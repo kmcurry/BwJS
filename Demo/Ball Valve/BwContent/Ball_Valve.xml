@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="20" farDistance="200000">
+                <position x="-260.231" y="444.167" z="-652.458"/>
+                <rotation x="27.4" y="21.5" z="1.05881e-006"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.35" g="0.35" b="0.35"/>
+            </GlobalIllumination>
+            <PointLight name="Light" range="3.40282e+038" parent="Camera">
+                <position x="372.983" y="4251.14" z="-3830.07"/>
+                <rotation x="36.4" y="9.69999" z="-4.23214e-008"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="1" g="1" b="1"/>
+                <specular r="1" g="1" b="1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="Ball_Valve_Layer1" url="objects/Ball_Valve.lwo" layer="1"/>
+            <Model name="Ball_Valve_Layer2" url="objects/Ball_Valve.lwo" layer="2"/>
+            <Model name="Ball_Valve_Layer4" url="objects/Ball_Valve.lwo" layer="4"/>
+            <Model name="Ball_Valve_Layer5" url="objects/Ball_Valve.lwo" layer="5"/>
+            <Model name="Ball_Valve_Layer6" url="objects/Ball_Valve.lwo" layer="6"/>
+            <Model name="Ball_Valve_Layer7" url="objects/Ball_Valve.lwo" layer="7"/>
+            <Model name="Ball_Valve_Layer8" url="objects/Ball_Valve.lwo" layer="8"/>
+            <Model name="Ball_Valve_Layer9" url="objects/Ball_Valve.lwo" layer="9"/>
+            <Model name="Ball_Valve_Water_Layer1" url="objects/Ball_Valve_Water.lwo" layer="1"/>
+            <Model name="Ball_Valve_Water_Layer2" url="objects/Ball_Valve_Water.lwo" layer="2"/>
+            <Model name="Ball_Valve_Water_Layer3" url="objects/Ball_Valve_Water.lwo" layer="3"/>
+            <Model name="Ball_Valve_Water_Layer4" url="objects/Ball_Valve_Water.lwo" layer="4"/>
+            <Model name="Ball_Valve_Water_Layer5" url="objects/Ball_Valve_Water.lwo" layer="5"/>
+            <Model name="Ball_Valve_Water_Layer6" url="objects/Ball_Valve_Water.lwo" layer="6"/>
+            <Model name="Ball_Valve_Water_Layer7" url="objects/Ball_Valve_Water.lwo" layer="7"/>
+            <Model name="Ball_Valve_Water_Layer8" url="objects/Ball_Valve_Water.lwo" layer="8"/>
+            <Model name="Ball_Valve_Split_Layer1" url="objects/Ball_Valve_Split.lwo" layer="1"/>
+            <Model name="Ball_Valve_Split_Layer2" url="objects/Ball_Valve_Split.lwo" layer="2"/>
+            <Model name="Ball_Valve_Split_Layer3" url="objects/Ball_Valve_Split.lwo" layer="3"/>
+            <Model name="Ball_Valve_Water_Layer9" url="objects/Ball_Valve_Water.lwo" layer="9">
+                <position x="107.772" y="70.8667" z="-0.244152"/>
+                <pivot x="0" y="98.8667" z="2.98023e-008"/>
+            </Model>
+            <Model name="Ball_Shadow_Layer1" url="objects/Ball_Shadow.lwo" layer="1"/>
+            <Model name="Ball_Shadow_Layer2" url="objects/Ball_Shadow.lwo" layer="2"/>
+            <Model name="Ball_Valve_Layer3" url="objects/Ball_Valve.lwo" layer="3" parent="Ball_Valve_Layer2"/>
+            <Model name="Ball_Valve_Layer10" url="objects/Ball_Valve.lwo" layer="10" parent="Ball_Valve_Layer2">
+                <position x="0" y="-1.84613" z="0"/>
+            </Model>
+        </Group>
+        <Isolator name="PivotConeIsolator" isolateRenderModes="true">
+            <RenderMode depthTestEnabled="false"/>
+        </Isolator>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/Background.jpg"/>
+    <Animations>
+        <KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer1Motion" url="motions/Ball_Valve_Layer1.mot" target="Ball_Valve_Layer1"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer2Motion" url="motions/Ball_Valve_Layer2.mot" target="Ball_Valve_Layer2"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer4Motion" url="motions/Ball_Valve_Layer4.mot" target="Ball_Valve_Layer4"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer4Dissolve" url="envelopes/Ball_Valve_Layer4.env" target="Ball_Valve_Layer4" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer5Motion" url="motions/Ball_Valve_Layer5.mot" target="Ball_Valve_Layer5"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer6Motion" url="motions/Ball_Valve_Layer6.mot" target="Ball_Valve_Layer6"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer7Motion" url="motions/Ball_Valve_Layer7.mot" target="Ball_Valve_Layer7"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer8Motion" url="motions/Ball_Valve_Layer8.mot" target="Ball_Valve_Layer8"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer9Motion" url="motions/Ball_Valve_Layer9.mot" target="Ball_Valve_Layer9"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer1Motion" url="motions/Ball_Valve_Water_Layer1.mot" target="Ball_Valve_Water_Layer1"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer1Dissolve" url="envelopes/Ball_Valve_Water_Layer1.env" target="Ball_Valve_Water_Layer1" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer2Motion" url="motions/Ball_Valve_Water_Layer2.mot" target="Ball_Valve_Water_Layer2"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer2Dissolve" url="envelopes/Ball_Valve_Water_Layer2.env" target="Ball_Valve_Water_Layer2" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer3Motion" url="motions/Ball_Valve_Water_Layer3.mot" target="Ball_Valve_Water_Layer3"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer3Dissolve" url="envelopes/Ball_Valve_Water_Layer3.env" target="Ball_Valve_Water_Layer3" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer4Motion" url="motions/Ball_Valve_Water_Layer4.mot" target="Ball_Valve_Water_Layer4"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer4Dissolve" url="envelopes/Ball_Valve_Water_Layer4.env" target="Ball_Valve_Water_Layer4" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer5Motion" url="motions/Ball_Valve_Water_Layer5.mot" target="Ball_Valve_Water_Layer5"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer5Dissolve" url="envelopes/Ball_Valve_Water_Layer5.env" target="Ball_Valve_Water_Layer5" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer6Motion" url="motions/Ball_Valve_Water_Layer6.mot" target="Ball_Valve_Water_Layer6"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer6Dissolve" url="envelopes/Ball_Valve_Water_Layer6.env" target="Ball_Valve_Water_Layer6" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer7Motion" url="motions/Ball_Valve_Water_Layer7.mot" target="Ball_Valve_Water_Layer7"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer7Dissolve" url="envelopes/Ball_Valve_Water_Layer7.env" target="Ball_Valve_Water_Layer7" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer8Motion" url="motions/Ball_Valve_Water_Layer8.mot" target="Ball_Valve_Water_Layer8"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer8Dissolve" url="envelopes/Ball_Valve_Water_Layer8.env" target="Ball_Valve_Water_Layer8" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer1Motion" url="motions/Ball_Valve_Split_Layer1.mot" target="Ball_Valve_Split_Layer1"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer1Dissolve" url="envelopes/Ball_Valve_Split_Layer1.env" target="Ball_Valve_Split_Layer1" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer2Motion" url="motions/Ball_Valve_Split_Layer2.mot" target="Ball_Valve_Split_Layer2"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer2Dissolve" url="envelopes/Ball_Valve_Split_Layer2.env" target="Ball_Valve_Split_Layer2" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer3Motion" url="motions/Ball_Valve_Split_Layer3.mot" target="Ball_Valve_Split_Layer3"/>
+        <KeyframeInterpolator name="Ball_Valve_Split_Layer3Dissolve" url="envelopes/Ball_Valve_Split_Layer3.env" target="Ball_Valve_Split_Layer3" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer9Motion" url="motions/Ball_Valve_Water_Layer9.mot" target="Ball_Valve_Water_Layer9"/>
+        <KeyframeInterpolator name="Ball_Valve_Water_Layer9Dissolve" url="envelopes/Ball_Valve_Water_Layer9.env" target="Ball_Valve_Water_Layer9" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer1Motion" url="motions/Ball_Shadow_Layer1.mot" target="Ball_Shadow_Layer1"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer1Dissolve" url="envelopes/Ball_Shadow_Layer1.env" target="Ball_Shadow_Layer1" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer2Motion" url="motions/Ball_Shadow_Layer2.mot" target="Ball_Shadow_Layer2"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer2Dissolve" url="envelopes/Ball_Shadow_Layer2.env" target="Ball_Shadow_Layer2" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer3Motion" url="motions/Ball_Valve_Layer3.mot" target="Ball_Valve_Layer3"/>
+        <KeyframeInterpolator name="Ball_Valve_Layer10Motion" url="motions/Ball_Valve_Layer10.mot" target="Ball_Valve_Layer10"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+    <Set target="Selector" computePivotDistance="true"/>
+    <!--<AppendNode parent="PivotConeIsolator" child="pivotCone"/>-->
+    <ConnectAttributes source="SceneInspector/pivotPointWorld" target="pivotCone/sectorPosition"/>
+    <Set target="pivotCone" screenScaleEnabled="true"/>
+</Scene>

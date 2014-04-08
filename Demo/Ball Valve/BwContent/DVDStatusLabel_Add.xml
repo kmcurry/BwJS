@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="DVDStatusLabel"/>
+	<RasterLabel name="DVDStatusLabel" fontSize="20" clampToViewport="true" textBorderWidth="0" format="center" fontStyle="Bold" selectable="false" height="35" width="0" fontName="Verdana" text="">
+		<position x="500" y="500"/>
+		<textColor r=".3" g=".3" b=".3"/>
+	</RasterLabel>
+</Update>

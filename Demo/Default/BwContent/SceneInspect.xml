@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Set target="SceneInspector" enabled="true"/>
+	<Set target="ObjectInspector" enabled="false"/>
+	<!--This is needed so the ray pick can set the pivotdistance-->
+	<Set target="EllisFacilityIsland" selectable="true"/>
+</Update>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Set target="ClipSlider" show="false"/>
+    <Set target="FadeSlider" show="false"/>
+  <Remove target="Label_ClipSlider4"/>
+  <Remove target="Label_ClipSlider3"/>
+  <Remove target="Label_ClipSlider2"/>
+  <Remove target="Label_ClipSlider1"/>
+</Update>

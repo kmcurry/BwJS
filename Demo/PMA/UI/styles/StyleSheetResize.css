@@ -1,0 +1,129 @@
+﻿body {
+    background-color: #f2f5e9;
+    margin: 0;
+    background-repeat: repeat;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    background-attachment: fixed;
+    background-position: left;
+
+}
+
+#logo {
+	position:absolute;
+	top:27px;
+	left:20px;
+	z-index:1;
+	
+}
+
+
+a {
+    color: #0000ff;
+    text-decoration: underline;
+}
+
+a:hover {
+    cursor: pointer;
+}
+
+/* Links BW scene & DVDControls*/
+#panel-right {
+	
+	height:100%;
+	width:50%;
+	float:right;
+	
+}
+
+#BwContainer {
+    position: relative;
+	top:10px;
+    background-color: #eeece2;
+
+    height: 90%;
+    width: 100%;
+    float: right;
+}
+
+
+#DVDControls {
+    position: relative;
+	text-align:center;
+	top:20px;
+	display:table;    
+    width: 100%;
+    padding-top: 10px;
+    margin: auto;
+}
+
+.cbuttons {
+	background-color:#c86ba8;	
+	border:0;
+	padding:3 6 3 6;
+	font-weight:bold;
+	color:#f2f5e9;
+}
+
+.cbuttons:hover {
+	background-color:#6281b8;	
+	border:0;
+	padding:3 6 3 6;
+}
+
+
+#panel-left {
+    position: absolute;
+    float: left;
+	margin-left:15px;
+	border:thin #000 solid;
+	top: 150px;
+    height: 80%;
+    width: 47%;
+	
+	
+	}
+	
+#prescriptions {
+	position:absolute;
+	float:right;
+	width:100%;
+	height:100%;
+	background-color:yellow;
+}
+
+#Categories {
+    border: 0px solid; 
+    width: 100%;
+}
+
+.records {
+    font-size: 14px;
+}
+
+/* Styles to make contol images work like radio buttons The class with the input makes the radio button disappear, leaving only the label visible.*/
+.rb input{
+  display:none;
+  }
+
+input[type=radio] + img{
+  cursor:pointer;
+  border:2px solid #c86ba8;
+}
+
+input[type=radio]:checked + img{
+  border:2px solid #6281b8;
+}
+
+input[type=radio]:checked + img:hover{
+  border:2px solid #6281b8;
+}
+
+input[type=radio] + img:hover{
+  cursor:pointer;
+  border:2px solid #6281b8;
+}
+
+
+
+

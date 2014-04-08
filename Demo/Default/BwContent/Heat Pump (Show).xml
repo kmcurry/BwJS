@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<AutoInterpolate target="Heater_FrontCover" dissolve="0"/>
+	<AutoInterpolate target="Heater_Top" dissolve="0"/>
+	<AutoInterpolate target="Heater_guard" dissolve="0"/>
+	<AutoInterpolate target="Heater_SideCover" dissolve="0"/>
+	<AutoInterpolate target="Heater_Shell" dissolve="0"/>
+	<AutoInterpolate target="Heater_FanMotor" dissolve="0"/>
+	<AutoInterpolate target="Heater_Fan" dissolve="0"/>
+	<AutoInterpolate target="Heater_screws" dissolve="0"/>
+	<AutoInterpolate target="Heater_DuctFlange-screws" dissolve="0"/>
+	<AutoInterpolate target="Heater_Fan-nut" dissolve="0"/>
+	<AutoInterpolate target="Heater_BaseInterior" dissolve="0"/>
+</Update>

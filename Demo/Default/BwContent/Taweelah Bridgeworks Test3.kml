@@ -1,0 +1,1002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+	<Document>
+		<name>KMLTest.xml</name>
+		<Style id="sn_ylw-pushpin">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin12</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin9</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin0">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin1">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin0">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin9</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin15</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin0">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin1">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin18</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin8</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin2">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin00">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin4">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin1">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin3">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin4">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin2">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin10</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin11</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin2">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin3">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin14</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin3">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin5">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin4">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin30</styleUrl>
+			</Pair>
+		</StyleMap>
+		<StyleMap id="msn_ylw-pushpin5">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin2</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin7</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin6">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin6">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin17</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin0</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin7">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin5">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin8">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin6">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin9">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin7">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin7">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin7</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin1</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin10">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin11">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin8">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin8">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin5</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin5</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin9">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin23">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin9">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin13</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin10</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin10">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin12">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin13">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin10">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin15</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin3</styleUrl>
+			</Pair>
+		</StyleMap>
+		<StyleMap id="msn_ylw-pushpin30">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin23</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin2</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin11">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin11">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin0</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin6</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin14">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin15">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin12">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin16</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin13</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin12">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin13">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin6</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin12</styleUrl>
+			</Pair>
+		</StyleMap>
+		<StyleMap id="msn_ylw-pushpin14">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin1</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin4</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sn_ylw-pushpin16">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin17">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin15">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin3</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin17</styleUrl>
+			</Pair>
+		</StyleMap>
+		<StyleMap id="msn_ylw-pushpin16">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin8</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin14</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin13">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin14">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sn_ylw-pushpin18">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin15">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin30">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+		</Style>
+		<Style id="sh_ylw-pushpin16">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_ylw-pushpin17">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin11</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin16</styleUrl>
+			</Pair>
+		</StyleMap>
+		<StyleMap id="msn_ylw-pushpin18">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_ylw-pushpin4</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_ylw-pushpin00</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_ylw-pushpin17">
+			<IconStyle>
+				<scale>1.3</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Folder>
+			<name>KMLTest</name>
+			<open>1</open>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.69028730231192</longitude>
+					<latitude>24.7606302980442</latitude>
+					<altitude>0</altitude>
+					<range>604.851150942353</range>
+					<tilt>0</tilt>
+					<heading>6.152517314203632</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin14</styleUrl>
+				<Point>
+					<coordinates>54.69265569136571,24.76091771173374,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Honolulu</name>
+				<LookAt>
+					<longitude>-157.8218536044712</longitude>
+					<latitude>21.29197686683423</latitude>
+					<altitude>0</altitude>
+					<range>29281.62200512978</range>
+					<tilt>0</tilt>
+					<heading>4.476133020963345e-007</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin3</styleUrl>
+				<Point>
+					<coordinates>-157.8218536044712,21.29197686683423,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>South Corner</name>
+				<LookAt>
+					<longitude>54.68418582498666</longitude>
+					<latitude>24.76052437661312</latitude>
+					<altitude>0</altitude>
+					<range>2047.597128024397</range>
+					<tilt>0</tilt>
+					<heading>-1.49103337629435</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin4</styleUrl>
+				<Point>
+					<coordinates>54.68074642215004,24.75794264401933,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>West Corner</name>
+				<LookAt>
+					<longitude>54.68532798236735</longitude>
+					<latitude>24.76530467651586</latitude>
+					<altitude>0</altitude>
+					<range>2033.417069968332</range>
+					<tilt>0</tilt>
+					<heading>-1.490554809746019</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin30</styleUrl>
+				<Point>
+					<coordinates>54.6759970830237,24.76183235482985,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>North Corner</name>
+				<LookAt>
+					<longitude>54.68640210218933</longitude>
+					<latitude>24.76635371349685</latitude>
+					<altitude>0</altitude>
+					<range>2028.05203160834</range>
+					<tilt>0</tilt>
+					<heading>-1.490104749611079</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin11</styleUrl>
+				<Point>
+					<coordinates>54.68558698108374,24.77137973577542,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>East Corner</name>
+				<LookAt>
+					<longitude>54.68640210218933</longitude>
+					<latitude>24.76635371349685</latitude>
+					<altitude>0</altitude>
+					<range>2028.05203160834</range>
+					<tilt>0</tilt>
+					<heading>-1.490104749611079</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin18</styleUrl>
+				<Point>
+					<coordinates>54.69027727439477,24.76747552030593,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.69028730231192</longitude>
+					<latitude>24.7606302980442</latitude>
+					<altitude>0</altitude>
+					<range>604.851150942353</range>
+					<tilt>0</tilt>
+					<heading>6.152517314203632</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin8</styleUrl>
+				<Point>
+					<coordinates>54.69135615779923,24.7608424618587,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.69028730231192</longitude>
+					<latitude>24.7606302980442</latitude>
+					<altitude>0</altitude>
+					<range>604.851150942353</range>
+					<tilt>0</tilt>
+					<heading>6.152517314203632</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin5</styleUrl>
+				<Point>
+					<coordinates>54.69197794040439,24.76146474096757,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.69028730231192</longitude>
+					<latitude>24.7606302980442</latitude>
+					<altitude>0</altitude>
+					<range>604.851150942353</range>
+					<tilt>0</tilt>
+					<heading>6.152517314203632</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin12</styleUrl>
+				<Point>
+					<coordinates>54.69203971915567,24.76028040876428,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68987307841255</longitude>
+					<latitude>24.75326631094166</latitude>
+					<altitude>0</altitude>
+					<range>372.6168965907847</range>
+					<tilt>0</tilt>
+					<heading>6.15234351600684</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin0</styleUrl>
+				<Point>
+					<coordinates>54.6888752467118,24.75377365520455,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.69028730231192</longitude>
+					<latitude>24.7606302980442</latitude>
+					<altitude>0</altitude>
+					<range>604.851150942353</range>
+					<tilt>0</tilt>
+					<heading>6.152517314203632</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin17</styleUrl>
+				<Point>
+					<coordinates>54.68706070939255,24.75937038188029,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68987307861706</longitude>
+					<latitude>24.75326631077052</latitude>
+					<altitude>0</altitude>
+					<range>1389.456810592868</range>
+					<tilt>0</tilt>
+					<heading>6.152343516092458</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin10</styleUrl>
+				<Point>
+					<coordinates>54.6853360196592,24.75380199081326,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.66994357073023</longitude>
+					<latitude>24.75580333102666</latitude>
+					<altitude>0</altitude>
+					<range>1901.878289397993</range>
+					<tilt>0</tilt>
+					<heading>6.143997140421956</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin13</styleUrl>
+				<Point>
+					<coordinates>54.66462410003499,24.7581082956106,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68868498368609</longitude>
+					<latitude>24.75797039355421</latitude>
+					<altitude>0</altitude>
+					<range>606.4879583330844</range>
+					<tilt>0</tilt>
+					<heading>6.151846221637507</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin9</styleUrl>
+				<Point>
+					<coordinates>54.68824902804398,24.75747063989645,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68029020941638</longitude>
+					<latitude>24.76879347714203</latitude>
+					<altitude>0</altitude>
+					<range>1022.936115760402</range>
+					<tilt>0</tilt>
+					<heading>6.148331026847342</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin15</styleUrl>
+				<Point>
+					<coordinates>54.68051520605291,24.76652205748549,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68029020896365</longitude>
+					<latitude>24.76879347761257</latitude>
+					<altitude>0</altitude>
+					<range>1962.235382500645</range>
+					<tilt>0</tilt>
+					<heading>6.148331026657646</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin</styleUrl>
+				<Point>
+					<coordinates>54.67676105260036,24.77251059392854,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68029020941638</longitude>
+					<latitude>24.76879347714203</latitude>
+					<altitude>0</altitude>
+					<range>1022.936115760402</range>
+					<tilt>0</tilt>
+					<heading>6.148331026847342</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin6</styleUrl>
+				<Point>
+					<coordinates>54.68175244943901,24.76778407403881,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.66994357073023</longitude>
+					<latitude>24.75580333102666</latitude>
+					<altitude>0</altitude>
+					<range>1901.878289397993</range>
+					<tilt>0</tilt>
+					<heading>6.143997140421956</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin16</styleUrl>
+				<Point>
+					<coordinates>54.66504101488554,24.75649203240894,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.68029020896365</longitude>
+					<latitude>24.76879347761257</latitude>
+					<altitude>0</altitude>
+					<range>1962.235382500645</range>
+					<tilt>0</tilt>
+					<heading>6.148331026657646</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin1</styleUrl>
+				<Point>
+					<coordinates>54.6750728647198,24.77093378130122,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.66994357073023</longitude>
+					<latitude>24.75580333102666</latitude>
+					<altitude>0</altitude>
+					<range>1901.878289397993</range>
+					<tilt>0</tilt>
+					<heading>6.143997140421956</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin7</styleUrl>
+				<Point>
+					<coordinates>54.66301191264011,24.75648913910242,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Untitled Placemark</name>
+				<LookAt>
+					<longitude>54.66994357073023</longitude>
+					<latitude>24.75580333102666</latitude>
+					<altitude>0</altitude>
+					<range>1901.878289397993</range>
+					<tilt>0</tilt>
+					<heading>6.143997140421956</heading>
+					<altitudeMode>relativeToGround</altitudeMode>
+				</LookAt>
+				<styleUrl>#msn_ylw-pushpin2</styleUrl>
+				<Point>
+					<coordinates>54.66357116804815,24.75492763662573,0</coordinates>
+				</Point>
+			</Placemark>
+		</Folder>
+	</Document>
+</kml>

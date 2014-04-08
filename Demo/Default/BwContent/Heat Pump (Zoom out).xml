@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<AutoInterpolate target="Camera" nearDistance=".05" farDistance="100000">
+		<position x="-8.08" y="3.5875" z="-13.2837"/>
+		<rotation x="15.1" y="36.72" z="0"/>
+	</AutoInterpolate>
+	<Remove target="InstructionLabel"/>
+	<Set target="SceneInspector" pivotDistance="12"/>
+</Update>

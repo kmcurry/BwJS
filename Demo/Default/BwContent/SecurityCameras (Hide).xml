@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="Security Cameras Image (Hide).xml"?>
+<Update>
+    <Remove target="Label_SecurityCameraNew"/>
+    <Remove target="SecurityCameraNewAnchor"/>
+    <Remove target="SecurityCameraNew"/>
+    <Set target="CameraProjector" enabled="false"/>
+    <Set target="SecurityCamera1" show="false"/>
+    <Set target="Label_SecurityCamera1" show="false"/>
+    <Set target="SecurityCamera2" show="false"/>
+    <Set target="Label_SecurityCamera2" show="false"/>
+    <Set target="SecurityCamera3" show="false"/>
+    <Set target="Label_SecurityCamera3" show="false"/>
+    <Set target="SecurityCamera4" show="false"/>
+    <Set target="Label_SecurityCamera4" show="false"/>
+    <Set target="SecurityCamera5" show="false"/>
+    <Set target="Label_SecurityCamera5" show="false"/>
+    <Set target="SecurityCamera6" show="false"/>
+    <Set target="Label_SecurityCamera6" show="false"/>
+    <Set target="SecurityCamera7" show="false"/>
+    <Set target="Label_SecurityCamera7" show="false"/>
+    <Set target="SecurityCamera8" show="false"/>
+    <Set target="Label_SecurityCamera8" show="false"/>
+    <Set target="SecurityCamera9" show="false"/>
+    <Set target="Label_SecurityCamera9" show="false"/>
+ </Update>

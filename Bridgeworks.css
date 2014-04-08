@@ -1,0 +1,13 @@
+﻿body 
+{
+}
+
+.labelText
+{
+    cursor: default;
+}
+
+.labelIcon
+{
+    -webkit-user-select: none;
+}

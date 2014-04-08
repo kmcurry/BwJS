@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_TestLabel"/>
+	<Label name="Label_TestLabel" renderSequenceSlot="980" text="Test Label">
+        <description>
+            <![CDATA[<img  src="http://localhost/cip/images/al-taweelah.jpg" class="title-image" title=""><p>
+<table>
+    <tbody>
+        <tr bgcolor="#add1f8">
+            <td class="txb"><font size="1"><strong>Country</strong></font></td>
+            <td class="txb"><font size="1"><strong>United Arab Emirates</strong></font></td>
+        </tr>
+        <tr>
+            <td class="txb"><font size="1">Year of order</font></td>
+            <td class="txb"><font size="1">1992</font></td>
+        </tr>
+        <tr bgcolor="#add1f8">
+            <td class="txb"><font size="1">Owner</font></td>
+            <td class="txb"><font size="1">Abu Dhabi Water &amp; Electric Dpt (ADWE)</font></td>
+        </tr>
+       
+    </tbody>
+</table>]]>
+        </description>
+		<position x="6087300" y="4.6" z="2752000"/>
+		<anchor x="32" y="0"/>
+		<styles name="labelStyle">
+			<iconStyle opacity="1">
+				<url>images/symbols/Alert_28x28.png</url>
+				<scale x="1" y="1" z="1"/>
+			</iconStyle>
+			<labelStyle anchor="middleRight">
+				<fontStyle>
+					<size>16</size>
+				</fontStyle>
+			</labelStyle>
+		</styles>
+	</Label>
+</Update>

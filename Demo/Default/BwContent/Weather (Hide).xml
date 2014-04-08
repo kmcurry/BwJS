@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <Remove target="Label_Weather7"/>
+  <Remove target="Label_Weather6"/>
+  <Remove target="Label_Weather5"/>
+  <Remove target="Label_Weather4"/>
+  <Remove target="Label_Weather3"/>
+  <Remove target="Label_Weather2"/>
+  <Remove target="Label_Weather1"/>
+  <Remove target="Label_SecurityCamera"/>
+  <AutoInterpolate duration="3" target="Flag">
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+	<AutoInterpolate target="Fog" density="0"/>
+  <AutoInterpolate target="VE_Smoke_1">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_2">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_3">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_4">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_5">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_6">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_7">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_8">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_9">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate target="VE_Smoke_10">
+    <linearVelocity x="0" y="5" z="0"/>
+  </AutoInterpolate>
+</Update>

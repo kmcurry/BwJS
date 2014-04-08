@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="SM1"/>
+	<Remove target="SM2"/>
+	<Remove target="SM3"/>
+	<Remove target="SM4"/>
+	<SendMessage name="SM1" trigger="AnimationAgent/globalTimeInSecs=1.75" target="Bridgeworks_CB" get="Step1"/>
+	<SendMessage name="SM2" trigger="AnimationAgent/globalTimeInSecs=3" target="Bridgeworks_CB" get="Step2"/>
+	<SendMessage name="SM3" trigger="AnimationAgent/globalTimeInSecs=6" target="Bridgeworks_CB" get="Step3"/>
+	<SendMessage name="SM4" trigger="AnimationAgent/globalTimeInSecs=7" target="Bridgeworks_CB" get="Step4"/>
+</Update>

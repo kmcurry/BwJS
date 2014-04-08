@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Set target="SceneInspector" enabled="false"/>
+	<Set target="ObjectInspector" enabled="true"/>
+	<!--This has to be set to false only during objectInspect. It is needed at all other times so the ray pick can set the pivotdistance-->
+	<Set target="EllisFacilityIsland" selectable="false"/>
+	<AutoInterpolate target="Camera">
+        <position x="6087351" y="701.3" z="2752096"/>
+		<rotation x="90" y="137.9" z="-180"/>
+	</AutoInterpolate>
+</Update>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_Incident2"/>
+	<Remove target="Incident2"/>
+	<Set target="NodeMgr" sgPointer="Models"/>
+	<Group name="Incident2">
+		<Model name="BombBlastZone11m" url="objects/BombBlastZone11m.lwo" dissolve=".5" selectable="false" renderSequenceSlot="700">
+			<position x="6087706" y="0" z="2751006"/>
+		</Model>
+		<Model name="BombBlastZone58m" url="objects/BombBlastZone58m.lwo" dissolve=".5" selectable="false" renderSequenceSlot="800">
+			<position x="6087706" y="0.01" z="2751006"/>
+		</Model>
+		<Model name="BombBlastZone107m" url="objects/BombBlastZone107m.lwo" dissolve=".5" selectable="false" renderSequenceSlot="900">
+			<position x="6087706" y="0.02" z="2751006"/>
+		</Model>
+	</Group>
+	<Label name="Label_Incident2" parent="BombBlastZone11m" renderSequenceSlot="999" text="BOMB THREAT">
+		<position x="0" y="0" z="0"/>
+		<anchor x="20" y="0"/>
+		<!--<styles ref="theStyle"/>-->
+		<styles name="labelStyle">
+			<iconStyle opacity="1">
+				<url>images/symbols/Crime_Bomb_Threat_ch.png</url>
+				<color r="1" g="0" b="1"/>
+				<scale x="1" y="1" z="1"/>
+				<alphaUrl/>
+			</iconStyle>
+			<labelStyle anchor="middleLeft">
+				<backgroundColor r="0" g="0" b="1"/>
+				<backgroundOpacity>0</backgroundOpacity>
+				<scale x="1" y="1" z="1"/>
+				<fontStyle>
+					<antialiasType>3</antialiasType>
+					<borderColor r="0" g="0" b="0"/>
+					<color r="1" g="1" b="1"/>
+					<size>16</size>
+					<opacity>1</opacity>
+				</fontStyle>
+			</labelStyle>
+		</styles>
+	</Label>
+</Update>

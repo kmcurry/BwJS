@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="200" farDistance="2e+006">
+                <position x="5529.15" y="3062.99" z="-3245.19"/>
+                <rotation x="18.1" y="-64.1001" z="0"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.4" g="0.4" b="0.4"/>
+            </GlobalIllumination>
+            <PointLight name="Light" range="3.40282e+038" parent="Camera">
+                <position x="-5470.62" y="8817.95" z="-30481.5"/>
+                <rotation x="21.5447" y="15.2365" z="-1.16284"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="1" g="1" b="1"/>
+                <specular r="1" g="1" b="1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="trex" url="objects/trex.lwo"/>
+            <Model name="trex_shadow" url="objects/trex_shadow.lwo">
+                <scale x="1.11" y="1" z="1"/>
+            </Model>
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/white.png"/>
+    <Animations>
+        <KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+        <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+        <KeyframeInterpolator name="trexMotion" url="motions/trex.mot" target="trex"/>
+        <KeyframeInterpolator name="trex_shadowMotion" url="motions/trex_shadow.mot" target="trex_shadow"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>

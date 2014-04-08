@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SendMessage numResponses="-1" target="Bridgeworks_CB" get="Selector/Selected/name">
+	<event>MButton1.DoubleClick</event>
+  <event>MButton1.Click</event>
+	<!--<event>Mouse.Hover</event>-->
+</SendMessage>

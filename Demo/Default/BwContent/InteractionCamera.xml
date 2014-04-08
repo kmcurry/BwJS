@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Update>
+    <Set target="ObjectInspector" enabled="false"/>
+    <Set target="SceneInspector" enabled="true" pivotDistance="0" zoomSensitivity="0.005"/>
+    <Set target="Selector" computePivotDistance="false"/>
+    <!-- Enable lens zoom) -->
+    <Remove target="MButton3.Scene"/>
+    <ConnectAttributes name="MButton3.Scene" event="MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>zoomDelta</targetAttribute>
+    </ConnectAttributes>
+    <!-- Remove ability to pan -->
+    <Remove target="MButtonBoth.Scene"/>
+</Update>

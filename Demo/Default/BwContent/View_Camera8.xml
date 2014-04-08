@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?bwinclude url="InteractionCamera.xml"?>
+<?bwinclude url="View_Facility.xml"?>
+<Update>
+  <AutoInterpolate postBehavior="1" shape="2" duration="2" target="Camera" zoom="3">
+    <sectorPosition ref="SecurityCamera8/sectorWorldPosition"/>
+    <rotation ref="SecurityCamera8/rotation"/>
+  </AutoInterpolate>
+  <Set target="SecurityCamera8" show="false"/>
+  <Remove target='Label_SecurityCamera'/>
+</Update>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<!--<?bwplugin name="BBOGL11Engine" action="load"?>-->
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+	<Scene>
+		<Isolator name="Root" isolateTransforms="true" isolateTextures="true" isolateClipPlanes="true" isolateLightModels="true">
+			<Selector name="Cameras">
+				<PerspectiveCamera name="Camera" zoom="3.2" nearDistance="100000" farDistance="100000000">
+					<position x="0" y="35374940" z="0"/>
+					<rotation x="90" y="0" z="0"/>
+				</PerspectiveCamera>
+			</Selector>
+			<Group name="Lights">
+				<!--<GlobalIllumination name="GlobalLight">
+					<ambient r=".25" g=".25" b=".25"/>
+				</GlobalIllumination>-->
+				<DirectionalLight name="theLight">
+					<ambient r=".2" g=".2" b=".2"/>
+					<diffuse r=".8" g=".8" b=".8"/>
+					<specular r="0" g="0" b="0"/>
+					<rotation x="45" y="0" z="0"/>
+				</DirectionalLight>
+			</Group>
+			<Group name="Bars"/>
+			<Group name="Labels"/>
+			<!--<Model name="EarthBackground" url="/objects/EarthBackground.lwo">
+				<position x="0" y="0" z="0"/>
+			</Model>-->
+			<Group name="Projectors">
+				
+			</Group>
+			<Group name="Models" proxyChildAttrs="true">
+				<!--<Model name="WorldMap" url="/objects/EarthMercatorCentered.lwo">
+					<position x="0" y="-10000" z="-50000"/>
+				</Model>-->
+				<ArcViewShape name="World" mapProjection="equalarc" borders="true" bordersOnly="false" url="/objects/World.shp" extrusionMagnitude="0">
+					<borderColor r=".5759" g=".1098" b=".0824"/>
+					<color r=".7373" g=".7922" b=".8275"/>
+					<diffuse r=".5" g=".5" b=".5"/>
+					<specular r="0" g="0" b="0"/>
+				</ArcViewShape>
+				<ArcViewShape name="HI" mapProjection="equalarc" borders="true" bordersOnly="false" url="/objects/HI.shp" extrusionMagnitude="0">
+					<borderColor r=".5759" g=".1098" b=".0824"/>
+					<color r=".7373" g=".7922" b=".8275"/>
+					<diffuse r=".5" g=".5" b=".5"/>
+					<specular r="0" g="0" b="0"/>
+				</ArcViewShape>
+			</Group>
+			<Isolator name="ArcViewShapes" isolateTransforms="true"/>
+			<Isolator name="ArcViewLabels" isolateTransforms="true"/>
+			<MapProjectionCalculator name="MapProjectionCalculator" mapProjection="equalarc" units="meters">
+				<center2d centerLon="54.684775" centerLat="24.765994"/>
+			</MapProjectionCalculator>
+		</Isolator>
+		<!--<RenderDirective name="TheRD" root="MainRoot" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>-->
+		<RenderDirective name="TheRD" root="MainRoot" antialiasType="4" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>
+	</Scene>
+	<!-- Customize default preferences for this content-->
+	<ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+	<Set target="Selector">
+		<computePivotDistance>true</computePivotDistance>
+	</Set>
+	<SendMessage event="MButton1.DoubleClick" numResponses="-1" target="Bridgeworks_CB" get="Selector/Selected"/>
+	<!--<?bwinclude url="./CameraPositionRotation_Display.xml"?>-->
+</Session>

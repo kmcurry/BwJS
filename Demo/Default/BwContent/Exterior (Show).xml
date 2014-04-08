@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <AutoInterpolate target="EllisFacilityIsland" dissolve="0"/>
+	<AutoInterpolate target="EllisFacility" dissolve="0"/>
+</Update>

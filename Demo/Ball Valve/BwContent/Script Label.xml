@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="ScriptLabel"/>
+	<RasterLabel name="ScriptLabel" fontSize="18" fontStyle="Bold"  format="center" selectable="false" height="20" width="668" fontName="Verdana" opacity="1" text="Press the Play button to begin.">
+		<position x="0" y="525"/>
+		<textColor r=".3" g=".3" b=".3"/>
+		<bgColor r=".91" g=".92" b=".9"/>
+	</RasterLabel>
+</Update>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="InstructionLabel"/>
+	<RasterLabel name="InstructionLabel" fontSize="18" format="center" selectable="false" height="20" fontName="Verdana">
+	<text>Click both mouse buttons on a camera and drag the mouse
+	to reposition the camera.  Right-click on a camera and drag the
+	mouse to move the camera toward/away from you.</text>
+		<position x="215" y="5" z="0"/>
+		<textColor r="1" g="1" b=".9"/>
+		<bgColor r=".35" g=".35" b=".35"/>
+	</RasterLabel>
+</Update>

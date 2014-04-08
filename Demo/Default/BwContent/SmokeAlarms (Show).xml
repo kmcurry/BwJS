@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="AlarmLabels"/>
+	<!--url="C:/Sandbox/CNIA/BwContent/images/symbols/Sensor_Camera_S1.png"-->
+	<Group name="AlarmLabels">
+		<Label name="Label_SmokeAlarm1" renderSequenceSlot="980" text="Smoke Alarm 1, Building 12">
+			<position x="6087312" y="4.6" z="2752034"/>
+			<anchor x="32" y="0"/>
+			<styles name="labelStyle">
+				<iconStyle opacity="1">
+					<url>images/symbols/Alert_28x28.png</url>
+					<scale x="1" y="1" z="1"/>
+				</iconStyle>
+				<labelStyle anchor="middleRight">
+					<fontStyle>
+						<size>16</size>
+					</fontStyle>
+				</labelStyle>
+			</styles>
+		</Label>
+		<Label name="Label_SmokeAlarm2" renderSequenceSlot="980" text="Smoke Alarm 2, Building 12">
+			<position x="6087301" y="4.6" z="2752020"/>
+			<anchor x="32" y="0"/>
+			<styles name="labelStyle">
+				<iconStyle opacity="1">
+					<url>images/symbols/Alert_28x28.png</url>
+					<scale x="1" y="1" z="1"/>
+				</iconStyle>
+				<labelStyle anchor="middleLeft">
+					<fontStyle>
+						<size>16</size>
+					</fontStyle>
+				</labelStyle>
+			</styles>
+		</Label>
+	</Group>
+</Update>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <ConnectAttributes sourceContainer="Camera" targetContainer="PerspectiveProjector" persist="false">
+    <sourceAttribute>position</sourceAttribute>
+    <targetAttribute>position</targetAttribute>
+    <sourceAttribute>rotation</sourceAttribute>
+    <targetAttribute>rotation</targetAttribute>
+  </ConnectAttributes>
+</Update>

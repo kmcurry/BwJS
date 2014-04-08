@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<!-- remove all command sequences created in case user clicks another action button before performing the actions defined by the command sequences -->
+	<Remove target="PlaceSecurityCameraNew"/>
+	<Remove target="MoveSecurityCameras_SceneInspect"/>
+	<Remove target="MoveSecurityCameraNew"/>
+	<!-- hide instruction labels -->
+	<Remove target="InstructionLabel"/>
+	<!-- set show to true for any hidden camera frustums/labels (hidden by rotate camera xml) -->
+	<Set target="SecurityCameraNew" show="true"/>
+	<Set target="SecurityCameraNewAnchor" show="true"/>
+	<Set target="Label_SecurityCameraNew" show="true"/>
+	<!-- disconnect camera from camera frustums (connected by rotate camera xml) -->
+	<DisconnectAttributes source="Camera" target="SecurityCameraNew">
+		<sourceAttribute>rotation</sourceAttribute>
+		<targetAttribute>rotation</targetAttribute>
+	</DisconnectAttributes>
+	<!-- re-enable scene inspection pan-z (switched to lens zoom in rotate camera xml) -->
+	<!--<Remove target="MButton3.Scene"/>
+	<ConnectAttributes name="MButton3.Scene" event="MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+		<sourceAttribute>deltaY</sourceAttribute>
+		<targetAttribute>panDelta:2</targetAttribute>
+	</ConnectAttributes>
+	<Set target="SceneInspector" enabled="true"/>
+	<Set target="Selector" computePivotDistance="true"/>-->
+	<!-- re-enable object inspection rotate (disabled in move camera xml) -->
+	<!--<Remove target="MButton1.Object"/>
+	<ConnectAttributes name="MButton1.Object" event="MButton1.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="ObjectInspector">
+		<sourceAttribute>deviceY</sourceAttribute>
+		<targetAttribute>rotationNow:0</targetAttribute>
+		<sourceAttribute>deviceX</sourceAttribute>
+		<targetAttribute>rotationNow:1</targetAttribute>
+	</ConnectAttributes>
+	<Set target="ObjectInspector" enabled="false"/>-->
+</Update>

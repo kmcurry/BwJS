@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+  <Scene>
+    <Isolator name="Root" isolateFog="true">
+      <Selector name="Cameras">
+        <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".1" farDistance="10000">
+          <!--<geoPosition lon="54.684775" alt="100" lat="24.765994"/>-->
+          <position x="-8241526" y="158" z="4523204"/>
+          <rotation p="14" h="-105" b="0"/>
+        </PerspectiveCamera>
+      </Selector>
+      <Group name="Lights">
+        <DirectionalLight name="Light">
+          <position x="-1100.8" y="6975.7" z="-7000"/>
+          <rotation x="34" y="8.00007" z="0"/>
+          <ambient r="0.398431" g="0.393726" b="0.381176" a="1"/>
+          <diffuse r="0.996078" g="0.984314" b="0.952941" a="1"/>
+          <specular r="0.996078" g="0.984314" b="0.952941" a="1"/>
+        </DirectionalLight>
+      </Group>
+      <Group name="Effects">
+        <Fog name="Fog">
+          <mode>4</mode>
+          <color r=".9" g=".9" b=".9"/>
+          <start>.5</start>
+          <end>1</end>
+          <density>0</density>
+        </Fog>
+      </Group>
+      <Group name="Models">
+        <NullObject name="WorldLocationOfScene">
+          <geoPosition lon="-74.038240" alt="0" lat="40.698367"/>
+        </NullObject>
+        <Isolator name="PivotConeIsolator" isolateRenderModes="true">
+          <RenderMode depthTestEnabled="false"/>
+        </Isolator>
+        <Isolator name="ProjectorIsolator" isolateTextures="true">
+          <PerspectiveProjector name="PerspectiveProjector" zoom="3.2" nearDistance=".00001" farDistance="4000">
+            <position x="0" y="0" z="0"/>
+            <rotation p="0" h="0" r="0"/>
+            <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
+          </PerspectiveProjector>
+          <PerspectiveProjector name="CameraProjector" shadowCaster="false" zoom="-4.2" aspectRatio="2" nearDistance=".001" farDistance="4" parent="WorldLocationOfScene" enabled="false">
+            <position x="0" y="0" z="0"/>
+            <rotation x="0" y="0" z="0"/>
+            <MediaTexture name="CameraFeed" opacity="1" widthWrap="1" heightWrap="1" imageFilename="bwcontent/images/camera1.jpg" alphaFilename="bwcontent/images/CameraAlpha2.bmp"/>
+          </PerspectiveProjector>
+          <!--<Model name="EllisTerrain" url="objects/EllisTerrain.lwo" parent="WorldLocationOfScene">
+          <rotation x="0" y="233" z="0"/>
+        </Model>-->
+          <Model name="OtherBuildings" url="objects/OtherBuildings.lwo" parent="WorldLocationOfScene">
+            <position x="-228.2578" y="-1.5" z="23.6269"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacilityIsland" url="objects/EllisFacilityIsland.lwo" parent="WorldLocationOfScene">
+            <position x="0" y="0" z="0"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="Flag" url="objects/Flag.lwo" parent="WorldLocationOfScene">
+            <position x="-12.0361" y="3.0177" z="10.9734"/>
+            <rotation x="0" y="0" z="0"/>
+          </Model>
+          <Model dissolve="1" name="EllisFacility-basement" url="objects/EllisFacility-basement.lwo" parent="WorldLocationOfScene">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Isolator name="ClipPlaneIsolator" isolateClipPlanes="true">
+            <ClipPlane name="ClipPlane" parent="WorldLocationOfScene">
+              <position x="-170.559" y="45" z="-190.319"/>
+              <rotation x="90" y="0" z="0"/>
+            </ClipPlane>
+            <Model name="EllisFacility" url="objects/EllisFacility.lwo" parent="WorldLocationOfScene">
+              <position x="-123.0736" y="3.5" z="83.2428"/>
+              <rotation x="0" y="223" z="0"/>
+            </Model>
+            <!--<Model name="EllisFacility_1" url="objects/EllisFacility_1.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacility_2" url="objects/EllisFacility_2.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacility_3" url="objects/EllisFacility_3.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>-->
+            <Model name="EllisFacilityWalls" url="objects/EllisFacilityWalls.lwo" parent="WorldLocationOfScene" selectable="true">
+              <position x="-123.0736" y="3.5" z="83.2428"/>
+              <rotation x="0" y="223" z="0"/>
+            </Model>
+            <Model name="ExitLines" url="objects/ExitLines.lwo" dissolve="1" parent="WorldLocationOfScene">
+              <position x="-123.0736" y="3.5" z="83.2428"/>
+              <rotation x="0" y="223" z="0"/>
+            </Model>
+            <Model name="EllisFacilityFloors" url="objects/EllisFacilityFloors.lwo" parent="WorldLocationOfScene">
+              <position x="-123.0736" y="3.5" z="83.2428"/>
+              <rotation x="0" y="223" z="0"/>
+            </Model>
+            <Model dissolve="1" name="Heater_BaseInterior" url="objects/Heater_BaseInterior.lwo">
+              <position x="-8242083" y="22.9" z="4523056"/>
+              <rotation x="0" y="223" z="0"/>
+            </Model>
+            <!--<Model dissolve="0" name="Sky2" url="objects/Sky2.lwo"/>-->
+            <Model dissolve="1" name="Heater_DuctFlange" url="objects/Heater_DuctFlange.lwo" parent="Heater_BaseInterior">
+              <position x="0.0545" y="0.05" z="-0.05"/>
+              <pivot x="0.0545" y="0.05" z="-0.05"/>
+            </Model>
+            <Model dissolve="1" name="Heater_Fan" url="objects/Heater_Fan.lwo" parent="Heater_BaseInterior">
+              <position x="-0.0118" y="0.0766" z="0.026"/>
+              <pivot x="-0.0118" y="0.0766" z="0.026"/>
+            </Model>
+            <Model dissolve="1" name="Heater_FanMotor" url="objects/Heater_FanMotor.lwo" parent="Heater_BaseInterior">
+              <position x="-0.0125" y="0.091" z="0.026"/>
+              <pivot x="-0.0125" y="0.091" z="0.026"/>
+            </Model>
+            <Model dissolve="1" name="Heater_guard" url="objects/Heater_guard.lwo" parent="Heater_BaseInterior">
+              <position x="-0.012" y="0.094" z="0.026"/>
+              <pivot x="-0.012" y="0.094" z="0.026"/>
+            </Model>
+            <Model dissolve="1" name="Heater_screws" url="objects/Heater_screws.lwo" parent="Heater_BaseInterior">
+              <position x="-0.0116" y="0.094" z="0.0257"/>
+              <pivot x="-0.0116" y="0.094" z="0.0257"/>
+            </Model>
+            <Model dissolve="1" name="Heater_Shell" url="objects/Heater_Shell.lwo" parent="Heater_BaseInterior">
+              <position x="0" y="0.052" z="-0.004"/>
+              <pivot x="0" y="0.052" z="-0.004"/>
+            </Model>
+            <Model dissolve="1" name="Heater_SideCover" url="objects/Heater_SideCover.lwo" parent="Heater_BaseInterior">
+              <position x="0.003" y="0.054" z="-0.072"/>
+              <pivot x="0.003" y="0.054" z="-0.072"/>
+            </Model>
+            <Model dissolve="1" name="Heater_Top" url="objects/Heater_Top.lwo" parent="Heater_BaseInterior">
+              <position x="0" y="0.09" z="0"/>
+              <pivot x="0" y="0.09" z="0"/>
+            </Model>
+            <Model dissolve="1" name="Heater_FrontCover" url="objects/Heater_FrontCover.lwo" parent="Heater_BaseInterior"/>
+            <Model dissolve="1" name="Heater_DuctFlange-screws" url="objects/Heater_DuctFlange-screws.lwo" parent="Heater_BaseInterior">
+              <position x="0.05" y="0.052" z="-0.05"/>
+              <pivot x="0.05" y="0.052" z="-0.05"/>
+            </Model>
+            <Model dissolve="1" name="Heater_Fan-nut" url="objects/Heater_Fan-nut.lwo" parent="Heater_BaseInterior">
+              <position x="-0.012" y="0.074" z="0.0258"/>
+              <pivot x="-0.012" y="0.074" z="0.0258"/>
+            </Model>
+          </Isolator>
+        </Isolator>
+      </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
+  </Scene>
+  <!-- Customize default preferences for this content-->
+  <!--<ConnectOutputs targetContainer="OrthoCam" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>-->
+  <Set target="Light" parent="WorldLocationOfScene"/>
+  <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+  <Set target="Selector" computePivotDistance="true"/>
+  <ConnectAttributes source="SceneInspector/pivotPointWorld" target="pivotCone/sectorPosition"/>
+  <?bwinclude url="./SecurityCameras (Add).xml"?>
+</Session>

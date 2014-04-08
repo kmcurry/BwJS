@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="Security Camera (Initial State).xml"?>
+<?bwinclude url="Security Camera (Instruction Label).xml"?>
+<Update>
+    <Remove target="Label_SecurityCameraNew"/>
+    <Remove target="SecurityCameraNewAnchor"/>
+    <Remove target="SecurityCameraNew"/>
+    <!-- Add camera frustum to scene -->
+    <Set target="NodeMgr" sgPointer="SecurityCameras"/>
+    <Model name="SecurityCameraNew" url="objects/FrustumLong.lwo" enableSharing="false" show="false">
+        <scale x="6" y="6" z="6"/>
+        <!--<rotation x="33.2" y="136.9" z="0"/>-->
+      <rotation x="33" y="43" z="0"/>
+    </Model>
+    <Model name="SecurityCameraNewAnchor" url="objects/FrustumAnchor.lwo" parent="SecurityCameraNew" enableSharing="false" show="false">
+        <inheritRotation_X>false</inheritRotation_X>
+        <inheritRotation_Y>false</inheritRotation_Y>
+        <inheritRotation_Z>false</inheritRotation_Z>
+    </Model>
+    <Label name="Label_SecurityCameraNew" parent="SecurityCameraNew" renderSequenceSlot="901" text="CAMERA (New)" show="false">
+        <position x="0" y="0" z="0"/>
+        <anchor x="20" y="0"/>
+        <!--<styles ref="theStyle"/>-->
+        <styles name="labelStyle">
+            <iconStyle opacity="1">
+                <url>images/symbols/Sensor_Camera_28x28.png</url>
+                <color r="0" g="1" b="0"/>
+                <scale x="1" y="1" z="1"/>
+                <alphaUrl/>
+            </iconStyle>
+            <labelStyle anchor="topLeft">
+                <backgroundColor r="0" g="0" b="1"/>
+                <backgroundOpacity>0</backgroundOpacity>
+                <scale x="1" y="1" z="1"/>
+                <fontStyle>
+                    <antialiasType>3</antialiasType>
+                    <borderColor r="0" g="0" b="0"/>
+                    <color r="1" g="1" b="1"/>
+                    <size>16</size>
+                    <opacity>1</opacity>
+                </fontStyle>
+            </labelStyle>
+        </styles>
+    </Label>
+    <!-- reset scene nav -->
+    <!--<Remove target="MButtonBoth.Scene"/>
+    <Remove target="MButton3.Scene"/>
+    <ConnectAttributes name="MButtonBoth.Scene" event="MButton1+MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>invertedTrackDelta:0</targetAttribute>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>invertedTrackDelta:2</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes name="MButton3.Scene" event="MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>panDelta:2</targetAttribute>
+    </ConnectAttributes>-->
+    <!-- move camera frustum on click to click position -->
+    <CommandSequence name="PlaceSecurityCameraNew" event="MButton1.Click">
+        <Remove target="InstructionLabel"/>
+        <Set target="SecurityCameraNew" show="true">
+            <position ref="Selector/pointWorld"/>
+        </Set>
+        <Set target="SecurityCameraNewAnchor" show="true"/>
+        <Set target="Label_SecurityCameraNew" show="true"/>
+    </CommandSequence>
+</Update>

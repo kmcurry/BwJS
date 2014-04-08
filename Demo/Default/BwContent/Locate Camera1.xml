@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="Security Cameras Image (Hide).xml"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="View_Facility.xml"?>
+<Update>
+  <Remove target="Label_SecurityCamera"/>
+  <Set target="SecurityCamera1" show="true"/>
+  <Set target="Label_SecurityCamera1" show="true"/>
+  <Set target="SecurityCamera1_Image" show="false"/>
+  <!--<Label name="Label_Close" renderSequenceSlot="1001">
+    <rasterPosition x="320" y="22" z="0"/>
+    <styles name="labelStyle">
+      <iconStyle opacity="1">
+        <url>images/close_btn.png</url>
+      </iconStyle>
+    </styles>
+  </Label>-->
+
+  <Label name="Label_SecurityCamera" renderSequenceSlot="1001" text="[CAMERA 1] Parking Lot" depthShadingEnabled="false">
+    <rasterPosition x="0" y="255" z="0"/>
+    <anchor x="0" y="0"/>
+    <styles name="labelStyle">
+      <iconStyle opacity="1">
+        <url>images/outsideColor.avi</url>
+        <!--<url>http://216.54.25.117/axis-cgi/mjpg/video.cgi</url>
+       <scale x=".5" y=".5" z=".5"/>-->
+      </iconStyle>
+      <labelStyle textAlign="bottomCenter">
+       
+        <backgroundColor r="0" g="0" b="0"/>
+        <backgroundOpacity>0</backgroundOpacity>
+        <scale x="1" y="1" z="1"/>
+        <fontStyle>
+          <antialiasType>3</antialiasType>
+          <borderColor r="0" g="0" b="0"/>
+          <color r="1" g="1" b="1"/>
+          <size>16</size>
+          <opacity>1</opacity>
+         
+          
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Set target="CameraProjector" enabled="true">
+    <position x="-90.0058" y="9.7908" z="193.64"/>
+    <rotation x="30" y="44.9" z="180"/>
+  </Set>
+  <Set target="CameraFeed" imageFilename="images/outsideColor.avi"/>
+
+  <!--<Set target="NodeMgr" sgPointer="SecurityCameras"/>
+    <Model name="SecurityCamera_Image" url="objects/SecurityCamera_Image.lwo" parent="WorldLocationOfScene" show="false">
+        <position x="-178.374" y="8.60195" z="-235.776"/>
+        <rotation x="33.2" y="136.9" z="0"/>
+        <scale x="1.314" y="1.314" z="1.314"/>
+    </Model>
+  <Set target="SecurityCamera1_Image/CameraView/colorTexture0" imageFilename="images/outsideColor.avi"/>-->
+
+  <Locate closeness="2" duration="2" target="SecurityCamera1"/>
+</Update>

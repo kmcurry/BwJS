@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="View_Facility.xml"?>
+<Update>
+    <Remove target="Label_SecurityCamera"/>
+    <Set target="SecurityCamera5" show="true"/>
+    <Set target="Label_SecurityCamera5" show="true"/>
+    <Set target="SecurityCamera5_Image" show="true"/>
+    <Label name="Label_SecurityCamera" renderSequenceSlot="1001" depthShadingEnabled="false">
+      <rasterPosition x="0" y="240" z="0"/>
+        <styles name="labelStyle">
+            <iconStyle>
+              <url>http://216.54.25.121/axis-cgi/mjpg/video.cgi?resolution=320x240</url>
+            </iconStyle>
+        </styles>
+    </Label>
+  <AutoInterpolate duration="2" target="Camera">
+    <sectorPosition x="-606" y="-121.4" z="-65"/>
+    <rotation x="44.5" y="-38" z="0"/>
+  </AutoInterpolate>
+  <Set target="SecurityCamera5_Image/CameraView/colorTexture0" imageFilename="http://216.54.25.121/axis-cgi/mjpg/video.cgi"/>
+</Update>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <Remove target="posHeader"/>
+  <Remove target="posLabel"/>
+  <Remove target="rotHeader"/>
+  <Remove target="rotLabel"/>
+  <Remove target="pointWorldHeader"/>
+  <Remove target="pointWorldLabel"/>
+  <Remove target="pointGeoHeader"/>
+  <Remove target="pointGeoLabel"/>
+  <Remove target="pivotDistanceHeader"/>
+  <Remove target="pivotDistanceLabel"/>
+  <Remove target="Compass"/>
+</Update>

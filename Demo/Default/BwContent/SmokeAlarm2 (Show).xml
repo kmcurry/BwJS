@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_SmokeAlarm2"/>
+	<Label name="Label_SmokeAlarm2" renderSequenceSlot="980" text="Smoke Alarm 2, Building 12">
+        <description>
+            <![CDATA[  <b><font color="red">STATUS: ACTIVATED</font></b><br />
+    <br />
+    <b>Location: </b>Taweelah Power Station, Building 12<br />
+    <br />
+    <b>Sensor Type: </b>
+    <br />
+    <a href="http://www.kiddefiresystems.com/utcfs/Templates/Pages/Template-53/0,8062,pageId%3D939%26siteId%3D383,00.html#"
+        target="_blank">Fire Sensor Type II</a><br />
+    <br />
+    <table width="300px">
+        <tr>
+            <td>
+                <b>Checklist: </b><a href="./frame_Checklist.htm" target="_top">(link)</a><br />
+                <input type="checkbox" name="Checkbox1" id="Checkbox1" value="" />Investigate /
+                Confirm Sensor Reading
+                <br />
+                <input type="checkbox" name="Checkbox2" id="Checkbox2" enableviewstate="true" value="" />Create
+                Incident <a href="./frame_Incidents.htm" target="_top">(link)</a><br />
+                <br />
+            </td>
+        </tr>
+    </table>]]>
+        </description>
+    <position x="-8242074" y="27.6" z="4523055"/>
+		<anchor x="32" y="0"/>
+		<styles name="labelStyle">
+			<iconStyle opacity="1">
+				<url>images/symbols/Alert_28x28.png</url>
+				<scale x="1" y="1" z="1"/>
+			</iconStyle>
+			<labelStyle anchor="middleRight">
+				<fontStyle>
+					<size>16</size>
+				</fontStyle>
+			</labelStyle>
+		</styles>
+	</Label>
+</Update>

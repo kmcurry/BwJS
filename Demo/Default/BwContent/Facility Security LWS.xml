@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin name="BBD3D8Engine" action="load"?>
+<?bwinclude url="scenes/EllisFacility_3.lws"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Session>
+	<ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+	<Stop/>
+	<Set target="ExitLines" dissolve="1"/>
+	<Set target="Selector" computePivotDistance="true"/>
+	<Set target="Camera" nearDistance="0.5" farDistance="50000"/>
+	<Group name="Effects">
+		<Fog name="Fog">
+			<mode>4</mode>
+			<color r=".9" g=".9" b=".9"/>
+			<start>.5</start>
+			<end>1</end>
+			<density>0</density>
+		</Fog>
+	</Group>
+	<Set target="RenderDirective" antialiasType="4" antialiasWaitTimeMs="500"/>
+</Session>

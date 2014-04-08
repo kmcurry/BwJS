@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <Styles name="SecurityCameraLabel_MouseOut">
+    <IconStyle>
+      <scale x="1" y="1" z="1"/>
+    </IconStyle>
+    <LabelStyle>
+      <fontStyle>
+        <opacity>0</opacity>
+      </fontStyle>
+    </LabelStyle>
+  </Styles>
+  <Styles name="SecurityCameraLabel_MouseOver">
+    <IconStyle>
+      <scale x="1.2" y="1.2" z="1.2"/>
+    </IconStyle>
+    <LabelStyle>
+      <fontStyle>
+        <opacity>1</opacity>
+      </fontStyle>
+    </LabelStyle>
+  </Styles>
+  <StylesMap name="SecurityCameraLabel_StylesMap">
+    <styleMap>
+      <event>Mouse.Out</event>
+      <styleUrl>#SecurityCameraLabel_MouseOut</styleUrl>
+    </styleMap>
+    <styleMap>
+      <event>Mouse.Over</event>
+      <styleUrl>#SecurityCameraLabel_MouseOver</styleUrl>
+    </styleMap>
+  </StylesMap>
+  <Set target="NodeMgr" sgPointer="Models"/>
+  <Group name="SecurityCameras">
+    <!--CAMERA 1-->
+    <Model name="SecurityCamera1" url="objects/SecurityCamera1.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-90.0058" y="9.7908" z="193.64"/>
+      <rotation x="30" y="44.9" z="180"/>
+      <scale x="1" y="1" z="1"/>
+    </Model>
+    <Label name="Label_SecurityCamera1" parent="SecurityCamera1" renderSequenceSlot="901" text="C1" show="false">
+      <!--<description>
+                <![CDATA[test]]>
+            </description>-->
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="bottomRight">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera1_Image" url="objects/SecurityCamera1_Image.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-90.0058" y="9.7908" z="193.64"/>
+      <rotation x="30" y="44.9" z="180"/>
+      <scale x="1" y="1" z="1"/>
+    </Model>
+    <!--CAMERA 2-->
+    <Model name="SecurityCamera2" url="objects/SecurityCamera2.lwo" show="false">
+      <!--<position x="-140.9" y="10.202" z="-141.4"/>
+          <rotation x="0" y="136.9" z="0"/>-->
+      <position x="-8241998" y="13.8114" z="4522993"/>
+      <rotation p="-9" h="-101" b="0"/>
+      <scale x="1" y="1" z="1.3"/>
+    </Model>
+    <Label name="Label_SecurityCamera2" parent="SecurityCamera2" renderSequenceSlot="901" text="C2" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <!--<styles ref="theStyle"/>-->
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="middleRight">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera2_Image" url="objects/SecurityCamera2_Image.lwo" show="false">
+      <position x="-8241998" y="13.8114" z="4522993"/>
+      <rotation p="-9" h="-101" b="0"/>
+      <scale x="1" y="1" z="1.3"/>
+    </Model>
+    <!--CAMERA 3-->
+    <Model name="SecurityCamera3" url="objects/SecurityCamera3.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-303" y="7" z="161"/>
+      <rotation p="0" h="45.6" r="0"/>
+    </Model>
+    <Label name="Label_SecurityCamera3" parent="SecurityCamera3" renderSequenceSlot="902" text="C3" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="middleLeft">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera3_Image" url="objects/SecurityCamera3_Image.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-303" y="7" z="161"/>
+      <rotation p="0" h="45.6" r="0"/>
+    </Model>
+    <!--CAMERA 4-->
+    <Model name="SecurityCamera4" url="objects/SecurityCamera4.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-117" y="6.1" z="219"/>
+      <rotation p="0" h="0" r="0"/>
+    </Model>
+    <Label name="Label_SecurityCamera4" parent="SecurityCamera4" renderSequenceSlot="901" text="C4" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="middleRight">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera4_Image" url="objects/SecurityCamera4_Image.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-117" y="6.1" z="219"/>
+      <rotation p="0" h="0" r="0"/>
+    </Model>
+
+    <!--CAMERA 5-->
+    <Model name="SecurityCamera5" url="objects/SecurityCamera5.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-222" y="7" z="212"/>
+      <rotation p="10" h="0" b="0"/>
+    </Model>
+    <Label name="Label_SecurityCamera5" parent="SecurityCamera5" renderSequenceSlot="901" text="C5" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <!--<styles ref="theStyle"/>-->
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="topLeft">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera5_Image" url="objects/SecurityCamera5_Image.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-222" y="7" z="212"/>
+      <rotation p="10" h="0" b="0"/>
+    </Model>
+    <!--CAMERA 6-->
+    <Model name="SecurityCamera6" url="objects/SecurityCamera6.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-553.3418" y="4.7103" z="426.1527"/>
+      <rotation x="18.6" y="-74.8" z="0"/>
+    </Model>
+    <Label name="Label_SecurityCamera6" parent="SecurityCamera6" renderSequenceSlot="901" text="C6" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <!--<styles ref="theStyle"/>-->
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="1" g="0" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="topLeft">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera6_Image" url="objects/SecurityCamera6_Image.lwo" parent="WorldLocationOfScene" show="false">
+      <position x="-553.3418" y="4.7103" z="426.1527"/>
+      <rotation x="18.6" y="-74.8" z="0"/>
+    </Model>
+    <!--CAMERA 7-->
+    <Model name="SecurityCamera7" url="objects/SecurityCamera7.lwo" show="false">
+      <!--<position x="-117.3953" y="9.6659" z="65.4386"/>
+      <rotation x="10" y="135.8" z="0"/>-->
+      <position x="-8242055" y="19.7003" z="4523039"/>
+      <rotation p="-4" h="-74.5" b="0"/>
+      <scale x="1.2" y="1.2" z=".5"/>
+    </Model>
+    <position x="-8242050" y="21.14" z="4523034"/>
+    <rotation p="7" h="-73" b="0"/>
+    <Label name="Label_SecurityCamera7" parent="SecurityCamera7" renderSequenceSlot="901" text="C7" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <!--<styles ref="theStyle"/>-->
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="topLeft">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera7_Image" url="objects/SecurityCamera7_Image.lwo" show="false">
+      <position x="-8242055" y="19.7003" z="4523039"/>
+      <rotation p="-4" h="-74.5" b="0"/>
+      <scale x="1.2" y="1.2" z=".5"/>
+    </Model>
+    <!--CAMERA 8-->
+    <Model name="SecurityCamera8" url="objects/SecurityCamera8.lwo" show="false">
+      <position x="-8242051" y="13.2693" z="4523026.5"/>
+      <rotation x="-1.3" y="167.2001" z="0"/>
+      <scale x="1" y="1" z="1"/>
+    </Model>
+    <Label name="Label_SecurityCamera8" parent="SecurityCamera8" renderSequenceSlot="901" text="C8" show="false">
+      <position x="0" y="0" z="0"/>
+      <anchor x="20" y="0"/>
+      <styles name="labelStyle">
+        <iconStyle opacity="1">
+          <url>images/symbols/Sensor_Camera_28x28.png</url>
+          <color r="0" g="1" b="0"/>
+          <scale x="1" y="1" z="1"/>
+          <alphaUrl/>
+        </iconStyle>
+        <labelStyle anchor="middleRight">
+          <backgroundColor r="0" g="0" b="1"/>
+          <backgroundOpacity>0</backgroundOpacity>
+          <scale x="1" y="1" z="1"/>
+          <fontStyle>
+            <antialiasType>3</antialiasType>
+            <borderColor r="0" g="0" b="0"/>
+            <color r="1" g="1" b="1"/>
+            <size>16</size>
+            <opacity>0</opacity>
+          </fontStyle>
+        </labelStyle>
+      </styles>
+      <stylesMap ref="SecurityCameraLabel_StylesMap"/>
+    </Label>
+    <Model name="SecurityCamera8_Image" url="objects/SecurityCamera8_Image.lwo" show="false">
+      <position x="-8242051" y="13.2693" z="4523026.5"/>
+      <rotation x="-1.3" y="167.2001" z="0"/>
+      <scale x="1" y="1" z="1"/>
+        </Model>
+  </Group>
+</Update>

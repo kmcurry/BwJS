@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+  <Isolator name="Root">
+    <Selector name="Cameras">
+      <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="0.2" farDistance="2000">
+        <position x="21.6623" y="5.275" z="29.9076"/>
+        <rotation x="9.9" y="-147" z="0"/>
+      </PerspectiveCamera>
+    </Selector>
+    <Group name="Lights">
+      <GlobalIllumination name="AmbientLight">
+        <ambient r="0.25" g="0.25" b="0.25"/>
+      </GlobalIllumination>
+      <DirectionalLight name="Light">
+        <position x="8.91015" y="10.05" z="15.7595"/>
+        <rotation x="28.9" y="194.6" z="0"/>
+        <ambient r="0.05" g="0.05" b="0.05"/>
+        <diffuse r="1" g="1" b="1"/>
+        <specular r="1" g="1" b="1"/>
+      </DirectionalLight>
+    </Group>
+    <Group name="Models">
+      <Model name="Spec_Transparency_5X5_TransMapped_Layer5" url="objects/Spec_Transparency_1X1.lwo" layer="5">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <!--<Model name="Spec_Transparency_5X5_TransMapped_Layer1" url="objects/Spec_Transparency_5X5_TransMapped.lwo" layer="1">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_TransMapped_Layer2" url="objects/Spec_Transparency_5X5_TransMapped.lwo" layer="2">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_TransMapped_Layer3" url="objects/Spec_Transparency_5X5_TransMapped.lwo" layer="3">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_TransMapped_Layer4" url="objects/Spec_Transparency_5X5_TransMapped.lwo" layer="4">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_TransMapped_Layer5" url="objects/Spec_Transparency_5X5_TransMapped.lwo" layer="5">
+        <position x="-7.15185" y="0" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_Layer1" url="objects/Spec_Diffuse_5X5.lwo" layer="1">
+        <position x="7.22133" y="-0.0399991" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_Layer2" url="objects/Spec_Diffuse_5X5.lwo" layer="2">
+        <position x="7.22133" y="-0.0399991" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_Layer3" url="objects/Spec_Diffuse_5X5.lwo" layer="3">
+        <position x="7.22133" y="-0.0399991" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_Layer4" url="objects/Spec_Diffuse_5X5.lwo" layer="4">
+        <position x="7.22133" y="-0.0399991" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_Layer5" url="objects/Spec_Diffuse_5X5.lwo" layer="5">
+        <position x="7.22133" y="-0.0399991" z="0"/>
+      </Model>
+      <Model name="Spec_Glossiness_4X4_Layer1" url="objects/Spec_Glossiness_4X4.lwo" layer="1">
+        <position x="-4.30407" y="7.3" z="0"/>
+      </Model>
+      <Model name="Spec_Glossiness_4X4_Layer2" url="objects/Spec_Glossiness_4X4.lwo" layer="2">
+        <position x="-4.30407" y="7.3" z="0"/>
+      </Model>
+      <Model name="Spec_Glossiness_4X4_Layer3" url="objects/Spec_Glossiness_4X4.lwo" layer="3">
+        <position x="-4.30407" y="7.3" z="0"/>
+      </Model>
+      <Model name="Spec_Glossiness_4X4_Layer4" url="objects/Spec_Glossiness_4X4.lwo" layer="4">
+        <position x="-4.30407" y="7.3" z="0"/>
+      </Model>
+      <Model name="Spec_Luminosity_4X4_Layer1" url="objects/Spec_Luminosity_4X4.lwo" layer="1">
+        <position x="9.25004" y="7.32" z="0"/>
+      </Model>
+      <Model name="Spec_Luminosity_4X4_Layer2" url="objects/Spec_Luminosity_4X4.lwo" layer="2">
+        <position x="9.25004" y="7.32" z="0"/>
+      </Model>
+      <Model name="Spec_Luminosity_4X4_Layer3" url="objects/Spec_Luminosity_4X4.lwo" layer="3">
+        <position x="9.25004" y="7.32" z="0"/>
+      </Model>
+      <Model name="Spec_Luminosity_4X4_Layer4" url="objects/Spec_Luminosity_4X4.lwo" layer="4">
+        <position x="9.25004" y="7.32" z="0"/>
+      </Model>
+      <Model name="Spec_Transparecy_4X4_Layer1" url="objects/Spec_Transparecy_4X4.lwo" layer="1">
+        <position x="-10.41" y="7.39" z="0"/>
+      </Model>
+      <Model name="Spec_Transparecy_4X4_Layer2" url="objects/Spec_Transparecy_4X4.lwo" layer="2">
+        <position x="-10.41" y="7.39" z="0"/>
+      </Model>
+      <Model name="Spec_Transparecy_4X4_Layer3" url="objects/Spec_Transparecy_4X4.lwo" layer="3">
+        <position x="-10.41" y="7.39" z="0"/>
+      </Model>
+      <Model name="Spec_Transparecy_4X4_Layer4" url="objects/Spec_Transparecy_4X4.lwo" layer="4">
+        <position x="-10.41" y="7.39" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_Layer1" url="objects/Spec_Transparency_5X5.lwo" layer="1">
+        <position x="-0.00598205" y="-0.109999" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_Layer2" url="objects/Spec_Transparency_5X5.lwo" layer="2">
+        <position x="-0.00598205" y="-0.109999" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_Layer3" url="objects/Spec_Transparency_5X5.lwo" layer="3">
+        <position x="-0.00598205" y="-0.109999" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_Layer4" url="objects/Spec_Transparency_5X5.lwo" layer="4">
+        <position x="-0.00598205" y="-0.109999" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_Layer5" url="objects/Spec_Transparency_5X5.lwo" layer="5">
+        <position x="-0.00598205" y="-0.109999" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_4X4_Layer1" url="objects/Spec_Diffuse_4X4.lwo" layer="1">
+        <position x="2.69" y="7.28" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_4X4_Layer2" url="objects/Spec_Diffuse_4X4.lwo" layer="2">
+        <position x="2.69" y="7.28" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_4X4_Layer3" url="objects/Spec_Diffuse_4X4.lwo" layer="3">
+        <position x="2.69" y="7.28" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_4X4_Layer4" url="objects/Spec_Diffuse_4X4.lwo" layer="4">
+        <position x="2.69" y="7.28" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_SpecMapped_Layer1" url="objects/Spec_Transparency_5X5_SpecMapped.lwo" layer="1">
+        <position x="-4.63512" y="-7.08" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_SpecMapped_Layer2" url="objects/Spec_Transparency_5X5_SpecMapped.lwo" layer="2">
+        <position x="-4.63512" y="-7.08" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_SpecMapped_Layer3" url="objects/Spec_Transparency_5X5_SpecMapped.lwo" layer="3">
+        <position x="-4.63512" y="-7.08" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_SpecMapped_Layer4" url="objects/Spec_Transparency_5X5_SpecMapped.lwo" layer="4">
+        <position x="-4.63512" y="-7.08" z="0"/>
+      </Model>
+      <Model name="Spec_Transparency_5X5_SpecMapped_Layer5" url="objects/Spec_Transparency_5X5_SpecMapped.lwo" layer="5">
+        <position x="-4.63512" y="-7.08" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_SpecMapped_Layer1" url="objects/Spec_Diffuse_5X5_SpecMapped.lwo" layer="1">
+        <position x="2.98" y="-7.09" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_SpecMapped_Layer2" url="objects/Spec_Diffuse_5X5_SpecMapped.lwo" layer="2">
+        <position x="2.98" y="-7.09" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_SpecMapped_Layer3" url="objects/Spec_Diffuse_5X5_SpecMapped.lwo" layer="3">
+        <position x="2.98" y="-7.09" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_SpecMapped_Layer4" url="objects/Spec_Diffuse_5X5_SpecMapped.lwo" layer="4">
+        <position x="2.98" y="-7.09" z="0"/>
+      </Model>
+      <Model name="Spec_Diffuse_5X5_SpecMapped_Layer5" url="objects/Spec_Diffuse_5X5_SpecMapped.lwo" layer="5">
+        <position x="2.98" y="-7.09" z="0"/>
+      </Model>-->
+    </Group>
+  </Isolator>
+  <RenderDirective name="RenderDirective" backgroundImageFilename="images/Sky2.jpg"/>
+  <Animations>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_TransMapped_Layer1Motion" url="motions/Spec_Transparency_5X5_TransMapped_Layer1.mot" target="Spec_Transparency_5X5_TransMapped_Layer1"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_TransMapped_Layer2Motion" url="motions/Spec_Transparency_5X5_TransMapped_Layer2.mot" target="Spec_Transparency_5X5_TransMapped_Layer2"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_TransMapped_Layer3Motion" url="motions/Spec_Transparency_5X5_TransMapped_Layer3.mot" target="Spec_Transparency_5X5_TransMapped_Layer3"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_TransMapped_Layer4Motion" url="motions/Spec_Transparency_5X5_TransMapped_Layer4.mot" target="Spec_Transparency_5X5_TransMapped_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_TransMapped_Layer5Motion" url="motions/Spec_Transparency_5X5_TransMapped_Layer5.mot" target="Spec_Transparency_5X5_TransMapped_Layer5"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_Layer1Motion" url="motions/Spec_Diffuse_5X5_Layer1.mot" target="Spec_Diffuse_5X5_Layer1"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_Layer2Motion" url="motions/Spec_Diffuse_5X5_Layer2.mot" target="Spec_Diffuse_5X5_Layer2"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_Layer3Motion" url="motions/Spec_Diffuse_5X5_Layer3.mot" target="Spec_Diffuse_5X5_Layer3"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_Layer4Motion" url="motions/Spec_Diffuse_5X5_Layer4.mot" target="Spec_Diffuse_5X5_Layer4"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_Layer5Motion" url="motions/Spec_Diffuse_5X5_Layer5.mot" target="Spec_Diffuse_5X5_Layer5"/>
+    <KeyframeInterpolator name="Spec_Glossiness_4X4_Layer1Motion" url="motions/Spec_Glossiness_4X4_Layer1.mot" target="Spec_Glossiness_4X4_Layer1"/>
+    <KeyframeInterpolator name="Spec_Glossiness_4X4_Layer2Motion" url="motions/Spec_Glossiness_4X4_Layer2.mot" target="Spec_Glossiness_4X4_Layer2"/>
+    <KeyframeInterpolator name="Spec_Glossiness_4X4_Layer3Motion" url="motions/Spec_Glossiness_4X4_Layer3.mot" target="Spec_Glossiness_4X4_Layer3"/>
+    <KeyframeInterpolator name="Spec_Glossiness_4X4_Layer4Motion" url="motions/Spec_Glossiness_4X4_Layer4.mot" target="Spec_Glossiness_4X4_Layer4"/>
+    <KeyframeInterpolator name="Spec_Luminosity_4X4_Layer1Motion" url="motions/Spec_Luminosity_4X4_Layer1.mot" target="Spec_Luminosity_4X4_Layer1"/>
+    <KeyframeInterpolator name="Spec_Luminosity_4X4_Layer2Motion" url="motions/Spec_Luminosity_4X4_Layer2.mot" target="Spec_Luminosity_4X4_Layer2"/>
+    <KeyframeInterpolator name="Spec_Luminosity_4X4_Layer3Motion" url="motions/Spec_Luminosity_4X4_Layer3.mot" target="Spec_Luminosity_4X4_Layer3"/>
+    <KeyframeInterpolator name="Spec_Luminosity_4X4_Layer4Motion" url="motions/Spec_Luminosity_4X4_Layer4.mot" target="Spec_Luminosity_4X4_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparecy_4X4_Layer1Motion" url="motions/Spec_Transparecy_4X4_Layer1.mot" target="Spec_Transparecy_4X4_Layer1"/>
+    <KeyframeInterpolator name="Spec_Transparecy_4X4_Layer2Motion" url="motions/Spec_Transparecy_4X4_Layer2.mot" target="Spec_Transparecy_4X4_Layer2"/>
+    <KeyframeInterpolator name="Spec_Transparecy_4X4_Layer3Motion" url="motions/Spec_Transparecy_4X4_Layer3.mot" target="Spec_Transparecy_4X4_Layer3"/>
+    <KeyframeInterpolator name="Spec_Transparecy_4X4_Layer4Motion" url="motions/Spec_Transparecy_4X4_Layer4.mot" target="Spec_Transparecy_4X4_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_Layer1Motion" url="motions/Spec_Transparency_5X5_Layer1.mot" target="Spec_Transparency_5X5_Layer1"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_Layer2Motion" url="motions/Spec_Transparency_5X5_Layer2.mot" target="Spec_Transparency_5X5_Layer2"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_Layer3Motion" url="motions/Spec_Transparency_5X5_Layer3.mot" target="Spec_Transparency_5X5_Layer3"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_Layer4Motion" url="motions/Spec_Transparency_5X5_Layer4.mot" target="Spec_Transparency_5X5_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_Layer5Motion" url="motions/Spec_Transparency_5X5_Layer5.mot" target="Spec_Transparency_5X5_Layer5"/>
+    <KeyframeInterpolator name="Spec_Diffuse_4X4_Layer1Motion" url="motions/Spec_Diffuse_4X4_Layer1.mot" target="Spec_Diffuse_4X4_Layer1"/>
+    <KeyframeInterpolator name="Spec_Diffuse_4X4_Layer2Motion" url="motions/Spec_Diffuse_4X4_Layer2.mot" target="Spec_Diffuse_4X4_Layer2"/>
+    <KeyframeInterpolator name="Spec_Diffuse_4X4_Layer3Motion" url="motions/Spec_Diffuse_4X4_Layer3.mot" target="Spec_Diffuse_4X4_Layer3"/>
+    <KeyframeInterpolator name="Spec_Diffuse_4X4_Layer4Motion" url="motions/Spec_Diffuse_4X4_Layer4.mot" target="Spec_Diffuse_4X4_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_SpecMapped_Layer1Motion" url="motions/Spec_Transparency_5X5_SpecMapped_Layer1.mot" target="Spec_Transparency_5X5_SpecMapped_Layer1"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_SpecMapped_Layer2Motion" url="motions/Spec_Transparency_5X5_SpecMapped_Layer2.mot" target="Spec_Transparency_5X5_SpecMapped_Layer2"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_SpecMapped_Layer3Motion" url="motions/Spec_Transparency_5X5_SpecMapped_Layer3.mot" target="Spec_Transparency_5X5_SpecMapped_Layer3"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_SpecMapped_Layer4Motion" url="motions/Spec_Transparency_5X5_SpecMapped_Layer4.mot" target="Spec_Transparency_5X5_SpecMapped_Layer4"/>
+    <KeyframeInterpolator name="Spec_Transparency_5X5_SpecMapped_Layer5Motion" url="motions/Spec_Transparency_5X5_SpecMapped_Layer5.mot" target="Spec_Transparency_5X5_SpecMapped_Layer5"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_SpecMapped_Layer1Motion" url="motions/Spec_Diffuse_5X5_SpecMapped_Layer1.mot" target="Spec_Diffuse_5X5_SpecMapped_Layer1"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_SpecMapped_Layer2Motion" url="motions/Spec_Diffuse_5X5_SpecMapped_Layer2.mot" target="Spec_Diffuse_5X5_SpecMapped_Layer2"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_SpecMapped_Layer3Motion" url="motions/Spec_Diffuse_5X5_SpecMapped_Layer3.mot" target="Spec_Diffuse_5X5_SpecMapped_Layer3"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_SpecMapped_Layer4Motion" url="motions/Spec_Diffuse_5X5_SpecMapped_Layer4.mot" target="Spec_Diffuse_5X5_SpecMapped_Layer4"/>
+    <KeyframeInterpolator name="Spec_Diffuse_5X5_SpecMapped_Layer5Motion" url="motions/Spec_Diffuse_5X5_SpecMapped_Layer5.mot" target="Spec_Diffuse_5X5_SpecMapped_Layer5"/>
+  </Animations>
+  <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>

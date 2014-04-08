@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <AutoInterpolate duration="2" target="Heater_DuctFlange">
+    <position x="0.0545" y="0.05" z="-0.05"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_Fan">
+    <position x="-0.0118" y="0.0766" z="0.026"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_FanMotor">
+    <position x="-0.0125" y="0.091" z="0.026"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_guard">
+    <position x="-0.012" y="0.094" z="0.026"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_screws">
+    <position x="-0.0116" y="0.094" z="0.0257"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="4" target="Heater_Shell" dissolve="0">
+    <position x="0" y="0.052" z="-0.004"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_SideCover">
+    <position x="0.003" y="0.054" z="-0.072"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_Top">
+    <position x="0" y="0.09" z="0"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_FrontCover">
+    <position x="0" y="0" z="0"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_DuctFlange-screws">
+    <position x="0.05" y="0.052" z="-0.05"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+  <AutoInterpolate duration="2" target="Heater_Fan-nut">
+    <position x="-0.012" y="0.074" z="0.0258"/>
+    <rotation x="0" y="0" z="0"/>
+  </AutoInterpolate>
+</Update>

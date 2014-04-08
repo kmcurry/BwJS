@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwinclude url="scenes/Ball_Valve_Explode.lws"?>
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+	<!-- Customize default preferences for this content-->
+	<ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+	<!--<Set target="Selector" computePivotDistance="true"/>-->
+	<Set target="SceneInspector" pivotDistance="982"/>
+	<?bwinclude url="DVDStatusLabel_Add.xml"?>
+	<?bwinclude url="Script Label.xml"?>
+</Session>
+

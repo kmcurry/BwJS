@@ -1,0 +1,76 @@
+LWMO
+3
+
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 2.3333333 3 0 0 0 -0.17789574 -0.12706839 0
+  Key -0.30496413 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key -0.0099999998 0 3 0 0 0 0 0 0
+  Key -0.0099999998 2.3333333 3 0 0 0 0 0 0
+  Key -0.0099999998 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.125 0 3 0 0 0 0 0 0
+  Key -0.125 2.3333333 3 0 0 0 0 0 0
+  Key -0.125 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 2.3333333 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 2.3333333 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 1.3700839 0 3 0 0 0 0 0 0
+  Key 0 2.3333333 3 0 0 0 0 -0.57086831 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 2.3333333 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 2.3333333 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 2.3333333 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}

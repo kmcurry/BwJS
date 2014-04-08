@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <title>BWJS Demo</title>
+    <script type="text/javascript" src="../../Bridgeworks-min.js"></script>
+    <link type="text/css" rel="StyleSheet" href="../Bridgeworks.css"/>
+  </head>
+  <body onload="main()" onmouseup="onMouseUp();" onmousemove="onMouseMove();">
+<H1>Bridgeworks - WebGL Version</H1>
+          
+    <script type="text/javascript">
+    
+    var g_rc = null;
+    var g_bridgeworks = null;
+    var once = true;
+    
+    function draw()
+    {
+        showBG();
+        
+        g_rc.clear();
+        
+        g_bridgeworks.renderAgent.render();
+    }
+    
+    function onMouseEnter()
+    {
+        g_bridgeworks.handleEvent(event);
+    }
+    
+    function onMouseOut()
+    {
+        g_bridgeworks.handleEvent(event);   
+    }
+    
+    function onMouseDown()
+    {
+        g_bridgeworks.handleEvent(event);
+    }
+    
+    function onMouseUp()
+    {
+        g_bridgeworks.handleEvent(event);
+    }
+    
+    function onMouseMove()
+    {
+        g_bridgeworks.handleEvent(event);
+    }
+    
+    function onClick()
+    {
+        g_bridgeworks.handleEvent(event);
+    }
+    
+    function main()
+    {
+        // create render context for BW
+        g_rc = newRenderContext("webgl", document.getElementById("Canvas"), document.getElementById("BackgroundImage")); 
+        if (!g_rc) return;    
+        
+        // create BW
+        g_bridgeworks = new Bridgeworks(document.getElementById("Canvas"));
+        
+        g_bridgeworks.setRenderContext(g_rc);
+        
+        var xml;
+        var xmlParser = new XMLParser(g_bridgeworks.factory, g_bridgeworks.registry);
+        
+        //xml = loadXMLResource("./bwcontent/Test.xml");
+        //xmlParser.parse(xml);
+        
+        xml = loadXMLResource("./bwcontent/DefaultPreferences.xml");
+        xmlParser.parse(xml);
+        
+        xml = loadXMLResource("./bwcontent/01_StartGridScene.xml");
+        xmlParser.parse(xml);
+        
+        // disable right-click context menu
+        document.oncontextmenu = function() { return false; }
+        // disable selection
+        document.onselectstart = function() { return true; }
+              
+        setInterval(draw, 0);
+    }
+    
+    function showBG() 
+    {
+        var root = document.body;
+        var eStage = document.getElementById("Canvas");
+        var pageX = eStage.offsetLeft;
+        var pageY = eStage.offsetTop; 
+        var ebg = document.getElementById("BackgroundImage"); 
+        ebg.style.left = pageX; 
+        ebg.style.top = pageY; 
+        ebg.style.visibility = 'visible';
+    }
+    
+    
+    function OutputDebugMsg(msg)
+    {
+        var innerHTML = document.getElementById("DebugOutput").innerHTML;
+        innerHTML += "&gt; " + msg + "<br>";
+        //document.getElementById("DebugOutput").innerHTML = innerHTML;
+    }
+    
+    //$(document).ready(function() {
+    //$("#DebugOutput").dialog({ height: 300 });
+    //});   
+   
+    </script>
+
+    <img id="BackgroundImage" style="position: absolute; visibility: hidden;" src="bwcontent/images/1x1.jpg" width="1200" height="800">
+    </img>
+
+    <div id="CanvasDiv" style="text-align: center;">
+      <canvas id="Canvas" width="1200" height="800" onmouseenter="onMouseEnter();" onmouseout="onMouseOut();"
+        onmousedown="onMouseDown();" onclick="onClick();" onselectstart="return false;">
+      </canvas>     
+    </div>
+    
+    <div id="RasterComponents" style="visibility: visible;">
+    </div>
+    
+    <div id="DebugOutput" title="Debug Output">
+    </div>
+    
+  </body>
+</html>

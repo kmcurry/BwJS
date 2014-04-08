@@ -1,0 +1,13 @@
+LWMO
+3
+
+NumChannels 1
+Channel 0
+{ Envelope
+  4
+  Key 0 90 0 0 0 0 0 0 0
+  Key 0 180 0 0 0 0 0 0 0
+  Key 0 270 0 0 0 0 0 0 0
+  Key 0 360 0 0 0 0 0 0 0
+  Behaviors 1 2
+}

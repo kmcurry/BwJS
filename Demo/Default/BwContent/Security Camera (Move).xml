@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?bwinclude url="Security Camera (Initial State).xml"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="Security Camera (Move Instruction Label).xml"?>
+<Update>
+	<Remove target="MButton1.Object"/>
+	<CommandSequence name="MoveSecurityCameras_SceneInspect" trigger="Selector/selectedName!=SecurityCameraNew" numResponses="-1">
+		<Set target="ObjectInspector" enabled="false"/>
+		<Set target="SceneInspector" enabled="true"/>
+	</CommandSequence>
+	<CommandSequence name="MoveSecurityCameraNew" trigger="Selector/selectedName=SecurityCameraNew" numResponses="-1">
+		<Set target="ObjectInspector" enabled="true"/>
+		<Set target="SceneInspector" enabled="false"/>
+	</CommandSequence>
+</Update>

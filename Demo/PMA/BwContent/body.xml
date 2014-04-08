@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+	<Isolator name="Root">
+		<Selector name="Cameras">
+			<PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".10" farDistance="10000">
+				<position x="-9.93585" y="123.75" z="-329.667"/>
+				<rotation x="6.00001" y="1.7" z="0"/>
+			</PerspectiveCamera>
+		</Selector>
+		<Group name="Lights">
+			<GlobalIllumination name="AmbientLight">
+				<ambient r="0.45" g="0.45" b="0.45"/>
+			</GlobalIllumination>
+			<PointLight name="Light" range="3.40282e+038" parent="Camera">
+				<position x="-45.4236" y="1465.25" z="-2028.23"/>
+				<rotation x="24.4" y="11" z="2.01724e-007"/>
+				<ambient r="0.05" g="0.05" b="0.05"/>
+				<diffuse r="1" g="1" b="1"/>
+				<specular r="1" g="1" b="1"/>
+			</PointLight>
+		</Group>
+		<Group name="Models">
+			<Model name="Body_Male" url="objects/Body_Male.lwo">
+                <scale x="1" y="1" z="1"/>
+            </Model>
+			<Model name="Shadow" url="objects/Shadow.lwo">
+				<position x="-2.27922" y="4.35364" z="3.46961"/>
+				<scale x="0.904001" y="1.192" z="0.976001"/>
+			</Model>
+		</Group>
+	</Isolator>
+	<RenderDirective name="RenderDirective" backgroundImageFilename="images/white.png"/>
+	<Animations>
+		<KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+		<KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+		<KeyframeInterpolator name="ShadowMotion" url="motions/Shadow.mot" target="Shadow"/>
+	</Animations>
+	<ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+    <Set target="Selector" computePivotDistance="true"/>
+</Scene>

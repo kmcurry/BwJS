@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+    <Remove target="Label_SecurityCamera"/>
+    <Remove target="SecurityCamera_Image"/>
+    <Label name="Label_SecurityCamera" renderSequenceSlot="1001" text="AL TAWEELAH CAMERA 1">
+        <rasterPosition x="0" y="240" z="0"/>
+        <anchor x="20" y="0"/>
+        <!--<styles ref="theStyle"/>-->
+        <styles name="labelStyle">
+            <iconStyle opacity="1">
+                <url>http://216.54.25.117/axis-cgi/mjpg/video.cgi</url>
+                <scale x=".5" y=".5" z=".5"/>
+            </iconStyle>
+            <labelStyle textAlign="bottomCenter">
+                <backgroundColor r="0" g="1" b="0"/>
+                <backgroundOpacity>0</backgroundOpacity>
+                <scale x="1" y="1" z="1"/>
+                <fontStyle>
+                    <antialiasType>3</antialiasType>
+                    <borderColor r="0" g="0" b="0"/>
+                    <color r="1" g="1" b="1"/>
+                    <size>16</size>
+                    <opacity>1</opacity>
+                </fontStyle>
+            </labelStyle>
+        </styles>
+    </Label>
+    <!--<Set target="NodeMgr" sgPointer="SecurityCameras"/>
+	<Model name="SecurityCamera_Image" url="objects/SecurityCamera1_Image.lwo" parent="WorldLocationOfScene">
+		<position x="-178.374" y="8.60195" z="-235.776"/>
+		<rotation x="-33.2" y="-43.1" z="0"/>
+		<scale x="1.314" y="1.314" z="1.314"/>
+	</Model>-->
+    <!--<?bwinclude url="./SectorTest_UpdateSectorOrigin.xml"?>-->
+    <!--<Locate closeness="3" duration="5" target="SecurityCamera1"/>-->
+    <Set target ="PerspectiveProjector" parent="WorldLocationOfScene">
+        <position x="-178.374" y="8.60195" z="-235.776"/>
+        <rotation x="-33.2" y="-43.1" z="0"/>
+    </Set>
+    <Set target="ProjectionImage1" imageFilename="http://216.54.25.117/axis-cgi/mjpg/video.cgi" />
+    <?bwinclude url="View_Facility.xml"?>
+    <AutoInterpolate duration="2" target="Camera">
+        <position x="6087372" y="38.3419" z="2751999.25"/>
+        <rotation x="20" y="-24.8" z="0"/>
+    </AutoInterpolate>
+</Update>

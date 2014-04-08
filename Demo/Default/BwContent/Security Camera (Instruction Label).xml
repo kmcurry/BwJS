@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="InstructionLabel"/>
+	<RasterLabel name="InstructionLabel" fontSize="18" format="center" selectable="false" height="20" fontName="Verdana">
+		<text>Left-click on a structural location in the scene to position the camera.</text>
+		<position x="80" y="5" z="0"/>
+		<textColor r="1" g="1" b=".9"/>
+		<bgColor r=".35" g=".35" b=".35"/>
+	</RasterLabel>
+</Update>

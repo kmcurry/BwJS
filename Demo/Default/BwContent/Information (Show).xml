@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="posHeader"/>
+	<Remove target="posLabel"/>
+	<Remove target="rotHeader"/>
+	<Remove target="rotLabel"/>
+	<Remove target="pointWorldHeader"/>
+	<Remove target="pointWorldLabel"/>
+	<Remove target="pointGeoHeader"/>
+	<Remove target="pointGeoLabel"/>
+	<Remove target="pivotDistanceHeader"/>
+	<Remove target="pivotDistanceLabel"/>
+	<!-- Add position labels -->
+	<RasterLabel name="posHeader" fontSize="16" fontStyle="Bold">
+		<textColor r=".81" g=".89" b=".48"/>
+		<bgColor r="0" g="0" b="0"/>
+		<text>Camera Position (meters): </text>
+	</RasterLabel>
+	<RasterLabel name="posLabel" fontSize="16" fontStyle="Bold" >
+		<position x="0" y="16" z="0"/>
+		<textColor r=".36" g=".58" b=".32"/>
+		<bgColor r="0" g="0" b="0"/>
+	</RasterLabel>
+	<ConnectAttributes sourceContainer="Camera" targetContainer="posLabel">
+		<sourceAttribute>position</sourceAttribute>
+		<targetAttribute>text</targetAttribute>
+	</ConnectAttributes>
+	<!-- Add rotation labels -->
+	<RasterLabel name="rotHeader" fontSize="16" fontStyle="Bold">
+		<position x="0" y="32" z="0"/>
+		<textColor r=".81" g=".89" b=".48"/>
+		<bgColor r="0" g="0" b="0"/>
+		<text>Camera Rotation:</text>
+	</RasterLabel>
+	<RasterLabel name="rotLabel" fontSize="16" fontStyle="Bold">
+		<position x="0" y="48" z="0"/>
+		<textColor r=".36" g=".58" b=".32"/>
+		<bgColor r="0" g="0" b="0"/>
+	</RasterLabel>
+	<ConnectAttributes sourceContainer="Camera" targetContainer="rotLabel">
+		<sourceAttribute>rotation</sourceAttribute>
+		<targetAttribute>text</targetAttribute>
+	</ConnectAttributes>
+	<!-- Add pointWorld labels -->
+	<RasterLabel name="pointWorldHeader" fontSize="16" fontStyle="Bold">
+		<position x="0" y="64" z="0"/>
+		<textColor r=".91" g="1" b=".59"/>
+		<bgColor r="0" g="0" b="0"/>
+		<text>Selected Point World:</text>
+	</RasterLabel>
+	<RasterLabel name="pointWorldLabel" fontSize="16" fontStyle="Bold">
+		<position x="0" y="80" z="0"/>
+		<textColor r=".36" g=".58" b=".32"/>
+		<bgColor r="0" g="0" b="0"/>
+	</RasterLabel>
+	<ConnectAttributes sourceContainer="Selector" targetContainer="pointWorldLabel">
+		<sourceAttribute>pointWorld</sourceAttribute>
+		<targetAttribute>text</targetAttribute>
+	</ConnectAttributes>
+	<!-- Add pointGeo labels -->
+	<RasterLabel name="pointGeoHeader" fontSize="16" fontStyle="Bold">
+		<position x="0" y="96" z="0"/>
+		<textColor r=".91" g="1" b=".59"/>
+		<bgColor r="0" g="0" b="0"/>
+		<text>Selected Point Geo (lon, alt, lat):</text>
+	</RasterLabel>
+	<RasterLabel name="pointGeoLabel" fontSize="16" fontStyle="Bold">
+		<position x="0" y="112" z="0"/>
+		<textColor r=".36" g=".58" b=".32"/>
+		<bgColor r="0" g="0" b="0"/>
+	</RasterLabel>
+	<ConnectAttributes sourceContainer="Selector" targetContainer="pointGeoLabel">
+		<sourceAttribute>pointGeo</sourceAttribute>
+		<targetAttribute>text</targetAttribute>
+	</ConnectAttributes>
+	<!-- Add pivotDistance -->
+	<RasterLabel name="pivotDistanceHeader" fontSize="16" fontStyle="Bold">
+		<position x="0" y="128" z="0"/>
+		<textColor r=".91" g="1" b=".59"/>
+		<bgColor r="0" g="0" b="0"/>
+		<text>pivotDistance: </text>
+	</RasterLabel>
+	<RasterLabel name="pivotDistanceLabel" fontSize="16" fontStyle="Bold">
+		<position x="93" y="128" z="0"/>
+		<textColor r=".36" g=".58" b=".32"/>
+		<bgColor r="0" g="0" b="0"/>
+	</RasterLabel>
+	<ConnectAttributes sourceContainer="SceneInspector" targetContainer="pivotDistanceLabel">
+		<sourceAttribute>pivotDistance</sourceAttribute>
+		<targetAttribute>text</targetAttribute>
+	</ConnectAttributes>
+	<Model name="Pivot" url="objects/pivot.lwo" parent="Camera" selectable="false">
+		<position x="0" y="0" z="0"/>
+		<scale x=".1" y=".1" z=".1"/>
+	</Model>
+	<ConnectAttributes sourceContainer="SceneInspector" targetContainer="Pivot">
+		<sourceAttribute>pivotDistance</sourceAttribute>
+		<targetAttribute>position:2</targetAttribute>
+	</ConnectAttributes>
+
+  <Model name="Compass" url="objects/Compass.lwo" parent="Camera" >
+    <position x="25" y="25" z="100"/>
+    <rotation x="0" y="0" z="0"/>
+    <scale x="10" y="10" z="10"/>
+  </Model>
+  <ConnectAttributes sourceContainer="Camera" targetContainer="Compass">
+    <sourceAttribute>rotation:1</sourceAttribute>
+    <targetAttribute>rotation:2</targetAttribute>
+  </ConnectAttributes>
+
+</Update>

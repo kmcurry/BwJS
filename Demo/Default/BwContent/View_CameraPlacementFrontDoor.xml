@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Update>
+ <AutoInterpolate target="Camera">
+    <zoom>2.0144</zoom>
+   <position x="-8241998" y="13.8114" z="4522993"/>
+   <rotation p="-9" h="-101" b="0"/>
+   </AutoInterpolate>
+  <Set target="SecurityCamera2_Image">
+    <show>true</show>
+    <parent>Camera</parent>
+    <dissolve>.3</dissolve>
+    <position x="0" y="0" z="0"/>
+    <rotation p="0" h="0" b="0"/>
+    <selectable>false</selectable>
+    <aspectRatio>1</aspectRatio>
+  </Set>
+  <Set target="Selector" computePivotDistance="false"/>
+  <Set target="SceneInspector" pivotDistance="0"/>
+</Update>
+
+
+

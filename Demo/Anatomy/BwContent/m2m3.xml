@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" parent="cam" nearDistance="2" farDistance="20000">
+                <position x="0" y="5.94572" z="-78.962"/>
+                <rotation x="2.7" y="0" z="0"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.25" g="0.25" b="0.25"/>
+            </GlobalIllumination>
+            <PointLight name="Light (1)" range="3.40282e+038" parent="Camera">
+                <position x="-1500" y="2167" z="-3235.3"/>
+                <rotation x="35" y="45" z="0"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="0.85" g="0.723333" b="0.66"/>
+                <specular r="0.85" g="0.723333" b="0.66"/>
+            </PointLight>
+            <PointLight name="Light (2)" range="3.40282e+038">
+                <position x="20.3433" y="9.75" z="-28.0713"/>
+                <rotation x="-2.19999" y="-53.7" z="0"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="0.1" g="0.1" b="0.1"/>
+                <specular r="0.1" g="0.1" b="0.1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="Woman" url="objects/Woman.lwo" dissolve=".4"/>
+            <NullObject name="cam"/>
+            <Model name="M2M3_Organs" url="objects/M2M3_Organs.lwo"/>
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/WatsonDark.bmp"/>
+    <Animations>
+        <KeyframeInterpolator name="Light (1)Motion" url="motions/Light (1).mot" target="Light (1)"/>
+        <KeyframeInterpolator name="Light (2)Motion" url="motions/Light (2).mot" target="Light (2)"/>
+        <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+        <KeyframeInterpolator name="WomanMotion" url="motions/Woman.mot" target="Woman"/>
+        <KeyframeInterpolator name="camMotion" url="motions/cam.mot" target="cam"/>
+        <KeyframeInterpolator name="M2M3_OrgansMotion" url="motions/M2M3_Organs.mot" target="M2M3_Organs"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>

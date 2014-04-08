@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="20" farDistance="200000">
+                <position x="-260.231" y="444.167" z="-652.458"/>
+                <rotation x="27.4" y="21.5" z="1.05881e-006"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.35" g="0.35" b="0.35"/>
+            </GlobalIllumination>
+            <PointLight name="Light" range="3.40282e+038" parent="Camera">
+                <position x="372.983" y="4251.14" z="-3830.07"/>
+                <rotation x="36.4" y="9.69999" z="-4.23214e-008"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="1" g="1" b="1"/>
+                <specular r="1" g="1" b="1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="Ball_Valve_Explode_1_Layer1" url="objects/Ball_Valve_Explode_1.lwo" layer="1"/>
+            <Model name="Ball_Valve_Explode_1_Layer2" url="objects/Ball_Valve_Explode_1.lwo" layer="2"/>
+            <Model name="Ball_Valve_Explode_1_Layer3" url="objects/Ball_Valve_Explode_1.lwo" layer="3"/>
+            <Model name="Ball_Valve_Explode_1_Layer4" url="objects/Ball_Valve_Explode_1.lwo" layer="4"/>
+            <Model name="Ball_Valve_Explode_1_Layer5" url="objects/Ball_Valve_Explode_1.lwo" layer="5"/>
+            <Model name="Ball_Valve_Explode_1_Layer6" url="objects/Ball_Valve_Explode_1.lwo" layer="6"/>
+            <Model name="Ball_Valve_Explode_1_Layer7" url="objects/Ball_Valve_Explode_1.lwo" layer="7"/>
+            <Model name="Ball_Valve_Explode_1_Layer8" url="objects/Ball_Valve_Explode_1.lwo" layer="8"/>
+            <Model name="Ball_Valve_Explode_1_Layer9" url="objects/Ball_Valve_Explode_1.lwo" layer="9"/>
+            <Model name="Ball_Shadow_Layer1" url="objects/Ball_Shadow.lwo" layer="1"/>
+            <Model name="Ball_Shadow_Layer2" url="objects/Ball_Shadow.lwo" layer="2"/>
+            <Model name="Ball_Valve_Explode_1_Layer10" url="objects/Ball_Valve_Explode_1.lwo" layer="10">
+                <position x="0" y="-1.84613" z="0"/>
+            </Model>
+            <Model name="Ball_Shadow_Layer3" url="objects/Ball_Shadow.lwo" layer="3">
+                <position x="0" y="-1.84613" z="0"/>
+                <scale x="1.154" y="1.154" z="1.432"/>
+            </Model>
+            <Model name="Line (1)" url="objects/Line.lwo">
+                <position x="-180.022" y="346.324" z="-9.8324"/>
+                <rotation x="-13.7" y="90" z="0"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="Line (2)" url="objects/Line.lwo">
+                <position x="-69.6914" y="192.822" z="18.9112"/>
+                <rotation x="15.4" y="90" z="0"/>
+                <scale x="1" y="1" z="1.084"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="Line (3)" url="objects/Line.lwo">
+                <position x="-307.668" y="74.5362" z="2.57088"/>
+                <rotation x="0" y="90" z="0"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="Line (4)" url="objects/Line.lwo">
+                <position x="-87.5536" y="57.3664" z="-35.4006"/>
+                <rotation x="9.7" y="148.6" z="-28.3"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="Line (5)" url="objects/Line.lwo">
+                <position x="296.679" y="55.8819" z="2.57088"/>
+                <rotation x="0" y="90" z="0"/>
+                <scale x="1" y="1" z="1.356"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="Line (6)" url="objects/Line.lwo">
+                <position x="-125.484" y="279.733" z="2.57088"/>
+                <rotation x="0" y="90" z="0"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+            <Model name="HandleNO" url="objects/HandleNO.lwo">
+                <position x="-192.001" y="346.1" z="-10.0863"/>
+                <pivot x="-4.98703" y="0" z="0"/>
+            </Model>
+            <Model name="BonnetNO" url="objects/BonnetNO.lwo">
+                <position x="-81.7873" y="193.995" z="19.4836"/>
+                <pivot x="-4.48833" y="0" z="0"/>
+            </Model>
+            <Model name="StemNO" url="objects/StemNO.lwo">
+                <position x="-136.293" y="279.929" z="2.2945"/>
+                <pivot x="-4.589" y="0" z="0"/>
+            </Model>
+            <Model name="BallNO" url="objects/BallNO.lwo">
+                <position x="-16.5204" y="37.6298" z="-136.752"/>
+                <pivot x="4.589" y="0" z="0"/>
+            </Model>
+            <Model name="BodyNO" url="objects/BodyNO.lwo">
+                <position x="149.325" y="38.7648" z="-164.841"/>
+                <rotation x="0" y="180" z="0"/>
+                <pivot x="-4.26814" y="0" z="0"/>
+            </Model>
+            <Model name="OutletNO" url="objects/OutletNO.lwo">
+                <position x="-319.806" y="74.3876" z="2.43894"/>
+                <pivot x="-4.57301" y="0" z="0"/>
+            </Model>
+            <Model name="InletNO" url="objects/InletNO.lwo">
+                <position x="468.207" y="56.3213" z="2.27561"/>
+                <pivot x="4.55122" y="0" z="0"/>
+            </Model>
+            <Model name="Line (7)" url="objects/Line.lwo">
+                <position x="79.9216" y="57.3664" z="-64.9412"/>
+                <rotation x="9.7" y="148.6" z="-28.3"/>
+                <pivot x="0" y="0" z="-57.7116"/>
+            </Model>
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/Background.jpg"/>
+    <Animations>
+        <KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+        <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer1Motion" url="motions/Ball_Valve_Explode_1_Layer1.mot" target="Ball_Valve_Explode_1_Layer1"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer2Motion" url="motions/Ball_Valve_Explode_1_Layer2.mot" target="Ball_Valve_Explode_1_Layer2"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer3Motion" url="motions/Ball_Valve_Explode_1_Layer3.mot" target="Ball_Valve_Explode_1_Layer3"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer4Motion" url="motions/Ball_Valve_Explode_1_Layer4.mot" target="Ball_Valve_Explode_1_Layer4"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer5Motion" url="motions/Ball_Valve_Explode_1_Layer5.mot" target="Ball_Valve_Explode_1_Layer5"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer6Motion" url="motions/Ball_Valve_Explode_1_Layer6.mot" target="Ball_Valve_Explode_1_Layer6"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer7Motion" url="motions/Ball_Valve_Explode_1_Layer7.mot" target="Ball_Valve_Explode_1_Layer7"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer8Motion" url="motions/Ball_Valve_Explode_1_Layer8.mot" target="Ball_Valve_Explode_1_Layer8"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer9Motion" url="motions/Ball_Valve_Explode_1_Layer9.mot" target="Ball_Valve_Explode_1_Layer9"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer1Motion" url="motions/Ball_Shadow_Layer1.mot" target="Ball_Shadow_Layer1"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer1Dissolve" url="envelopes/Ball_Shadow_Layer1.env" target="Ball_Shadow_Layer1" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer2Motion" url="motions/Ball_Shadow_Layer2.mot" target="Ball_Shadow_Layer2"/>
+        <KeyframeInterpolator name="Ball_Valve_Explode_1_Layer10Motion" url="motions/Ball_Valve_Explode_1_Layer10.mot" target="Ball_Valve_Explode_1_Layer10"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer3Motion" url="motions/Ball_Shadow_Layer3.mot" target="Ball_Shadow_Layer3"/>
+        <KeyframeInterpolator name="Ball_Shadow_Layer3Dissolve" url="envelopes/Ball_Shadow_Layer3.env" target="Ball_Shadow_Layer3" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (1)Motion" url="motions/Line (1).mot" target="Line (1)"/>
+        <KeyframeInterpolator name="Line (1)Dissolve" url="envelopes/Line (1).env" target="Line (1)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (2)Motion" url="motions/Line (2).mot" target="Line (2)"/>
+        <KeyframeInterpolator name="Line (2)Dissolve" url="envelopes/Line (2).env" target="Line (2)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (3)Motion" url="motions/Line (3).mot" target="Line (3)"/>
+        <KeyframeInterpolator name="Line (3)Dissolve" url="envelopes/Line (3).env" target="Line (3)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (4)Motion" url="motions/Line (4).mot" target="Line (4)"/>
+        <KeyframeInterpolator name="Line (4)Dissolve" url="envelopes/Line (4).env" target="Line (4)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (5)Motion" url="motions/Line (5).mot" target="Line (5)"/>
+        <KeyframeInterpolator name="Line (5)Dissolve" url="envelopes/Line (5).env" target="Line (5)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (6)Motion" url="motions/Line (6).mot" target="Line (6)"/>
+        <KeyframeInterpolator name="Line (6)Dissolve" url="envelopes/Line (6).env" target="Line (6)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="HandleNOMotion" url="motions/HandleNO.mot" target="HandleNO"/>
+        <KeyframeInterpolator name="BonnetNOMotion" url="motions/BonnetNO.mot" target="BonnetNO"/>
+        <KeyframeInterpolator name="StemNOMotion" url="motions/StemNO.mot" target="StemNO"/>
+        <KeyframeInterpolator name="BallNOMotion" url="motions/BallNO.mot" target="BallNO"/>
+        <KeyframeInterpolator name="BodyNOMotion" url="motions/BodyNO.mot" target="BodyNO"/>
+        <KeyframeInterpolator name="OutletNOMotion" url="motions/OutletNO.mot" target="OutletNO"/>
+        <KeyframeInterpolator name="InletNOMotion" url="motions/InletNO.mot" target="InletNO"/>
+        <KeyframeInterpolator name="Line (7)Motion" url="motions/Line (7).mot" target="Line (7)"/>
+        <KeyframeInterpolator name="Line (7)Dissolve" url="envelopes/Line (7).env" target="Line (7)" targetConnectionType="dissolve"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>

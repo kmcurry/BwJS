@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<!--<AutoInterpolate duration="2" target="EllisFacilityIsland" dissolve=".5"/>-->
+    <AutoInterpolate duration="2" target="OtherBuildings" dissolve="1"/>
+  <AutoInterpolate duration="2" target="EllisFacilityWalls" dissolve="1"/>
+	<AutoInterpolate duration="2" target="EllisFacility" dissolve="1"/>
+    <AutoInterpolate duration="2" target="ClipSlider">
+        <scrollPosition>17.6</scrollPosition>
+    </AutoInterpolate>
+    <AutoInterpolate duration="2" target="FadeSlider">
+        <scrollPosition>0</scrollPosition>
+    </AutoInterpolate>
+</Update>

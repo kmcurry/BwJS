@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_Alarm2"/>
+	<Label name="Label_Alarm2" renderSequenceSlot="980" text="Emergency Exit Door Opened">
+        <description>
+            <![CDATA[ 
+           <style type="text/css">
+                body
+                {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 11px;
+                }
+                .status
+                {
+                    font-size: medium;
+                    font-weight: bold;
+                    color: #FF0000;
+                }
+            </style>
+            
+            <b><font class="status">ALERT: EMERGENCY EXIT DOOR OPENED</font></b><br />
+    <br />
+    <b>Location: </b>Main Building, Registry Room<br />
+    <br />
+    <b>Door Sensor Installed: </b>May 16, 2002<br /><br />
+   
+    <b>Alarm History: </b><br />
+    July 5, 2010 10:00am - Activated <br />
+    July 5, 2010 11:20am - Activated<br />
+    <a href="http://www.etown.edu/docs/Safety/2010%20Fire%20Alarm%20Log.pdf" target="_blank">...more</a><br /><br />
+        
+    <b>Service Company: </b><br />
+          <a href="http://www.security.honeywell.com/hsc/products/sensor/co/su/21750.html" target="_blank">Honeywell</a><br />
+          Customer Service: 1-800-573-0154<br />
+          Tech Support: 1-800-645-7492<br /><br />
+       
+    <table width="500px">
+        <tr>
+            <td>
+                <b>Checklist: </b><br />
+                <input type="checkbox" name="Checkbox1" id="Checkbox1" value="" />Verify door sensor using cameras
+                <br />
+                <input type="checkbox" name="Checkbox2" id="Checkbox2" enableviewstate="true" value="" />Record suspicious activity
+                <br />
+                <input type="checkbox" name="Checkbox3" id="Checkbox3" enableviewstate="true" value="" />Investigate further as necessary
+                <br />
+               
+            </td>
+        </tr>
+    </table>]]>
+        </description>
+		<position x="-8242043.5" y="13.5884" z="4522996"/>
+    <!--<parent>Heater_BaseInterior</parent>-->
+		<anchor x="0" y="0"/>
+		<styles name="labelStyle">
+			<iconStyle opacity="1">
+				<url>images/symbols/Alert_28x28.png</url>
+				<scale x="1" y="1" z="1"/>
+			</iconStyle>
+			<labelStyle anchor="middleRight">
+				<fontStyle>
+					<size>16</size>
+				</fontStyle>
+			</labelStyle>
+		</styles>
+	</Label>
+</Update>

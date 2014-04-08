@@ -1,0 +1,84 @@
+﻿ConnectionMgr.prototype = new AttributeContainer();
+ConnectionMgr.prototype.constructor = ConnectionMgr;
+
+function ConnectionMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "ConnectionMgr";
+    
+    this.name = new StringAttr("ConnectionMgr");
+    
+    this.registerAttribute(this.name, "name");
+    
+    registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
+}
+
+ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    var lastCamera = inspector.getCamera();
+    if (lastCamera == camera)
+    {
+        // already connected
+        return;
+    }
+    else if (lastCamera)
+    {
+        this.disconnectSceneInspection(inspector, lastCamera);
+    }
+
+    camera.getAttribute("sectorPosition").addTarget(inspector.getAttribute("viewPosition"), eAttrSetOp.Replace, null, true);
+    camera.getAttribute("rotation").addTarget(inspector.getAttribute("viewRotation"), eAttrSetOp.Replace, null, true);
+
+    inspector.getAttribute("resultPosition").addTarget(camera.getAttribute("sectorPosition"), eAttrSetOp.Replace, null, false);
+    inspector.getAttribute("resultRotation").addTarget(camera.getAttribute("rotation"), eAttrSetOp.Replace, null, false);
+    
+    inspector.setCamera(camera);
+}
+
+ConnectionMgr.prototype.disconnectAllTargets = function(source, target)
+{
+    if (source)
+    {
+        var count = source.getAttributeCount();
+        for (var i=0; i < count; i++)
+        {
+            var attribute = source.getAttributeAt(i);
+            if (attribute)
+            {
+                attribute.removeAllTargets();
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    camera.getAttribute("sectorPosition").removeTarget(inspector.getAttribute("viewPosition"));
+    camera.getAttribute("rotation").removeTarget(inspector.getAttribute("viewRotation"));
+    
+    inspector.getAttribute("resultPosition").removeTarget(camera.getAttribute("sectorPosition"));
+    inspector.getAttribute("resultRotation").removeTarget(camera.getAttribute("rotation"));
+    
+    inspector.setCamera(null);
+}
+
+ConnectionMgr.prototype.connectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").addTarget(pme.getAttribute("position"));
+
+    mpc.evaluate();
+}
+
+ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
+}
+

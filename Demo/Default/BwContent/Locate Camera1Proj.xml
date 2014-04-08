@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+    <?bwinclude url="Security Cameras (Add).xml"?>
+    <Remove target="CameraProjector"/>
+    <Set target="NodeMgr" sgPointer="ProjectorIsolator"/>
+    <PerspectiveProjector name="CameraProjector" shadowCaster="false" zoom="3.2" nearDistance=".00001" farDistance="4000" parent="WorldLocationOfScene">
+        <position x="-178.374" y="8.60195" z="-235.776"/>
+        <rotation x="-33.2" y="-43.1" z="0"/>
+        <MediaTexture opacity="1" widthWrap="1" heightWrap="1" imageFilename="images/IndustrialFire.jpg"/>
+    </PerspectiveProjector>
+    <?bwinclude url="View_Facility.xml"?>
+    <AutoInterpolate duration="2" target="Camera">
+        <position x="6087372" y="38.3419" z="2751999.25"/>
+        <rotation x="20" y="-24.8" z="0"/>
+    </AutoInterpolate>
+</Update>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Stop/>
+	<Set target="SceneInspector" evaluate="true"/>
+	<Set target="Camera" nearDistance=".05" farDistance="100000"/>
+	<Locate closeness="2" duration="2" target="Heater_BaseInterior"/>
+	<?bwinclude url="Heat Pump (Show).xml"?>
+	<Remove target="InstructionLabel"/>
+</Update>

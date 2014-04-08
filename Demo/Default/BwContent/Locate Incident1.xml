@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="InteractionScene.xml"?>
+<Update>
+	<Remove target="Label_SecurityCamera"/>
+    <!--<Locate closeness="2.5" duration="2" target="Label_Incident1"/>-->
+    <AutoInterpolate duration="2" target="Camera">
+        <position x="6087441" y="96.5584" z="2752005"/>
+        <rotation x="34.5" y="-78.3" z="0"/>
+    </AutoInterpolate>
+</Update>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Update>
+  <Remove target="Label_SecurityCamera"/>
+  <Set target="SecurityCamera2" show="true"/>
+  <Set target="Label_SecurityCamera2" show="true"/>
+  <AutoInterpolate duration="2" target="EllisFacilityIsland" dissolve="0"/>
+  <AutoInterpolate duration="2" target="OtherBuildings" dissolve="1"/>
+  <AutoInterpolate duration="2" target="EllisFacilityWalls" dissolve="0"/>
+  <AutoInterpolate duration="2" target="EllisFacility" dissolve="1"/>
+  <AutoInterpolate target="Camera">
+    <position x="-8242001" y="13.1042" z="4522989"/>
+    <rotation p="-5" h="-100" b="0"/>
+    <zoom>2</zoom>
+  </AutoInterpolate>
+  <Set target="SecurityCamera2_Image">
+    <show>true</show>
+    <parent>Camera</parent>
+    <dissolve>.5</dissolve>
+    <position x="0" y="0" z="2"/>
+    <rotation p="0" h="0" b="0"/>
+    <selectable>false</selectable>
+  </Set>
+  <Set target="NodeMgr" sgPointer="SecurityCameras"/>
+  <Set target="SecurityCamera2_Image/CameraView/colorTexture0" imageFilename="http://216.54.25.118/axis-cgi/mjpg/video.cgi"/>
+</Update>
+
+
+

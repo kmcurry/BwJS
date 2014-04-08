@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="Security Cameras Image (Hide).xml"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="View_Facility.xml"?>
+<Update>
+	<Remove target="Label_SecurityCamera"/>
+    <Set target="SecurityCamera9" show="true"/>
+    <Set target="Label_SecurityCamera9" show="true"/>
+    <Set target="SecurityCamera9_Image" show="true"/>
+    <Label name="Label_SecurityCamera" renderSequenceSlot="1001" text="AL TAWEELAH CAMERA 9" depthShadingEnabled="false">
+        <rasterPosition x="0" y="256" z="0"/>
+        <styles name="labelStyle">
+            <iconStyle opacity="1">
+                <url>images/IndustrialFire.avi</url>
+            </iconStyle>
+            <labelStyle textAlign="bottomCenter">
+                <fontStyle>
+                    <size>16</size>
+                </fontStyle>
+            </labelStyle>
+        </styles>
+    </Label>
+	<Set target="NodeMgr" sgPointer="SecurityCameras"/>
+	<Locate closeness="3" duration="2" target="SecurityCamera9"/>
+</Update>

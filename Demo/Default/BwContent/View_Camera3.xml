@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?bwinclude url="InteractionCamera.xml"?>
+<Update>
+    <AutoInterpolate postBehavior="1" shape="2" duration="2" target="Camera">
+        <sectorPosition ref="SecurityCamera3/sectorWorldPosition"/>
+        <rotation ref="SecurityCamera3/rotation"/>
+    </AutoInterpolate>
+    <Set target="SecurityCamera3" show="false"/>
+    <!--<Set target="Label_SecurityCamera3" show="false"/>-->
+    <Remove target='Label_SecurityCamera'/>
+    <!--<ConnectAttributes name="Cam3P" numResponses="-1" undoable="false" sourceContainer="Camera" targetContainer="SecurityCamera3_Image">
+        <sourceAttribute>worldPosition</sourceAttribute>
+        <targetAttribute>worldPosition</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes name="Cam3R" numResponses="-1" undoable="false" sourceContainer="Camera" targetContainer="SecurityCamera3_Image">
+        <sourceAttribute>rotation</sourceAttribute>
+        <targetAttribute>rotation</targetAttribute>
+    </ConnectAttributes>
+    <Set target="SecurityCamera3_Image" dissolve=".2"/>-->
+</Update>

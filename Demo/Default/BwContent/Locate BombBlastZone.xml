@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_Incident2"/>
+	<Label name="Label_Incident2" renderSequenceSlot="1000">
+		<rasterPosition x="0" y="102" z="0"/>
+		<styles name="labelStyle">
+			<iconStyle>
+				<url>images/BombBlastLegend.jpg</url>
+			</iconStyle>
+			<!--<labelStyle anchor="bottomCenter">
+				
+				<backgroundColor r="1" g="0" b="0"/>
+				<backgroundOpacity>1</backgroundOpacity>
+				<scale x="1" y="1" z="1"/>
+				<fontStyle>
+					<antialiasType>3</antialiasType>
+					<borderColor r="0" g="0" b="0"/>
+					<color r="1" g="1" b="1"/>
+					<size>16</size>
+					<opacity>1</opacity>
+				</fontStyle>
+			</labelStyle>-->
+		</styles>
+	</Label>
+	<Locate target="Incident2"/>
+</Update>

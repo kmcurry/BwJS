@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Set target="ClipSlider" show="true"/>
+    <Set target="FadeSlider" show="true"/>
+
+  <Remove target="Label_ClipSlider3"/>
+  <Remove target="Label_ClipSlider2"/>
+  <Remove target="Label_ClipSlider1"/>
+  <Label name="Label_ClipSlider1" text="1st">
+    <rasterPosition x="19" y="228" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <backgroundOpacity>.6</backgroundOpacity>
+        <width>18</width>
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_ClipSlider2" text="2nd">
+    <rasterPosition x="19" y="194" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <backgroundOpacity>.6</backgroundOpacity>
+        <width>18</width>
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_ClipSlider3" text="3rd">
+    <rasterPosition x="19" y="168" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <backgroundOpacity>.6</backgroundOpacity>
+        <width>18</width>
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  
+</Update>

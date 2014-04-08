@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+    <Remove target="Person"/>
+    <Remove target="Label_Person"/>
+    <!--<Set target="NodeMgr" sgPointer="Models"/>-->
+    <!--<Model name="Person" url="objects/Person.lwo" parent="WorldLocationOfScene">-->
+    <Model name="Person" url="objects/Person.lwo">
+        <position x="6087310" y="0" z="2752040"/>
+        <rotation x="0" y="0" z="0"/>
+    </Model>
+    <PathTrace name="Trace_Person" sampleRate=".01" maxLength="150" width="3">
+        <color r="1" g="0" b="0"/>
+    </PathTrace>
+    <ConnectAttributes sourceContainer="Person" targetContainer="Trace_Person" sourceAttribute="worldPosition" targetAttribute="pathPosition"/>
+    <!--<Placemark name="Label_Person" text="Person of Interest" parent="Person">
+        <anchor x="32" y="0"/>
+        <styles name="labelStyle">
+            <PlacemarkStyle>
+                <description><![CDATA[xxThe quick brown fox jumped over the lazy dog. <a href="http://www.bridgeborn.com" target="_blank">Bridgeborn</a>]]></description>
+                <balloonTiplabelStyle>
+                    <balloonOffset>100</balloonOffset>
+                    <bgColor r="1" g="1" b="1" a="1"/>
+                </balloonTiplabelStyle>
+            </PlacemarkStyle>
+            <iconStyle opacity="1">
+                <url>images/Comms_PhoneActive.gif</url>
+                <scale x="1" y="1" z="1"/>
+            </iconStyle>
+            <labelStyle anchor="middleRight">
+                <fontStyle>
+                    <size>16</size>
+                </fontStyle>
+            </labelStyle>
+        </styles>
+    </Placemark>-->
+</Update>

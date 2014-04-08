@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+ 
+  <Remove target="Label_Weather7"/>
+  <Remove target="Label_Weather6"/>
+  <Remove target="Label_Weather5"/>
+  <Remove target="Label_Weather4"/>
+  <Remove target="Label_Weather3"/>
+  <Remove target="Label_Weather2"/>
+  <Remove target="Label_Weather1"/>
+  <Remove target="Label_SecurityCamera"/>
+  <Label name="Label_SecurityCamera" renderSequenceSlot="1001" text="CURRENT VIEW [FROM BROOKLYN]" depthShadingEnabled="false">
+    <rasterPosition x="0" y="189" z="0"/>
+    <styles name="labelStyle">
+      <iconStyle opacity="1">
+        <!--<url>http://abclocal.go.com/three/wabc/webcam/brooklyn.jpg</url>-->
+        <!--<url>http://216.54.25.121/axis-cgi/mjpg/video.cgi</url>-->
+        <url>http://images.webcams.travel/webcam/1183482661.jpg</url>
+        <scale x=".6" y=".6" z=".6"/>
+      </iconStyle>
+      <labelStyle textAlign="bottomCenter">
+        <fontStyle>
+          <size>16</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+ 
+  <Label name="Label_Weather1" text="Last Updated N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="24" z="0"/>
+    <styles name="labelStyle">
+        <labelStyle>
+          <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+          <backgroundOpacity>0</backgroundOpacity>
+          
+          <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_Weather2" text="Weather: N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="40" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+        
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+
+  <Label name="Label_Weather3" text="Temperature: N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="56" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+        
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_Weather4" text="Visibility: N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="72" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+        
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+
+  <Label name="Label_Weather5" text="Relative Humidity: N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="88" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+        
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_Weather6" text="Wind: N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="104" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+        
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <Label name="Label_Weather7" text="Wind Direction (degrees): N/A" depthShadingEnabled="false">
+    <rasterPosition x="252" y="120" z="0"/>
+    <styles name="labelStyle">
+      <labelStyle>
+        <!--<backgroundColor r=".5" g=".5" b=".5" a=".5"/>-->
+        <backgroundOpacity>0</backgroundOpacity>
+
+        <fontStyle>
+          <size>12</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <!--<AutoInterpolate target="Fog" density="0.001"/>-->
+</Update>

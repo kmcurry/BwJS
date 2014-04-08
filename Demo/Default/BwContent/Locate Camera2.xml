@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="Security Cameras Image (Hide).xml"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="View_Blg01_Floor02.xml"?>
+<Update>
+  <Remove target="Label_SecurityCamera"/>
+  <Set target="SecurityCamera2" show="true"/>
+  <Set target="Label_SecurityCamera2" show="true"/>
+  <Set target="SecurityCamera2_Image" show="true"/>
+  <Label name="Label_SecurityCamera" renderSequenceSlot="1001" depthShadingEnabled="false">
+    <rasterPosition x="0" y="240" z="0"/>
+    <styles name="labelStyle">
+      <iconStyle>
+        <url>http://216.54.25.118/axis-cgi/mjpg/video.cgi?resolution=320x240</url>
+      </iconStyle>
+    </styles>
+  </Label>
+  <Set target="NodeMgr" sgPointer="SecurityCameras"/>
+  <Set target="SecurityCamera2_Image/CameraView/colorTexture0" imageFilename="http://216.54.25.118/axis-cgi/mjpg/video.cgi"/>
+  <Locate closeness="3" duration="2" target="SecurityCamera2"/>
+</Update>

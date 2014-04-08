@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <?bwinclude url="Security Camera (Initial State).xml"?>
+  <?bwinclude url="InteractionScene.xml"?>
+  <?bwinclude url="View_Facility.xml"?>
+  <AutoInterpolate target="Camera" zoom="3.2" nearDistance=".05" farDistance="100000">
+    <position x="-8241526" y="158" z="4523204"/>
+    <rotation p="14" h="-105" b="0"/>
+  </AutoInterpolate>
+</Update>

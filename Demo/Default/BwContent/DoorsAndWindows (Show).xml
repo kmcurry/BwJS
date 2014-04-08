@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="DoorsAndWindows"/>
+  <Set target="NodeMgr" sgPointer="Models"/>
+	<Model name="DoorsAndWindows" url="objects/DoorAndWindows.lwo" parent="WorldLocationOfScene">
+    <position x="-123.0736" y="3.5" z="83.2428"/>
+    <rotation x="0" y="223" z="0"/>
+	</Model>
+</Update>

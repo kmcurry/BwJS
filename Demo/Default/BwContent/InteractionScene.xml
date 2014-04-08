@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+    <Set target="ObjectInspector" enabled="false"/>
+    <Set target="SceneInspector" enabled="true"/>
+    <Set target="WalkInspector" enabled="false"/>
+    <Set target="Selector" computePivotDistance="true"/>
+    <Set target="Camera" zoom="3.2"/>
+    <!-- re-enable scene inspection pan-z from lens zoom) -->
+    <Remove target="MButton3.Scene"/>
+    <ConnectAttributes name="MButton3.Scene" event="MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>panDelta:2</targetAttribute>
+    </ConnectAttributes>
+    <Remove target="MButtonBoth.Scene"/>
+    <ConnectAttributes name="MButtonBoth.Scene" event="MButton1+MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>invertedTrackDelta:0</targetAttribute>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>invertedTrackDelta:2</targetAttribute>
+    </ConnectAttributes>
+    <!-- re-enable object inspection rotate (disabled in move camera xml) -->
+    <Remove target="MButton1.Object"/>
+    <ConnectAttributes name="MButton1.Object" event="MButton1.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="ObjectInspector">
+        <sourceAttribute>deviceY</sourceAttribute>
+        <targetAttribute>rotationNow:0</targetAttribute>
+        <sourceAttribute>deviceX</sourceAttribute>
+        <targetAttribute>rotationNow:1</targetAttribute>
+    </ConnectAttributes>
+</Update>

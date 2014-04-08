@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+	<Document>
+		<name>Center of Bridgeworks Scene</name>
+		<Style id="sn_Fire_Smoke_ch">
+			<IconStyle>
+				<color>ff0000ff</color>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+				<hotSpot x="25" y="0" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<StyleMap id="msn_Fire_Smoke_ch">
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#sn_Fire_Smoke_ch</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#sh_Fire_Smoke_ch</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id="sh_Fire_Smoke_ch">
+			<IconStyle>
+				<color>ff0000ff</color>
+				<scale>1.2</scale>
+				<Icon>
+					<href>C:/Program Files/Bridgeborn/Bridgeworks/BWSCHOOLS/Facility Security UAE/BwContent/images/Fire_Smoke_ch.png</href>
+				</Icon>
+			</IconStyle>
+			<ListStyle>
+		</ListStyle>
+		</Style>
+		<Placemark>
+			<name>Center of Bridgeworks Scene</name>
+			<LookAt>
+				<longitude>54.68461508913312</longitude>
+				<latitude>24.76589285662869</latitude>
+				<altitude>0</altitude>
+				<range>156.1783648015667</range>
+				<tilt>0</tilt>
+				<heading>-138.2720778010045</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_Fire_Smoke_ch</styleUrl>
+			<Point>
+				<coordinates>54.6847746065438,24.7659940176273,0</coordinates>
+			</Point>
+		</Placemark>
+	</Document>
+</kml>

@@ -1,0 +1,3866 @@
+LWSC
+3
+
+RenderRangeType 0
+FirstFrame 1
+LastFrame 60
+FrameStep 1
+RenderRangeArbitrary 1-60
+PreviewFirstFrame 0
+PreviewLastFrame 121
+PreviewFrameStep 1
+CurrentFrame 121
+FramesPerSecond 30
+Plugin MasterHandler 1 .SceneEditorStandardBanks
+EndPlugin
+Plugin MasterHandler 2 SceneEditor
+VERS 2
+{ CurrentWorkspace
+  Name "<default>"
+  WindowDimensions 1638 295 2bc 12c
+  Divider1 0.5
+  LayoutItemFilterEnabled 0
+  LayoutItemChannelFilterEnabled 0
+  SurfaceFilterEnabled 0
+  SurfaceChannelFilterEnabled 0
+  ChannelFilterEnabled 0
+  { Bank
+    PresetID 5f425042
+    Column 5f425042 0 74
+    Column 5f425042 1 90
+    Column 5f425042 2 90
+    Column 5f425042 3 90
+    Column 5f425042 4 90
+    Column 5f425042 5 90
+    Column 5f425042 6 90
+    Column 5f425042 7 90
+  }
+  { SurfaceListBank
+    PresetID 5f425042
+    Column 5f425042 0 74
+    Column 5f425042 1 90
+    Column 5f425042 2 90
+    Column 5f425042 3 90
+    Column 5f425042 4 90
+    Column 5f425042 5 90
+    Column 5f425042 6 90
+    Column 5f425042 7 90
+  }
+  { ChannelListBank
+    PresetID 5f425042
+    Column 5f425042 0 74
+    Column 5f425042 1 90
+    Column 5f425042 2 90
+    Column 5f425042 3 90
+    Column 5f425042 4 90
+    Column 5f425042 5 90
+    Column 5f425042 6 90
+    Column 5f425042 7 90
+  }
+  BackgroundColorOdd 78 78 78 ff
+  BackgroundColorEven 6f 6f 6f ff
+  HierarchyIndent c
+  HighlightColor b5 b0 a5 ff
+  DefaultObjectColor 60 e0 f0 ff
+  DefaultBoneColor 60 e0 f0 ff
+  DefaultLightColor f0 60 f0 ff
+  DefaultCameraColor 20 e0 20 ff
+  AutoApplyToViewPorts 1
+  MultiselectSimilarTypes 1
+  LimitColorRange 1
+  ColorsAsHSV 0
+  ShowSelectionOrder 1
+  EnvelopeButtonOpensGraphEditor 1
+  ShowRenderExtents 1
+  BlockPeriod 0.033333335
+  BlockWidthMin 3
+  BlockWidthMax c8
+  ShowKeyTicks 1
+  OverrideBlockColors 0
+  BlockKeyColor 99 ae cf ff
+  BlockGroupColor 64 85 b6 ff
+  DSAllowChannelGroupSelection 1
+}
+EndPlugin
+
+LoadObjectLayer 1 objects/9VBattery.lwo
+ShowObject 6 3
+SchematicPosition -0.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.43134901 0 0 0 0 0 0 0 0
+  Key 0.43134901 1 3 0 0 0 0 0 0
+  Key 0.43134901 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.028181614 0 0 0 0 0 0 0 0
+  Key 0.028181614 1 3 0 0 0 0.11116765 0.31429157 0
+  Key 0.44723704 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.0024141271 0 0 0 0 0 0 0 0
+  Key 0.0024141271 1 3 0 0 0 0 0 0
+  Key 0.0024141271 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LockedChannels 5
+PivotPosition 0.431349 0.02818161 0.002414127
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/BatteryClip.lwo
+ShowObject 6 3
+SchematicPosition 0.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.43157429 0 0 0 0 0 0 0 0
+  Key 0.43157429 1 3 0 0 0 0 0 0
+  Key 0.43157429 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.020890204 0 0 0 0 0 0 0 0
+  Key 0.020890204 1 3 0 0 0 0.088580221 0.24012552 0
+  Key 0.34105757 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.0029128618 0 0 0 0 0 0 0 0
+  Key 0.0029128618 1 3 0 0 0 0 0 0
+  Key 0.0029128618 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.4315743 0.0208902 0.002912862
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 1.800000 -1.200000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.34 -4132.228 0
+  Key 0.41760057 4.0333333 3 0 0 0 -495867.34 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.34357694 0 3 0 0 0 0 0 0
+  Key 0.34357694 4 3 0 0 0 -0.31752136 -0.0026460113 0
+  Key 0.02340957 4.0333333 3 0 0 0 -0.31752136 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.03172208 0 3 0 0 0 0 0 0
+  Key 0.03172208 4 3 0 0 0 0 0 0
+  Key 0.03172208 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.47800067 0 3 0 0 0 0 0 0
+  Key 0.47800067 4 3 0 0 0 0 0 0
+  Key 0.47800067 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000001
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/BatteryClipNO.lwo
+ShowObject 6 3
+SchematicPosition 17.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 1.8230383 0 3 0 0 0 0 0 0
+  Key 1.8230383 4 3 0 0 0 0 0 0
+  Key 0.41755494 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.34371847 0 3 0 0 0 0 0 0
+  Key 0.34371847 4 3 0 0 0 0 0 0
+  Key 0.023551101 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 74.339722 0.61949772 0
+  Key 0.23130222 4.0333333 3 0 0 0 74.339722 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 0.004902032
+ParentItem 10000001
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/BlastingCap.lwo
+ShowObject 6 3
+SchematicPosition 1.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0.071148403 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/EFP.lwo
+ShowObject 6 3
+SchematicPosition 2.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0.060026079 0.10303967 0
+  Key 0.13738623 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 8.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.78 -4132.2314 0
+  Key 0 4.0333333 3 0 0 0 -495867.78 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.32161289 0 3 0 0 0 0 0 0
+  Key 0.32161289 4 3 0 0 0 -0.13625081 -0.0011354234 0
+  Key 0.18422666 4.0333333 3 0 0 0 -0.13625081 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.19884482 0 3 0 0 0 0 0 0
+  Key -0.19884482 4 3 0 0 0 0 0 0
+  Key -0.19884482 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.31000039 0 3 0 0 0 0 0 0
+  Key 0.31000039 4 3 0 0 0 0 0 0
+  Key 0.31000039 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000005
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Tape.lwo
+ShowObject 6 3
+SchematicPosition 3.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  2
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  2
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  2
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 2.2 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ObjectDissolve (envelope)
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0.9997223 0
+  Key 1 1 0 0 0 0 0.9997223 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/TerminalBlock.lwo
+ShowObject 6 3
+SchematicPosition 4.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.41967046 0 0 0 0 0 0 0 0
+  Key 0.41967046 1 3 0 0 0 0 0 0
+  Key 0.41967046 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.022500589 0 0 0 0 0 0 0 0
+  Key 0.022500589 1 3 0 0 0 0.047288511 0.071423769 0
+  Key 0.11773229 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.089433022 0 0 0 0 0 0 0 0
+  Key 0.089433022 1 3 0 0 0 0 0 0
+  Key 0.089433022 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.4196705 0.02250059 0.08943302
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Trigger.lwo
+ShowObject 6 3
+SchematicPosition 5.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.39329907 0 0 0 0 0 0 5.8191496e-010 0
+  Key 0.39329907 1 3 0 0 0 1.4551915e-010 0.14397663 0
+  Key 0.5852679 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.029895753 0 0 0 0 0 0 0 0
+  Key 0.029895753 1 3 0 0 0 0 0 0
+  Key 0.029895753 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.15077913 0 0 0 0 0 0 0 0
+  Key 0.15077913 1 3 0 0 0 0.073261514 0 0
+  Key 0.15077913 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.3932991 0.02989575 0.1507791
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Wood.lwo
+ShowObject 6 3
+SchematicPosition 6.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Wires.lwo
+ShowObject 6 3
+SchematicPosition 7.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 0.600000 -0.400000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.78 -4132.2314 0
+  Key -0.00017541961 4.0333333 3 0 0 0 -495867.78 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.039425746 0 3 0 0 0 0 0 0
+  Key 0.039425746 4 3 0 0 0 0 0 0
+  Key 0.039425746 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.19034338 0 3 0 0 0 0 0 0
+  Key -0.19034338 4 3 0 0 0 0 0 0
+  Key -0.19034338 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.47800067 0 3 0 0 0 0 0 0
+  Key 0.47800067 4 3 0 0 0 0 0 0
+  Key 0.47800067 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000004
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 1.200000 -0.800000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.34 -4132.228 0
+  Key 0.41760057 4.0333333 3 0 0 0 -495867.34 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.023114299 0 3 0 0 0 0 0 0
+  Key 0.023114299 4 3 0 0 0 -0.0015502337 -1.2918614e-005 0
+  Key 0.021551147 4.0333333 3 0 0 0 -0.0015502337 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.00099020451 0 3 0 0 0 0 0 0
+  Key -0.00099020451 4 3 0 0 0 0 0 0
+  Key -0.00099020451 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.16200052 0 3 0 0 0 0 0 0
+  Key 0.16200052 4 3 0 0 0 0 0 0
+  Key 0.16200052 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000008
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 2.400000 -1.600000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.34 -4132.228 0
+  Key 0.41760054 4.0333333 3 0 0 0 -495867.34 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.032422248 0 3 0 0 0 0 0 0
+  Key 0.032422248 4 3 0 0 0 -0.0034344152 -2.8620128e-005 0
+  Key 0.028959213 4.0333333 3 0 0 0 -0.0034344152 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.03172208 0 3 0 0 0 0 0 0
+  Key 0.03172208 4 3 0 0 0 0 0 0
+  Key 0.03172208 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.47800067 0 3 0 0 0 0 0 0
+  Key 0.47800067 4 3 0 0 0 0 0 0
+  Key 0.47800067 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000000
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 1.800000 -1.200000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.41 -4132.2285 0
+  Key 0.37770092 4.0333333 3 0 0 0 -495867.41 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.031964868 0 3 0 0 0 0 0 0
+  Key 0.031964868 4 3 0 0 0 0 0 0
+  Key 0.031964868 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.15551335 0 3 0 0 0 0 0 0
+  Key 0.15551335 4 3 0 0 0 -2.9556022e-008 -2.4630017e-010 0
+  Key 0.15551332 4.0333333 3 0 0 0 -2.9556022e-008 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.47800067 0 3 0 0 0 0 0 0
+  Key 0.47800067 4 3 0 0 0 0 0 0
+  Key 0.47800067 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000009
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 2.400000 -1.600000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.59 -4132.23 0
+  Key 0.18154885 4.0333333 3 0 0 0 -495867.59 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key -0.047511917 0 3 0 0 0 0 0 0
+  Key -0.047511917 4 3 0 0 0 0 0 0
+  Key -0.047511917 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.17898639 0 3 0 0 0 0 0 0
+  Key -0.17898639 4 3 0 0 0 0 0 0
+  Key -0.17898639 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key -0.35604721 0 3 0 0 0 0 0 0
+  Key -0.35604721 4 3 0 0 0 0 0 0
+  Key -0.35604721 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.47800067 0 3 0 0 0 0 0 0
+  Key 0.47800067 4 3 0 0 0 0 0 0
+  Key 0.47800067 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LockedChannels 48
+PivotPosition 0 0 -0.1972527
+ParentItem 1000000b
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 3.000000 -2.000000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.59 -4132.23 0
+  Key 0.18154885 4.0333333 3 0 0 0 -495867.59 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key -0.047511917 0 3 0 0 0 0 0 0
+  Key -0.047511917 4 3 0 0 0 0 0 0
+  Key -0.047511917 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.17898639 0 3 0 0 0 0 0 0
+  Key -0.17898639 4 3 0 0 0 0 0 0
+  Key -0.17898639 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0.16057026 0 3 0 0 0 0 0 0
+  Key 0.16057026 4 3 0 0 0 0 0 0
+  Key 0.16057026 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1.0539993 0 3 0 0 0 0 0 0
+  Key 1.0539993 4 3 0 0 0 0 0 0
+  Key 1.0539993 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.57200015 0 3 0 0 0 0 0 0
+  Key 0.57200015 4 3 0 0 0 0 0 0
+  Key 0.57200015 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LockedChannels 48
+PivotPosition 0 0 -0.1972527
+ParentItem 1000000b
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/9VBatteryNO.lwo
+ShowObject 6 3
+SchematicPosition 16.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 1.6615651 0 3 0 0 0 0 0 0
+  Key 1.6615651 4 3 0 0 0 0 0 0
+  Key 0.41741133 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.44795662 0 3 0 0 0 0 0 0
+  Key 0.44795662 4 3 0 0 0 0 0 0
+  Key 0.028901188 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 74.339706 0.61949754 0
+  Key 0.23011412 4.0333333 3 0 0 0 74.339706 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 0.004596076
+ParentItem 10000000
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/BlastingCapNO.lwo
+ShowObject 6 3
+SchematicPosition 18.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 2.1338823 0 3 0 0 0 0 0 0
+  Key 2.1338823 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.086538233 0 3 0 0 0 0 0 0
+  Key 0.086538233 4 3 0 0 0 0 0 0
+  Key 0.039349981 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 73.134254 0.60945207 0
+  Key -0.20078531 4.0333333 3 0 0 0 73.134254 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.005124225
+ParentItem 10000004
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/EFPNO.lwo
+ShowObject 6 3
+SchematicPosition 19.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 2.2937088 0 3 0 0 0 0 0 0
+  Key 2.2937088 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.38709566 0 3 0 0 0 0 0 0
+  Key 0.38709566 4 3 0 0 0 0 0 0
+  Key 0.18471429 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 74.339737 0.61949784 0
+  Key -0.21064021 4.0333333 3 0 0 0 74.339737 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.005228879
+ParentItem 10000005
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/TerminalBlockNO.lwo
+ShowObject 6 3
+SchematicPosition 20.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 2.3402448 0 3 0 0 0 0 0 0
+  Key 2.3402448 4 3 0 0 0 0 0 0
+  Key 0.41785499 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.21090493 0 3 0 0 0 0 0 0
+  Key 0.21090493 4 3 0 0 0 0 0 0
+  Key 0.021750882 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 74.138847 0.61782372 0
+  Key -0.011060059 4.0333333 3 0 0 0 74.138847 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.005196011
+ParentItem 10000008
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/TriggerNO.lwo
+ShowObject 6 3
+SchematicPosition 21.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 1.9668082 0 3 0 0 0 0 0 0
+  Key 1.9668082 4 3 0 0 0 0 0 0
+  Key 0.37782782 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.03200984 0 3 0 0 0 0 0 0
+  Key 0.03200984 4 3 0 0 0 0 0 0
+  Key 0.03200984 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 73.736984 0.61447483 0
+  Key 0.35441646 4.0333333 3 0 0 0 73.736984 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 0.004961814
+ParentItem 10000009
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/WiresNO.lwo
+ShowObject 6 3
+SchematicPosition 22.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 2.2016134 0 3 0 0 0 0 0 0
+  Key 2.2016134 4 3 0 0 0 0 0 0
+  Key 0.18189278 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key -0.047749888 0 3 0 0 0 0 0 0
+  Key -0.047749888 4 3 0 0 0 0 0 0
+  Key -0.047749888 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 73.350975 0.61125815 0
+  Key -0.18990926 4.0333333 3 0 0 0 73.350975 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.005063673
+ParentItem 1000000b
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/TripWire.lwo
+ShowObject 6 3
+SchematicPosition 23.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.27811891 0 3 0 0 0 0 0 0
+  Key 0.27811891 1 3 0 0 0 0 0 0
+  Key 0.27811891 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.053977668 0 3 0 0 0 0 0 0
+  Key 0.053977668 1 3 0 0 0 -2.910383e-011 0 0
+  Key 0.053977668 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.19431958 0 3 0 0 0 0 0 0
+  Key 0.19431958 1 3 0 0 0 0.10714278 0.24809104 0
+  Key 0.52510762 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.2781189 0.05397767 0.1943196
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+SchematicPosition 1.800000 -1.200000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 -495867.5 -4132.229 0
+  Key 0.27871066 4.0333333 3 0 0 0 -495867.5 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.037825122 0 3 0 0 0 0 0 0
+  Key 0.037825122 4 3 0 0 0 0 0 0
+  Key 0.037825122 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.22244252 0 3 0 0 0 0 0 0
+  Key 0.22244252 4 3 0 0 0 -0.0027110113 -2.2591761e-005 0
+  Key 0.21970892 4.0333333 3 0 0 0 -0.0027110113 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.3325792 0 3 0 0 0 0 0 0
+  Key 0.3325792 4 3 0 0 0 0.001409645 1.1747041e-005 0
+  Key 0.33400059 4.0333333 3 0 0 0 0.001409645 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.1972527
+ParentItem 10000018
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/TripWireNO.lwo
+ShowObject 6 3
+SchematicPosition 25.500000 -0.250000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 1.891506 0 3 0 0 0 0 0 0
+  Key 1.891506 4 3 0 0 0 0 0 0
+  Key 0.27959421 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.037723735 0 3 0 0 0 0 0 0
+  Key 0.037723735 4 3 0 0 0 0 0 0
+  Key 0.037723735 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 3 0 0 0 0 0 0
+  Key -1000000 4 3 0 0 0 75.377518 0.62814599 0
+  Key 0.36136955 4.0333333 3 0 0 0 75.377518 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 3 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 0.005036558
+ParentItem 10000018
+ObjectDissolve 1
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Shadow_EFP.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.19233696 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.04995586 0 0 0 0 0 0 -0.02199791 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key -0.027177915 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 0.63199973 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 0.59599996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 0.59599996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.5024921 0 0.486485
+ObjectDissolve (envelope)
+{ Envelope
+  2
+  Key 0.5 1 0 0 0 0 0 0.49986115 0
+  Key 1 2 0 0 0 0 0.49986115 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Jumper.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 0.41310817 0 3 0 0 0 0 2.3276599e-010 0
+  Key 0.41310817 1 3 0 0 0 5.8207661e-011 0 0
+  Key 0.41310817 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.050938018 0 3 0 0 0 0 0 0
+  Key 0.050938018 1 3 0 0 0 0.043365046 0.13009514 0
+  Key 0.22439821 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.089387 0 3 0 0 0 0 0 0
+  Key 0.089387 1 3 0 0 0 0 0 0
+  Key 0.089387 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 1 3 0 0 0 0 0 0
+  Key 1 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0.4131082 0.05093802 0.089387
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/JumperNO.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 1.8915 0 0 0 0 0 0 0 0
+  Key 1.8915 4 0 0 0 0 -1.467209 0 0
+  Key 0.41206425 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.038478449 0 0 0 0 0 0 0 0
+  Key 0.038478449 4 0 0 0 0 0 2.4052751e-013 0
+  Key 0.038478449 4.0333333 0 0 0 0 2.9101827e-011 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -1000000 0 0 0 0 0 0 0 0
+  Key -1000000 4 0 0 0 0 991735.5 0 0
+  Key -0.01726751 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 4 0 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 4 0 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 0 0 0 0 0 0 0
+  Key 0 4 0 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 4 0 0 0 0 0 0 0
+  Key 1 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 4 0 0 0 0 0 0 0
+  Key 1 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 1 0 0 0 0 0 0 0 0
+  Key 1 4 0 0 0 0 0 0 0
+  Key 1 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 -0.005063835
+ParentItem 1000001c
+ObjectDissolve 1
+ShadowOptions 0
+
+LoadObjectLayer 1 objects/Line.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  3
+  Key 500000 0 3 0 0 0 0 0 0
+  Key 500000 4 3 0 0 0 0 0 0
+  Key 0.41260296 4.0333333 0 0 0 0 -495867.38 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.038596883 0 3 0 0 0 0 0 0
+  Key 0.038596883 4 3 0 0 0 0 0 0
+  Key 0.038596883 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key 0.077633612 0 3 0 0 0 0 0 0
+  Key 0.077633612 4 3 0 0 0 0 0 0
+  Key 0.076764934 4.0333333 0 0 0 0 -0.00086149893 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 4 3 0 0 0 0 0 0
+  Key 0 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 0 0 0
+  Key 1 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  3
+  Key 0.21400052 0 3 0 0 0 0 0 0
+  Key 0.21400052 4 3 0 0 0 0 0 0
+  Key 0.21400052 4.0333333 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+PivotPosition 0 0 0.1977069
+ParentItem 1000001c
+ObjectDissolve (envelope)
+{ Envelope
+  3
+  Key 1 0 3 0 0 0 0 0 0
+  Key 1 4 3 0 0 0 -0.99173552 -0.0082644625 0
+  Key 0 4.0333333 3 0 0 0 -0.99173552 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Webcam.lwo
+ShowObject 7 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.43738434 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.19228791 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 1.0278397 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0.011429671 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key -0.011582234 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key -0.0014167754 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LockedChannels 24
+ParentItem 30000000
+ObjectDissolve (envelope)
+{ Envelope
+  2
+  Key 0 0 0 0 0 0 0 0.49996528 0
+  Key 0.5 4 0 0 0 0 0.49996528 0 0
+  Behaviors 1 1
+}
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Map.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin.lwo
+ShowObject 6 3
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key -0.1788054 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.28799996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin.lwo
+ShowObject 6 3
+SchematicPosition 0.600000 -0.400000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.13967001 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.10559995 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin.lwo
+ShowObject 6 3
+SchematicPosition 1.200000 -0.800000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.081670053 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.21660008 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.00093294261 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin.lwo
+ShowObject 6 3
+SchematicPosition 1.800000 -1.200000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key -0.069359735 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.23260008 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.00093294261 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin.lwo
+ShowObject 6 3
+SchematicPosition 2.400000 -1.600000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key -0.064151905 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.3062 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.00093294261 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 1.200000 -0.800000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.13967001 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.33588612 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 1.800000 -1.200000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.17685431 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.30008996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 2.400000 -1.600000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.20291777 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.33986348 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 3.000000 -2.000000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.21402526 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.28418055 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 3.600000 -2.400000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.26868358 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.22452027 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+LoadObjectLayer 1 objects/Push Pin (Blue).lwo
+ShowObject 6 3
+SchematicPosition 4.200000 -2.800000
+ObjectMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.23599519 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.38425496 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key 0.001315933 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ShadowOptions 7
+
+AmbientColor 1 1 1
+AmbientIntensity 0.15
+
+AddLight
+LightName Light
+ShowLight 1 5
+SchematicPosition -0.500000 0.250000
+LightMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 2.9869561 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 0.63100731 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key -2.1534982 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key -0.98960298 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0.15533422 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key -0.015708102 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LightColor 1 1 1
+LightIntensity 0.5
+AffectCaustics 1
+LightType 1
+ShadowType 1
+ShadowColor 0 0 0
+
+AddLight
+LightName Light
+ShowLight 1 5
+SchematicPosition 0.100000 -0.150000
+LightMotion
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key -0.98713481 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key 15.571004 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key -8.1177387 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key -0.1884965 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0.83426648 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key -0.015708102 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 1 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+
+LightColor 1 1 1
+LightIntensity 0.9
+AffectCaustics 1
+LightType 1
+ShadowType 1
+ShadowColor 0 0 0
+
+AddCamera
+CameraName Camera
+ShowCamera 1 2
+SchematicPosition -0.500000 0.750000
+CameraMotion
+NumChannels 6
+Channel 0
+{ Envelope
+  3
+  Key 0.91820937 0 3 0 0 0 0 0 0
+  Key 0.91820937 1 3 0 0 0 0.062893137 0.11177064 0
+  Key 1.0672369 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  3
+  Key 0.55679947 0 3 0 0 0 0 0 0
+  Key 0.55679947 1 3 0 0 0 0.07099998 0.12375064 0
+  Key 0.72180033 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  3
+  Key -0.67779046 0 3 0 0 0 0 0 0
+  Key -0.67779046 1 3 0 0 0 -0.061611325 -0.058038577 0
+  Key -0.75517523 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  3
+  Key -0.76445436 0 3 0 0 0 0 0 0
+  Key -0.76445436 1 3 0 0 0 0 0 0
+  Key -0.76445436 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  3
+  Key 0.47472998 0 3 0 0 0 0 0 0
+  Key 0.47472998 1 3 0 0 0 0 0 0
+  Key 0.47472998 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  3
+  Key 0 0 3 0 0 0 0 0 0
+  Key 0 1 3 0 0 0 0 0 0
+  Key 0 4 0 1 0 0 0 0 0
+  Behaviors 1 1
+}
+
+ZoomFactor 3.2
+ResolutionMultiplier 1.0
+FrameSize 640 480
+PixelAspect 1
+MaskPosition 0 0 640 480
+MotionBlur 0
+FieldRendering 0
+
+ApertureHeight 0.015
+Antialiasing 0
+AntiAliasingLevel -1
+ReconstructionFilter 0
+AdaptiveSampling 0
+
+BGImage
+{ Clip
+  { Still
+    "images/Background.jpg"
+  }
+  Flags 80
+}
+SolidBackdrop 1
+BackdropColor 1 1 1
+ZenithColor 0 0.1569 0.3137
+SkyColor 0.4706 0.7059 0.9412
+GroundColor 0.1961 0.1569 0.1176
+NadirColor 0.3922 0.3137 0.2353
+FogType 0
+FogMinDistance 0
+FogMaxDistance 1
+FogMinAmount 0
+FogMaxAmount 1
+FogColor 0.5098 0.5098 0.549
+BackdropFog 0
+DitherIntensity 1
+AnimatedDither 0
+
+RenderMode 2
+RayTraceEffects 0
+DepthBufferAA 0
+RayRecursionLimit 16
+RayTraceOptimization 1
+DataOverlayLabel  
+SaveRGB 0
+SaveAlpha 0
+
+ViewConfiguration 0
+DefineView 0
+ViewType 9
+ViewAimpoint 0.3717587 0.135 -0.1901886
+ViewZoomFactor 3.204281
+
+GridNumber 0
+GridSize 0.2
+CameraViewBG 0
+ShowMotionPath 1
+ShowFogRadius 0
+ShowFogEffect 1
+ShowSafeAreas 1
+ShowFieldChart 1
+OverlayColor_fv 0 0 0
+
+CurrentObject 43
+CurrentLight 1
+CurrentCamera 0
+GraphEditorData
+{ GraphEd_Favorites
+}
+{ GE_Expression_Lib
+  1
+}
+ImageEditorData
+NumberOfClips 26
+Clip 0
+{ ClipObject
+  "Pin.jpg"
+  128
+  0
+}
+Clip 1
+{ ClipObject
+  "9VBattery.jpg"
+  128
+  0
+}
+Clip 2
+{ ClipObject
+  "9VBattery_Face.jpg"
+  128
+  0
+}
+Clip 3
+{ ClipObject
+  "Black_Plastic.jpg"
+  128
+  0
+}
+Clip 4
+{ ClipObject
+  "Can_Lid.jpg"
+  128
+  0
+}
+Clip 5
+{ ClipObject
+  "Can_Bottom.jpg"
+  128
+  0
+}
+Clip 6
+{ ClipObject
+  "Can_Side.jpg"
+  128
+  0
+}
+Clip 7
+{ ClipObject
+  "Can_Lid_Spec_Map.jpg"
+  128
+  0
+}
+Clip 8
+{ ClipObject
+  "Can_Side_Map_Spec.jpg"
+  128
+  0
+}
+Clip 9
+{ ClipObject
+  "Can_Bottom_Spec_Map.jpg"
+  128
+  0
+}
+Clip 10
+{ ClipObject
+  "Electrical-Tape.jpg"
+  128
+  0
+}
+Clip 11
+{ ClipObject
+  "Electrical-Tape_Spec_Map.jpg"
+  128
+  0
+}
+Clip 12
+{ ClipObject
+  "Red_Positive.jpg"
+  128
+  0
+}
+Clip 13
+{ ClipObject
+  "Trigger.jpg"
+  128
+  0
+}
+Clip 14
+{ ClipObject
+  "wood.jpg"
+  128
+  0
+}
+Clip 15
+{ ClipObject
+  "wood_Spec_Map.jpg"
+  128
+  0
+}
+Clip 16
+{ ClipObject
+  "Wires_Taped.jpg"
+  128
+  0
+}
+Clip 17
+{ ClipObject
+  "Spool_Top.jpg"
+  128
+  0
+}
+Clip 18
+{ ClipObject
+  "String.jpg"
+  128
+  0
+}
+Clip 19
+{ ClipObject
+  "Cardboard.jpg"
+  128
+  0
+}
+Clip 20
+{ ClipObject
+  "String_Spec_Map.jpg"
+  128
+  0
+}
+Clip 21
+{ ClipObject
+  "Spool_Top_Spec_Map.jpg"
+  128
+  0
+}
+Clip 22
+{ ClipObject
+  "EFP_IED_Shadow.jpg"
+  128
+  0
+}
+Clip 23
+{ ClipObject
+  "Hummer_UV.jpg"
+  128
+  0
+}
+Clip 24
+{ ClipObject
+  "map.jpg"
+  128
+  0
+}
+Clip 25
+{ ClipObject
+  "Background.jpg"
+  128
+  0
+}

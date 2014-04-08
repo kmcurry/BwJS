@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Remove target="Label_Alarm1"/>
+	<Label name="Label_Alarm1" renderSequenceSlot="980" text="Heat Pump Power Failure">
+        <description>
+            <![CDATA[ 
+            
+            <style type="text/css">
+                body
+                {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 11px;
+                }
+                .status
+                {
+                    font-size: medium;
+                    font-weight: bold;
+                    color: #FF0000;
+                }
+            </style>
+            <b><font class="status">ALERT: POWER FAILURE</font></b><br />
+            <br />
+            <b>Location: </b>Main Building, NW Roof Top<br />
+            <br />
+            <b>Installed: </b>June 23, 1995<br />
+            <b>Warranty/Maintenance Contract: </b>EXPIRED June 23, 2000 <a href="http://www.energystar.gov/ia/business/servicecontracts.pdf" target="_blank">(Click to View)</a><br /><br />
+            <b>Service History: </b><br />
+            July 5, 2002 - General Inspection<br />
+            May 8, 2009 - Condenser Replaced<br /><br />
+        
+            <b>Service Company: </b><br />
+                  <a href="http://www.airmaxairconditioning.com/" target="_blank">AIRMAX Heating/Air Conditioning Corp.</a><br />
+                  73 Spring Street, New York, NY 10012<br />
+                  (212) 343-0336 (Phone) * (212) 343-0295 (Fax) <br /><br />
+       
+            <table width="500px">
+                <tr>
+                    <td>
+                        <b>Troubleshooting: </b><br />
+                        <input type="checkbox" name="Checkbox1" id="Checkbox1" value="" />Verify Main Breaker Switch is ON
+                        <br />
+                        <input type="checkbox" name="Checkbox2" id="Checkbox2" enableviewstate="true" value="" />Verify Local Breaker Switch is ON
+                        <br />
+                        <input type="checkbox" name="Checkbox3" id="Checkbox3" enableviewstate="true" value="" />Reset Thermostat
+                        <br />
+                        <input type="checkbox" name="Checkbox4" id="Checkbox4" enableviewstate="true" value="" />Contact HVAC Service if Required
+                        <br />
+                    </td>
+                </tr>
+            </table>  
+    ]]>
+        </description>
+		<!--<position x="-8242074" y="24.6" z="4523055"/>-->
+    <parent>Heater_BaseInterior</parent>
+		<anchor x="32" y="0"/>
+		<styles name="labelStyle">
+			<iconStyle opacity="1">
+				<url>images/symbols/Alert_28x28.png</url>
+				<scale x="1" y="1" z="1"/>
+			</iconStyle>
+			<labelStyle anchor="middleRight">
+				<fontStyle>
+					<size>16</size>
+				</fontStyle>
+			</labelStyle>
+		</styles>
+	</Label>
+</Update>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bwinclude url="InteractionScene.xml"?>
+<?bwinclude url="View_Blg01_Floor03.xml"?>
+<Update>
+  <Remove target="Label_SecurityCamera"/>
+  <Set target="SecurityCamera8" show="true"/>
+  <Set target="Label_SecurityCamera8" show="true"/>
+  <Set target="SecurityCamera8_Image" show="true"/>
+  <Label name="Label_SecurityCamera" renderSequenceSlot="1001" text="REGISTRY ROOM [CAMERA 8]" depthShadingEnabled="false">
+    <rasterPosition x="0" y="225" z="0"/>
+    <styles name="labelStyle">
+      <iconStyle opacity="1">
+        <url>images/Camera8.jpg</url>
+        <scale x=".5" y=".5" z=".5"/>
+      </iconStyle>
+      <labelStyle textAlign="bottomCenter">
+        <fontStyle>
+          <size>16</size>
+        </fontStyle>
+      </labelStyle>
+    </styles>
+  </Label>
+  <AutoInterpolate duration="2" target="Camera">
+    <sectorPosition x="-524" y="-136.9344" z="-169"/>
+    <rotation x="18" y="-187.5" z="0"/>
+  </AutoInterpolate>
+  <!--<Locate closeness="1.5" duration="2" target="SecurityCamera8"/>-->
+</Update>

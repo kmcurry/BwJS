@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Update>
+  <Remove target="Label_SecurityCamera"/>
+ 
+  <AutoInterpolate target="Camera">
+  
+    <zoom>6</zoom>
+  </AutoInterpolate>
+  <Set target="SecurityCamera8_Image">
+    <show>true</show>
+    <parent>Camera</parent>
+    <dissolve>.3</dissolve>
+    <position x="0" y="0" z="0"/>
+    <rotation p="0" h="0" b="0"/>
+    <scale x="0" y="0" z="13"/>
+    <selectable>false</selectable>
+  </Set>
+  <Set target="NodeMgr" sgPointer="SecurityCameras"/>
+ <Set target="SecurityCamera8_Image/CameraView/colorTexture0" imageFilename="images/Camera8.jpg"/>
+  <Set target="Selector" computePivotDistance="false"/>
+  <Set target="SceneInspector">
+  <pivotDistance>0</pivotDistance>
+  <rotationSensitivity x=".1" y=".1" z=".1"/>
+  </Set>
+</Update>
+
+
+

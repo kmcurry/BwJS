@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw?>
+<?bwinclude url="scenes/SS_All_Objects_DistLight.lws"?>
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+	<!-- Customize default preferences for this content-->
+	<ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+	<Set target="SceneInspector" pivotDistance="35"/>
+	<Set target="RenderDirective">
+		<backgroundColor r="0.5" g="0.5" b="1"/>
+	</Set>
+</Session>
+

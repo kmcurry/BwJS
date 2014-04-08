@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>ESA - iStudy - Ball Valve</title>
+        <link rel="STYLESHEET" type="text/css" href="UI/styles/style.css"/>
+	    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+	    <script type="text/javascript" src="UI/scripts/Bridgeworks.js"></script>
+	    <script type="text/javascript" src="UI/scripts/dvdcontrols.js"></script>
+	    <script type="text/javascript">
+	        var BWorks;
+			var g_mode = "";
+			var PRINCIPLES_OF_OPERATION = "Principles of Operation";
+			var MAJOR_COMPONENTS = "Major Components";
+			
+			function init()
+	        {
+	            BWorks = new BridgeWorksObject();
+				BWorks.sceneControl = Bridgeworks;
+
+				updatePage("Principles of Operation");
+	        }
+
+	        function updateDivDisplay(strPOODiv, strMCDiv, strSCBDiv)
+            {
+                // Displays Details div associated with current mode
+                document.getElementById("PrinciplesOfOperation_DetailsDiv").style.display = strPOODiv;
+	            document.getElementById("MajorComponents_DetailsDiv").style.display = strMCDiv;
+	            document.getElementById("SceneControlButtonsDiv").style.display = strSCBDiv;
+
+	            // Highlights button of current mode by displaying corresponding Options div
+	            document.getElementById("Options1").style.display = strPOODiv;
+	            document.getElementById("Options2").style.display = strMCDiv;
+            }
+
+			function showHideFastForwardAndRewindButton(strShowHide)
+            {   
+                if (document.getElementById) 
+		        {    
+                    document.getElementById('button_rewind').style.visibility = strShowHide; 
+                    document.getElementById('button_fastForward').style.visibility = strShowHide;
+                } 
+            }    
+			
+			function updatePage(mode)
+			{
+			    window.status = '';
+			    
+			    if(mode == PRINCIPLES_OF_OPERATION)
+			    {
+			        g_mode = mode;
+
+			        document.getElementById("bannerText").innerHTML = "Ball Valve - Principles of Operation";
+			        updateDivDisplay('block', 'none', 'block');
+			        showHideFastForwardAndRewindButton('visible');
+
+			        Bridgeworks.UpdateScene("Load_Lightwave_Scene.xml");
+
+					Bridgeworks.SendMessage("stop");
+			        document.getElementById("button_playPause").src = 'UI/images/button_play.gif';
+			        BWorks.isPaused = true;
+			    }
+			    else if (mode == MAJOR_COMPONENTS)
+			    {
+			        g_mode = mode;
+
+			        document.getElementById("bannerText").innerHTML = "Ball Valve - Major Components";
+			        updateDivDisplay('none', 'block', 'block');
+			        showHideFastForwardAndRewindButton('hidden');
+
+			        Bridgeworks.UpdateScene("Load_Lightwave_Scene_Explode.xml");
+
+			        Bridgeworks.SendMessage("stop");
+			        document.getElementById("button_playPause").src = 'UI/images/button_play.gif';
+			        BWorks.isPaused = true;
+			    }
+			    else
+			    {
+			        g_mode = "none";
+
+			        document.getElementById("BannerText").innerHTML = "Invalid mode selected";
+			        updateDivDisplay('none', 'none', 'none');
+
+			        Bridgeworks.UpdateScene("Load_Lightwave_Scene.xml");
+			    }
+			}
+
+			function submit(value)
+			{
+			    if(value > 90)
+			    {
+			        alert("The ball valve actuator handle will turn only 90º\nPlease submit a number between 0 and 90.");
+			    }
+			    else
+			    {
+			        alert("You entered " + value);
+			    }
+			}
+                        
+                        function checkWindowSize()
+                        {
+                            var WIDTH = Scene.offsetWidth;
+                            var HEIGHT = Scene.offsetHeight;
+
+                            if (WIDTH != document.getElementById("Bridgeworks").width ||
+                                HEIGHT != document.getElementById("Bridgeworks").height)
+                            {
+                                resize();
+                            }
+                        }
+
+                        function resize()
+                        {
+                            var WIDTH = Scene.offsetWidth;
+                            var HEIGHT = Scene.offsetHeight;
+
+                            document.getElementById("Bridgeworks").width = WIDTH;
+                            document.getElementById("Bridgeworks").height = HEIGHT;
+
+                            Bridgeworks.SetWindowSize(WIDTH, HEIGHT);
+                        }
+	    </script>
+    </head>
+    <body onload="init(); resize(); setInterval('checkWindowSize()', 50);" class="body">
+        <div id="logo"><img src="UI/images/logo.gif" alt="ESA Logo"/></div>
+        <div id="Banner">
+             <table>
+                <tr>
+                    <td height="40" id="bannerText" style="vertical-align:middle;">Loading...</td>
+                </tr>
+             </table>
+        </div>
+        <!-- Highlights Principles of Operation Button -->
+        <div id="Options1" class="Options" style="display:block;">
+            <h3>Options:</h3>
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="center">
+                        <input type="button" id="operationButton" class="input_button_over" style="cursor:default;" value="Principles of Operation" title="Investigate the principles of operation" />
+                        <input type="button" id="majorComponentsButton" class="input_button" onclick="updatePage(this.value);" onmouseover="this.className='input_button_over';" onmouseout="this.className='input_button';" value="Major Components" title="Investigate the major components" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!-- Highlights Major Components Button -->
+        <div id="Options2" class="Options" style="display:none;">
+            <h3>Options:</h3>
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="center">
+                        <input type="button" id="operationButton1" class="input_button" onclick="updatePage(this.value);" onmouseover="this.className='input_button_over';" onmouseout="this.className='input_button';" value="Principles of Operation" title="Investigate the principles of operation" />
+                        <input type="button" id="majorComponentsButton1" class="input_button_over" style="cursor:default;" value="Major Components" title="Investigate the major components" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="Scene">
+            <script type="text/javascript">
+	              createObject('BwContent/', 668, 550);
+            </script>
+            <noscript>Browser doesn't support JavaScript!</noscript>
+        </div>
+        <div id="PrinciplesOfOperation_DetailsDiv" class="Details" style="display:none;">
+            <h3>Principles of Operation:</h3>
+            <ul class="compact">
+                <li><b>Key Features</b>
+                    <ul class="subUlCompact">
+                        <li>Starts, stops, or throttles fluid flow <span style="font-weight:100; color:#888888;">&#8226;</span> Has limited throttling characteristics</li>
+                        <li>Works on disk rotation</li>
+                        <li>Disk is ball-shaped and has a passage through its center</li>
+                        <li>Provides tight sealing with low torque</li>
+                        <li>Is inexpensive, compact, easy to operate, and requires little maintenance</li>
+                    </ul>
+                </li>
+                <li><b>How It Works</b>
+                    <ol style="margin-left:20px;">
+                        <li>Fluid flows through valve <span style="font-weight:100; color:#888888;">&#8226;</span> Valve is open when passage aligns with inlet and outlet <span style="font-weight:100; color:#888888;">&#8226;</span> Handle aligns with passage indicating position of opening</li>
+                        <li>As handle moves, stops limit rotation to 90º and prevent over-rotation <span style="font-weight:100; color:#888888;">&#8226;</span> Valve is closed when handle and passage are perpendicular to inlet and outlet</li>
+                        <li>Valve is closed <span style="font-weight:100; color:#888888;">&#8226;</span> Flow is stopped</li>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+        <div id="MajorComponents_DetailsDiv" class="Details" style="display:none;">
+            <h3>Major Components:</h3>
+            <ul class="compact">
+                <li><b>Body</b>
+                    <ul class="subUlCompact">
+                        <li>Provides framework for components</li>
+                    </ul>
+                </li>
+                <li><b>Bonnet</b>
+                    <ul class="subUlCompact">
+                        <li>Bonnet cap fastens to body</li>
+                        <li>Holds stem and ball-disk in place</li>
+                    </ul>
+                </li>
+                <li><b>Disk (Ball)</b>
+                    <ul class="subUlCompact">
+                        <li>Usually metallic</li>
+                        <li>Rotates as stem turns</li>
+                    </ul>
+                </li>
+                <li><b>Stem</b>
+                    <ul class="subUlCompact">
+                        <li>Normally not fastened to ball</li>
+                        <li>Connects to ball by coupling</li>
+                    </ul>
+                </li>
+                <!--<li><b>Seat</b>
+                    <ul class="subUlCompact">
+                        <li>Made of elastometric materials</li>
+                        <li>Material chosen for compatibility</li>
+                    </ul>
+                </li>-->
+                <li><b>Actuator (Handle)</b>
+                    <ul class="subUlCompact">
+                        <li>Operates stem and disk assembly</li>
+                    </ul>
+                </li>
+                <!--<li><b>Packing</b>
+                    <ul class="subUlCompact">
+                        <li>Seals surface along stem</li>
+                        <li>Is usually O-rings</li>
+                        <li>Is normally of Teflon material</li>
+                    </ul>
+                </li>-->
+            </ul>
+        </div>
+        <div id="SceneControlButtonsDiv" class="SceneControlButtons">
+	        <table border="0" cellpadding="0" cellspacing="0">
+		        <tr>
+			        <td>
+			            <!--REWIND BUTTON--><img class="DVDbutton" id="button_rewind" onmouseover="src='UI/images/button_rw_over.gif';" onmouseout="src='UI/images/button_rw.gif'" onmousedown="src='UI/images/button_rw_on.gif'" onmouseup="DVD_Rewind();src='UI/images/button_rw_over.gif';" src="UI/images/button_rw.gif" width="28" height="29" alt="Rewind" /><!--STOP BUTTON--><img class="DVDbutton" id="button_stop" onmouseover="src='UI/images/button_stop_over.gif';" onmouseout="src='UI/images/button_stop.gif';" onmousedown="src='UI/images/button_stop_on.gif';" onmouseup="DVD_Stop();src='UI/images/button_stop_over.gif';" src="UI/images/button_stop.gif" width="27" height="29" alt="Stop" /><!--PLAY/PAUSE BUTTON--><img class="DVDbutton" id="button_playPause" onmouseover="DVD_CheckPlayPauseButtonState(this, event);" onmouseout="DVD_CheckPlayPauseButtonState(this, event);" onmousedown="DVD_CheckPlayPauseButtonState(this, event);" onmouseup="DVD_PlayPause(this);" src="UI/images/button_play.gif" width="26" height="29" alt="Pause" /><!--FFWD BUTTON--><img class="DVDbutton" id="button_fastForward" onmouseover="src='UI/images/button_ff_over.gif';" onmouseout="src='UI/images/button_ff.gif'" onmousedown="src='UI/images/button_ff_on.gif'" onmouseup="DVD_FastForward();src='UI/images/button_ff_over.gif';" src="UI/images/button_ff.gif" width="30" height="29" alt="Fast Forward" />
+			        </td>
+		        </tr>
+	        </table>
+        </div>
+        <script type="text/javascript" language="JavaScript">
+			function setLabelText(strLabel, strText)
+			{
+			    Bridgeworks.UpdateScene("<Set target='" + strLabel + "' text='" + strText + "'/>");
+			}
+
+			var g_msgDom = new ActiveXObject("Microsoft.XMLDOM");
+			g_msgDom.async = false;
+
+			function Bridgeworks::ReceiveMessage(msg)
+			{
+				g_msgDom.loadXML(msg);
+				var smGet = g_msgDom.documentElement.selectSingleNode("/Message").attributes.getNamedItem("get");
+
+				if (smGet)
+				{
+				    if(smGet.value == "Step1")
+				    {
+				        setLabelText('ScriptLabel', '1.	Fluid flows through valve');
+				    }
+				    else if(smGet.value == "Step2")
+				    {
+				        setLabelText('ScriptLabel', '2.	Handle is turned 90 degrees');
+				    }
+				    else if(smGet.value == "Step3")
+				    {
+				        setLabelText('ScriptLabel', '3.	Flow is stopped');
+				    }
+				    else if(smGet.value == "Step4") // ANIMATION END
+				    {
+				        // Provide scene status in status bar
+				        window.status = "Animation End.  Press Stop followed by the Play button to restart animation sequence.";
+
+				        // Update the scene instructions and clear the dvd button status label
+				        setLabelText('ScriptLabel', 'End of Animation.  Press stop then play to restart sequence.');
+				        setLabelText('DVDStatusLabel', '');
+
+			            // Synch. PlayPause button
+			            document.getElementById("button_playPause").src = 'UI/images/button_play.gif';
+				        BWorks.isPaused = "true";
+				    }
+				    else if(smGet.value == "ShowPartLabels")
+				    {
+				        Bridgeworks.UpdateScene("Label_Major_Components.xml");
+
+				        // Provide scene status in status bar
+				        window.status = "Animation End.  Press Stop followed by the Play button to restart animation sequence.";
+
+				        // Update the scene instructions and clear the dvd button status label
+				        setLabelText('ScriptLabel', 'End of Animation.  Press stop then play to restart sequence.');
+				        setLabelText('DVDStatusLabel', '');
+
+				        // Synch. PlayPause button
+	                    document.getElementById("button_playPause").src = 'UI/images/button_play.gif';
+	                    BWorks.isPaused = "true";
+				    }
+				    else
+				    {
+				        window.status = '';
+				    }
+				}
+			}
+		</script>
+		<noscript>Browser doesn't support JavaScript</noscript>
+    </body>
+</html>

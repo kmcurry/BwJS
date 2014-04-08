@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Set target="Heater_BaseInterior" dissolve="1"/>
+	<Set target="Heater_DuctFlange" dissolve="1"/>
+	<Set target="Heater_Fan" dissolve="1"/>
+	<Set target="Heater_FanMotor" dissolve="1"/>
+	<Set target="Heater_guard" dissolve="1"/>
+	<Set target="Heater_screws" dissolve="1"/>
+	<Set target="Heater_Shell" dissolve="1"/>
+	<Set target="Heater_SideCover" dissolve="1"/>
+	<Set target="Heater_Top" dissolve="1"/>
+	<Set target="Heater_FrontCover" dissolve="1"/>
+	<Set target="Heater_DuctFlange-screws" dissolve="1"/>
+	<Set target="Heater_Fan-nut" dissolve="1"/>
+</Update>

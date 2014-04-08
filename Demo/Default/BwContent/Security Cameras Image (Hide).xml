@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+    <Set target="SecurityCamera1_Image" show="false"/>
+    <Set target="SecurityCamera2_Image" show="false"/>
+    <Set target="SecurityCamera3_Image" show="false"/>
+    <Set target="SecurityCamera4_Image" show="false"/>
+    <Set target="SecurityCamera5_Image" show="false"/>
+    <Set target="SecurityCamera6_Image" show="false"/>
+    <Set target="SecurityCamera7_Image" show="false"/>
+    <Set target="SecurityCamera8_Image" show="false"/>
+</Update>

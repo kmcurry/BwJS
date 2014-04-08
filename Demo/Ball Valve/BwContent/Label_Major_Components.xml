@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+	<Group name="MajorComponentLabels">
+		<!-- LABEL MAJOR COMPONENTS OF A BALL VALVE -->
+		<!-- CREATE BONNET LABEL -->
+		<Remove target="BonnetLabel"/>
+        <Label name="BonnetLabel" parent="BonnetNO">
+            <labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+            <text>Bonnet</text>
+        </Label>
+		<!-- CREATE BODY LABEL -->
+		<Remove target="BodyLabel"/>
+        <Label name="BodyLabel" parent="BodyNO" text="Body">
+            <labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+            <text>Body</text>
+        </Label>
+		<!-- CREATE STEM LABEL -->
+		<Remove target="StemLabel"/>
+        <Label name="StemLabel" parent="StemNO">
+            <labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+            <text>Stem</text>
+        </Label>
+		<!-- CREATE HANDLE LABEL -->
+		<Remove target="HandleLabel"/>
+        <Label name="HandleLabel" parent="HandleNO">
+            <labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+            <text>Actuator (Handle)</text>
+        </Label>
+		<!-- CREATE BALL LABEL -->
+		<Remove target="BallLabel"/>
+		<Label name="BallLabel" parent="BallNO">
+			<labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+			<text>Ball</text>
+		</Label>
+		<!-- CREATE INLET LABEL -->
+		<Remove target="InletLabel"/>
+		<Label name="InletLabel" parent="InletNO">
+			<labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+			<text>Inlet</text>
+		</Label>
+		<!-- CREATE OUTLET LABEL -->
+		<Remove target="OutletLabel"/>
+		<Label name="OutletLabel" parent="OutletNO">
+			<labelStyle>
+                <fontStyle>
+                    <size>10</size>
+                    <color r=".59" g=".17" b=".07"/>
+                </fontStyle>
+            </labelStyle>
+			<text>Outlet</text>
+		</Label>
+	</Group>
+</Update>

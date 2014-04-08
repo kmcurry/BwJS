@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Update>
+  <Set target="Group_Smoke" enabled="false"/>
+</Update>

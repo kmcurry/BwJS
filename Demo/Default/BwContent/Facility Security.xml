@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<!--<?bwplugin url="BBOGL11Engine" action="load"?>-->
+<?bwinclude url="DefaultPreferencesFS.xml"?>
+<Scene>
+  <Isolator name="Root" isolateFog="true">
+    <Selector name="Cameras">
+      <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".1" farDistance="10000">
+        <!--<geoPosition lon="54.684775" alt="100" lat="24.765994"/>-->
+        <position x="-8241526" y="158" z="4523204"/>
+        <rotation p="14" h="-105" b="0"/>
+      </PerspectiveCamera>
+    </Selector>
+    <Group name="Lights">
+      <DirectionalLight name="Light">
+        <position x="-1100.8" y="6975.7" z="-7000"/>
+        <rotation x="34" y="8.00007" z="0"/>
+        <ambient r="0.398431" g="0.393726" b="0.381176"/>
+        <diffuse r="0.996078" g="0.984314" b="0.952941"/>
+        <specular r="0.996078" g="0.984314" b="0.952941"/>
+      </DirectionalLight>
+    </Group>
+    <Group name="Effects">
+      <Fog name="Fog">
+        <mode>4</mode>
+        <color r=".9" g=".9" b=".9"/>
+        <start>.5</start>
+        <end>1</end>
+        <density>0</density>
+      </Fog>
+    </Group>
+    <Group name="Models">
+      <NullObject name="WorldLocationOfScene">
+        <geoPosition lon="-74.038240" alt="0" lat="40.698367"/>
+      </NullObject>
+      <Isolator name="PivotConeIsolator" isolateRenderModes="true">
+        <RenderMode depthTestEnabled="false"/>
+      </Isolator>
+      <Isolator name="ProjectorIsolator" isolateTextures="true">
+        <PerspectiveProjector name="PerspectiveProjector" zoom="3.2" nearDistance=".00001" farDistance="4000">
+          <position x="0" y="0" z="0"/>
+          <rotation p="0" h="0" r="0"/>
+          <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
+        </PerspectiveProjector>
+        <PerspectiveProjector name="CameraProjector" shadowCaster="false" zoom="-4.2" aspectRatio="2" nearDistance=".001" farDistance="4" parent="WorldLocationOfScene" enabled="false">
+          <position x="0" y="0" z="0"/>
+          <rotation x="0" y="0" z="0"/>
+          <MediaTexture name="CameraFeed" opacity="1" widthWrap="1" heightWrap="1" imageFilename="images/camera1.jpg" alphaFilename="images/CameraAlpha2.bmp"/>
+        </PerspectiveProjector>
+        <!--<Model name="EllisTerrain" url="objects/EllisTerrain.lwo" parent="WorldLocationOfScene">
+          <rotation x="0" y="233" z="0"/>
+        </Model>-->
+        <Model name="OtherBuildings" url="objects/OtherBuildings.lwo" parent="WorldLocationOfScene">
+          <position x="-228.2578" y="-1.5" z="23.6269"/>
+          <rotation x="0" y="223" z="0"/>
+        </Model>
+        <Model name="EllisFacilityIsland" url="objects/EllisFacilityIsland.lwo" parent="WorldLocationOfScene">
+          <position x="0" y="0" z="0"/>
+          <rotation x="0" y="223" z="0"/>
+        </Model>
+        <Model name="Flag" url="objects/Flag.lwo" parent="WorldLocationOfScene">
+          <position x="-12.0361" y="3.0177" z="10.9734"/>
+          <rotation x="0" y="0" z="0"/>
+        </Model>
+        <Model dissolve="1" name="EllisFacility-basement" url="objects/EllisFacility-basement.lwo" parent="WorldLocationOfScene">
+          <position x="-123.0736" y="3.5" z="83.2428"/>
+          <rotation x="0" y="223" z="0"/>
+        </Model>
+        <Isolator name="ClipPlaneIsolator" isolateClipPlanes="true">
+          <ClipPlane name="ClipPlane" parent="WorldLocationOfScene">
+            <position x="-170.559" y="45" z="-190.319"/>
+            <rotation x="90" y="0" z="0"/>
+          </ClipPlane>
+          <Model name="EllisFacility" url="objects/EllisFacility.lwo" parent="WorldLocationOfScene">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <!--<Model name="EllisFacility_1" url="objects/EllisFacility_1.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacility_2" url="objects/EllisFacility_2.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacility_3" url="objects/EllisFacility_3.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>-->
+          <Model name="EllisFacilityWalls" url="objects/EllisFacilityWalls.lwo" parent="WorldLocationOfScene" selectable="true">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="ExitLines" url="objects/ExitLines.lwo" dissolve="1" parent="WorldLocationOfScene">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model name="EllisFacilityFloors" url="objects/EllisFacilityFloors.lwo" parent="WorldLocationOfScene">
+            <position x="-123.0736" y="3.5" z="83.2428"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <Model dissolve="1" name="Heater_BaseInterior" url="objects/Heater_BaseInterior.lwo">
+            <position x="-8242083" y="22.9" z="4523056"/>
+            <rotation x="0" y="223" z="0"/>
+          </Model>
+          <!--<Model dissolve="0" name="Sky2" url="objects/Sky2.lwo"/>-->
+          <Model dissolve="1" name="Heater_DuctFlange" url="objects/Heater_DuctFlange.lwo" parent="Heater_BaseInterior">
+            <position x="0.0545" y="0.05" z="-0.05"/>
+            <pivot x="0.0545" y="0.05" z="-0.05"/>
+          </Model>
+          <Model dissolve="1" name="Heater_Fan" url="objects/Heater_Fan.lwo" parent="Heater_BaseInterior">
+            <position x="-0.0118" y="0.0766" z="0.026"/>
+            <pivot x="-0.0118" y="0.0766" z="0.026"/>
+          </Model>
+          <Model dissolve="1" name="Heater_FanMotor" url="objects/Heater_FanMotor.lwo" parent="Heater_BaseInterior">
+            <position x="-0.0125" y="0.091" z="0.026"/>
+            <pivot x="-0.0125" y="0.091" z="0.026"/>
+          </Model>
+          <Model dissolve="1" name="Heater_guard" url="objects/Heater_guard.lwo" parent="Heater_BaseInterior">
+            <position x="-0.012" y="0.094" z="0.026"/>
+            <pivot x="-0.012" y="0.094" z="0.026"/>
+          </Model>
+          <Model dissolve="1" name="Heater_screws" url="objects/Heater_screws.lwo" parent="Heater_BaseInterior">
+            <position x="-0.0116" y="0.094" z="0.0257"/>
+            <pivot x="-0.0116" y="0.094" z="0.0257"/>
+          </Model>
+          <Model dissolve="1" name="Heater_Shell" url="objects/Heater_Shell.lwo" parent="Heater_BaseInterior">
+            <position x="0" y="0.052" z="-0.004"/>
+            <pivot x="0" y="0.052" z="-0.004"/>
+          </Model>
+          <Model dissolve="1" name="Heater_SideCover" url="objects/Heater_SideCover.lwo" parent="Heater_BaseInterior">
+            <position x="0.003" y="0.054" z="-0.072"/>
+            <pivot x="0.003" y="0.054" z="-0.072"/>
+          </Model>
+          <Model dissolve="1" name="Heater_Top" url="objects/Heater_Top.lwo" parent="Heater_BaseInterior">
+            <position x="0" y="0.09" z="0"/>
+            <pivot x="0" y="0.09" z="0"/>
+          </Model>
+          <Model dissolve="1" name="Heater_FrontCover" url="objects/Heater_FrontCover.lwo" parent="Heater_BaseInterior"/>
+          <Model dissolve="1" name="Heater_DuctFlange-screws" url="objects/Heater_DuctFlange-screws.lwo" parent="Heater_BaseInterior">
+            <position x="0.05" y="0.052" z="-0.05"/>
+            <pivot x="0.05" y="0.052" z="-0.05"/>
+          </Model>
+          <Model dissolve="1" name="Heater_Fan-nut" url="objects/Heater_Fan-nut.lwo" parent="Heater_BaseInterior">
+            <position x="-0.012" y="0.074" z="0.0258"/>
+            <pivot x="-0.012" y="0.074" z="0.0258"/>
+          </Model>
+        </Isolator>
+        <Group name="Group_Smoke" proxyChildAttrs="true" enabled="false">
+          <Group name="Group_Smoke_1" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_1" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_1" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_1" target0="Camera" observer="Smoke_1" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_1/dissolve=1" numResponses="-1" target="Smoke_1">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_1" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_1" targetContainer="VE_Smoke_1" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_1" targetContainer="Smoke_1" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_2" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_2" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_2" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_2" target0="Camera" observer="Smoke_2" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_2/dissolve=1" numResponses="-1" target="Smoke_2">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_2" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_2" targetContainer="VE_Smoke_2" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_2" targetContainer="Smoke_2" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_3" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_3" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_3" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_3" target0="Camera" observer="Smoke_3" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_3/dissolve=1" numResponses="-1" target="Smoke_3">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_3" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_3" targetContainer="VE_Smoke_3" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_3" targetContainer="Smoke_3" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_4" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_4" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_4" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_4" target0="Camera" observer="Smoke_4" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_4/dissolve=1" numResponses="-1" target="Smoke_4">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_4" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_4" targetContainer="VE_Smoke_4" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_4" targetContainer="Smoke_4" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_5" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_5" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_5" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_5" target0="Camera" observer="Smoke_5" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_5/dissolve=1" numResponses="-1" target="Smoke_5">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_5" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_5" targetContainer="VE_Smoke_5" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_5" targetContainer="Smoke_5" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_6" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_6" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_6" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_6" target0="Camera" observer="Smoke_6" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_6/dissolve=1" numResponses="-1" target="Smoke_6">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_6" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_6" targetContainer="VE_Smoke_6" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_6" targetContainer="Smoke_6" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_7" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_7" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_7" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_7" target0="Camera" observer="Smoke_7" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_7/dissolve=1" numResponses="-1" target="Smoke_7">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_7" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_7" targetContainer="VE_Smoke_7" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_7" targetContainer="Smoke_7" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_8" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_8" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_8" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_8" target0="Camera" observer="Smoke_8" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_8/dissolve=1" numResponses="-1" target="Smoke_8">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_8" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_8" targetContainer="VE_Smoke_8" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_8" targetContainer="Smoke_8" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_9" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_9" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_9" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_9" target0="Camera" observer="Smoke_9" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_9/dissolve=1" numResponses="-1" target="Smoke_9">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_9" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_9" targetContainer="VE_Smoke_9" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_9" targetContainer="Smoke_9" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+          <Group name="Group_Smoke_10" proxyChildAttrs="true">
+            <Model dissolve="0" name="Smoke_10" url="objects/Smoke5.lwo">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+              <scale x="0" y="0" z="0"/>
+            </Model>
+            <VelocityEffector name="VE_Smoke_10" enabled="false">
+              <linearVelocity x="0" y="5" z="0"/>
+            </VelocityEffector>
+            <TargetObserver name="TO_Smoke_10" target0="Camera" observer="Smoke_10" affectPitch="true" affectHeading="true"/>
+            <Set trigger="Smoke_10/dissolve=1" numResponses="-1" target="Smoke_10">
+              <geoPosition lon="-74.0398" alt="24.4905" lat="40.7002"/>
+            </Set>
+            <ConnectAttributes sourceContainer="RenderAgent" targetContainer="VE_Smoke_10" persist="true">
+              <sourceAttribute>timeIncrement</sourceAttribute>
+              <targetAttribute>elapsedTime</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="Smoke_10" targetContainer="VE_Smoke_10" persist="true">
+              <sourceAttribute>position</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+            <ConnectAttributes sourceContainer="VE_Smoke_10" targetContainer="Smoke_10" persist="true">
+              <sourceAttribute>resultPosition</sourceAttribute>
+              <targetAttribute>position</targetAttribute>
+            </ConnectAttributes>
+          </Group>
+        </Group>
+      </Isolator>
+    </Group>
+    <Group name="Sliders">
+      <ScrollBarLabel name="ClipSlider" show="false">
+        <rasterPosition x="0" y="0"/>
+        <styles>
+          <scrollBarLabelStyle>
+            <length>300</length>
+            <maxPosition>1.5</maxPosition>
+            <minPosition>45</minPosition>
+            <orientation>0</orientation>
+            <tickDelta>.2</tickDelta>
+          </scrollBarLabelStyle>
+        </styles>
+        <scrollPosition>45</scrollPosition>
+      </ScrollBarLabel>
+      <ScrollBarLabel name="FadeSlider" show="false">
+        <rasterPosition x="0" y="320"/>
+        <styles>
+          <scrollBarLabelStyle>
+            <length>300</length>
+            <maxPosition>1</maxPosition>
+            <minPosition>0</minPosition>
+            <orientation>0</orientation>
+            <tickDelta>0.0050</tickDelta>
+          </scrollBarLabelStyle>
+        </styles>
+        <scrollPosition>1</scrollPosition>
+      </ScrollBarLabel>
+    </Group>
+  </Isolator>
+  <!--<MapProjectionCalculator name="MapProjectionCalculator" mapProjection="equalarc" units="meters">
+    <center2d centerLon="54.684775" centerLat="24.765994"/>
+  </MapProjectionCalculator>-->
+  <RenderDirective name="RenderDirective" antialiasType="2" antialiasWaitTimeMs="100"/>
+  <Animations/>
+  <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+  <ConnectOutputs targetContainer="Camera" sourceContainer="WalkSimulator" connectionType="walkSimulation"/>
+  <Set target="WalkSimulator">
+    <linearSensitivity x="0.5" y="0.1" z="0.5"/>
+    <angularSensitivity x ="1" y="1" z="1"/>
+  </Set>
+  <CommandSequence name="OnEnableWalkSimulation" numResponses="-1" undoable="false">
+    <event>VK_W</event>
+    <event>EnableWalkSimulation</event>
+    <AutoInterpolate renderAndRelease="false" target="Camera">
+      <position x="-8242051" y="13.2693" z="4523026.5"/>
+      <rotation x="-1.3" y="-192.7999" z="0"/>
+      <zoom>3</zoom>
+    </AutoInterpolate>
+  </CommandSequence>
+  <Set target="Selector" computePivotDistance="true"/>
+  <Set target="Light" parent="WorldLocationOfScene"/>
+  <!--<?bwinclude url="./CameraPositionRotation_Display.xml"?>-->
+  <?bwinclude url="./SectorTest_UpdateSectorOrigin.xml"?>
+  <?bwinclude url="./SendMessage.xml"?>
+  <!--<?bwinclude url="./Alarm2 (Show).xml"?>-->
+  <?bwinclude url="./SecurityCameras (Add).xml"?>
+  <AppendNode parent="PivotConeIsolator" child="pivotCone"/>
+  <ConnectAttributes source="SceneInspector/pivotPointWorld" target="pivotCone/sectorPosition"/>
+  <Set target="pivotCone" screenScaleEnabled="true"/>
+  <ConnectAttributes sourceContainer="ClipPlane" targetContainer="ClipPlaneModel" persist="true">
+    <sourceAttribute>position:1</sourceAttribute>
+    <targetAttribute>position:1</targetAttribute>
+  </ConnectAttributes>
+  <ConnectAttributes sourceContainer="FadeSlider" targetContainer="EllisFacilityWalls" persist="true">
+    <sourceAttribute>scrollPosition</sourceAttribute>
+    <targetAttribute>dissolve</targetAttribute>
+  </ConnectAttributes>
+  <ConnectAttributes sourceContainer="ClipSlider" targetContainer="ClipPlane" persist="true">
+    <sourceAttribute>scrollPosition</sourceAttribute>
+    <targetAttribute>position:1</targetAttribute>
+  </ConnectAttributes>
+  <?bwinclude url="Smoke (Hide).xml"?>
+  <?bwinclude url="./SetThreadModel_App_Build_Render.xml"?>
+  <?bwinclude url="data/Ellis Island Locators.kml"?>
+</Scene>

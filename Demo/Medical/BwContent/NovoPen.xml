@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="0.05" farDistance="500">
+                <position x="-0.944843" y="0.365" z="-0.660977"/>
+                <rotation x="20" y="65" z="0"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.2" g="0.2" b="0.2"/>
+            </GlobalIllumination>
+            <PointLight name="Light" range="3.40282e+038" parent="Camera">
+                <position x="-4.11762" y="4.71677" z="-3.36293"/>
+                <rotation x="31.0869" y="4.6253" z="-2.11181"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="1" g="1" b="1"/>
+                <specular r="1" g="1" b="1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="innovo_cartridge_holder" url="objects/innovo_cartridge_holder.lwo">
+                <position x="0" y="-0.01" z="-0.125"/>
+                <rotation x="0" y="0" z="78.5"/>
+                <pivot x="0" y="-0.01" z="-0.125"/>
+            </Model>
+            <Model name="norvopen_bottom" url="objects/norvopen_bottom.lwo">
+                <position x="0" y="-0.01" z="-0.42"/>
+                <rotation x="0" y="0" z="80"/>
+                <pivot x="0" y="-0.01" z="-0.42"/>
+            </Model>
+            <Model name="Novo_rod" url="objects/Novo_rod.lwo">
+                <position x="0" y="-0.009" z="-0.211"/>
+                <pivot x="0" y="-0.009" z="-0.211"/>
+            </Model>
+            <Model name="Novo_rod-dial" url="objects/Novo_rod-dial.lwo">
+                <position x="0" y="-0.009" z="-0.248"/>
+                <pivot x="0" y="-0.009" z="-0.248"/>
+            </Model>
+            <Model name="Novopen_top1" url="objects/Novopen_top1.lwo">
+                <position x="0" y="-0.01" z="-0.05843"/>
+                <rotation x="0" y="0" z="80"/>
+                <pivot x="0" y="-0.01" z="-0.065"/>
+            </Model>
+            <Model name="novo_cartridge_insulin" url="objects/novo_cartridge_insulin.lwo" parent="innovo_cartridge_holder">
+                <position x="0" y="-0.01" z="-0.11"/>
+                <pivot x="0" y="-0.01" z="-0.11"/>
+            </Model>
+            <Model name="Norvo_bottom_dial" url="objects/Norvo_bottom_dial.lwo" parent="norvopen_bottom">
+                <position x="0" y="-0.01" z="-0.515"/>
+                <rotation x="0" y="0" z="-80"/>
+                <pivot x="0" y="-0.01" z="-0.515"/>
+            </Model>
+            <Model name="Norvo_bottom_thumb-piece" url="objects/Norvo_bottom_thumb-piece.lwo" parent="norvopen_bottom">
+                <position x="0" y="-0.01" z="-0.558"/>
+                <rotation x="0" y="0" z="-80"/>
+                <pivot x="0" y="-0.01" z="-0.558"/>
+            </Model>
+            <Model name="Norvo_needle_cap" url="objects/Norvo_needle_cap.lwo" parent="innovo_cartridge_holder">
+                <position x="0" y="-0.01" z="0.135"/>
+                <pivot x="0" y="-0.01" z="0.135"/>
+            </Model>
+            <Model name="norvopen_needle_plastic" url="objects/norvopen_needle_plastic.lwo" parent="innovo_cartridge_holder">
+                <position x="0" y="-0.01" z="0.085"/>
+                <pivot x="0" y="-0.01" z="0.085"/>
+            </Model>
+            <Model name="Novo_plastic_cap" url="objects/Novo_plastic_cap.lwo" parent="innovo_cartridge_holder"/>
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/white.png"/>
+    <Animations>
+        <KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+        <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+        <KeyframeInterpolator name="innovo_cartridge_holderMotion" url="motions/innovo_cartridge_holder.mot" target="innovo_cartridge_holder"/>
+        <KeyframeInterpolator name="norvopen_bottomMotion" url="motions/norvopen_bottom.mot" target="norvopen_bottom"/>
+        <KeyframeInterpolator name="Novo_rodMotion" url="motions/Novo_rod.mot" target="Novo_rod"/>
+        <KeyframeInterpolator name="Novo_rod-dialMotion" url="motions/Novo_rod-dial.mot" target="Novo_rod-dial"/>
+        <KeyframeInterpolator name="Novopen_top1Motion" url="motions/Novopen_top1.mot" target="Novopen_top1"/>
+        <KeyframeInterpolator name="novo_cartridge_insulinMotion" url="motions/novo_cartridge_insulin.mot" target="novo_cartridge_insulin"/>
+        <KeyframeInterpolator name="Norvo_bottom_dialMotion" url="motions/Norvo_bottom_dial.mot" target="Norvo_bottom_dial"/>
+        <KeyframeInterpolator name="Norvo_bottom_thumb-pieceMotion" url="motions/Norvo_bottom_thumb-piece.mot" target="Norvo_bottom_thumb-piece"/>
+        <KeyframeInterpolator name="Norvo_needle_capMotion" url="motions/Norvo_needle_cap.mot" target="Norvo_needle_cap"/>
+        <KeyframeInterpolator name="norvopen_needle_plasticMotion" url="motions/norvopen_needle_plastic.mot" target="norvopen_needle_plastic"/>
+        <KeyframeInterpolator name="Novo_plastic_capMotion" url="motions/Novo_plastic_cap.mot" target="Novo_plastic_cap"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>
