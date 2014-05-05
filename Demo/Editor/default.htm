@@ -238,10 +238,18 @@
               switch(e.type) {
                 case "mousedown": {
                     capture = true;
+                    if (e.shiftKey) {
+                        console.debug("SHIFTY");
+                        bridgeworks.updateScene("ObjectInspection.xml");
+                    }
                 }
                     break;
                 case "mouseup":
                     capture = false;
+                    if (!e.shiftKey) {
+                        console.debug("NOT SHIFTY");
+                        bridgeworks.updateScene("SceneInspection.xml");
+                    }
                     break;
                 case "click": {
                     if (!e.metaKey && !e.ctrlKey) {
@@ -262,6 +270,7 @@
                             
                         }
                     }
+                    
                     capture = false;
                 }
                 break;
@@ -325,17 +334,7 @@
                 <input id="objectname"/><button onclick="locate();">Locate</button>
                     <button onclick="showHome();">Home</button>
                     <br/>
-                    <!--
-                    
-                    <button onclick="bridgeworks.updateScene('ObjectInspection.xml');">Move Objects</button>
-                    <button onclick="bridgeworks.updateScene('SceneInspection.xml');">Move Camera</button>
-                    
-                        <button onclick="showTop();">Top</button>
-                        <button onclick="showBottom();">Bottom</button>
-                        <button onclick="showLeft();">Left</button>
-                        <button onclick="showRight();">Right</button>
-                        -->
-                    <!-- <a href="javascript:showHelp();">Instructions</a> -->
+
                     <br/>
                     <button onclick="bridgeworks.renderController.pause();">Pause</button>
                     <button onclick="bridgeworks.renderController.play();">Play</button>
@@ -422,7 +421,7 @@
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
                 
-                bridgeworks = init("grid-100.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("grid.xml", document.getElementById("BwContainer"));
                 
                 listLibrary();
                 

@@ -1,5 +1,5 @@
 SerializeCommand.prototype = new Command();
-SerializeCommand.prototype.constructor = SerializeCommand();
+SerializeCommand.prototype.constructor = SerializeCommand;
 
 
 function SerializeCommand()

@@ -4,7 +4,7 @@
 <Scene>
     <Isolator name="Root">
         <Selector name="Cameras">
-            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="0.1" farDistance="10000">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="0.1" farDistance="1000000">
                 <position x="4.5" y="1.5" z="-4.5"/>
                 <rotation x="15" y="-45" z="0"/>
             </PerspectiveCamera>
