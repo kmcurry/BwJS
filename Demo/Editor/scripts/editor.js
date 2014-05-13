@@ -13,7 +13,7 @@ function cut()
 {
     if (selectedModel) {
         var name = selectedModel.name.getValueDirect().join("");
-        var c = "\<Remove target='" + name + "'/>"
+        var c = "\<Remove target='" + name + "'/>";
         bridgeworks.updateScene(c);
         
         var panel = document.getElementById("panel-curr-scene");
@@ -33,11 +33,11 @@ function listLibrary()
     listDirectory(url + "Buildings/objects/", panel);
     listDirectory(url + "Vehicles/objects/", panel);
     
-    url = document.location.href + "/../../Entymology/BwContent/"
-    listDirectory(url + "objects/", panel);
+   // url = document.location.href + "/../../Entymology/BwContent/"
+   // listDirectory(url + "objects/", panel);
     
-    url = document.location.href + "/../../Paleontology/BwContent/"
-    listDirectory(url + "objects/", panel);
+   // url = document.location.href + "/../../Paleontology/BwContent/"
+   // listDirectory(url + "objects/", panel);
     
     panel = document.getElementById("panel-lib-motions");
     
