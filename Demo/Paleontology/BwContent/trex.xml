@@ -6,7 +6,7 @@
     <Isolator name="Root">
         <Selector name="Cameras">
             <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="200" farDistance="2e+006">
-                <position x="5529.15" y="3062.99" z="-3245.19"/>
+                <position x="32" y="0" z="-30"/>
                 <rotation x="18.1" y="-64.1001" z="0"/>
             </PerspectiveCamera>
         </Selector>
@@ -37,4 +37,21 @@
         <KeyframeInterpolator name="trex_shadowMotion" url="motions/trex_shadow.mot" target="trex_shadow"/>
     </Animations>
     <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+    <!--<Placemark name="Label_trex" text="Trex of Interest" parent="trex">
+        <anchor x="32" y="0" z = "0"/>
+        <styles name="labelStyle">
+            <PlacemarkStyle>
+                <balloonTiplabelStyle>
+                    <balloonOffset>100</balloonOffset>
+                    <bgColor r="1" g="1" b="1" a="1"/>
+                    <text>Hello World</text>
+                </balloonTiplabelStyle>
+            </PlacemarkStyle>
+            <labelStyle anchor="middleRight">
+                <fontStyle>
+                    <size>16</size>
+                </fontStyle>
+            </labelStyle>
+        </styles>
+    </Placemark>-->
 </Scene>

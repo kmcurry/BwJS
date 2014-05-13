@@ -12,7 +12,7 @@
         <color r="1" g="0" b="0"/>
     </PathTrace>
     <ConnectAttributes sourceContainer="Person" targetContainer="Trace_Person" sourceAttribute="worldPosition" targetAttribute="pathPosition"/>
-    <!--<Placemark name="Label_Person" text="Person of Interest" parent="Person">
+    <Placemark name="Label_Person" text="Person of Interest" parent="Person">
         <anchor x="32" y="0"/>
         <styles name="labelStyle">
             <PlacemarkStyle>
@@ -32,5 +32,5 @@
                 </fontStyle>
             </labelStyle>
         </styles>
-    </Placemark>-->
+    </Placemark>
 </Update>

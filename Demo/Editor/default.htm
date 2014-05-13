@@ -40,6 +40,7 @@
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglRC.js"></script>
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglVB.js"></script>
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglTO.js"></script>
+    <script type="text/javascript" src="../../RenderContext/Plugins/webgl/shaders.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentHandler.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentBuilder.js"></script>
     <script type="text/javascript" src="../../ContentHandler/BinaryParser.js"></script> 
@@ -172,7 +173,8 @@
           
             function addRecord()
             {
-                var title = $( "#title" ).val();
+                //var title = $( "#title" ).val();
+                var title = "Hello I am a cube. A mighty mighty cube!";
                 if (title != "") {
                     var update = "\<Set target='Label_" + g_labelName + "' text='" + title + "' show='true'/>";
                     console.debug(update);
@@ -183,12 +185,12 @@
                     // If we made it this far then there is nothing to undo.
                     adding = false;
                 }
-                $( "#dialog" ).dialog("close");
+               // $( "#dialog" ).dialog("close");
             }
             
           function createRecord()
           {
-              $( "#dialog" ).dialog("open");
+             // $( "#dialog" ).dialog("open");
               
               adding = true;
               
@@ -221,6 +223,8 @@
               var xstr = (new XMLSerializer()).serializeToString(xml);
               console.debug(xstr);
               bridgeworks.updateScene(xstr);
+
+              //addRecord();
           }
           
           
@@ -266,7 +270,7 @@
                             $("#rotationZ").spinner("value", rot.z);
                             
                             $("#scale").spinner("value", selectedModel.scale.getValueDirect().x);
-                            $('#objectname').val(selectedModel.name.getValueDirect().join(""))
+                            $('#objectname').val(selectedModel.name.getValueDirect().join(""));
                             
                         }
                     }
@@ -399,18 +403,20 @@
     <center>
     <div class="slide"><a href="#" class="btn-slide">Tools</a></div>
     </center>
-    <div id="BwContainer" ondblclick="handleEvent(event);" onclick="handleEvent(event);" onmousedown="handleEvent(event);" onmouseup="handleEvent(event);" onmousemove="handleEvent(event);">
+    <div id="BwContainer" ondblclick="handleEvent(event)" onclick="handleEvent(event);" onmousedown="handleEvent(event);" onmouseup="handleEvent(event);" onmousemove="handleEvent(event);">
       <canvas id="Canvas">
       </canvas>     
     </div>
+
+      <!--ondblclick="handleEvent(event);" onclick="handleEvent(event);" onmousedown="createRecord();"-->
     
 
-<div id="dialog" title="Name that part!">
+<!--<div id="dialog" title="Name that part!">
     <form id="my-form" enctype="multipart/form-data" method="post">
         <p>Title: <input type="text" id="title"></p>
         <p><input type="button" value="Submit" onclick="addRecord()"></p>
     </form>
-</div>
+</div>-->
 
     
     <!--<video controls="controls" src="http://localhost/bwjs/bwcontent/images/quake.mpg">

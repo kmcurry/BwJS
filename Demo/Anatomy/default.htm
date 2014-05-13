@@ -40,6 +40,7 @@
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglRC.js"></script>
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglVB.js"></script>
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/webglTO.js"></script>
+    <script type="text/javascript" src="../../RenderContext/Plugins/webgl/shaders.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentHandler.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentBuilder.js"></script>
     <script type="text/javascript" src="../../ContentHandler/BinaryParser.js"></script> 
@@ -175,7 +176,7 @@
               g_labelName = "L-" + g_countStr;
               
               var xml = loadXMLFile("bwcontent/label.xml");
-              
+
               var name = xml.getElementsByTagName("Model")[0].attributes[0];
               name.value = g_labelName;
               
@@ -199,7 +200,7 @@
           
           function addRecord()
           {
-              var title = $( "#title" ).val();
+              var title = "Hello I am printing on the screen. Do you stay in the screen?";//$( "#title" ).val();
               if (title != "") {
                   var update = "\<Set target='Label_" + g_labelName + "' text='" + title + "' show='true'/>";
                   console.debug(update);
@@ -267,7 +268,7 @@
 
 <div id="dialog" title="Name that part!">
     <form id="my-form" enctype="multipart/form-data" method="post">
-        <p>Title: <input type="text" id="title"></p>
+        <!--<p>Title: <input type="text" id="title"></p>-->
         <p><input type="button" value="Submit" onclick="addRecord()"></p>
     </form>
 </div>
