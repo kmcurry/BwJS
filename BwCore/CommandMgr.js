@@ -53,8 +53,8 @@ CommandMgr.prototype.addCommand = function(command)
     }
     else if (trigger.getLength() > 0)
     {
-        // TODO
-        console.debug("TODO: ");
+		trigger.addModifiedCB(CommandMgr_CommandTriggerModifiedCB, this);
+		createCommandTrigger(command, trigger);
     }
     else // no events -- execute and remove
     {
@@ -208,4 +208,9 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 			}
 		  }
 		return newAttribute; 
+}
+
+function CommandMgr_CommandTriggerModifiedCB(attribute, container)
+{
+	createCommandTrigger(attribute, container);
 }
