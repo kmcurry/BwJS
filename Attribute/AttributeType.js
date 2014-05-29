@@ -98,6 +98,28 @@
     UserDefined                 :2000
 };
 
+var eAttrElemType = {
+    // unknown
+    eAttrElemType_Unknown               :0,	///
+
+    // standard C-types
+    eAttrElemType_Int                   :0,							///
+    eAttrElemType_UnsignedInt           :0,					///
+    eAttrElemType_Char                  :0,							///
+    eAttrElemType_UnsignedChar          :0,					///
+    eAttrElemType_Float                 :0,						///
+    eAttrElemType_Double                :0,						///
+
+    // attribute
+    eAttrElemType_Attribute             :0,					///
+
+    // user-defined
+    eAttrElemType_UserDefined           :0x000000FF,		///
+    
+    // force enumeration to 32-bits
+    eAttrElemType_FORCE_DWORD           :0x7FFFFFFF		///
+};
+
 function enumerateAttributeTypes()
 {
     var count = 0; 
