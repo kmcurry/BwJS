@@ -178,19 +178,19 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 			case eAttrElemType_Int:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseInt());
+		            newAttribute.setValueDirect(value.parseInt());
 				}
 				break;
 			case eAttrElemType_UnsignedInt:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseInt());
+		            newAttribute.setValueDirect(value.parseInt());
 				}
 				break;
 			case eAttrElemType_Char:
 				{
 					newAttribute = new StringAttr();
-                    newAttribute.setValueDirect(valueString);
+                    newAttribute.setValueDirect(value);
 				}
 				break;
 			case eAttrElemType_UnsignedChar:
@@ -201,7 +201,7 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
             case eAttrElemType_Double:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseFloat());
+		            newAttribute.setValueDirect(value.parseFloat());
 				}
 				break;
 			default:
