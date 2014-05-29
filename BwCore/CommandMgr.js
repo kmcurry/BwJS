@@ -54,7 +54,7 @@ CommandMgr.prototype.addCommand = function(command)
     else if (trigger.getLength() > 0)
     {
 		trigger.addModifiedCB(CommandMgr_CommandTriggerModifiedCB, this);
-		createCommandTrigger(command, trigger);
+		this.createCommandTrigger(command, trigger);
     }
     else // no events -- execute and remove
     {
@@ -79,12 +79,15 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
     var valueNdx = 0;
     var rangeNdx = 0;
     var itemNdx = 0;
+    
+    var triggerString = "";
+    triggerString = trigger.getValueDirect().join("");
 
- 	attrNdx = trigger.lastIndexOf('/');
+ 	attrNdx = triggerString.lastIndexOf('/');
  	if (attrNdx != -1)
  	{
  		
- 		var objectName = trigger.substringing(0, attrNdx);
+ 		var objectName = triggerString.substring(0, attrNdx);
  		var resource = bridgeworks.registry.find(objectName);
 
  		if(resource)
@@ -97,52 +100,52 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
             var valueString = "";
             var rangeString = "";
             
- 			valueNdx = trigger.lastIndexOf('!'); 
+ 			valueNdx = triggerString.lastIndexOf('!'); 
  			if (valueNdx > 0)
  			{
  			    trigger.erase(valueNdx, 1); // erase the '!' for subsequent processing
  			    not = true;
  			}
 
- 			valueNdx = trigger.lastIndexOf('=');
+ 			valueNdx = triggerString.lastIndexOf('=');
  			if(valueNdx > 0) 
  			{
- 				itemNdx = trigger.lastIndexOf('['); 
+ 				itemNdx = triggerString.lastIndexOf('['); 
  				if(itemNdx > 0) 
  				{
- 					var itemNdx2 = trigger.lastIndexOf(']', itemNdx); 
- 					itemString = trigger.substring(itemNdx+1, itemNdx2 - itemNdx - 1); 
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx); 
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2 - itemNdx - 1); 
  				}
 
  				var range = FLT_MAX; 
- 				rangeNdx = trigger.lastIndexOf(',');
+ 				var rangeNdx = triggerString.lastIndexOf(',');
  				if(rangeNdx > 0)
  				{
- 					var rangeString = trigger.substring(rangeNdx+1, trigger.length()-rangeNdx-1);
+ 					var rangeString = triggerString.substring(rangeNdx+1, trigger.length()-rangeNdx-1);
  					range = rangeString.parseFloat(); 
  				}
- 				rangeNdx = rangeNdx == -1 ? trigger.length() : rangeNdx;
+ 				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
 
  				// value is the string between '=' && (',' || end of string)
- 				value = trigger.substring(valueNdx+1, rangeNdx-valueNdx);
+ 				value = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
  			}
  			else //TEMPEST
  			{
- 				itemNdx = trigger.lastIndexOf('[');
+ 				itemNdx = triggerString.lastIndexOf('[');
  				if(itemNdx > 0) 
  				{
- 					var itemNdx2 = trigger.lastIndexOf(']', itemNdx);
- 					itemString = trigger.substring(itemNdx+1, itemNdx2-itemNdx-1);
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx);
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2-itemNdx-1);
  				}
  			}
- 			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? trigger.length() : valueNdx) : itemNdx;
- 			attrName = trigger.substring(attrNdx+1, valueNdx-attrNdx-1);
+ 			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
+ 			attrName = triggerString.substring(attrNdx+1, valueNdx-attrNdx-1);
 
- 			var input = target.getAttribute(attrName);
+ 			var input = resource.getAttribute(attrName);
 
- 			var trigger = createAttribute(input, valueString);
+ 			var attr = this.createAttribute(input, valueString);
 
- 			if(trigger)
+ 			if(attr)
  			{
  				var item = -1; 
  				if(itemString != "")
@@ -150,12 +153,11 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  					item = itemString.parseInt(); 
  				}
  				var numExecutions = command.getNumResponses();
- 				var trigger = new AttributeTrigger(input, trigger, command, item, not, numExecutions);
+ 				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
 
- 				if(!trigger) return;
- 				command.setTrigger(trigger); 
+ 				command.setTrigger(newTrigger); 
  			}
- 			trigger = objectName + "/" + attrName;
+ 			triggerString = objectName + "/" + attrName;
 
  			console.debug(trigger);
  			console.debug("\n");
