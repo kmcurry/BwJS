@@ -131,7 +131,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				itemNdx = trigger.lastIndexOf('[');
  				if(itemNdx > 0) 
  				{
- 					int itemNdx2 = trigger.lastIndexOf(']', itemNdx);
+ 					var itemNdx2 = trigger.lastIndexOf(']', itemNdx);
  					itemString = trigger.substring(itemNdx+1, itemNdx2-itemNdx-1);
  				}
  			}

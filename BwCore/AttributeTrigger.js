@@ -36,11 +36,10 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
 
 AttributeTrigger.prototype.execute = function()
 {
-	eERR_CODE err = eERR_FAIL;
-
 	if (this.target)
 	{
-        eAttrElemType type = this.trigger.getAttributeElementType();
+        var type = this.trigger.attrElemType;
+
         switch (type)
         {
         case eAttrElemType_Char:
@@ -78,7 +77,7 @@ AttributeTrigger.prototype.execute = function()
 		        if (this.item != -1)
 		        {
 			        // if equal OR descending past OR ascending past
-                    bool pass = ((vIn[this.item] == vTrig[0]) ||
+                    var pass = ((vIn[this.item] == vTrig[0]) ||
 			                     (this.lastValues[this.item] > vIn[this.item] && vIn[this.item] < vTrig[0]) ||
 			                     (this.lastValues[this.item] < vIn[this.item] && vIn[this.item] > vTrig[0]));
                     pass = this.not ? !pass : pass;
@@ -90,9 +89,9 @@ AttributeTrigger.prototype.execute = function()
 		        }
 		        else	// match every item in a multi-item Attribute
 		        {
-			        int len = this.input.getLength();
-			        int matches = 0;
-			        for (int i = 0; i < len; ++i)
+			        var len = this.input.getLength();
+			        var matches = 0;
+			        for (var i = 0; i < len; ++i)
 			        {
 				        // if equal OR descending past OR ascending past
 				        var pass = ((vIn[i] == vTrig[i]) ||
