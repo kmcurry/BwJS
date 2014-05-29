@@ -129,3 +129,13 @@ function enumerateAttributeTypes()
             eAttrType[i] = count++;
     }
 }
+
+function enumerateAttributeElementTypes()
+{
+    var count = 0;
+    for (var i in eAttrElemType)
+    {
+        if (eAttrElemType[i] == 0)
+            eAttrElemType[i] = count++;
+    }
+}
