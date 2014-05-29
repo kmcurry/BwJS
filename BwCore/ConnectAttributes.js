@@ -1,4 +1,4 @@
-﻿function ConnectionDesc()
+function ConnectionDesc()
 {
     this.sourceContainer = null;
     this.targetContainer = null;
@@ -62,7 +62,6 @@ ConnectAttributesCommand.prototype.eventPerformed = function(event)
     // call base-class implementation
     Command.prototype.eventPerformed.call(this, event);
 }
-
 
 ConnectAttributesCommand.prototype.execute = function()
 {

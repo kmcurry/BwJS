@@ -501,6 +501,7 @@ function finalizeEvaluator(evaluator, factory)
             
             contentHandler.parseFileStream(pathInfo[0]); 
         }
+        AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
         break;
     }
 }
@@ -508,26 +509,21 @@ function finalizeEvaluator(evaluator, factory)
 function registerEvaluatorAttributes(evaluator, factory)
 {
     // url
-	var url = new StringAttr("");
-	evaluator.registerAttribute(url, "url");
-	
-	// target
-	var target = new StringAttr("");
-	evaluator.registerAttribute(target, "target");
+    var url = new StringAttr("");
+    evaluator.registerAttribute(url, "url");
 
-	// renderAndRelease
-	var renderAndRelease = new BooleanAttr(false);
-	evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+    // target
+    var target = new StringAttr("");
+    evaluator.registerAttribute(target, "target");
+
+    // renderAndRelease
+    var renderAndRelease = new BooleanAttr(false);
+    evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
 	
-    // TODO
-    console.debug("TODO: " + arguments.callee.name);
-    /*
     // targetConnectionType
-	CStringAttr* targetConnectionType = new CStringAttr("transform");
-	targetConnectionType->AddModifiedCB(DefaultFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
-	evaluator->RegisterAttribute(targetConnectionType, "targetConnectionType");
-
-    */
+    var targetConnectionType = new StringAttr("transform");
+    targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
+    evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
 }
 
 function registerParentableAttributes(pme, factory)
@@ -601,4 +597,18 @@ function AttributeFactory_ParentableWorldPositionModifiedCB(attribute, container
 {
     // TODO
     //console.debug("TODO: " + arguments.callee.name);
+}
+
+function AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(attribute, container)
+{  
+    var evaluator = attribute.getContainer();
+    if (evaluator)
+    {
+        var connect = new ConnectAttributesCommand();
+        connect.setRegistry(container.registry);
+        connect.getAttribute("sourceContainer").copyValue(evaluator.getAttribute("name"));
+        connect.getAttribute("targetContainer").copyValue(evaluator.getAttribute("target"));
+        connect.getAttribute("connectionType").copyValue(attribute);
+        connect.execute();
+    }
 }

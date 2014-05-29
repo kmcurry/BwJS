@@ -1,4 +1,4 @@
-﻿ConnectionMgr.prototype = new AttributeContainer();
+ConnectionMgr.prototype = new AttributeContainer();
 ConnectionMgr.prototype.constructor = ConnectionMgr;
 
 function ConnectionMgr()
@@ -10,7 +10,10 @@ function ConnectionMgr()
     
     this.registerAttribute(this.name, "name");
     
+    // TODO: finish adding connection helpers
+    //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
     registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
+    registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
 }
 
 ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
@@ -82,3 +85,40 @@ ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
     mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
 }
 
+ConnectionMgr.prototype.connectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.addTarget(dissolve);
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.removeTarget(dissolve);
+            }
+        }
+    }
+}
