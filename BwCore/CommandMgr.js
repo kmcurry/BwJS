@@ -127,7 +127,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
 
  				// value is the string between '=' && (',' || end of string)
- 				value = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
+ 				valueString = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
  			}
  			else //TEMPEST
  			{
