@@ -82,14 +82,12 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
     
     var triggerString = "";
     triggerString = trigger.getValueDirect().join("");
-
  	attrNdx = triggerString.lastIndexOf('/');
+
  	if (attrNdx != -1)
  	{
- 		
  		var objectName = triggerString.substring(0, attrNdx);
  		var resource = bridgeworks.registry.find(objectName);
-
  		if(resource)
  		{
  			var not = false;
@@ -100,17 +98,17 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
             var valueString = "";
             var rangeString = "";
             
- 			valueNdx = triggerString.lastIndexOf('!'); 
+ 			valueNdx = triggerString.lastIndexOf('!');
  			if (valueNdx > 0)
  			{
- 			    trigger.replace("!", ""); // erase the '!' for subsequent processing
+ 			    triggerString.replace("!", ""); // erase the '!' for subsequent processing
  			    not = true;
  			}
 
  			valueNdx = triggerString.lastIndexOf('=');
  			if(valueNdx > 0) 
  			{
- 				itemNdx = triggerString.lastIndexOf('['); 
+ 				itemNdx = triggerString.lastIndexOf('[');
  				if(itemNdx > 0) 
  				{
  					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx); 
@@ -125,9 +123,9 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  					range = rangeString.parseFloat(); 
  				}
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
-
  				// value is the string between '=' && (',' || end of string)
- 				valueString = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
+ 				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
+                console.debug(valueString);
  			}
  			else //TEMPEST
  			{
@@ -139,9 +137,11 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				}
  			}
  			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
- 			attrName = triggerString.substring(attrNdx+1, valueNdx-attrNdx-1);
+ 			attrName = triggerString.substring(attrNdx+1, valueNdx);
 
  			var input = resource.getAttribute(attrName);
+
+            console.debug(attrName);
 
  			var attr = this.createAttribute(input, valueString);
 
@@ -214,5 +214,5 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 
 function CommandMgr_CommandTriggerModifiedCB(attribute, container)
 {
-	createCommandTrigger(attribute, container);
+	this.createCommandTrigger(attribute, container);
 }
