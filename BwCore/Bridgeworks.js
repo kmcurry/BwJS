@@ -67,6 +67,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.viewportMgr.getAttribute("layout").setValueDirect(this.layout);
     
     enumerateAttributeTypes();
+    enumerateAttributeElementTypes();
     
     // TODO: remove the following when onLoadModified is defined
     console.debug("TODO: " + arguments.callee.name);

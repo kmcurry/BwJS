@@ -13,9 +13,11 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     this.item = item;
     
     this.not = _not;
+
+
     this.executionCount = _executionCount;
     
-    executionCount = new UnsignedIntegerAttr(this.executionCount);
+    //this.executionCount = new NumberAttr(this.executionCount);
 
 	this.input.addRef();
 
@@ -60,7 +62,7 @@ AttributeTrigger.prototype.execute = function()
 
                 if (this.executionCount == 0)
 		        {
-			        this.target = NULL;
+			        this.target = null;
 		        }
             }
             break;
@@ -83,7 +85,7 @@ AttributeTrigger.prototype.execute = function()
                     pass = this.not ? !pass : pass;
                     if (pass)
 			        {
-						err = this.target.Execute();
+						err = this.target.execute();
 				        executionCount.setValueDirect(--this.executionCount);
 			        }
 		        }
@@ -107,14 +109,14 @@ AttributeTrigger.prototype.execute = function()
 			        // if every item matches simultaneously
 			        if (matches = len)
 			        {
-						err = this.target.Execute();
+						err = this.target.execute();
 						executionCount.setValueDirect(--this.executionCount);
 			        }
 		        }
 
 		        if (this.executionCount == 0)
 		        {
-			        this.target = NULL;
+			        this.target = null;
 		        }
 		        else
 		        {

@@ -103,7 +103,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			valueNdx = triggerString.lastIndexOf('!'); 
  			if (valueNdx > 0)
  			{
- 			    trigger.erase(valueNdx, 1); // erase the '!' for subsequent processing
+ 			    trigger.replace("!", ""); // erase the '!' for subsequent processing
  			    not = true;
  			}
 
@@ -127,7 +127,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
 
  				// value is the string between '=' && (',' || end of string)
- 				value = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
+ 				valueString = triggerString.substring(valueNdx+1, rangeNdx-valueNdx);
  			}
  			else //TEMPEST
  			{
@@ -178,19 +178,19 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 			case eAttrElemType_Int:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseInt());
+		            newAttribute.setValueDirect(value.parseInt());
 				}
 				break;
 			case eAttrElemType_UnsignedInt:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseInt());
+		            newAttribute.setValueDirect(value.parseInt());
 				}
 				break;
 			case eAttrElemType_Char:
 				{
 					newAttribute = new StringAttr();
-                    newAttribute.setValueDirect(valueString);
+                    newAttribute.setValueDirect(value);
 				}
 				break;
 			case eAttrElemType_UnsignedChar:
@@ -201,7 +201,7 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
             case eAttrElemType_Double:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(valueString.parseFloat());
+		            newAttribute.setValueDirect(value.parseFloat());
 				}
 				break;
 			default:
