@@ -7,6 +7,10 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     this.input = input;
     this.trigger = trigger;
     this.target = target;
+//    console.debug(input);
+//    console.debug(trigger);
+//    console.debug(target);
+
 
     this.lastValues = this.input.getValueDirect();
 

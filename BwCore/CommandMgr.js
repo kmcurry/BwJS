@@ -79,7 +79,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
     var valueNdx = 0;
     var rangeNdx = 0;
     var itemNdx = 0;
-    
+
     var triggerString = "";
     triggerString = trigger.getValueDirect().join("");
  	attrNdx = triggerString.lastIndexOf('/');
@@ -124,7 +124,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
  				// value is the string between '=' && (',' || end of string)
  				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
-                console.debug(valueString);
  			}
  			else //TEMPEST
  			{
@@ -140,8 +139,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
 
  			var input = resource.getAttribute(attrName);
 
-            console.debug(input);
-
  			var attr = this.createAttribute(input, valueString);
 
  			if(attr)
@@ -155,8 +152,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
 
  				command.setTrigger(newTrigger);
-
-                console.debug(command);
  			}
  			triggerString = objectName + "/" + attrName;
 
@@ -204,7 +199,7 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 //				break;
 //			}
 		  }
-        console.debug(newAttribute);
+        //console.debug(newAttribute);
 		return newAttribute; 
 }
 
