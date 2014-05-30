@@ -40,11 +40,11 @@ AttributeTrigger.prototype.execute = function()
 {
 	if (this.target)
 	{
-        var type = this.trigger.attrElemType;
+        var type = this.trigger.attrType;
 
         switch (type)
         {
-        case eAttrElemType_Char:
+        case eAttrType.String:
             {
                 var vIn;
                 var vTrig;

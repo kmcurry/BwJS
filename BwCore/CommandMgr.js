@@ -170,40 +170,32 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 	var newAttribute = null;
 	if(attribute)
 	{
-		var etype = attribute.attrElemType;
+		var etype = attribute.attrType;
 		var len = attribute.getLength();
 
 			switch (etype)
 			{
-			case eAttrElemType_Int:
+			case eAttrType.BooleanAttr:
 				{
 					newAttribute = new NumberAttr();
 		            newAttribute.setValueDirect(value.parseInt());
 				}
 				break;
-			case eAttrElemType_UnsignedInt:
-				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseInt());
-				}
-				break;
-			case eAttrElemType_Char:
-				{
-					newAttribute = new StringAttr();
-                    newAttribute.setValueDirect(value);
-				}
-				break;
-			case eAttrElemType_UnsignedChar:
-				{
-			    }
-				break;
-			case eAttrElemType_Float:
-            case eAttrElemType_Double:
+            case eAttrType.NumberAttr:
 				{
 					newAttribute = new NumberAttr();
 		            newAttribute.setValueDirect(value.parseFloat());
 				}
 				break;
+                
+            case eAttrType.StringAttr:
+				{
+					newAttribute = new StringAttr();
+                    newAttribute.setValueDirect(value);
+				}
+				break;
+			
+                
 			default:
 				newAttribute = null;
 				break;
