@@ -86,7 +86,7 @@ AttributeTrigger.prototype.execute = function()
                     if (pass)
 			        {
 						err = this.target.execute();
-				        executionCount.setValueDirect(--this.executionCount);
+				        this.executionCount.setValueDirect(--this.executionCount);
 			        }
 		        }
 		        else	// match every item in a multi-item Attribute
@@ -110,7 +110,7 @@ AttributeTrigger.prototype.execute = function()
 			        if (matches = len)
 			        {
 						err = this.target.execute();
-						executionCount.setValueDirect(--this.executionCount);
+						this.executionCount.setValueDirect(--this.executionCount);
 			        }
 		        }
 
