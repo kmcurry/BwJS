@@ -91,8 +91,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  		if(resource)
  		{
  			var not = false;
-            
-            var objectName = "";
+
             var attrName = "";
             var itemString = "";
             var valueString = "";
@@ -150,12 +149,14 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				var item = -1; 
  				if(itemString != "")
  				{
- 					item = itemString.parseInt(); 
+ 					item = parseInt(itemString);
  				}
- 				var numExecutions = command.getNumResponses();
+ 				var numExecutions = command.numResponses;
  				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
 
- 				command.setTrigger(newTrigger); 
+ 				command.setTrigger(newTrigger);
+
+                console.debug(command);
  			}
  			triggerString = objectName + "/" + attrName;
 
@@ -174,34 +175,34 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 		var etype = attribute.attrType;
 		var len = attribute.getLength();
         //console.debug(etype);
-			switch (etype)
-			{
-
-			case eAttrType.BooleanAttr:
-				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(parseInt(value));
-				}
-				break;
-            case eAttrType.NumberAttr:
-
-				{
+//			switch (etype)
+//			{
+//
+//			case eAttrType.BooleanAttr:
+//				{
+//					newAttribute = new NumberAttr();
+//		            newAttribute.setValueDirect(parseInt(value));
+//				}
+//				break;
+//            case eAttrType.NumberAttr:
+//
+//				{
 					newAttribute = new NumberAttr();
 		            newAttribute.setValueDirect(parseFloat(value));
-				}
-				break;
-
-            case eAttrType.StringAttr:
-				{
-					newAttribute = new StringAttr();
-                    newAttribute.setValueDirect(value);
-				}
-				break;
-
-			default:
-				newAttribute = null;
-				break;
-			}
+//				}
+//				break;
+//
+//            case eAttrType.StringAttr:
+//				{
+//					newAttribute = new StringAttr();
+//                    newAttribute.setValueDirect(value);
+//				}
+//				break;
+//
+//			default:
+//				newAttribute = null;
+//				break;
+//			}
 		  }
         console.debug(newAttribute);
 		return newAttribute; 

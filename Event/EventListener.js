@@ -40,18 +40,15 @@ EventListener.prototype.eventPerformed = function(event)
         this.numResponses.setValueDirect(numResponses-1);
     }
 }
-EventListener.prototype.getTrigger = function(container)
+EventListener.prototype.getTrigger = function()
 {
-    if(container)
-    {
-        container = this.trigger;
-    }
+        this.trigger;
 }
-EventListener.prototype.setTrigger = function(container)
+EventListener.prototype.setTrigger = function(trigger)
 {
-    if(container)
+    if(trigger)
     {
-        this.trigger = container;
+        this.trigger = trigger;
     }
 }
 
