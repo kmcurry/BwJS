@@ -103,7 +103,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			valueNdx = triggerString.lastIndexOf('!'); 
  			if (valueNdx > 0)
  			{
- 			    trigger.erase(valueNdx, 1); // erase the '!' for subsequent processing
+ 			    trigger.replace("!", ""); // erase the '!' for subsequent processing
  			    not = true;
  			}
 
