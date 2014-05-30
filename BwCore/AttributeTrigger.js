@@ -44,7 +44,7 @@ AttributeTrigger.prototype.execute = function()
 
         switch (type)
         {
-        case eAttrType.String:
+        case eAttrType.StringAttr:
             {
                 var vIn;
                 var vTrig;
