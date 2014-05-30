@@ -141,7 +141,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
 
  			var input = resource.getAttribute(attrName);
 
-            console.debug(attrName);
+            console.debug(input);
 
  			var attr = this.createAttribute(input, valueString);
 
@@ -170,46 +170,40 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 	var newAttribute = null;
 	if(attribute)
 	{
-        console.debug(attribute);
-		var etype = attribute.attrElemType;
+        //console.debug(attribute);
+		var etype = attribute.attrType;
 		var len = attribute.getLength();
-
+        //console.debug(etype);
 			switch (etype)
 			{
-			case etype.eAttrElemType_Int:
+
+			case eAttrType.BooleanAttr:
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseInt());
+		            newAttribute.setValueDirect(parseInt(value));
 				}
 				break;
-			case etype.eAttrElemType_UnsignedInt:
+            case eAttrType.NumberAttr:
+
 				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseInt());
+		            newAttribute.setValueDirect(parseFloat(value));
 				}
 				break;
-			case etype.eAttrElemType_Char:
+
+            case eAttrType.StringAttr:
 				{
 					newAttribute = new StringAttr();
                     newAttribute.setValueDirect(value);
 				}
 				break;
-			case etype.eAttrElemType_UnsignedChar:
-				{
-			    }
-				break;
-			case etype.eAttrElemType_Float:
-            case etype.eAttrElemType_Double:
-				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseFloat());
-				}
-				break;
+
 			default:
 				newAttribute = null;
 				break;
 			}
 		  }
+        console.debug(newAttribute);
 		return newAttribute; 
 }
 
