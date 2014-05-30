@@ -66,7 +66,7 @@ function Attribute()
     Base.call(this);
     this.className = "Attribute";
     this.attrType = eAttrType.Attribute;
-    this.attrElemType = eAttrElemType.eAttrElemType_Unknown;
+    this.attrElemType = eAttrElemType.eAttrElemType_Attribute;
     
     this.values = [];
     this.modifiedCBs = [];
