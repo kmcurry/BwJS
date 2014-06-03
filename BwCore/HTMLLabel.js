@@ -3,7 +3,7 @@ HTMLLabel.prototype.constructor = HTMLLabel;
 
 function HTMLLabel()
 {
-	this.attrType = eAttrType_Node_HTMLLabel;
+	this.attrType = eAttrType.Node.HTMLLabel;
 	this.typeString = "HTMLLabel";
 
 	this.windowHandle = new PointerAttr();  //ASK KEVIN
@@ -30,9 +30,6 @@ function HTMLLabel()
 	this.labelRect.left = this.labelRect.top = this.labelRect.right = this.labelRect.bottom = 0;
 
 	//this.graphMgr.getNodeRegistry().RegisterNode(this, eAttrType_Node_HTMLLabel); ASK KEVIN
-
-    // causes issues w/ load of HTML; too much idle processing
-	//this.taskThread.Start();
 }
 
  HTMLLabel.prototype.Update = function(params, visitChildren)
@@ -110,7 +107,7 @@ function HTMLLabel()
                     {
                         // add to render sequence agent for sequenced drawing
                         renderParams.renderSequenceAgent.AddObject(this, 
-                            this.renderSequenceSlot.getValueDirect(), 0.0f);
+                            this.renderSequenceSlot.getValueDirect(), 0.0);
                         drawNow = false;
                     }
                 }
@@ -285,14 +282,14 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		if (hr)
 		{
 			var tagString = null;
-			var bstr_tag(tag, false); tagString = bstr_tag;
+			var bstr_tag(tag, false);
+            tagString = bstr_tag;
 
 			if (!_stricmp("A", tagString))
 			{
                 mouseOverLink = true;
 
 				var vtValue;
-				var = vtValue;
 				hr = this.elementHit.element.getAttribute(L"href", 0, vtValue);
 				if (SUCCEEDED(hr))
 				{
@@ -442,8 +439,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 			this.hScrollBar.getAttribute("scrollPosition").addTarget(this.labelStyle.left());
             this.showStates.hScrollBar = true;
 			hScrollBarLabelStyle.length().setValueDirect(labelWidth, false);
-			hScrollBarLabelStyle.minPosition().setValueDirect((var) 0, false);
-			hScrollBarLabelStyle.maxPosition().setValueDirect((var) (pageWidth - labelWidth), false);
+			hScrollBarLabelStyle.minPosition().setValueDirect (0, false);
+			hScrollBarLabelStyle.maxPosition().setValueDirect((pageWidth - labelWidth), false);
 		}
 
 		// height
@@ -461,8 +458,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 			this.vScrollBar.getAttribute("scrollPosition").addTarget(this.labelStyle.top());
             this.showStates.vScrollBar = true;
 			vScrollBarLabelStyle.length().setValueDirect(labelHeight, false);
-			vScrollBarLabelStyle.minPosition().setValueDirect((var) 0, false);
-			vScrollBarLabelStyle.maxPosition().setValueDirect((var) (pageHeight - labelHeight), false);
+			vScrollBarLabelStyle.minPosition().setValueDirect(0, false);
+			vScrollBarLabelStyle.maxPosition().setValueDirect((pageHeight - labelHeight), false);
 		}
     }
 
@@ -510,9 +507,9 @@ HTMLLabel.prototype.Capture = function(x, y, width, height)
 		return ;
 	}
 
-	var r
-	var g
-	var b
+	var r;
+	var g;
+	var b;
 	var a;
 	labelStyle.bgColor().getValueDirect(r, g, b, a);
 	
@@ -542,7 +539,7 @@ HTMLLabel.prototype.Draw = function()
 	// determine the rendering positions
 	var labelX = 0;
 	var labelY = 0;
-	getRenderingPositions(labelX, labelY);
+	this.getRenderingPositions(labelX, labelY);
 
 	// get current viewport
     var x, y;
@@ -610,7 +607,7 @@ HTMLLabel.prototype.Draw = function()
 			labelHeight = y + height - dstY;
 		}
 
-		if (this.renderEngine.getFrameBufferOrigin() == ReBufferOrigin_LowerLeft)
+		if (renderEngine.getFrameBufferOrigin() == ReBufferOrigin_LowerLeft)
 		{
 			srcY = this.label.height - labelHeight - srcY;
 		}
@@ -653,13 +650,13 @@ HTMLLabel.prototype.Draw = function()
 	// get screen position
 	// if user has set the raster position, use that instead
 	var screen = this.screenPosition.getValueDirect();
-	if (getAttributeModificationCount(this.rasterPosition) > 0)
+	if (this.getAttributeModificationCount(this.rasterPosition) > 0)
 	{
 		screen = this.rasterPosition.getValueDirect();
 
         // offset by rasterOrigin
         var rasterOrigin;
-        this.rasterOrigin.getValueDirect(rasterOrigin);
+        rasterOrigin.getValueDirect(rasterOrigin);
 
         // get render engine
         var renderEngine = this.graphMgr.getRenderEngine();
