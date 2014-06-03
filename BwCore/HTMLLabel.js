@@ -93,7 +93,7 @@ function HTMLLabel()
 				this.renderEngine.getMatrix(ReMatrixMode_WorldView, worldViewMatrix);
 
 				if (this.cullable.getValueDirect() == true &&
-					OutsideViewVolume(renderParams.viewVolume, 1.0f, renderParams.viewMatrix))//worldViewMatrix))
+					OutsideViewVolume(renderParams.viewVolume, 1.0, renderParams.viewMatrix))//worldViewMatrix))
                 {
 //#ifdef _DEBUG
                     //OutputDebugMsg("Label: OutsideViewVolume() returned true; culling label\n");
@@ -138,14 +138,14 @@ function HTMLLabel()
                         var picked = params.currentNodePath;
                         if (!picked) return;
                         picked.AddNode(this); // this node won't be added to current path until base class implementation is invoked
-                        if (!(Push_Back<std.prototype.pair<std.prototype.pair<GcCamera*, CPath*>, TRayPickRecord> >(rayPickParams.picked, 
+                     /*   if (!(Push_Back<std.prototype.pair<std.prototype.pair<GcCamera*, CPath*>, TRayPickRecord> >(rayPickParams.picked,
                             std.prototype.pair<std.prototype.pair<GcCamera*, CPath*>, TRayPickRecord>(
                             std.prototype.pair<GcCamera*, CPath*>(
-                            rayPickParams.currentCamera, picked), pickRecord)))) 
+                            rayPickParams.currentCamera, picked), pickRecord))))
                         {
                             this.applyLock.Unlock();//(CReadWriteLock.prototype.eRWLockMode_Read);
                             return;
-                        }
+                        }*/
                     }
                 }
             }
@@ -210,8 +210,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 			labelStyle.html().getValueDirect(html);
 			if (!html.empty() && url == "")//strcmp(html.c_str(), ""))
 			{
-                try
-                {
+             //   try
+             //   {
 				    if (this.wb.load(this.FormatHTML(html), pageWidth, pageHeight))
                     {
                         return ;
@@ -222,13 +222,13 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
                     {
                         return ;
                     }
-                }
-                catch ()
+             //   }
+               /* catch ()
                 {
                     OutputDebugMsg("WARN: exception caught in HTMLLabel.prototype.UpdateLabel()\n");
                     s_globalExcept.Throw(Except.prototype.eExceptCode_Unspecified);
                     return ;
-                }
+                }*/
 			}
 		}
 
@@ -278,11 +278,11 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
     if (this.wb.ElementFromPoint(this.x, this.y, this.elementHit.element))
 	{
 		var tag;
-		var hr = this.elementHit.element.get_tagName(&tag);
+		//var hr = this.elementHit.element.get_tagName(&tag); ASK KEVIN
 		if (hr)
 		{
 			var tagString = null;
-			var bstr_tag(tag, false);
+			//var bstr_tag(tag, false); ASK KEVIN
             tagString = bstr_tag;
 
 			if (!_stricmp("A", tagString))
@@ -290,21 +290,21 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
                 mouseOverLink = true;
 
 				var vtValue;
-				hr = this.elementHit.element.getAttribute(L"href", 0, vtValue);
+				hr = this.elementHit.element.getAttribute("href", 0, vtValue);
 				if (SUCCEEDED(hr))
 				{
                     if (vtValue.bstrVal)
                     {
-					    _bstr_t bstr_href(vtValue.bstrVal, false); 
-                        this.elementHit.href = (char*) bstr_href;
+					    //_bstr_t bstr_href(vtValue.bstrVal, false);  ASK KEVIN
+                        //this.elementHit.href = (char*) bstr_href; ASK KEVIN
 
 					    // determine if user wants a popup window for the link
-					    hr = this.elementHit.element.getAttribute(L"target", 0, &vtValue);
+					    //hr = this.elementHit.element.getAttribute(L"target", 0, &vtValue); ASK KEVIN
 					    if (SUCCEEDED(hr))
 					    {
                             if (vtValue.bstrVal)
                             {
-						        _bstr_t bstr_target(vtValue.bstrVal, false);
+						        //_bstr_t bstr_target(vtValue.bstrVal, false); ASK KEVIN
                                 this.elementHit.target = bstr_target;
                             }
                             else // !vtValue.bstrVal
@@ -327,18 +327,19 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 
  HTMLLabel.prototype.UpdateCursor = function( mouseOverLink)
 {
-    const std.prototype.vector<CAttributeContainer*>* attributes;
+    //ASK KEVIN
+    /*const std.prototype.vector<CAttributeContainer*>* attributes;
     
     if (this.registry.get("ViewportMgr", &attributes))
     {
         attributes)[0].getAttribute("cursor").setValueDirect(mouseOverLink ? "Hand" : "Arrow");
-    }
+    }*/
 }
 
  HTMLLabel.prototype.UpdateLabelDimensions = function()
 {
     // get label style (if specified)
-	HTMLLabelStyleAttr* labelStyle = this.styles.getStyle<HTMLLabelStyleAttr>();
+	//HTMLLabelStyleAttr* labelStyle = this.styles.getStyle<HTMLLabelStyleAttr>(); ASK KEVIN
 
 	var pageWidth = this.pageWidth.getValueDirect();
 	var pageHeight = this.pageHeight.getValueDirect();
@@ -1004,7 +1005,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 		raw.erase(pos, 3);
 	}
 
-	var s_style_width[16];
+	//var s_style_width[16]; ASK KEVIN
 	_itoa_s(style_width, s_style_width, sizeof(s_style_width), 10);
 
 	// insert raw into body section 
@@ -1071,7 +1072,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 	if (pMouseInput)
 
 	{
-		var click[];
+		//var click[]; ASK KEVIN
 		var x = pMouseInput.getX();
 		var y = pMouseInput.getY();
 
@@ -1083,7 +1084,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 		if (x < 0 || 
 			y < 0 || 
 			x > this.labelStyle.left().getValueDirect()+right-left-Number(this.sizeStates.vScrollWidth) || 
-			y > this.labelStyle.top().getValueDirect()+bottom-top-Number(this.sizeStates.hScrollHeight) 
+			y > this.labelStyle.top().getValueDirect()+bottom-top-Number(this.sizeStates.hScrollHeight))
         {
             this.x = -1;
             this.y = -1;
@@ -1143,7 +1144,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 	if (registry)
 	{
 		var resource = null;
-		if (registry.find("DefaultFactory", resource)))
+		if (registry.find("DefaultFactory", resource))
 		{		
 			var factory = resource;
 			if (factory)
@@ -1186,7 +1187,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 
         if (this.registry.find("Bridgeworks", resource))
         {
-            Bridgeworks* bridgeworks = dynamic_cast<Bridgeworks*>(resource);
+            //Bridgeworks* bridgeworks = dynamic_cast<Bridgeworks*>(resource); ASK KEVIN
             if (bridgeworks)
             {
                 bridgeworks.getAttribute("windowWidth").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
