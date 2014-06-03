@@ -89,6 +89,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Group"] = newSGNode;
     this.newResourceProcs["Isolator"] = newSGNode;
     this.newResourceProcs["Label"] = newSGNode;
+    this.newResourceProcs["HTMLLabel"] = newSGNode;
     this.newResourceProcs["LineList"] = newSGNode;
     this.newResourceProcs["MediaTexture"] = newSGNode;
     this.newResourceProcs["Model"] = newModel;
@@ -226,6 +227,7 @@ function newSGNode(name, factory)
     case "Group":               resource = new Group(); break;
     case "Isolator":            resource = new Isolator(); break;
     case "Label":               resource = new Label(); break;
+    case "HTMLLabel":           resource = new HTMLLabel(); break;
     case "LineList":            resource = new LineList(); break;
     case "MediaTexture":        resource = new MediaTexture(); break;
     case "OrthographicCamera":  resource = new OrthographicCamera(); registerParentableAttributes(resource, factory); break;
