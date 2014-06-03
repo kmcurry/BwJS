@@ -164,7 +164,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			}
  			triggerString = objectName + "/" + attrName;
 
-            newTrigger.execute();
+            //newTrigger.execute();
             //command.execute(trigger);
  			console.debug(trigger);
  			console.debug("\n");

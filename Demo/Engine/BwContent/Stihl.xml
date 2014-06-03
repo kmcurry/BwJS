@@ -168,5 +168,5 @@
         <KeyframeInterpolator name="PistonMotion" url="motions/Piston.mot" target="Piston"/>
     </Animations>
     <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
-    <Pause trigger="RenderAgent/globalTimeInSecs=1"/>
+    <Pause trigger="RenderAgent/elapsedTimeInSecs=10"/>
 </Scene>

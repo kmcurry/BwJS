@@ -54,7 +54,7 @@ AttributeTrigger.prototype.execute = function()
 
         case eAttrType.StringAttr:
             {
-                console.debug("THIS HITS STRINGATTR");
+                //console.debug("THIS HITS STRINGATTR");
                 var vIn = [];
                 var vTrig = [];
             
@@ -78,7 +78,7 @@ AttributeTrigger.prototype.execute = function()
 
         default:
             {
-                console.debug("THIS HITS DEFAULT");
+                //console.debug("THIS HITS DEFAULT");
                 var vIn = [];
                 var vTrig = [];
 
@@ -96,7 +96,8 @@ AttributeTrigger.prototype.execute = function()
                     if (pass)
 			        {
 						this.target.execute();
-				        this.executionCount.setValueDirect(--this.executionCount);
+                        var count = this.executionCount.getValueDirect() - 1;
+				        this.executionCount.setValueDirect(count);
 			        }
 		        }
 		        else	// match every item in a multi-item Attribute
