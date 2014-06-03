@@ -7,8 +7,14 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     this.input = input;
     this.trigger = trigger;
     this.target = target;
-    
-	this.input.getValue(this.lastValues);
+//    console.debug(input);
+//    console.debug(trigger);
+//    console.debug(target);
+
+
+    this.lastValues = this.input.getValueDirect();
+
+	//this.input.getValue(this.lastValues);
 	
     this.item = item;
     
@@ -19,13 +25,14 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     
     //this.executionCount = new NumberAttr(this.executionCount);
 
-	this.input.addRef();
+	//this.input.addRef();
 
-	this.input.addModifiedSink(AttributeTrigger_InputModifiedCB, this);
+	this.input.addModifiedCB(AttributeTrigger_InputModifiedCB, this);
 
-	this.target.setUndoable(false);
+	//this.target.setUndoable(false);
 
-	this.input.getValue(this.lastValues);
+	//this.input.getValue(this.lastValues);
+    this.lastValues = this.input.getValueDirect();
 
 	var len = this.input.getLength();
 
@@ -40,11 +47,12 @@ AttributeTrigger.prototype.execute = function()
 {
 	if (this.target)
 	{
-        var type = this.trigger.attrElemType;
+        var type = this.trigger.attrType;
 
         switch (type)
         {
-        case type.eAttrElemType_Char:
+
+        case eAttrType.StringAttr:
             {
                 var vIn;
                 var vTrig;

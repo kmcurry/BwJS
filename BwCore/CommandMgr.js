@@ -79,7 +79,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
     var valueNdx = 0;
     var rangeNdx = 0;
     var itemNdx = 0;
-    
+
     var triggerString = "";
     triggerString = trigger.getValueDirect().join("");
  	attrNdx = triggerString.lastIndexOf('/');
@@ -91,8 +91,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  		if(resource)
  		{
  			var not = false;
-            
-            var objectName = "";
+
             var attrName = "";
             var itemString = "";
             var valueString = "";
@@ -125,7 +124,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
  				// value is the string between '=' && (',' || end of string)
  				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
-                console.debug(valueString);
  			}
  			else //TEMPEST
  			{
@@ -141,8 +139,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
 
  			var input = resource.getAttribute(attrName);
 
-            console.debug(attrName);
-
  			var attr = this.createAttribute(input, valueString);
 
  			if(attr)
@@ -150,12 +146,12 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				var item = -1; 
  				if(itemString != "")
  				{
- 					item = itemString.parseInt(); 
+ 					item = parseInt(itemString);
  				}
- 				var numExecutions = command.getNumResponses();
+ 				var numExecutions = command.numResponses;
  				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
 
- 				command.setTrigger(newTrigger); 
+ 				command.setTrigger(newTrigger);
  			}
  			triggerString = objectName + "/" + attrName;
 
@@ -170,46 +166,40 @@ CommandMgr.prototype.createAttribute = function(attribute, value)
 	var newAttribute = null;
 	if(attribute)
 	{
-        console.debug(attribute);
-		var etype = attribute.attrElemType;
+        //console.debug(attribute);
+		var etype = attribute.attrType;
 		var len = attribute.getLength();
-
-			switch (etype)
-			{
-			case etype.eAttrElemType_Int:
-				{
+        //console.debug(etype);
+//			switch (etype)
+//			{
+//
+//			case eAttrType.BooleanAttr:
+//				{
+//					newAttribute = new NumberAttr();
+//		            newAttribute.setValueDirect(parseInt(value));
+//				}
+//				break;
+//            case eAttrType.NumberAttr:
+//
+//				{
 					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseInt());
-				}
-				break;
-			case etype.eAttrElemType_UnsignedInt:
-				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseInt());
-				}
-				break;
-			case etype.eAttrElemType_Char:
-				{
-					newAttribute = new StringAttr();
-                    newAttribute.setValueDirect(value);
-				}
-				break;
-			case etype.eAttrElemType_UnsignedChar:
-				{
-			    }
-				break;
-			case etype.eAttrElemType_Float:
-            case etype.eAttrElemType_Double:
-				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(value.parseFloat());
-				}
-				break;
-			default:
-				newAttribute = null;
-				break;
-			}
+		            newAttribute.setValueDirect(parseFloat(value));
+//				}
+//				break;
+//
+//            case eAttrType.StringAttr:
+//				{
+//					newAttribute = new StringAttr();
+//                    newAttribute.setValueDirect(value);
+//				}
+//				break;
+//
+//			default:
+//				newAttribute = null;
+//				break;
+//			}
 		  }
+        //console.debug(newAttribute);
 		return newAttribute; 
 }
 
