@@ -32,13 +32,13 @@ function HTMLLabel()
 	//this.graphMgr.getNodeRegistry().RegisterNode(this, eAttrType_Node_HTMLLabel); ASK KEVIN
 }
 
- HTMLLabel.prototype.Update = function(params, visitChildren)
+ HTMLLabel.prototype.update = function(params, visitChildren)
 {
     if (this.updateWebBrowser)
     {
         this.updateWebBrowser = false;
 
-        if (this.UpdateWebBrowser())
+        if (this.updateWebBrowser())
         {
             this.updateLabelHTML = true;
         }
@@ -47,7 +47,7 @@ function HTMLLabel()
 	if (this.updateLabel || this.updateLabelHTML)
 	{
         this.updateLabel = false;
-        if (this.UpdateLabel(this.updateLabelHTML))
+        if (this.updateLabel(this.updateLabelHTML))
         {
             this.updateLabelHTML = false;
         }
@@ -61,25 +61,23 @@ function HTMLLabel()
 	}
 	else if (this.show.getValueDirect())
 	{
-		this.UpdateLabel(false);
+		this.updateLabel(false);
 	}
 
-    this.UpdateMouseOver();
+    this.updateMouseOver();
 
 	// call base-class implementation
-	RasterComponent.prototype.Update(params, visitChildren);
+	RasterComponent.prototype.update(params, visitChildren);
 }
 
- HTMLLabel.prototype.Apply = function(directive, params, visitChildren)
+ HTMLLabel.prototype.apply = function(directive, params, visitChildren)
 {
 	if (!this.enabled.getValueDirect())
     {
 		// call base-class implementation
-		RasterComponent.prototype.Apply(directive, params, visitChildren);
+		RasterComponent.prototype.apply(directive, params, visitChildren);
         return;
     }
-
-	this.applyLock.Lock("HTMLLabel.prototype.Apply");//(CReadWriteLock.prototype.eRWLockMode_Read);
 
     switch (directive)
     {
@@ -95,9 +93,8 @@ function HTMLLabel()
 				if (this.cullable.getValueDirect() == true &&
 					OutsideViewVolume(renderParams.viewVolume, 1.0, renderParams.viewMatrix))//worldViewMatrix))
                 {
-//#ifdef _DEBUG
-                    //OutputDebugMsg("Label: OutsideViewVolume() returned true; culling label\n");
-//#endif //_DEBUG
+                   console.log("Label: OutsideViewVolume() returned true; culling label\n");
+
                     // outside viewing-volume, skip drawing
                     drawNow = false;
                 }
@@ -115,7 +112,7 @@ function HTMLLabel()
 
             if (drawNow)
             {
-			    Draw();
+			    draw();
             }
 		}
 		break;
@@ -130,9 +127,8 @@ function HTMLLabel()
                 {
                     if (IsSelected(rayPickParams.clickPointX, rayPickParams.clickPointY))
                     {
-//#ifdef _DEBUG
-						//OutputDebugMsg("Label: IsSelected() returned true\n");
-//#endif //_DEBUG
+						console.log("Label: IsSelected() returned true\n");
+
                         // create path for selected geometry
                         var pickRecord;
                         var picked = params.currentNodePath;
@@ -156,13 +152,11 @@ function HTMLLabel()
 		break;
 	}
 
-	this.applyLock.Unlock();//(CReadWriteLock.prototype.eRWLockMode_Read);
-
 	// call base-class implementation
-	RasterComponent.prototype.Apply(directive, params, visitChildren);
+	RasterComponent.prototype.apply(directive, params, visitChildren);
 }
 
-HTMLLabel.prototype.UpdateWebBrowser = function()
+HTMLLabel.prototype.updateWebBrowser = function()
 {
     var windowHandle = this.wb.getAttribute("windowHandle").getValueDirect();
     //SAFE_RELEASE(this.wb);
@@ -175,7 +169,7 @@ HTMLLabel.prototype.UpdateWebBrowser = function()
     return ; //this.wb ? eNO_ERR : eERR_FAIL;
 }
 
-HTMLLabel.prototype.UpdateLabel = function(navigate)
+HTMLLabel.prototype.updateLabel = function(navigate)
 {
 	if (!this.wb)
 	{
@@ -200,7 +194,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		{
 			if (this.wb.navigate(labelStyle.url().getValueDirect(url), pageWidth, pageHeight))
             {
-                OutputDebugMsg("WARN: WebBrowser.prototype.Navigate() failed\n");
+                console.log("WARN: WebBrowser.prototype.Navigate() failed\n");
                 return;
             }
 		}
@@ -225,7 +219,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
              //   }
                /* catch ()
                 {
-                    OutputDebugMsg("WARN: exception caught in HTMLLabel.prototype.UpdateLabel()\n");
+                    OutputDebugMsg("WARN: exception caught in HTMLLabel.prototype.updateLabel()\n");
                     s_globalExcept.Throw(Except.prototype.eExceptCode_Unspecified);
                     return ;
                 }*/
@@ -245,23 +239,23 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 	if (this.show.getValueDirect())
 	{
 		// get label dimensions
-		this.UpdateLabelDimensions();
+		this.updateLabelDimensions();
 
 		// capture label
-		if (this.Capture(labelStyle.left().getValueDirect(), labelStyle.top().getValueDirect(), 
+		if (this.capture(labelStyle.left().getValueDirect(), labelStyle.top().getValueDirect(), 
 				            this.labelWidth.getValueDirect(), this.labelHeight.getValueDirect()))
         {
             return ;
         }
 	}
 
-    this.UpdateShowStates();
+    this.updateShowStates();
 
     return;
 }
 
 
- HTMLLabel.prototype.UpdateMouseOver = function ()
+ HTMLLabel.prototype.updateMouseOver = function ()
 {
     if (!this.wb ||
          this.x < 0 ||
@@ -322,10 +316,10 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		}
 	}
 
-    this.UpdateCursor(mouseOverLink);
+    this.updateCursor(mouseOverLink);
 }
 
- HTMLLabel.prototype.UpdateCursor = function( mouseOverLink)
+ HTMLLabel.prototype.updateCursor = function( mouseOverLink)
 {
     //ASK KEVIN
     /*const std.prototype.vector<CAttributeContainer*>* attributes;
@@ -336,7 +330,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
     }*/
 }
 
- HTMLLabel.prototype.UpdateLabelDimensions = function()
+ HTMLLabel.prototype.updateLabelDimensions = function()
 {
     // get label style (if specified)
 	//HTMLLabelStyleAttr* labelStyle = this.styles.getStyle<HTMLLabelStyleAttr>(); ASK KEVIN
@@ -478,7 +472,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 }
 
 
- HTMLLabel.prototype.UpdateShowStates = function()
+ HTMLLabel.prototype.updateShowStates = function()
 {
     switch (this.show.getValueDirect())
 	{
@@ -493,13 +487,13 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		{
 			if (this.vScrollBar) this.vScrollBar.getAttribute("show").setValueDirect(false);
 			if (this.hScrollBar) this.hScrollBar.getAttribute("show").setValueDirect(false);
-			// show states are maintained by Update(), so that when show goes from false to true, the last show state is restored
+			// show states are maintained by update(), so that when show goes from false to true, the last show state is restored
 		}
 		break;
 	};
 }
 
-HTMLLabel.prototype.Capture = function(x, y, width, height)
+HTMLLabel.prototype.capture = function(x, y, width, height)
 {
 	// get label style (if specified)
 	var labelStyle = this.styles.getStyle();
@@ -514,7 +508,7 @@ HTMLLabel.prototype.Capture = function(x, y, width, height)
 	var a;
 	labelStyle.bgColor().getValueDirect(r, g, b, a);
 	
-    var result = this.wb.Capture(this.label, x, y, width, height, TPixel(r, g, b, a), this.renderEngine.getFrameBufferOrigin());
+    var result = this.wb.capture(this.label, x, y, width, height, TPixel(r, g, b, a), this.renderEngine.getFrameBufferOrigin());
     if (result)
     {
         //this.updateLabelHTML = true;
@@ -523,7 +517,7 @@ HTMLLabel.prototype.Capture = function(x, y, width, height)
     return result;
 }
 
-HTMLLabel.prototype.Draw = function()
+HTMLLabel.prototype.draw = function()
 {
 	if (!(this.show.getValueDirect()))
 	{
@@ -934,13 +928,13 @@ HTMLLabel.prototype.Draw = function()
 	// TODO: handle clampToViewport
 }
 
-HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
+HTMLLabel.prototype.outsideViewVolume = function(viewVolume, scale, worldView)
 {
 	// TODO
 	return false;
 }
 
- HTMLLabel.prototype.IsSelected = function(x, y) 
+ HTMLLabel.prototype.isSelected = function(x, y) 
 {
 	// call base class implementation
 	var isSelected = RasterComponent.prototype.IsSelected(x, y);
@@ -948,7 +942,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 	return isSelected;
 }
 
- HTMLLabel.prototype.FormatHTML = function( raw)
+ HTMLLabel.prototype.formatHTML = function( raw)
 {
 	if (raw.empty())
 	{
@@ -985,7 +979,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 }
 
 
- HTMLLabel.prototype.FormatHTML = function(raw, style_width)
+ HTMLLabel.prototype.formatHTML = function(raw, style_width)
 {
 	if (raw.empty())
 	{
@@ -1028,7 +1022,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 	return raw;
 }
 
-HTMLLabel.prototype.LaunchPopup = function(href)
+HTMLLabel.prototype.launchPopup = function(href)
 {
 	if (!this.wb)
 	{
@@ -1039,7 +1033,7 @@ HTMLLabel.prototype.LaunchPopup = function(href)
 	return this.wb.navigate(href, width, height, "_blank");
 }
 
- HTMLLabel.prototype.RenderSequenceSlotModified = function()
+ HTMLLabel.prototype.renderSequenceSlotModified = function()
 {
 	var slot = this.renderSequenceSlot.getValueDirect();
 
@@ -1053,7 +1047,7 @@ HTMLLabel.prototype.LaunchPopup = function(href)
 	}
 }
 
-HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
+HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
 {
 	isSelected = false;
 
@@ -1197,7 +1191,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 	}
 }
 
- HTMLLabel.prototype.AllocateRenderContextResources = function()
+ HTMLLabel.prototype.allocateRenderContextResources = function()
 {
 	this.updateLabel = true;
 }
@@ -1230,7 +1224,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 	}
 }
 
- HTMLLabel_RenderSequenceSlotModifiedCB = fuction(attr, data)
+ HTMLLabel_RenderSequenceSlotModifiedCB = function(attr, data)
 {
 	var node = data;
     
