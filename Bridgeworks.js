@@ -12240,6 +12240,130 @@ function Camera_FarDistanceModifiedCB(attribute, container)
     container.updateFarDistance = true;
     container.incrementModificationCount();
 }
+OrthographicCamera.prototype = new Camera();
+OrthographicCamera.prototype.constructor = OrthographicCamera;
+
+function OrthographicCamera()
+{
+    Camera.call(this);
+    this.className = "OrthographicCamera";
+    this.attrType = eAttrType.OrthographicCamera;
+    
+    this.updateWidth = false;
+    
+    this.width = new NumberAttr(2);
+    
+    this.width.addModifiedCB(OrthographicCamera_WidthModifiedCB, this);
+    
+    this.registerAttribute(this.width, "width");
+}
+
+OrthographicCamera.prototype.update = function(params, visitChildren)
+{
+    if (this.updateWidth)
+    {
+        this.updateWidth = false;
+
+        this.updateClipPlanes = true;
+    }
+    
+    // call base-class implementation
+    Camera.prototype.update.call(this, params, visitChildren);
+}
+
+OrthographicCamera.prototype.apply = function(directive, params, visitChildren)
+{
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
+    {
+        // call base-class implementation
+        Camera.prototype.apply.call(this, directive, params, visitChildren);
+        return;
+    }
+    
+    switch (directive)
+    {
+    case "render":
+        {
+            if (!this.viewport.equals(params.viewport))
+            {
+                this.viewport = params.viewport;
+                this.updateClipPlanes = true;  
+            }
+            
+            if (this.updateClipPlanes)
+            {
+                this.updateClipPlanes = false;
+                
+                this.setClipPlanes();
+            }
+            
+            this.applyOrthographicTransform();
+        }
+        break;
+    }
+    
+    // call base-class implementation
+    Camera.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+OrthographicCamera.prototype.setClipPlanes = function()
+{
+    var width = this.width.getValueDirect();
+    var height = width * this.viewport.height / this.viewport.width;
+    
+    this.top = height / 2;
+    this.bottom = -this.top;
+    this.right = width / 2;
+    this.left = -this.right;
+    
+    this.projectionMatrix.loadMatrix(this.graphMgr.renderContext.orthographicMatrixLH(this.left, this.right,
+        this.top, this.bottom, this.near, this.far));
+        
+    // update view-volume attribute
+    var viewVolume = new ViewVolume();
+    viewVolume.setOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
+    this.viewVolume.setValueDirect(viewVolume.left, viewVolume.right, viewVolume.top, viewVolume.bottom,
+        viewVolume.near, viewVolume.far);    
+}
+
+OrthographicCamera.prototype.applyOrthographicTransform = function()
+{
+    this.graphMgr.renderContext.projectionMatrixStack.top().loadMatrix(this.projectionMatrix);
+    this.graphMgr.renderContext.applyProjectionTransform();
+}
+
+OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
+{
+    // normalize click coordinates so they span [-1, 1] on each axis
+    var normX =  ((clickPoint.x - viewport.x) / viewport.width  * 2 - 1);
+    var normY = -((clickPoint.y - viewport.y) / viewport.height * 2 - 1);
+
+    // determine the width/2 of the visible portion of the x axis on the 
+    // far clipping plane
+    var farX  = (this.right - this.left) / 2;
+
+    // determine the height/2 of the visible portion of the y axis on the
+    // far clipping plane
+    var farY  = (this.top - this.bottom) / 2;
+
+    // set ray origin as point within visible portion of x, y on the 
+    // near clipping plane corresponding to the normalized screen coordinates
+    var origin = new Vector3D(normX * farX, normY * farY, this.near);
+
+    // set ray direction as point within visible portion of x, y on the 
+    // far clipping plane corresponding to the normalized screen coordinates
+    //rayDir = CVector3Df(normX * farX, normY * farY, m_far);
+    var direction = new Vector3D(0, 0, 1);
+    
+    return { origin: origin, direction: direction };  
+}
+
+function OrthographicCamera_WidthModifiedCB(attribute, container)
+{
+    container.updateWidth = true;
+    container.incrementModificationCount();
+}
 PerspectiveCamera.prototype = new Camera();
 PerspectiveCamera.prototype.constructor = PerspectiveCamera;
 
@@ -18463,6 +18587,58 @@ function Scale_ScaleModifiedCB(attribute, container)
     container.updateScale = true;
     container.incrementModificationCount();
 }
+Translate.prototype = new Transform();
+Translate.prototype.constructor = Translate;
+
+function Translate()
+{
+    Transform.call(this);
+    this.className = "Translate";
+    this.attrType = eAttrType.Translate;
+    
+    this.translation = new Vector3DAttr(0, 0, 0);
+    this.updateTranslation = true;
+    
+    this.translation.addModifiedCB(Translate_TranslationModifiedCB, this);
+	
+    this.registerAttribute(this.translation, "translation");
+}
+
+Translate.prototype.update = function(params, visitChildren)
+{
+    if (this.updateTranslation)
+    {
+        this.updateTranslation = false;
+
+        var t = this.translation.getValueDirect();
+
+        var matrix = new Matrix4x4();
+        matrix.loadTranslation(t.x, t.y, t.z);
+        this.matrix.setValueDirect(matrix);
+    }
+
+    // call base-class implementation
+    Transform.prototype.update.call(this, params, visitChildren);
+}
+
+Translate.prototype.apply = function(directive, params, visitChildren)
+{
+    if (!this.enabled.getValueDirect())
+    {
+        // call base-class implementation
+        Transform.prototype.apply.call(this, directive, params, visitChildren);
+        return;
+    }
+
+    // call base-class implementation
+    Transform.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+function Translate_TranslationModifiedCB(attribute, container)
+{
+    container.updateTranslation = true;
+    container.incrementModificationCount();
+}
 SerializeParams.prototype = new DirectiveParams();
 SerializeParams.prototype.constructor = SerializeParams();
 
@@ -18530,182 +18706,6 @@ SerializeDirective.prototype.execute = function(path)
 	return;
 }
 
-Translate.prototype = new Transform();
-Translate.prototype.constructor = Translate;
-
-function Translate()
-{
-    Transform.call(this);
-    this.className = "Translate";
-    this.attrType = eAttrType.Translate;
-    
-    this.translation = new Vector3DAttr(0, 0, 0);
-    this.updateTranslation = true;
-    
-    this.translation.addModifiedCB(Translate_TranslationModifiedCB, this);
-	
-    this.registerAttribute(this.translation, "translation");
-}
-
-Translate.prototype.update = function(params, visitChildren)
-{
-    if (this.updateTranslation)
-    {
-        this.updateTranslation = false;
-
-        var t = this.translation.getValueDirect();
-
-        var matrix = new Matrix4x4();
-        matrix.loadTranslation(t.x, t.y, t.z);
-        this.matrix.setValueDirect(matrix);
-    }
-
-    // call base-class implementation
-    Transform.prototype.update.call(this, params, visitChildren);
-}
-
-Translate.prototype.apply = function(directive, params, visitChildren)
-{
-    if (!this.enabled.getValueDirect())
-    {
-        // call base-class implementation
-        Transform.prototype.apply.call(this, directive, params, visitChildren);
-        return;
-    }
-
-    // call base-class implementation
-    Transform.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-function Translate_TranslationModifiedCB(attribute, container)
-{
-    container.updateTranslation = true;
-    container.incrementModificationCount();
-}
-OrthographicCamera.prototype = new Camera();
-OrthographicCamera.prototype.constructor = OrthographicCamera;
-
-function OrthographicCamera()
-{
-    Camera.call(this);
-    this.className = "OrthographicCamera";
-    this.attrType = eAttrType.OrthographicCamera;
-    
-    this.updateWidth = false;
-    
-    this.width = new NumberAttr(2);
-    
-    this.width.addModifiedCB(OrthographicCamera_WidthModifiedCB, this);
-    
-    this.registerAttribute(this.width, "width");
-}
-
-OrthographicCamera.prototype.update = function(params, visitChildren)
-{
-    if (this.updateWidth)
-    {
-        this.updateWidth = false;
-
-        this.updateClipPlanes = true;
-    }
-    
-    // call base-class implementation
-    Camera.prototype.update.call(this, params, visitChildren);
-}
-
-OrthographicCamera.prototype.apply = function(directive, params, visitChildren)
-{
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
-    {
-        // call base-class implementation
-        Camera.prototype.apply.call(this, directive, params, visitChildren);
-        return;
-    }
-    
-    switch (directive)
-    {
-    case "render":
-        {
-            if (!this.viewport.equals(params.viewport))
-            {
-                this.viewport = params.viewport;
-                this.updateClipPlanes = true;  
-            }
-            
-            if (this.updateClipPlanes)
-            {
-                this.updateClipPlanes = false;
-                
-                this.setClipPlanes();
-            }
-            
-            this.applyOrthographicTransform();
-        }
-        break;
-    }
-    
-    // call base-class implementation
-    Camera.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-OrthographicCamera.prototype.setClipPlanes = function()
-{
-    var width = this.width.getValueDirect();
-    var height = width * this.viewport.height / this.viewport.width;
-    
-    this.top = height / 2;
-    this.bottom = -this.top;
-    this.right = width / 2;
-    this.left = -this.right;
-    
-    this.projectionMatrix.loadMatrix(this.graphMgr.renderContext.orthographicMatrixLH(this.left, this.right,
-        this.top, this.bottom, this.near, this.far));
-        
-    // update view-volume attribute
-    var viewVolume = new ViewVolume();
-    viewVolume.setOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
-    this.viewVolume.setValueDirect(viewVolume.left, viewVolume.right, viewVolume.top, viewVolume.bottom,
-        viewVolume.near, viewVolume.far);    
-}
-
-OrthographicCamera.prototype.applyOrthographicTransform = function()
-{
-    this.graphMgr.renderContext.projectionMatrixStack.top().loadMatrix(this.projectionMatrix);
-    this.graphMgr.renderContext.applyProjectionTransform();
-}
-
-OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
-{
-    // normalize click coordinates so they span [-1, 1] on each axis
-    var normX =  ((clickPoint.x - viewport.x) / viewport.width  * 2 - 1);
-    var normY = -((clickPoint.y - viewport.y) / viewport.height * 2 - 1);
-
-    // determine the width/2 of the visible portion of the x axis on the 
-    // far clipping plane
-    var farX  = (this.right - this.left) / 2;
-
-    // determine the height/2 of the visible portion of the y axis on the
-    // far clipping plane
-    var farY  = (this.top - this.bottom) / 2;
-
-    // set ray origin as point within visible portion of x, y on the 
-    // near clipping plane corresponding to the normalized screen coordinates
-    var origin = new Vector3D(normX * farX, normY * farY, this.near);
-
-    // set ray direction as point within visible portion of x, y on the 
-    // far clipping plane corresponding to the normalized screen coordinates
-    //rayDir = CVector3Df(normX * farX, normY * farY, m_far);
-    var direction = new Vector3D(0, 0, 1);
-    
-    return { origin: origin, direction: direction };  
-}
-
-function OrthographicCamera_WidthModifiedCB(attribute, container)
-{
-    container.updateWidth = true;
-    container.incrementModificationCount();
-}
 var eEventType = {
     Unknown                     :-1,
     
@@ -19335,130 +19335,6 @@ function SetCommand_TargetModifiedCB(attribute, container)
     }
     
     setAttributeBin(container.attributeValuePairs);
-}
-PlayCommand.prototype = new Command();
-PlayCommand.prototype.constructor = PlayCommand;
-
-function PlayCommand()
-{
-    Command.call(this);
-    this.className = "PlayCommand";
-
-    this.evaluators = [];
-    this.negate = new BooleanAttr(false);   // if true, Pause
-    
-    this.registerAttribute(this.negate, "negate");
-    
-    this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
-
-}
-
-PlayCommand.prototype.execute = function()
-{
-    // TODO: enabled (?)
-	var renderAgent = this.registry.find("RenderAgent");
-	if (renderAgent)
-	{
-        // SetEvaluatorPlayState not implemented by RenderAgent
-        // ePlayState_* is not implemented by RenderAgent
-        if (this.evaluators.length < 1)
-        {
-			if (this.negate.getValueDirect() == false)
-			{
-				renderAgent.setEvaluatorsPlayState(ePlayState.Play);
-			}
-			else
-			{
-				renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
-			}
-        }
-        else
-        {
-            for (var i = 0; i < this.evaluators.length; i++)
-            {
-         
-    			if (this.negate.getValueDirect() == false)
-    			{
-    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Play);
-    			}
-    			else
-    			{
-    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Pause);
-    			}
-            
-            }   
-        }
-	}
-}
-
-function PlayCommand_TargetModifiedCB(attribute, container)
-{
-    var target = attribute.getValueDirect().join("");
-    var targets = target.split(",");
-
-    // find one or more evaluator to play
-    container.targets.length = 0;   // copied this from Set. What does it do?
-    for (var i = 0; i < targets.length; i++)
-    {
-        var evaluator = container.registry.find(targets[i]);
-        if (evaluator)
-        {
-            container.evaluators[i] = evaluator;
-        }
-    }
-}
-StopCommand.prototype = new Command();
-StopCommand.prototype.constructor = StopCommand;
-
-function StopCommand()
-{
-    Command.call(this);
-    this.className = "StopCommand";
-
-    this.evaluators = [];
-    
-    this.target.addModifiedCB(StopCommand_TargetModifiedCB, this);
-
-}
-
-StopCommand.prototype.execute = function()
-{
-    // TODO: enabled (?)
-	var renderAgent = this.registry.find("RenderAgent");
-	if (renderAgent)
-	{
-        // SetEvaluatorStopState not implemented by RenderAgent
-        // eStopState_* is not implemented by RenderAgent
-        if (this.evaluators.length < 1)
-        {
-			renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
-        }
-        else
-        {
-            for (var i = 0; i < this.evaluators.length; i++)
-            {
-         
-    			renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Stop);
-            }   
-        }
-	}
-}
-
-function StopCommand_TargetModifiedCB(attribute, container)
-{
-    var target = attribute.getValueDirect().join("");
-    var targets = target.split(",");
-
-    // find one or more evaluator to play
-    container.targets.length = 0;   // copied this from Set. What does it do?
-    for (var i = 0; i < targets.length; i++)
-    {
-        var evaluator = container.registry.find(targets[i]);
-        if (evaluator)
-        {
-            container.evaluators[i] = evaluator;
-        }
-    }
 }
 function ConnectionDesc()
 {
@@ -20346,6 +20222,590 @@ function LocateCommand_TargetModifiedCB(attribute, container)
     }
 }
 
+PlayCommand.prototype = new Command();
+PlayCommand.prototype.constructor = PlayCommand;
+
+function PlayCommand()
+{
+    Command.call(this);
+    this.className = "PlayCommand";
+
+    this.evaluators = [];
+    this.negate = new BooleanAttr(false);   // if true, Pause
+    
+    this.registerAttribute(this.negate, "negate");
+    
+    this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
+
+}
+
+PlayCommand.prototype.execute = function()
+{
+    // TODO: enabled (?)
+	var renderAgent = this.registry.find("RenderAgent");
+	if (renderAgent)
+	{
+        // SetEvaluatorPlayState not implemented by RenderAgent
+        // ePlayState_* is not implemented by RenderAgent
+        if (this.evaluators.length < 1)
+        {
+			if (this.negate.getValueDirect() == false)
+			{
+				renderAgent.setEvaluatorsPlayState(ePlayState.Play);
+			}
+			else
+			{
+				renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
+			}
+        }
+        else
+        {
+            for (var i = 0; i < this.evaluators.length; i++)
+            {
+         
+    			if (this.negate.getValueDirect() == false)
+    			{
+    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Play);
+    			}
+    			else
+    			{
+    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Pause);
+    			}
+            
+            }   
+        }
+	}
+}
+
+function PlayCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var targets = target.split(",");
+
+    // find one or more evaluator to play
+    container.targets.length = 0;   // copied this from Set. What does it do?
+    for (var i = 0; i < targets.length; i++)
+    {
+        var evaluator = container.registry.find(targets[i]);
+        if (evaluator)
+        {
+            container.evaluators[i] = evaluator;
+        }
+    }
+}
+RemoveCommand.prototype = new Command();
+RemoveCommand.prototype.constructor = RemoveCommand;
+
+function RemoveCommand()
+{
+    Command.call(this);
+    this.className = "RemoveCommand";
+
+    this.targetAttribute = null;
+    
+    this.target.addModifiedCB(RemoveCommand_TargetModifiedCB, this);
+}
+
+RemoveCommand.prototype.execute = function()
+{
+    if (this.targetAttribute)
+    {
+        // if node, remove from tree, and remove/unregister all children
+        if (this.targetAttribute.isNode())
+        {
+            var i = 0;
+            var parent = null;
+            while ((parent = this.targetAttribute.getParent(i++)))
+            {
+                parent.removeChild(this.targetAttribute);
+            }
+
+            this.removeChildren(this.targetAttribute);
+        }
+
+        // remove from registry
+        this.registry.unregister(this.targetAttribute);
+        
+        // delete
+        this.targetAttribute.destroy();
+    }
+}
+
+RemoveCommand.prototype.removeChildren = function(root)
+{
+    var child = null;
+	while ((child = root.getChild(0))) // get child 0 each time because we are removing the front child
+	{
+		// recurse on child
+		this.removeChildren(child);
+
+		// remove from registry
+		this.registry.unregister(child);
+
+		// remove from root node
+		root.removeChild(child);
+	}
+}
+
+function RemoveCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    container.targetAttribute = container.registry.find(target);
+}
+
+StopCommand.prototype = new Command();
+StopCommand.prototype.constructor = StopCommand;
+
+function StopCommand()
+{
+    Command.call(this);
+    this.className = "StopCommand";
+
+    this.evaluators = [];
+    
+    this.target.addModifiedCB(StopCommand_TargetModifiedCB, this);
+
+}
+
+StopCommand.prototype.execute = function()
+{
+    // TODO: enabled (?)
+	var renderAgent = this.registry.find("RenderAgent");
+	if (renderAgent)
+	{
+        // SetEvaluatorStopState not implemented by RenderAgent
+        // eStopState_* is not implemented by RenderAgent
+        if (this.evaluators.length < 1)
+        {
+			renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
+        }
+        else
+        {
+            for (var i = 0; i < this.evaluators.length; i++)
+            {
+         
+    			renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Stop);
+            }   
+        }
+	}
+}
+
+function StopCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var targets = target.split(",");
+
+    // find one or more evaluator to play
+    container.targets.length = 0;   // copied this from Set. What does it do?
+    for (var i = 0; i < targets.length; i++)
+    {
+        var evaluator = container.registry.find(targets[i]);
+        if (evaluator)
+        {
+            container.evaluators[i] = evaluator;
+        }
+    }
+}
+CommandSequence.prototype = new Command();
+CommandSequence.prototype.constructor = CommandSequence;
+
+function CommandSequence()
+{
+    Command.call(this);
+    this.className = "CommandSequence";
+    
+    this.sequence = [];
+}
+
+CommandSequence.prototype.execute = function()
+{
+    for (var i=0; i < this.sequence.length; i++)
+    {
+        this.sequence[i].execute();
+    }
+}
+
+CommandSequence.prototype.addCommand = function(command)
+{
+    this.sequence.push(command);
+}
+CommandMgr.prototype = new AttributeContainer();
+CommandMgr.prototype.constructor = CommandMgr;
+
+function CommandMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "CommandMgr";
+    
+    this.sequenceStack = new Stack();
+    
+    this.name = new StringAttr("CommandMgr");
+    
+    this.registerAttribute(this.name, "name");
+}
+
+CommandMgr.prototype.pushCommandSequence = function(sequence)
+{
+    this.sequenceStack.push(sequence);
+}
+
+CommandMgr.prototype.popCommandSequence = function()
+{
+    this.sequenceStack.pop();
+}
+
+CommandMgr.prototype.clearCommandSequence = function()
+{
+    this.sequenceStack.clear();
+}
+
+CommandMgr.prototype.addCommand = function(command)
+{
+    if (this.sequenceStack.length > 0)
+    {
+        this.sequenceStack.top().addCommand(command);
+        return;
+    }
+    
+    // execute the command or register it for events.  If the command
+    // was NOT configured for events, then Execute it and get rid of it             
+    var events = command.getEventTypes();
+    var trigger = command.getAttribute("trigger");
+    if (events.length > 0)
+    {
+        var eventMgr = this.registry.find("EventMgr");
+        if (eventMgr)
+        {
+            for (var i=0; i < events.length; i++)
+            {
+                eventMgr.addListener(events[i], command);
+            }
+        }   
+    }
+    else if (trigger.getLength() > 0)
+    {
+		trigger.addModifiedCB(CommandMgr_CommandTriggerModifiedCB, this);
+		this.createCommandTrigger(command, trigger);
+    }
+    else // no events -- execute and remove
+    {
+        command.execute();
+        this.registry.unregister(command);
+    }
+    
+    setAttributeBin(null);
+}
+
+CommandMgr.prototype.createCommandTrigger = function(command, trigger) 
+ {
+
+ 	// TODO: Support Commands that Execute from Events AND Triggers
+
+ 	// trigger syntax based on Attributes:
+ 	// ObjectName/Attribute=value
+ 	// ObjectName/Attribute[item]=value
+ 	// ObjectName/Attribute=value,value,value,...,value
+ 	// Where "ObjectName" may be an XPath-like expression
+ 	var attrNdx = 0;
+    var valueNdx = 0;
+    var rangeNdx = 0;
+    var itemNdx = 0;
+
+    var triggerString = "";
+    triggerString = trigger.getValueDirect().join("");
+ 	attrNdx = triggerString.lastIndexOf('/');
+
+     console.debug(triggerString);
+
+ 	if (attrNdx != -1)
+ 	{
+ 		var objectName = triggerString.substring(0, attrNdx);
+ 		var resource = bridgeworks.registry.find(objectName);
+ 		if(resource)
+ 		{
+ 			var not = false;
+
+            var attrName = "";
+            var itemString = "";
+            var valueString = "";
+            var rangeString = "";
+            
+ 			valueNdx = triggerString.lastIndexOf('!');
+ 			if (valueNdx > 0)
+ 			{
+ 			    triggerString.replace("!", ""); // erase the '!' for subsequent processing
+ 			    not = true;
+ 			}
+
+ 			valueNdx = triggerString.lastIndexOf('=');
+
+ 			if(valueNdx > 0) 
+ 			{
+ 				itemNdx = triggerString.lastIndexOf('[');
+ 				if(itemNdx > 0) 
+ 				{
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx); 
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2 - itemNdx - 1); 
+ 				}
+
+ 				var range = FLT_MAX; 
+ 				var rangeNdx = triggerString.lastIndexOf(',');
+ 				if(rangeNdx > 0)
+ 				{
+ 					var rangeString = triggerString.substring(rangeNdx+1, trigger.length()-rangeNdx-1);
+ 					range = rangeString.parseFloat(); 
+ 				}
+ 				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
+ 				// value is the string between '=' && (',' || end of string)
+ 				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
+
+                console.debug(objectName);
+                console.debug(valueString);
+ 			}
+ 			else //TEMPEST
+ 			{
+ 				itemNdx = triggerString.lastIndexOf('[');
+ 				if(itemNdx > 0) 
+ 				{
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx);
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2-itemNdx-1);
+ 				}
+ 			}
+ 			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
+ 			attrName = triggerString.substring(attrNdx+1, valueNdx);
+
+            console.debug(attrName);
+
+ 			var input = resource.getAttribute(attrName);
+
+ 			var attr = this.createAttribute(input, valueString);
+
+ 			if(attr)
+ 			{
+ 				var item = -1; 
+ 				if(itemString != "")
+ 				{
+ 					item = parseInt(itemString);
+ 				}
+
+ 				var numExecutions = command.numResponses;
+ 				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
+
+ 				command.setTrigger(newTrigger);
+ 			}
+ 			triggerString = objectName + "/" + attrName;
+
+            //newTrigger.execute();
+            //command.execute(trigger);
+ 			console.debug(trigger);
+ 			console.debug("\n");
+ 		}		
+ 	}
+ }
+
+CommandMgr.prototype.createAttribute = function(attribute, value)
+{
+	var newAttribute = null;
+	if(attribute)
+	{
+        //console.debug(attribute);
+		var etype = attribute.attrType;
+		var len = attribute.getLength();
+        //console.debug(etype);
+//			switch (etype)
+//			{
+//
+//			case eAttrType.BooleanAttr:
+//				{
+//					newAttribute = new NumberAttr();
+//		            newAttribute.setValueDirect(parseInt(value));
+//				}
+//				break;
+//            case eAttrType.NumberAttr:
+//
+//				{
+					newAttribute = new NumberAttr();
+		            newAttribute.setValueDirect(parseFloat(value));
+//				}
+//				break;
+//
+//            case eAttrType.StringAttr:
+//				{
+//					newAttribute = new StringAttr();
+//                    newAttribute.setValueDirect(value);
+//				}
+//				break;
+//
+//			default:
+//				newAttribute = null;
+//				break;
+//			}
+		  }
+        //console.debug(newAttribute);
+		return newAttribute; 
+}
+
+function CommandMgr_CommandTriggerModifiedCB(attribute, container)
+{
+	this.createCommandTrigger(attribute, container);
+}
+
+AttributeTrigger.prototype = new Command();
+AttributeTrigger.prototype.constructor = AttributeTrigger;
+
+
+function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
+{
+    this.input = input;
+    this.trigger = trigger;
+    this.target = target;
+//    console.debug(input);
+//    console.debug(trigger);
+//    console.debug(target);
+
+    this.lastValues = [];
+    //this.lastValues[] = this.input.getValueDirect();
+
+	this.input.getValue(this.lastValues);
+	
+    this.item = item;
+    
+    this.not = _not;
+
+
+    this.executionCount = _executionCount;
+    
+    //this.executionCount = new NumberAttr(this.executionCount);
+
+	//this.input.addRef();
+
+	this.input.addModifiedCB(AttributeTrigger_InputModifiedCB, this);
+
+	//this.target.setUndoable(false);
+
+	//this.input.getValue(this.lastValues);
+  //  this.lastValues = this.input.getValueDirect();
+
+	var len = this.input.getLength();
+
+	if (len == 1)
+	{
+		this.item = 0;
+	}
+}
+
+
+AttributeTrigger.prototype.execute = function()
+{
+	if (this.target)
+	{
+        var type = this.trigger.attrType;
+
+        switch (type)
+        {
+
+        case eAttrType.StringAttr:
+            {
+                //console.debug("THIS HITS STRINGATTR");
+                var vIn = [];
+                var vTrig = [];
+            
+                this.input.getValue(vIn);
+                this.trigger.getValue(vTrig);
+
+                var pass = vIn[0] == vTrig[0] ? true : false;
+                pass = this.not ? !pass : pass;
+                if (pass)
+                {
+					//err = this.target.execute();
+					this.executionCount.setValueDirect(--this.executionCount);
+                }
+
+                if (this.executionCount == 0)
+		        {
+			        this.target = null;
+		        }
+            }
+            break;
+
+        default:
+            {
+                //console.debug("THIS HITS DEFAULT");
+                var vIn = [];
+                var vTrig = [];
+
+		        this.input.getValue(vIn);
+		        this.trigger.getValue(vTrig);
+
+		        // match single-item Attribute OR single item of a multi-item Attribute
+		        if (this.item != -1)
+		        {
+			        // if equal OR descending past OR ascending past
+                    var pass = ((vIn[this.item] == vTrig[0]) ||
+			                     (this.lastValues[this.item] > vIn[this.item] && vIn[this.item] < vTrig[0]) ||
+			                     (this.lastValues[this.item] < vIn[this.item] && vIn[this.item] > vTrig[0]));
+                    pass = this.not ? !pass : pass;
+                    if (pass)
+			        {
+						this.target.execute();
+                        var count = this.executionCount.getValueDirect() - 1;
+				        this.executionCount.setValueDirect(count);
+			        }
+		        }
+		        else	// match every item in a multi-item Attribute
+		        {
+			        var len = this.input.getLength();
+			        var matches = 0;
+			        for (var i = 0; i < len; ++i)
+			        {
+				        // if equal OR descending past OR ascending past
+				        var pass = ((vIn[i] == vTrig[i]) ||
+				                     (this.lastValues[i] > vIn[i] && vIn[i] < vTrig[i]) ||
+				                     (this.lastValues[i] < vIn[i] && vIn[i] > vTrig[i]));
+                        pass = this.not ? !pass : pass;
+                        if (pass)
+				        {
+					        ++matches;
+				        }
+			        }
+
+			        // if every item matches simultaneously
+			        if (matches = len)
+			        {
+						err = this.target.execute();
+						this.executionCount.setValueDirect(--this.executionCount);
+			        }
+		        }
+
+		        if (this.executionCount == 0)
+		        {
+			        this.target = null;
+		        }
+		        else
+		        {
+			        this.lastValues = vIn;
+		        }
+            }
+            break;
+        }
+	}
+
+	return;
+}
+
+function AttributeTrigger_InputModifiedCB(attribute, container)
+{
+	container.execute();
+
+	// TODO:  Expand to also support EventListener::EventPerformed
+}
+/*
+void AttributeTrigger_InputModifiedTaskProc(void* data, const bool & run)
+{
+	TAttributeTrigger* pTrigger = static_cast<TAttributeTrigger*>(data);
+	pTrigger.Execute();
+}
+*/
 BwRegistry.prototype = new AttributeRegistry();
 BwRegistry.prototype.constructor = BwRegistry;
 
@@ -21044,672 +21504,6 @@ function BwSceneInspector_SelectionOccurredCB(attribute, container)
 
 
 
-CommandSequence.prototype = new Command();
-CommandSequence.prototype.constructor = CommandSequence;
-
-function CommandSequence()
-{
-    Command.call(this);
-    this.className = "CommandSequence";
-    
-    this.sequence = [];
-}
-
-CommandSequence.prototype.execute = function()
-{
-    for (var i=0; i < this.sequence.length; i++)
-    {
-        this.sequence[i].execute();
-    }
-}
-
-CommandSequence.prototype.addCommand = function(command)
-{
-    this.sequence.push(command);
-}
-CommandMgr.prototype = new AttributeContainer();
-CommandMgr.prototype.constructor = CommandMgr;
-
-function CommandMgr()
-{
-    AttributeContainer.call(this);
-    this.className = "CommandMgr";
-    
-    this.sequenceStack = new Stack();
-    
-    this.name = new StringAttr("CommandMgr");
-    
-    this.registerAttribute(this.name, "name");
-}
-
-CommandMgr.prototype.pushCommandSequence = function(sequence)
-{
-    this.sequenceStack.push(sequence);
-}
-
-CommandMgr.prototype.popCommandSequence = function()
-{
-    this.sequenceStack.pop();
-}
-
-CommandMgr.prototype.clearCommandSequence = function()
-{
-    this.sequenceStack.clear();
-}
-
-CommandMgr.prototype.addCommand = function(command)
-{
-    if (this.sequenceStack.length > 0)
-    {
-        this.sequenceStack.top().addCommand(command);
-        return;
-    }
-    
-    // execute the command or register it for events.  If the command
-    // was NOT configured for events, then Execute it and get rid of it             
-    var events = command.getEventTypes();
-    var trigger = command.getAttribute("trigger");
-    if (events.length > 0)
-    {
-        var eventMgr = this.registry.find("EventMgr");
-        if (eventMgr)
-        {
-            for (var i=0; i < events.length; i++)
-            {
-                eventMgr.addListener(events[i], command);
-            }
-        }   
-    }
-    else if (trigger.getLength() > 0)
-    {
-		trigger.addModifiedCB(CommandMgr_CommandTriggerModifiedCB, this);
-		this.createCommandTrigger(command, trigger);
-    }
-    else // no events -- execute and remove
-    {
-        command.execute();
-        this.registry.unregister(command);
-    }
-    
-    setAttributeBin(null);
-}
-
-CommandMgr.prototype.createCommandTrigger = function(command, trigger) 
- {
-
- 	// TODO: Support Commands that Execute from Events AND Triggers
-
- 	// trigger syntax based on Attributes:
- 	// ObjectName/Attribute=value
- 	// ObjectName/Attribute[item]=value
- 	// ObjectName/Attribute=value,value,value,...,value
- 	// Where "ObjectName" may be an XPath-like expression
- 	var attrNdx = 0;
-    var valueNdx = 0;
-    var rangeNdx = 0;
-    var itemNdx = 0;
-
-    var triggerString = "";
-    triggerString = trigger.getValueDirect().join("");
- 	attrNdx = triggerString.lastIndexOf('/');
-
-     console.debug(triggerString);
-
- 	if (attrNdx != -1)
- 	{
- 		var objectName = triggerString.substring(0, attrNdx);
- 		var resource = bridgeworks.registry.find(objectName);
- 		if(resource)
- 		{
- 			var not = false;
-
-            var attrName = "";
-            var itemString = "";
-            var valueString = "";
-            var rangeString = "";
-            
- 			valueNdx = triggerString.lastIndexOf('!');
- 			if (valueNdx > 0)
- 			{
- 			    triggerString.replace("!", ""); // erase the '!' for subsequent processing
- 			    not = true;
- 			}
-
- 			valueNdx = triggerString.lastIndexOf('=');
-
- 			if(valueNdx > 0) 
- 			{
- 				itemNdx = triggerString.lastIndexOf('[');
- 				if(itemNdx > 0) 
- 				{
- 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx); 
- 					itemString = triggerString.substring(itemNdx+1, itemNdx2 - itemNdx - 1); 
- 				}
-
- 				var range = FLT_MAX; 
- 				var rangeNdx = triggerString.lastIndexOf(',');
- 				if(rangeNdx > 0)
- 				{
- 					var rangeString = triggerString.substring(rangeNdx+1, trigger.length()-rangeNdx-1);
- 					range = rangeString.parseFloat(); 
- 				}
- 				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
- 				// value is the string between '=' && (',' || end of string)
- 				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
-
-                console.debug(objectName);
-                console.debug(valueString);
- 			}
- 			else //TEMPEST
- 			{
- 				itemNdx = triggerString.lastIndexOf('[');
- 				if(itemNdx > 0) 
- 				{
- 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx);
- 					itemString = triggerString.substring(itemNdx+1, itemNdx2-itemNdx-1);
- 				}
- 			}
- 			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
- 			attrName = triggerString.substring(attrNdx+1, valueNdx);
-
-            console.debug(attrName);
-
- 			var input = resource.getAttribute(attrName);
-
- 			var attr = this.createAttribute(input, valueString);
-
- 			if(attr)
- 			{
- 				var item = -1; 
- 				if(itemString != "")
- 				{
- 					item = parseInt(itemString);
- 				}
-
- 				var numExecutions = command.numResponses;
- 				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
-
- 				command.setTrigger(newTrigger);
- 			}
- 			triggerString = objectName + "/" + attrName;
-
-            //newTrigger.execute();
-            //command.execute(trigger);
- 			console.debug(trigger);
- 			console.debug("\n");
- 		}		
- 	}
- }
-
-CommandMgr.prototype.createAttribute = function(attribute, value)
-{
-	var newAttribute = null;
-	if(attribute)
-	{
-        //console.debug(attribute);
-		var etype = attribute.attrType;
-		var len = attribute.getLength();
-        //console.debug(etype);
-//			switch (etype)
-//			{
-//
-//			case eAttrType.BooleanAttr:
-//				{
-//					newAttribute = new NumberAttr();
-//		            newAttribute.setValueDirect(parseInt(value));
-//				}
-//				break;
-//            case eAttrType.NumberAttr:
-//
-//				{
-					newAttribute = new NumberAttr();
-		            newAttribute.setValueDirect(parseFloat(value));
-//				}
-//				break;
-//
-//            case eAttrType.StringAttr:
-//				{
-//					newAttribute = new StringAttr();
-//                    newAttribute.setValueDirect(value);
-//				}
-//				break;
-//
-//			default:
-//				newAttribute = null;
-//				break;
-//			}
-		  }
-        //console.debug(newAttribute);
-		return newAttribute; 
-}
-
-function CommandMgr_CommandTriggerModifiedCB(attribute, container)
-{
-	this.createCommandTrigger(attribute, container);
-}
-
-var FRAME_RATE_DEFAULT = 30;
-var FRAME_RATE_MAX = FRAME_RATE_DEFAULT * 32;
-var FRAME_RATE_MIN = FRAME_RATE_DEFAULT * -32;
-
-RenderController.prototype = new AttributeContainer();
-RenderController.prototype.constructor = RenderController;
-
-function RenderController(bridgeworks)
-{
-    AttributeContainer.call(this);
-    this.className = "RenderController";
-    
-    this.playState = ePlayState.Pause;
-    
-    this.renderAgent = bridgeworks.renderAgent;
-}
-
-RenderController.prototype.fastForward = function()
-{
-    this.play();
-    var rate = this.renderAgent.frameRate.getValueDirect();
-    if (rate < 0)
-    {
-        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
-    }
-    
-    if (rate < FRAME_RATE_MAX)
-	{
-		this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * 2);
-	}
-	else
-	{
-		// clamp to max fast forward speed
-		this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MAX);
-	}
-}
-
-RenderController.prototype.pause = function()
-{
-    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
-    this.renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
-}
-
-RenderController.prototype.play = function()
-{
-    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
-    this.renderAgent.setEvaluatorsPlayState(ePlayState.Play);    
-}
-
-RenderController.prototype.rewind = function()
-{
-    this.play();
-    var rate = this.renderAgent.frameRate.getValueDirect();
-    if (rate > 0)
-    {
-        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
-    }
-    if (rate > FRAME_RATE_MIN)
-    {
-        this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * -2);
-    }
-    else
-    {
-        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MIN);    
-    }
-}
-
-RenderController.prototype.stop = function()
-{
-    this.renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
-    this.renderAgent.desiredFrameRate.setValueDirect(1);
-}
-
-
-/**
- *	Reverses the frame rate and updates a status label with the
- *	current playback speed.  Rewind is a negative frame rate
- *  that doubles with each push of the button until 
- *  BridgeworksObject.FRAME_RATE_MIN is reached
- *	
- *	@param void
- *	@return void
-	
-function DVD_Rewind()
-{
-    bridgeworks.updateScene("<Play/>");
-    
-
-    if (bridgeworks.renderAgent.frameRate > 0)
-    {
-        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
-    }
-    
-    if (bridgeworks.renderAgent.frameRate > FRAME_RATE_MIN)	// if fast forwarding or playing
-	{
-		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * -2);
-	}
-	else	// max rewind value reached
-	{
-		// clamp to max rewind speed
-		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MIN);
-	}
-    
-    g_paused = false;
-
-}
- */
-
-/**
- *	Fast forwards the frame rate and updates a status label with the
- *	current playback speed.  Fast forward is a positive frame rate
- *  that doubles with each push of the button until
- *  BridgeworksObject.FRAME_RATE_MAX is reached
- *	
- *	@param void
- *	@return void
-
-function DVD_FastForward()
-{
-    bridgeworks.updateScene("<Play/>");
-    
-    if (bridgeworks.renderAgent.frameRate < 0)
-    {
-        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
-    }
-    
-    if (bridgeworks.renderAgent.frameRate < FRAME_RATE_MAX)
-	{
-		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * 2);
-	}
-	else
-	{
-		// clamp to max fast forward speed
-		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MAX);
-	}
-    
-    g_paused = false;
-
-}
- */	
-
-ConnectionMgr.prototype = new AttributeContainer();
-ConnectionMgr.prototype.constructor = ConnectionMgr;
-
-function ConnectionMgr()
-{
-    AttributeContainer.call(this);
-    this.className = "ConnectionMgr";
-    
-    this.name = new StringAttr("ConnectionMgr");
-    
-    this.registerAttribute(this.name, "name");
-    
-    // TODO: finish adding connection helpers
-    //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
-    registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
-    registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
-}
-
-ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
-{
-    if (!inspector || !camera) return;
-    
-    var lastCamera = inspector.getCamera();
-    if (lastCamera == camera)
-    {
-        // already connected
-        return;
-    }
-    else if (lastCamera)
-    {
-        this.disconnectSceneInspection(inspector, lastCamera);
-    }
-
-    camera.getAttribute("sectorPosition").addTarget(inspector.getAttribute("viewPosition"), eAttrSetOp.Replace, null, true);
-    camera.getAttribute("rotation").addTarget(inspector.getAttribute("viewRotation"), eAttrSetOp.Replace, null, true);
-
-    inspector.getAttribute("resultPosition").addTarget(camera.getAttribute("sectorPosition"), eAttrSetOp.Replace, null, false);
-    inspector.getAttribute("resultRotation").addTarget(camera.getAttribute("rotation"), eAttrSetOp.Replace, null, false);
-    
-    inspector.setCamera(camera);
-}
-
-ConnectionMgr.prototype.disconnectAllTargets = function(source, target)
-{
-    if (source)
-    {
-        var count = source.getAttributeCount();
-        for (var i=0; i < count; i++)
-        {
-            var attribute = source.getAttributeAt(i);
-            if (attribute)
-            {
-                attribute.removeAllTargets();
-            }
-        }
-    }
-}
-
-ConnectionMgr.prototype.disconnectSceneInspection = function(inspector, camera)
-{
-    if (!inspector || !camera) return;
-    
-    camera.getAttribute("sectorPosition").removeTarget(inspector.getAttribute("viewPosition"));
-    camera.getAttribute("rotation").removeTarget(inspector.getAttribute("viewRotation"));
-    
-    inspector.getAttribute("resultPosition").removeTarget(camera.getAttribute("sectorPosition"));
-    inspector.getAttribute("resultRotation").removeTarget(camera.getAttribute("rotation"));
-    
-    inspector.setCamera(null);
-}
-
-ConnectionMgr.prototype.connectMapProjectionCalculator = function(mpc, pme)
-{
-    if (!mpc || !pme) return;
-
-    mpc.getAttribute("resultPosition").addTarget(pme.getAttribute("position"));
-
-    mpc.evaluate();
-}
-
-ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
-{
-    if (!mpc || !pme) return;
-
-    mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
-}
-
-ConnectionMgr.prototype.connectDissolve = function(evaluator, target)
-{
-    if (!evaluator || !target) return;
-    
-    var dissolve = target.getAttribute("dissolve");
-    if (dissolve)
-    {
-        var resultValues = evaluator.getAttribute("resultValues");
-        if (resultValues)
-        {
-            var resultValue = resultValues.getAt(0);
-            if (resultValue)
-            {
-                resultValue.addTarget(dissolve);
-            }
-        }
-    }
-}
-
-ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
-{
-    if (!evaluator || !target) return;
-    
-    var dissolve = target.getAttribute("dissolve");
-    if (dissolve)
-    {
-        var resultValues = evaluator.getAttribute("resultValues");
-        if (resultValues)
-        {
-            var resultValue = resultValues.getAt(0);
-            if (resultValue)
-            {
-                resultValue.removeTarget(dissolve);
-            }
-        }
-    }
-}
-
-AttributeTrigger.prototype = new Command();
-AttributeTrigger.prototype.constructor = AttributeTrigger;
-
-
-function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
-{
-    this.input = input;
-    this.trigger = trigger;
-    this.target = target;
-//    console.debug(input);
-//    console.debug(trigger);
-//    console.debug(target);
-
-    this.lastValues = [];
-    //this.lastValues[] = this.input.getValueDirect();
-
-	this.input.getValue(this.lastValues);
-	
-    this.item = item;
-    
-    this.not = _not;
-
-
-    this.executionCount = _executionCount;
-    
-    //this.executionCount = new NumberAttr(this.executionCount);
-
-	//this.input.addRef();
-
-	this.input.addModifiedCB(AttributeTrigger_InputModifiedCB, this);
-
-	//this.target.setUndoable(false);
-
-	//this.input.getValue(this.lastValues);
-  //  this.lastValues = this.input.getValueDirect();
-
-	var len = this.input.getLength();
-
-	if (len == 1)
-	{
-		this.item = 0;
-	}
-}
-
-
-AttributeTrigger.prototype.execute = function()
-{
-	if (this.target)
-	{
-        var type = this.trigger.attrType;
-
-        switch (type)
-        {
-
-        case eAttrType.StringAttr:
-            {
-                //console.debug("THIS HITS STRINGATTR");
-                var vIn = [];
-                var vTrig = [];
-            
-                this.input.getValue(vIn);
-                this.trigger.getValue(vTrig);
-
-                var pass = vIn[0] == vTrig[0] ? true : false;
-                pass = this.not ? !pass : pass;
-                if (pass)
-                {
-					//err = this.target.execute();
-					this.executionCount.setValueDirect(--this.executionCount);
-                }
-
-                if (this.executionCount == 0)
-		        {
-			        this.target = null;
-		        }
-            }
-            break;
-
-        default:
-            {
-                //console.debug("THIS HITS DEFAULT");
-                var vIn = [];
-                var vTrig = [];
-
-		        this.input.getValue(vIn);
-		        this.trigger.getValue(vTrig);
-
-		        // match single-item Attribute OR single item of a multi-item Attribute
-		        if (this.item != -1)
-		        {
-			        // if equal OR descending past OR ascending past
-                    var pass = ((vIn[this.item] == vTrig[0]) ||
-			                     (this.lastValues[this.item] > vIn[this.item] && vIn[this.item] < vTrig[0]) ||
-			                     (this.lastValues[this.item] < vIn[this.item] && vIn[this.item] > vTrig[0]));
-                    pass = this.not ? !pass : pass;
-                    if (pass)
-			        {
-						this.target.execute();
-                        var count = this.executionCount.getValueDirect() - 1;
-				        this.executionCount.setValueDirect(count);
-			        }
-		        }
-		        else	// match every item in a multi-item Attribute
-		        {
-			        var len = this.input.getLength();
-			        var matches = 0;
-			        for (var i = 0; i < len; ++i)
-			        {
-				        // if equal OR descending past OR ascending past
-				        var pass = ((vIn[i] == vTrig[i]) ||
-				                     (this.lastValues[i] > vIn[i] && vIn[i] < vTrig[i]) ||
-				                     (this.lastValues[i] < vIn[i] && vIn[i] > vTrig[i]));
-                        pass = this.not ? !pass : pass;
-                        if (pass)
-				        {
-					        ++matches;
-				        }
-			        }
-
-			        // if every item matches simultaneously
-			        if (matches = len)
-			        {
-						err = this.target.execute();
-						this.executionCount.setValueDirect(--this.executionCount);
-			        }
-		        }
-
-		        if (this.executionCount == 0)
-		        {
-			        this.target = null;
-		        }
-		        else
-		        {
-			        this.lastValues = vIn;
-		        }
-            }
-            break;
-        }
-	}
-
-	return;
-}
-
-function AttributeTrigger_InputModifiedCB(attribute, container)
-{
-	container.execute();
-
-	// TODO:  Expand to also support EventListener::EventPerformed
-}
-/*
-void AttributeTrigger_InputModifiedTaskProc(void* data, const bool & run)
-{
-	TAttributeTrigger* pTrigger = static_cast<TAttributeTrigger*>(data);
-	pTrigger.Execute();
-}
-*/
 ObjectInspector.prototype = new ArcballInspector();
 ObjectInspector.prototype.constructor = ObjectInspector;
 
@@ -22190,6 +21984,131 @@ function ObjectInspector_SelectionClearedCB(attribute, container)
 }
 
 
+ConnectionMgr.prototype = new AttributeContainer();
+ConnectionMgr.prototype.constructor = ConnectionMgr;
+
+function ConnectionMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "ConnectionMgr";
+    
+    this.name = new StringAttr("ConnectionMgr");
+    
+    this.registerAttribute(this.name, "name");
+    
+    // TODO: finish adding connection helpers
+    //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
+    registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
+    registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
+}
+
+ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    var lastCamera = inspector.getCamera();
+    if (lastCamera == camera)
+    {
+        // already connected
+        return;
+    }
+    else if (lastCamera)
+    {
+        this.disconnectSceneInspection(inspector, lastCamera);
+    }
+
+    camera.getAttribute("sectorPosition").addTarget(inspector.getAttribute("viewPosition"), eAttrSetOp.Replace, null, true);
+    camera.getAttribute("rotation").addTarget(inspector.getAttribute("viewRotation"), eAttrSetOp.Replace, null, true);
+
+    inspector.getAttribute("resultPosition").addTarget(camera.getAttribute("sectorPosition"), eAttrSetOp.Replace, null, false);
+    inspector.getAttribute("resultRotation").addTarget(camera.getAttribute("rotation"), eAttrSetOp.Replace, null, false);
+    
+    inspector.setCamera(camera);
+}
+
+ConnectionMgr.prototype.disconnectAllTargets = function(source, target)
+{
+    if (source)
+    {
+        var count = source.getAttributeCount();
+        for (var i=0; i < count; i++)
+        {
+            var attribute = source.getAttributeAt(i);
+            if (attribute)
+            {
+                attribute.removeAllTargets();
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    camera.getAttribute("sectorPosition").removeTarget(inspector.getAttribute("viewPosition"));
+    camera.getAttribute("rotation").removeTarget(inspector.getAttribute("viewRotation"));
+    
+    inspector.getAttribute("resultPosition").removeTarget(camera.getAttribute("sectorPosition"));
+    inspector.getAttribute("resultRotation").removeTarget(camera.getAttribute("rotation"));
+    
+    inspector.setCamera(null);
+}
+
+ConnectionMgr.prototype.connectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").addTarget(pme.getAttribute("position"));
+
+    mpc.evaluate();
+}
+
+ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
+}
+
+ConnectionMgr.prototype.connectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.addTarget(dissolve);
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.removeTarget(dissolve);
+            }
+        }
+    }
+}
+
 RenderAgent.prototype = new Agent();
 RenderAgent.prototype.constructor = RenderAgent;
 
@@ -22425,6 +22344,147 @@ function RenderAgent_GlobalTimeInSecsModified(attribute, container)
     var renderAgent = container.registry.find("RenderAgent");
     renderAgent.globalTimeInSecsModified();
 }
+var FRAME_RATE_DEFAULT = 30;
+var FRAME_RATE_MAX = FRAME_RATE_DEFAULT * 32;
+var FRAME_RATE_MIN = FRAME_RATE_DEFAULT * -32;
+
+RenderController.prototype = new AttributeContainer();
+RenderController.prototype.constructor = RenderController;
+
+function RenderController(bridgeworks)
+{
+    AttributeContainer.call(this);
+    this.className = "RenderController";
+    
+    this.playState = ePlayState.Pause;
+    
+    this.renderAgent = bridgeworks.renderAgent;
+}
+
+RenderController.prototype.fastForward = function()
+{
+    this.play();
+    var rate = this.renderAgent.frameRate.getValueDirect();
+    if (rate < 0)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    }
+    
+    if (rate < FRAME_RATE_MAX)
+	{
+		this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * 2);
+	}
+	else
+	{
+		// clamp to max fast forward speed
+		this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MAX);
+	}
+}
+
+RenderController.prototype.pause = function()
+{
+    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
+}
+
+RenderController.prototype.play = function()
+{
+    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Play);    
+}
+
+RenderController.prototype.rewind = function()
+{
+    this.play();
+    var rate = this.renderAgent.frameRate.getValueDirect();
+    if (rate > 0)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    }
+    if (rate > FRAME_RATE_MIN)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * -2);
+    }
+    else
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MIN);    
+    }
+}
+
+RenderController.prototype.stop = function()
+{
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
+    this.renderAgent.desiredFrameRate.setValueDirect(1);
+}
+
+
+/**
+ *	Reverses the frame rate and updates a status label with the
+ *	current playback speed.  Rewind is a negative frame rate
+ *  that doubles with each push of the button until 
+ *  BridgeworksObject.FRAME_RATE_MIN is reached
+ *	
+ *	@param void
+ *	@return void
+	
+function DVD_Rewind()
+{
+    bridgeworks.updateScene("<Play/>");
+    
+
+    if (bridgeworks.renderAgent.frameRate > 0)
+    {
+        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
+    }
+    
+    if (bridgeworks.renderAgent.frameRate > FRAME_RATE_MIN)	// if fast forwarding or playing
+	{
+		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * -2);
+	}
+	else	// max rewind value reached
+	{
+		// clamp to max rewind speed
+		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MIN);
+	}
+    
+    g_paused = false;
+
+}
+ */
+
+/**
+ *	Fast forwards the frame rate and updates a status label with the
+ *	current playback speed.  Fast forward is a positive frame rate
+ *  that doubles with each push of the button until
+ *  BridgeworksObject.FRAME_RATE_MAX is reached
+ *	
+ *	@param void
+ *	@return void
+
+function DVD_FastForward()
+{
+    bridgeworks.updateScene("<Play/>");
+    
+    if (bridgeworks.renderAgent.frameRate < 0)
+    {
+        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
+    }
+    
+    if (bridgeworks.renderAgent.frameRate < FRAME_RATE_MAX)
+	{
+		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * 2);
+	}
+	else
+	{
+		// clamp to max fast forward speed
+		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MAX);
+	}
+    
+    g_paused = false;
+
+}
+ */	
+
 function Selections()
 {
     this.viewports = [];
@@ -22921,239 +22981,493 @@ function ViewportMgr_LayoutModifiedCB(attribute, container)
         layout.getAttribute("height").setValueDirect(container.height.getValueDirect());
     }
 }
-PathTrace.prototype = new LineList();
-PathTrace.prototype.constructor = PathTrace;
+RasterComponentEventListener.prototype = new EventListener();
+RasterComponentEventListener.prototype.constructor = Command;
 
-
-function PathTrace()
+function RasterComponentEventListener()
 {
+    EventListener.call(this);
+    this.className = "RasterComponentEventListener";
 
-    LineList.call(this);
-    this.className = "PathTrace";
-    this.attrType = eAttrType.PathTrace;
+    this.rcs = [];
+    this.rcsSelectionState = [];
+    this.rcListenMap = [];
+    this.rcEventMap = [];
+    this.styleMgr = null;
     
-    this.pathLength = 0;
-    this.pathPosition = new Vector3DAttr();
-    this.sampleRate = new FloatAttr();
-    this.maxLength = new FloatAttr();
-    this.color = new ColorAttr();
-    this.trace = new BooleanAttr();
-	this.sectorOrigin = new Vector3DAttr();
-    
-	this.sectorOrigin.AddModifiedCB(PathTrace_SectorOriginModifiedCB, this);
+    this.selectionEvent = new InputEvent(eEventType.Unknown, 0, 0xffffffff, 0, eEventType.Key_Up);
 
-    this.sampleRate.setRange(0, FLT_MAX);
-    this.maxLength.setRange(0, FLT_MAX);
-
-    this.registerAttribute(this.pathPosition, "pathPosition");
-    this.registerAttribute(this.sampleRate, "sampleRate");
-    this.registerAttribute(this.maxLength, "maxLength");
-    this.registerAttribute(this.color, "color");
-    this.registerAttribute(this.trace, "trace");
-	this.registerAttribute(this.sectorOrigin, "sectorOrigin");
-
-	this.graphMgr.getAttribute("sectorOrigin").addTarget(this.sectorOrigin);
-    this.graphMgr.getNodeRegistry().registerNode(this, eAttrType_Node_PathTrace);
+	this.name.setValueDirect("RasterComponentEventListener");
+	this.numResponses.setValueDirect(-1);
 }
 
-PathTrace.prototype.reset = function()
+RasterComponentEventListener.prototype.eventPerformed = function(event)
 {
-    this.vertices.setValueDirect(0);
-    this.vertexColors.setValueDirect(0);
-    
-    this.lastPosition.setValueDirect(0,0,0);
-    this.pathLength = 0;
-}
-
-PathTrace.prototype.update = function(params, visitChildren)
-{
-	this.sectorOriginLock.Lock("PathTrace::Update");
-
-    // get current position
-    var currPosition = this.pathPosition.getValueDirect(currPosition);
-	// offset by sector origin
-	// "lock" sector origin to obtain value, to ensure the value will be synchronized
-	// with ::SectorOriginModified()
-	//var sectorOrigin = this.sectorOrigin.lock();
-	currPosition.x -= sectorOrigin[0];
-	currPosition.y -= sectorOrigin[1];
-	currPosition.z -= sectorOrigin[2];
-	//this.sectorOrigin.unlock(false);
-
-    // get current trace value
-    var trace = this.trace.getValueDirect();
-
-    // if trace value has changed since last update, add a vertex
-    if (trace != this.lastTrace)
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
     {
-        // add current position to vertices array
-        var length = this.vertices.length;
-        this.vertices.setLength(length + 3);
-        this.vertices.setElement(length  , currPosition.x);
-        this.vertices.setElement(length+1, currPosition.y); 
-        this.vertices.setElement(length+2, currPosition.z); 
-
-        // add color to vertex color array
-        var color = this.color.getValueDirect();
-        length = this.vertexColors.getLength();
-        this.vertexColors.setLength(length + 4);
-        this.vertexColors.setElement(length  , color.r);
-        this.vertexColors.setElement(length+1, color.g);
-        this.vertexColors.setElement(length+2, color.b);
-        this.vertexColors.setElement(length+3, color.a);
-
-        if (trace == false)
-        {
-            // reset path length to 0
-            this.pathLength = 0;
-        }
-
-        this.lastTrace = trace;
+        return;
     }
-
-    if (trace)
-    {
-        // if this is the first time we are tracing, sample the current position,
-        // and set as the line list's first point
-        if (this.verticesArray.length == 0)
-        {
-            this.lastPosition = this.pathPosition.getValueDirect();
-			// offset by sector origin
-			// "lock" sector origin to obtain value, to ensure the value will be synchronized
-			// with ::SectorOriginModified()
-			var sectorOrigin = this.sectorOrigin;//.lock();
-			this.lastPosition.x -= sectorOrigin[0];
-			this.lastPosition.y -= sectorOrigin[1];
-			this.lastPosition.z -= sectorOrigin[2];
-			//this.sectorOrigin.unlock(false);
-
-            this.vertices.setValueDirect(this.lastPosition.x, this.lastPosition.y, this.lastPosition.z);
-
-            var r, g, b, a;
-            var color = this.color.getValueDirect(r);
-            /*
-            Resize<float>(values, 4))) 
-            {
-                this.sectorOriginLock.unlock();
-                return;
-            }
-            */
-            this.vertexColors.setValueDirect(color.r, color.g, color.b, color.a);
-        }
-
-        // if current position - last position >= sample rate, add a line segment
-        var distance = distanceBetween(currPosition, this.lastPosition);
-        if (distance >= this.sampleRate.getValueDirect())
-        {
-            // add current position to vertices array
-            var length = this.vertices.length;
-            this.vertices.setLength(length + 6);
-            this.vertices.setElement(length  , currPosition.x);
-            this.vertices.setElement(length+1, currPosition.y); 
-            this.vertices.setElement(length+2, currPosition.z); 
-
-            this.vertices.setElement(length+3, currPosition.x);
-            this.vertices.setElement(length+4, currPosition.y); 
-            this.vertices.setElement(length+5, currPosition.z); 
-
-            // add color to vertex color array
-            var color = this.color.getValueDirect();
-            length = this.vertexColors.length;
-            this.vertexColors.setLength(length + 8);
-            this.vertexColors.setElement(length  , color.r);
-            this.vertexColors.setElement(length+1, color.g);
-            this.vertexColors.setElement(length+2, color.b);
-            this.vertexColors.setElement(length+3, color.a);
-
-            this.vertexColors.setElement(length+4, color.r);
-            this.vertexColors.setElement(length+5, color.g);
-            this.vertexColors.setElement(length+6, color.b);
-            this.vertexColors.setElement(length+7, color.a);
-
-            // save last position
-            this.lastPosition = currPosition;
-
-            // increment path length
-            this.pathLength += distance;
-        }
-
-        // check that length of path hasn't exceeded maxLength; if so, remove line segments
-        // until pathLength <= maxLength
-        var maxLength = this.maxLength.getValueDirect();
-        if (this.pathLength > maxLength)
-        {
-            /*
-            std::vector<float> vertices(this.vertices.getLength());
-            this.vertices.getValue(vertices);
-            
-            std::vector<float> vertexColors(this.vertexColors.getLength());
-            this.vertexColors.getValue(vertexColors);
-
-			var i, j;
-            var numSegments = vertices.length / 6;
-            for (i=1, j=0; i <= numSegments; i++, j+=6)
-            {
-                this.pathLength -= distanceBetween(CVector3Df(vertices[j  ], vertices[j+1], vertices[j+2]),
-                                                CVector3Df(vertices[j+3], vertices[j+4], vertices[j+5]));
-
-                if (this.pathLength <= maxLength)
-                {
-                    break;
-                }
-            }
-
-            std::vector<float>::iterator it = vertices.begin(), it2 = it + (i * 6);
-            vertices.erase(it, it2);
-
-            it = vertexColors.begin();
-            it2 = it + (i * 8);
-            vertexColors.erase(it, it2);
-
-            this.vertices.setValue(vertices);
-            this.vertexColors.setValue(vertexColors);
-            */
-        }
-    }
-
-	//this.sectorOriginLock.unlock();
-
-    // call base class implementation
-    //LineList::update(params, visitChildren);
-}
-
-PathTrace.prototype.sectorOriginModified = function()
-{
-	//this.sectorOriginLock.Lock("PathTrace::SectorOriginModified");
-	/*
-
-	// get new sector origin
-	var sectorOrigin = this.sectorOrigin.getValueDirect();
-
-	// update all vertices already in vertex list by adding old sector origin, and subtracting
-	// new sector origin
-	std::vector<float> vertices;
-	this.vertices.getValue(vertices);
-	for (unsigned int i=0; i < vertices.size(); i+=3)
+    
+    var currSelectionState, lastSelectionState, selectionEventSelectionState;
+	for (var i=0; i < this.rcs.length; i++)
 	{
-		vertices[i  ] = vertices[i  ] + this.lastSectorOrigin.x - sectorOrigin.x;
-		vertices[i+1] = vertices[i+1] + this.lastSectorOrigin.y - sectorOrigin.y;
-		vertices[i+2] = vertices[i+2] + this.lastSectorOrigin.z - sectorOrigin.z;
+		if (!this.isListening(this.rcs[i]))
+		{
+			continue;
+		}
+
+		lastSelectionState = this.rcsSelectionState[i];
+		currSelectionState = this.rcs[i].eventPerformed(event);
+		
+		if (this.styleMgr)
+	    {
+		    if (currSelectionState)
+			{
+				this.styleMgr.eventPerformed(event, this.rcs[i]);
+
+				// send selected/focus/mouseover event depending upon event type and whether 
+				// component doesn't have focus/didn't have selection
+				switch (event.type)
+				{
+				case eEventType.MouseLeftClick:
+					{
+						// send element focus event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementFocus) &&
+							this.rcs[i].hasFocus.getValueDirect() <= 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementFocus;
+							
+							selectionEventSelectionState = m_rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+
+							this.rcs[i].hasFocus.setValueDirect(1);
+					    }
+					}
+					break;
+
+				case eEventType.MouseMove:
+					{
+						// send element selected event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementSelected) &&
+							this.rcs[i].selected.getValueDirect() <= 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementSelected;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+							this.rcs[i].selected.setValueDirect(1);
+						}
+
+						if (!lastSelectionState &&
+							this.isListeningEvent(this.rcs[i], eEventType.MouseOver))
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.MouseOver;
+
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+						}
+					}
+					break;
+				}
+			}
+			else // !currSelectionState
+			{
+				// send unselected/blur/mouseout event depending upon event type and whether 
+				// component has focus/had selection
+				switch (event.type)
+				{
+				case eEventType.MouseLeftDown:
+				case eEventType.MouseLeftClick:
+				case eEventType.MouseLeftDblClick:
+				case eEventType.MouseMiddleDown:
+				case eEventType.MouseMiddleClick:
+				case eEventType.MouseMiddleDblClick:
+				case eEventType.MouseRightDown:
+				case eEventType.MouseRightClick:
+				case eEventType.MouseRightDblClick:
+				case eEventType.MouseWheelDown:
+				case eEventType.MouseBothDown:
+					{
+						// send element blur event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementBlur) &&
+							this.rcs[i].hasFocus.getValueDirect() > 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementBlur;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+
+							this.rcs[i].hasFocus.setValueDirect(-1);
+						}
+					}
+					break;
+
+				case eEventType.MouseMove:
+					{
+						// send element unselected event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementUnselected) &&
+							this.rcs[i].selected.getValueDirect() > 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementUnselected;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+							this.rcs[i].selected.setValueDirect(-1);
+						}
+
+						if (lastSelectionState &&
+							this.isListeningEvent(this.rcs[i], eEventType.MouseOut))
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.MouseOut;
+
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		this.rcsSelectionState[i] = currSelectionState;
 	}
-	this.vertices.setValue(vertices);
-
-	// update last position by adding old sector origin, and subtracting new sector origin
-	this.lastPosition = this.lastPosition + this.lastSectorOrigin - sectorOrigin;
-
-	// update last sector origin to new sector origin
-	this.lastSectorOrigin = sectorOrigin;
-	*/
-
-	//this.sectorOriginLock.unlock();
 }
 
-function PathTrace_SectorOriginModifiedCB(attribute, container)
+RasterComponentEventListener.prototype.registerComponent = function(rc, before)
 {
-	container.sectorOriginModified();
+    if (rc)
+    {
+        if (before)
+        {
+            var i = this.rcs.indexOf(before);
+            if (i < 0) i = this.rcs.length;
+            
+            this.rcs.splice(i, 0, rc);
+            this.rcsSelectionState.splice(i, 0, rc);
+        }
+        else
+        {
+            this.rcs.push(rc);
+            this.rcsSelectionState.push(rc);
+        }
+    }
+}
+
+RasterComponentEventListener.prototype.unregisterComponent = function(rc)
+{
+    if (rc)
+    {
+        this.rcs.splice(this.rcs.indexOf(rc), 1);
+    }
+}
+
+RasterComponentEventListener.prototype.Listen = function(rc)
+{
+    if (rc)
+    {
+        this.rcListenMap[rc] = true;
+    }
+}
+
+RasterComponentEventListener.prototype.Ignore = function(rc)
+{
+    if (rc)
+    {
+        this.rcListenMap[rc] = false;
+    }
+}
+
+RasterComponentEventListener.prototype.listenEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc] == undefined)
+        {
+            this.rcEventMap[rc] = new Array();
+        }
+
+        this.rcEventMap[rc].push(eventType);
+    }
+}
+
+RasterComponentEventListener.prototype.ignoreEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc])
+        {
+            this.rcEventMap[rc].splice(this.rcEventMap[rc].indexOf(eventType), 1);
+        }
+    }
+}
+
+RasterComponentEventListener.prototype.setStyleMgr = function(styleMgr)
+{
+    this.styleMgr = styleMgr;
+}
+
+RasterComponentEventListener.prototype.setSelectionState = function(rc, selected)
+{
+    this.rcsSelectionState[rc] = selected;
+}
+
+RasterComponentEventListener.prototype.getComponent = function(n)
+{
+    if (n < this.rcs.length)
+    {
+        return this.rcs[n];
+    }
+
+    return null;
+}
+
+RasterComponentEventListener.prototype.isListening = function(rc)
+{
+    if (rc)
+    {
+        if (this.rcListenMap[rc])
+        {
+            return this.rcListenMap[rc];
+        }
+    }
+
+    return false;
+}
+
+RasterComponentEventListener.prototype.isListeningEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc])
+        {
+            if (this.rcEventMap[rc].indexOf(eventType) >= 0)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
+var g_objPosMap = {};
+
+function addInspectionGroup(node, factory)
+{
+
+    // ensure that rotation group has not already been added
+	var rotGroup = getInspectionGroup(node);
+	
+    if (rotGroup) return;
+		
+	var pGrp        = new Group();
+    pGrp.setGraphMgr(factory.graphMgr);
+    var pTranslate  = new Translate();
+    pTranslate.setGraphMgr(factory.graphMgr);
+    var pScaleInv   = new Scale();
+    pScaleInv.setGraphMgr(factory.graphMgr);
+    var pQuat       = new QuaternionRotate();
+    pQuat.setGraphMgr(factory.graphMgr);
+    var pTransBack  = new Translate();
+    pTransBack.setGraphMgr(factory.graphMgr);
+    var pScale      = new Scale();
+    pScale.setGraphMgr(factory.graphMgr);
+    
+    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
+
+    pGrp.name.setValueDirect("InspectionGroup");
+	pTranslate.name.setValueDirect("Translate");
+    pScaleInv.name.setValueDirect("ScaleInverse");
+	pQuat.name.setValueDirect("Quaternion");
+	pTransBack.name.setValueDirect("TranslateBack");			
+    pScale.name.setValueDirect("Scale");
+
+	pGrp.addChild(pTranslate); // child 0
+    pGrp.addChild(pScaleInv);  // child 1
+	pGrp.addChild(pQuat);      // child 2
+    pGrp.addChild(pScale);     // child 3
+	pGrp.addChild(pTransBack); // child 4
+
+	var pChildZero = node.getChild(0);
+	if (pChildZero)
+	{
+		pChildZero.insertChild(pGrp, 0);
+	}
+
+    node.registerAttribute(pTranslate.translation, "inspectionGroup_translate");
+    node.registerAttribute(pScaleInv.scale, "inspectionGroup_scaleInverse");
+    node.registerAttribute(pQuat.rotationQuat, "inspectionGroup_rotationQuat");
+    node.registerAttribute(pQuat.enabled, "inspectionGroup_rotationEnabled");
+    node.registerAttribute(pScale.scale, "inspectionGroup_scale");
+    node.registerAttribute(pTransBack.translation, "inspectionGroup_translateBack");
+
+    pTranslate.translation.setContainer(node);
+    pScaleInv.scale.setContainer(node);
+    pQuat.rotationQuat.setContainer(node);
+    pQuat.enabled.setContainer(node);
+    pScale.scale.setContainer(node);
+    pTransBack.translation.setContainer(node);
+
+	return;
+}
+
+function deleteInspectionGroup(node)
+{
+	var rotGroup = getInspectionGroup(node);
+	if (rotGroup)
+	{
+        rotGroup.getChild(0).getAttribute("translation").setContainer(rotGroup.getChild(0));
+        rotGroup.getChild(1).getAttribute("scale").setContainer(rotGroup.getChild(1));
+        rotGroup.getChild(2).getAttribute("rotationQuat").setContainer(rotGroup.getChild(2));
+        rotGroup.getChild(2).getAttribute("enabled").setContainer(rotGroup.getChild(2));
+        rotGroup.getChild(3).getAttribute("scale").setContainer(rotGroup.getChild(3));
+        rotGroup.getChild(4).getAttribute("translation").setContainer(rotGroup.getChild(4));
+
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationEnabled"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scale"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translateBack"));
+
+        node.removeChild(rotGroup);
+
+	}
+
+	return;
+}
+
+function getInspectionGroup(moveableNode)
+{
+    var group = null;
+    
+	var childZero = moveableNode.getChild(0);
+	if (childZero)
+	{
+		group = childZero.getNamedChild("InspectionGroup")
+	}
+
+	return group;
+}
+
+function setInspectionGroupActivationState(node, enable)
+{
+	var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+		var pQuat = pRotGroup.getChild(2);
+		if (pQuat)
+		{
+			pQuat.enabled.setValueDirect(enable);
+
+			if (!enable)
+			{
+				var quat = new Quaternion();
+				quat.loadIdentity();
+
+				var quatAttr = pQuat.rotationQuat;
+				quatAttr.setValueDirect(quat);
+			}
+		}
+		
+		var pPos = node.getAttribute("position");
+		if (enable)
+		{
+			if (!(node in g_objPosMap))
+			{
+				g_objPosMap[node] = pPos.getValueDirect();
+			}
+		}
+		else // !enable
+		{
+			var pos = g_objPosMap[node];
+			pPos.setValueDirect(pos);
+		}
+		
+	}
+
+	return;
+}
+
+function setInspectionGroupContainer(node)
+{
+
+	var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationEnabled"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scale"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translateBack"));
+
+        node.registerAttribute(pRotGroup.getChild(0).getAttribute("translation"), "inspectionGroup_translate");
+        node.registerAttribute(pRotGroup.getChild(1).getAttribute("scale"), "inspectionGroup_scaleInverse");
+        node.registerAttribute(pRotGroup.getChild(2).getAttribute("rotationQuat"), "inspectionGroup_rotationQuat");
+        node.registerAttribute(pRotGroup.getChild(2).getAttribute("enabled"), "inspectionGroup_rotationEnabled");
+        node.registerAttribute(pRotGroup.getChild(3).getAttribute("scale"), "inspectionGroup_scale");
+        node.registerAttribute(pRotGroup.getChild(4).getAttribute("translation"), "inspectionGroup_translateBack");
+
+        pRotGroup.getChild(0).getAttribute("translation").setContainer(node);
+        pRotGroup.getChild(1).getAttribute("scale").setContainer(node);
+        pRotGroup.getChild(2).getAttribute("rotationQuat").setContainer(node);
+        pRotGroup.getChild(2).getAttribute("enabled").setContainer(node);
+        pRotGroup.getChild(3).getAttribute("scale").setContainer(node);
+        pRotGroup.getChild(4).getAttribute("translation").setContainer(node);
+
+    }
+
+    return;
+}
+
+
+// Isn't called. Commented out in RenderAgent.cpp
+function zeroInspectionGroup(node)
+{
+   var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+		var pQuat = pRotGroup.getChild(2);
+		if (pQuat)
+		{
+			var quat = new Quaternion();
+			quat.loadIdentity();
+
+			var quatAttr = pQuat.rotationQuat;
+			quatAttr.setValueDirect(quat);
+		}
+    }
+
+    return;
+}
+
+function clearObjectPositionMap()
+{
+	g_objPosMap = {};
+
+	return;
+}
+
+// Doesn't do anything.
+function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
+{
+    /* 
+    CQuaternionf q;
+	CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
+	if (quat)
+	{
+		quat.getValueDirect(q);
+	}
+    */
 }
 
 function SerializeCommand()
