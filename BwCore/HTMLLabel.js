@@ -1,35 +1,35 @@
+HTMLLabel.prototype = new RasterComponent();
+HTMLLabel.prototype.constructor = HTMLLabel;
 
-HTMLLabel.prototype = new RasterComponent(); 
-HTMLLabel.prototype.constructor = HTMLLabel; 
-function Initialize() //HTMLLabel.prototype.Initialize = function()
+function HTMLLabel()
 {
 	this.attrType = eAttrType_Node_HTMLLabel;
 	this.typeString = "HTMLLabel";
 
-	this.windowHandle = new PointerAttr(); 
+	this.windowHandle = new PointerAttr();  //ASK KEVIN
 	this.labelWidth = new NumberAttr(); 
 	this.labelHeight = new NumberAttr(); 
 	this.pageWidth = new NumberAttr();
 	this.pageHeight = new NumberAttr(); 
 	this.htmlLabelStyle = new HTMLLabelStyleAttr();
 
-	this.styles.AddModifiedCB(HTMLLabel_StylesModifiedCB, this);
-	this.windowHandle.AddModifiedCB(HTMLLabel_WindowHandleModifiedCB, this);
-    this.renderSequenceSlot.AddModifiedCB(HTMLLabel_RenderSequenceSlotModifiedCB, this);
+	this.styles.addModifiedCB(HTMLLabel_StylesModifiedCB, this);
+	this.windowHandle.addModifiedCB(HTMLLabel_WindowHandleModifiedCB, this);
+    this.renderSequenceSlot.addModifiedCB(HTMLLabel_RenderSequenceSlotModifiedCB, this);
 
-	RegisterAttribute(this.windowHandle, "windowHandle");
-	RegisterAttribute(this.labelWidth, "labelWidth");
-	RegisterAttribute(this.labelHeight, "labelHeight");
-	RegisterAttribute(this.pageWidth, "pageWidth");
-	RegisterAttribute(this.pageHeight, "pageHeight");
+    this.registerAttribute(this.windowHandle, "windowHandle");
+    this.registerAttribute(this.labelWidth, "labelWidth");
+    this.registerAttribute(this.labelHeight, "labelHeight");
+    this.registerAttribute(this.pageWidth, "pageWidth");
+    this.registerAttribute(this.pageHeight, "pageHeight");
 
-	this.styles.RegisterStyle(this.htmlLabelStyle, "htmlLabelStyle");
+	this.styles.registerStyle(this.htmlLabelStyle, "htmlLabelStyle");
 
-	this.wb = WebBrowser.prototype.Instance(eWebBrowserAPI_IWebBrowser2);
+	//this.wb = webBrowser.prototype.Instance(eWebBrowserAPI_IWebBrowser2); ASK KEVIN
 
 	this.labelRect.left = this.labelRect.top = this.labelRect.right = this.labelRect.bottom = 0;
 
-	this.graphMgr.getNodeRegistry().RegisterNode(this, eAttrType_Node_HTMLLabel);
+	//this.graphMgr.getNodeRegistry().RegisterNode(this, eAttrType_Node_HTMLLabel); ASK KEVIN
 
     // causes issues w/ load of HTML; too much idle processing
 	//this.taskThread.Start();
@@ -37,13 +37,11 @@ function Initialize() //HTMLLabel.prototype.Initialize = function()
 
  HTMLLabel.prototype.Update = function(params, visitChildren)
 {
-	this.applyLock.Lock("HTMLLabel.prototype.Update");//(CReadWriteLock.prototype.eRWLockMode_Write);
-
     if (this.updateWebBrowser)
     {
         this.updateWebBrowser = false;
 
-        if (UpdateWebBrowser())
+        if (this.UpdateWebBrowser())
         {
             this.updateLabelHTML = true;
         }
@@ -52,7 +50,7 @@ function Initialize() //HTMLLabel.prototype.Initialize = function()
 	if (this.updateLabel || this.updateLabelHTML)
 	{
         this.updateLabel = false;
-        if (UpdateLabel(this.updateLabelHTML))
+        if (this.UpdateLabel(this.updateLabelHTML))
         {
             this.updateLabelHTML = false;
         }
@@ -61,17 +59,15 @@ function Initialize() //HTMLLabel.prototype.Initialize = function()
         // but this change is less impactful for now.
         else if (this.updateLabelHTML) 
         {
-            Sleep(50);
+           // this.wait(50);
         }
 	}
 	else if (this.show.getValueDirect())
 	{
-		UpdateLabel(false);
+		this.UpdateLabel(false);
 	}
 
-    UpdateMouseOver();
-
-	this.applyLock.Unlock();//(CReadWriteLock.prototype.eRWLockMode_Write);
+    this.UpdateMouseOver();
 
 	// call base-class implementation
 	RasterComponent.prototype.Update(params, visitChildren);
@@ -142,7 +138,7 @@ function Initialize() //HTMLLabel.prototype.Initialize = function()
 //#endif //_DEBUG
                         // create path for selected geometry
                         var pickRecord;
-                        var picked = params.currentNodePath);
+                        var picked = params.currentNodePath;
                         if (!picked) return;
                         picked.AddNode(this); // this node won't be added to current path until base class implementation is invoked
                         if (!(Push_Back<std.prototype.pair<std.prototype.pair<GcCamera*, CPath*>, TRayPickRecord> >(rayPickParams.picked, 
@@ -203,9 +199,9 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		var pageHeight = 0;
  		var url;
 		labelStyle.url().getValueDirect(url);
-		if (!url.empty() && strcmp(url.c_str(), ""))
+		if (!url.empty() && url == "")//strcmp(url.c_str(), ""))
 		{
-			if (this.wb.Navigate(labelStyle.url().getValueDirect(url), pageWidth, pageHeight))
+			if (this.wb.navigate(labelStyle.url().getValueDirect(url), pageWidth, pageHeight))
             {
                 OutputDebugMsg("WARN: WebBrowser.prototype.Navigate() failed\n");
                 return;
@@ -215,22 +211,22 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		{
 			var html;
 			labelStyle.html().getValueDirect(html);
-			if (!html.empty() && strcmp(html.c_str(), ""))
+			if (!html.empty() && url == "")//strcmp(html.c_str(), ""))
 			{
                 try
                 {
-				    if (this.wb.Load(FormatHTML(html), pageWidth, pageHeight))
+				    if (this.wb.load(this.FormatHTML(html), pageWidth, pageHeight))
                     {
                         return ;
                     }
 				    // re-format html to include <div style="width:[this.pageWidth]px"></div> for text and bgColor
 				    labelStyle.html().getValueDirect(html);
-				    if (this.wb.Load(FormatHTML(html, pageWidth), pageWidth, pageHeight))
+				    if (this.wb.load(this.FormatHTML(html, pageWidth), pageWidth, pageHeight))
                     {
                         return ;
                     }
                 }
-                catch (...)
+                catch ()
                 {
                     OutputDebugMsg("WARN: exception caught in HTMLLabel.prototype.UpdateLabel()\n");
                     s_globalExcept.Throw(Except.prototype.eExceptCode_Unspecified);
@@ -240,10 +236,10 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		}
 
         // adjust dimensions according to system text size (normal is 96)
-        int iDPIX = .prototype.getDeviceCaps(.prototype.getDC(NULL), LOGPIXELSX);
-        int iDPIY = .prototype.getDeviceCaps(.prototype.getDC(NULL), LOGPIXELSY);
-        pageWidth  = ROUND(pageWidth * (iDPIX / 96.0f));
-        pageHeight = ROUND(pageHeight * (iDPIY / 96.0f));
+        //var iDPIX = .prototype.getDeviceCaps(.prototype.getDC(null), LOGPIXELSX);
+        //var iDPIY = .prototype.getDeviceCaps(.prototype.getDC(null), LOGPIXELSY);
+        pageWidth  = this.round((pageWidth * (iDPIX / 96.0)));
+        pageHeight = this.round((pageHeight * (iDPIY / 96.0)));
 
 		this.pageWidth.setValueDirect(pageWidth);
 		this.pageHeight.setValueDirect(pageHeight);
@@ -252,23 +248,23 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 	if (this.show.getValueDirect())
 	{
 		// get label dimensions
-		UpdateLabelDimensions();
+		this.UpdateLabelDimensions();
 
 		// capture label
-		if (Capture(labelStyle.left().getValueDirect(), labelStyle.top().getValueDirect(), 
+		if (this.Capture(labelStyle.left().getValueDirect(), labelStyle.top().getValueDirect(), 
 				            this.labelWidth.getValueDirect(), this.labelHeight.getValueDirect()))
         {
             return ;
         }
 	}
 
-    UpdateShowStates();
+    this.UpdateShowStates();
 
     return;
 }
 
 
- HTMLLabel.prototype.UpdateMouseOver()
+ HTMLLabel.prototype.UpdateMouseOver = function ()
 {
     if (!this.wb ||
          this.x < 0 ||
@@ -277,10 +273,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		return;
 	}
 
-    this.threadLock.Lock("HTMLLabel.prototype.UpdateMouseOver");
-
     var mouseOverLink = false;
-    this.elementHit.element = NULL;
+    this.elementHit.element = null;
     this.elementHit.href = "";
     this.elementHit.target = "";
 
@@ -290,7 +284,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		var hr = this.elementHit.element.get_tagName(&tag);
 		if (hr)
 		{
-			var tagString = NULL;
+			var tagString = null;
 			var bstr_tag(tag, false); tagString = bstr_tag;
 
 			if (!_stricmp("A", tagString))
@@ -331,14 +325,13 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		}
 	}
 
-    this.threadLock.Unlock();
-
-    UpdateCursor(mouseOverLink);
+    this.UpdateCursor(mouseOverLink);
 }
 
  HTMLLabel.prototype.UpdateCursor = function( mouseOverLink)
 {
     const std.prototype.vector<CAttributeContainer*>* attributes;
+    
     if (this.registry.get("ViewportMgr", &attributes))
     {
         attributes)[0].getAttribute("cursor").setValueDirect(mouseOverLink ? "Hand" : "Arrow");
@@ -368,11 +361,12 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
         this.wb.getDimensions(pageWidth, pageHeight);
 
         // adjust dimensions according to system text size (normal is 96)
-        int iDPIX = .prototype.getDeviceCaps(.prototype.getDC(NULL), LOGPIXELSX);
-        int iDPIY = .prototype.getDeviceCaps(.prototype.getDC(NULL), LOGPIXELSY);
-        pageWidth  = ROUND(pageWidth * (iDPIX / 96.0f));
-        pageHeight = ROUND(pageHeight * (iDPIY / 96.0f));
-
+        //int iDPIX = .prototype.getDeviceCaps(.prototype.getDC(null), LOGPIXELSX);
+       //int iDPIY = .prototype.getDeviceCaps(.prototype.getDC(null), LOGPIXELSY);
+        pageWidth  = this.round((pageWidth * (iDPIX / 96.0)));
+        pageHeight = this.round((pageHeight * (iDPIY / 96.0)));
+        
+        
         this.pageWidth.setValueDirect(pageWidth);
         this.pageHeight.setValueDirect(pageHeight);
     }	
@@ -381,7 +375,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 	{
 		var clientWidth = 0, clientHeight = 0;
 		var windowHandle = this.windowHandle.getValueDirect();
-		if (windowHandle) windowHandle.getClientDimensions(clientWidth, clientHeight);
+		if (windowHandle) 
+            this.windowHandle.getClientDimensions(clientWidth, clientHeight);
 		if (labelWidth == 0)
 		{	
 			if (this.labelRect.left + pageWidth <= clientWidth)
@@ -409,7 +404,10 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
     // get scrollbar dimensions
     var vScrollWidth = 0;
 	var hScrollHeight = 0;
-	int left, right, top, bottom;
+	var left;
+    var right;
+    var top;
+    var bottom;
 	if (this.vScrollBar)
 	{
 		this.vScrollBar.getAttribute("componentRect").getValueDirect(left, top, right, bottom);
@@ -423,8 +421,8 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		hScrollHeight = (bottom - top);
 	}
 
-    var vScrollBarLabelStyle = NULL;
-	var hScrollBarLabelStyle = NULL;
+    var vScrollBarLabelStyle = null;
+	var hScrollBarLabelStyle = null;
 	vScrollBarLabelStyle = this.vScrollBar.getAttribute("styles").getStyle();
 	hScrollBarLabelStyle = this.hScrollBar.getAttribute("styles").getStyle();
 	if (vScrollBarLabelStyle && hScrollBarLabelStyle)
@@ -432,16 +430,16 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		// width
 		if (labelWidth >= pageWidth)
 		{
-			this.hScrollBar.getAttribute("scrollPosition").RemoveTarget(labelStyle.left());
-			labelStyle.left().setValueDirect(0, false);
+			this.hScrollBar.getAttribute("scrollPosition").removeTarget(this.labelStyle.left());
+			this.labelStyle.left().setValueDirect(0, false);
             this.showStates.hScrollBar = false;
 		}
 		else // page too wide for labe, show horizontal scroll bar
 		{
             labelWidth -= vScrollWidth;
 
-            this.hScrollBar.getAttribute("scrollPosition").RemoveTarget(labelStyle.left()); // no duplicates
-			this.hScrollBar.getAttribute("scrollPosition").AddTarget(labelStyle.left());
+            this.hScrollBar.getAttribute("scrollPosition").removeTarget(this.labelStyle.left()); // no duplicates
+			this.hScrollBar.getAttribute("scrollPosition").addTarget(this.labelStyle.left());
             this.showStates.hScrollBar = true;
 			hScrollBarLabelStyle.length().setValueDirect(labelWidth, false);
 			hScrollBarLabelStyle.minPosition().setValueDirect((var) 0, false);
@@ -451,16 +449,16 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 		// height
 		if (labelHeight >= pageHeight)
 		{
-			this.vScrollBar.getAttribute("scrollPosition").RemoveTarget(labelStyle.top());
-			labelStyle.left().setValueDirect(0, false);
+			this.vScrollBar.getAttribute("scrollPosition").removeTarget(this.labelStyle.top());
+			this.labelStyle.left().setValueDirect(0, false);
             this.showStates.vScrollBar = false;
 		}
 		else // page too wide for labe, show horizontal scroll bar
 		{
             labelHeight -= hScrollHeight;
 
-			this.vScrollBar.getAttribute("scrollPosition").RemoveTarget(labelStyle.top()); // no duplicates
-			this.vScrollBar.getAttribute("scrollPosition").AddTarget(labelStyle.top());
+			this.vScrollBar.getAttribute("scrollPosition").removeTarget(this.labelStyle.top()); // no duplicates
+			this.vScrollBar.getAttribute("scrollPosition").addTarget(this.labelStyle.top());
             this.showStates.vScrollBar = true;
 			vScrollBarLabelStyle.length().setValueDirect(labelHeight, false);
 			vScrollBarLabelStyle.minPosition().setValueDirect((var) 0, false);
@@ -482,7 +480,7 @@ HTMLLabel.prototype.UpdateLabel = function(navigate)
 }
 
 
- HTMLLabel.prototype.UpdateShowStates()
+ HTMLLabel.prototype.UpdateShowStates = function()
 {
     switch (this.show.getValueDirect())
 	{
@@ -554,7 +552,7 @@ HTMLLabel.prototype.Draw = function()
 	// draw portion of label/icon within rendering area
 	var srcX, srcY, dstX, dstY;
 
-	renderEngine.EnableRenderMode(Re_AlphaBlend, true);
+	renderEngine.enableRenderMode(Re_AlphaBlend, true);
 	renderEngine.setBlendFactor(Re_SrcAlpha, Re_OneMinusSrcAlpha);
 
 	// draw label
@@ -619,7 +617,7 @@ HTMLLabel.prototype.Draw = function()
 
 		if (drawLabel)
 		{
-			renderEngine.WriteFrameBuffer(srcX, srcY, dstX, dstY, labelWidth, labelHeight, this.label.pitch, this.label.pixelFormat,
+			renderEngine.writeFrameBuffer(srcX, srcY, dstX, dstY, labelWidth, labelHeight, this.label.pitch, this.label.pixelFormat,
 				this.label.byteAlignment, this.label.pixels);
 
 			this.labelRect.left   = dstX;
@@ -640,7 +638,7 @@ HTMLLabel.prototype.Draw = function()
 		this.screenRect.setValueDirect(this.labelRect.left, this.labelRect.top, this.labelRect.right, this.labelRect.bottom);
 	}
 
-	renderEngine.EnableRenderMode(Re_AlphaBlend, false);
+	renderEngine.enableRenderMode(Re_AlphaBlend, false);
 }
 
 
@@ -660,7 +658,7 @@ HTMLLabel.prototype.Draw = function()
 		screen = this.rasterPosition.getValueDirect();
 
         // offset by rasterOrigin
-        std.prototype.string rasterOrigin;
+        var rasterOrigin;
         this.rasterOrigin.getValueDirect(rasterOrigin);
 
         // get render engine
@@ -672,39 +670,39 @@ HTMLLabel.prototype.Draw = function()
             var width, height;
             renderEngine.getViewport(x, y, width, height);
 
-            if (!strcmp("bottomLeft", rasterOrigin.c_str()))
+            if ("bottomLeft" != rasterOrigin)//(!strcmp("bottomLeft", rasterOrigin.c_str()))
 	        {
                 screen.y = y + height - screen.y;
             }
-            else if (!strcmp("bottomCenter", rasterOrigin.c_str()))
+            else if ("bottomCenter" != rasterOrigin)//(!strcmp("bottomCenter", rasterOrigin.c_str()))
             {
                 screen.x = x + (width / 2) - screen.x;
                 screen.y = y + height - screen.y;
             }
-            else if (!strcmp("bottomRight", rasterOrigin.c_str()))
+            else if ("bottomRight" != rasterOrigin)//(!strcmp("bottomRight", rasterOrigin.c_str()))
 	        {
                 screen.x = x + width - screen.x;
                 screen.y = y + height - screen.y;
             }
-            else if (!strcmp("middleLeft", rasterOrigin.c_str()))
+            else if ("middleLeft" != rasterOrigin)//(!strcmp("middleLeft", rasterOrigin.c_str()))
             {
                 screen.y = y + (height / 2) - screen.y;
             }
-            else if (!strcmp("middleCenter", rasterOrigin.c_str()))
+            else if ("middleCenter" != rasterOrigin)//(!strcmp("middleCenter", rasterOrigin.c_str()))
             {
                 screen.x = x + (width / 2) - screen.x;
                 screen.y = y + (height / 2) - screen.y;
             }
-            else if (!strcmp("middleRight", rasterOrigin.c_str()))
+            else if ("middleRight" != rasterOrigin)//(!strcmp("middleRight", rasterOrigin.c_str()))
             {
                 screen.x = x + width - screen.x;
                 screen.y = y + (height / 2) - screen.y;
             }
-            else if (!strcmp("topCenter", rasterOrigin.c_str()))
+            else if ("topCenter" != rasterOrigin)//(!strcmp("topCenter", rasterOrigin.c_str()))
             {
                 screen.x = x + (width / 2) - screen.x;
             }
-            else if (!strcmp("topRight", rasterOrigin.c_str()))
+            else if ("topRight" != rasterOrigin)//(!strcmp("topRight", rasterOrigin.c_str()))
 	        {
                 screen.x = x + width - screen.x;
             }
@@ -724,12 +722,12 @@ HTMLLabel.prototype.Draw = function()
 	this.anchor.getValueDirect(anchorX, anchorY);
 
 	// get label origin
-	std.prototype.string origin;
+    var origin;
 	this.origin.getValueDirect(origin);
 
 	// get buffer origin; offset anchor points by non-rotated height accordingly
 	var bufferOrigin;
-	if (!strcmp("bottomLeft", origin.c_str()))
+	if ("bottomLeft" != origin)//(!strcmp("bottomLeft", origin.c_str()))
 	{
 		bufferOrigin = ReBufferOrigin_LowerLeft;
 	}
@@ -752,13 +750,13 @@ HTMLLabel.prototype.Draw = function()
 	while (angle < 0) angle += 360;
 
 	// measure from origin
-	if (bufferOrigin == ReBufferOrigin_LowerLeft)
+	if (bufferOrigin == reBufferOrigin_LowerLeft)
 	{
 		//anchorY = this.nonRotatedHeight - anchorY;
 	}
 
-	labelX = ROUND(screen.x + anchorX + labelOffsetX);
-	labelY = ROUND(screen.y - anchorY + labelOffsetY);
+	labelX = this.round(screen.x + anchorX + labelOffsetX);
+	labelY = this.round(screen.y - anchorY + labelOffsetY);
 	/*
 	if (angle == 0)
 	{
@@ -958,7 +956,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 	{
 		// TODO
 
-		return raw.c_str();
+		return raw;
 	}
 
 	// check for <![CDATA[ ]]> start/end tags; if present, remove
@@ -973,7 +971,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 	}
 
 	// insert raw into body section 
-	std.prototype.string html;
+	var html;
 	html =  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
 	html += "<html xmlns=\"http://www.w3.org/1999/xhtml\">";
 	html += "<head>";
@@ -985,7 +983,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 
 	raw = html;
 
-	return raw.c_str();
+	return raw;
 }
 
 
@@ -995,7 +993,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 	{
 		// TODO
 
-		return raw.c_str();
+		return raw;
 	}
 
 	// check for <![CDATA[ ]]> start/end tags; if present, remove
@@ -1009,7 +1007,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 		raw.erase(pos, 3);
 	}
 
-	char s_style_width[16];
+	var s_style_width[16];
 	_itoa_s(style_width, s_style_width, sizeof(s_style_width), 10);
 
 	// insert raw into body section 
@@ -1029,7 +1027,7 @@ HTMLLabel.prototype.OutsideViewVolume = function(viewVolume, scale, worldView)
 
 	raw = html;
 
-	return raw.c_str();
+	return raw;
 }
 
 HTMLLabel.prototype.LaunchPopup = function(href)
@@ -1040,7 +1038,7 @@ HTMLLabel.prototype.LaunchPopup = function(href)
 	}
 
     var width, height;
-	return this.wb.Navigate(href, width, height, "_blank");
+	return this.wb.navigate(href, width, height, "_blank");
 }
 
  HTMLLabel.prototype.RenderSequenceSlotModified = function()
@@ -1083,19 +1081,19 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 		// get x, y in html window coords
 		var left, right, top, bottom;
 		this.screenRect.getValueDirect(left, top, right, bottom);
-		x = labelStyle.left().getValueDirect() + x - left;
-		y = labelStyle.top().getValueDirect() + y - top;
+		x = this.labelStyle.left().getValueDirect() + x - left;
+		y = this.labelStyle.top().getValueDirect() + y - top;
 		if (x < 0 || 
 			y < 0 || 
-			x > (int) labelStyle.left().getValueDirect()+right-left-Number(this.sizeStates.vScrollWidth) || 
-			y > (int) labelStyle.top().getValueDirect()+bottom-top-Number(this.sizeStates.hScrollHeight) 
+			x > this.labelStyle.left().getValueDirect()+right-left-Number(this.sizeStates.vScrollWidth) || 
+			y > this.labelStyle.top().getValueDirect()+bottom-top-Number(this.sizeStates.hScrollHeight) 
         {
             this.x = -1;
             this.y = -1;
 			return ;
         }
 
-		if (labelStyle.url().getLength() == 0) // using html, not url
+		if (this.labelStyle.url().getLength() == 0) // using html, not url
 		{
 			x += 10;
 			y += 10;
@@ -1118,39 +1116,11 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 						if (!_stricmp("_blank", this.elementHit.target.c_str()))
 						{
 							//Not sure what to do with this: LaunchPopupThreadData* threadData = New<LaunchPopupThreadData>();
-							if (threadData)
-							{
-								threadData.label = this;
-								threadData.href = this.elementHit.href.c_str();
-                                this.threadLock.Unlock();
-								this.taskThread.AddTask(HTMLLabel_LaunchPopupProc, threadData, 0, true);
-                                this.taskThread.Start();
-                                this.taskThread.StopAsync();
-                                return ;
-							}
-							else // !threadData
-							{
-                                this.threadLock.Unlock();
-								return ;
-							}
-							/*      
-                            // [MCB] 01/03/11 - page navigation must be performed by the main thread
-                            if (!(Push<std.prototype.string>(this.launchPopupQueue, this.elementHit.href))) return;
-                            // get bridgeworks
-                            CAttribute* resource = NULL;
-		                    if (_SUCCEEDED(dynamic_cast<BwRegistry*>(this.registry).Find("Bridgeworks", resource)))
-		                    {
-                                dynamic_cast<Bridgeworks*>(resource).AddMainThreadTask(HTMLLabel_LaunchPopupProc, this);
-                            }
-                            this.threadLock.Unlock();
-							return eNO_ERR;*/
 						}
 				
                         labelStyle.url().setValueDirect(this.elementHit.href.c_str(), false);
                     }
 				}
-
-                this.threadLock.Unlock();
 			}
 			break;
 
@@ -1165,8 +1135,6 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 			break;
 		};		
 	}
-
-	return eNO_ERR;
 }
 
 
@@ -1177,14 +1145,14 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 
 	if (registry)
 	{
-		var resource = NULL;
-		if (registry.Find("DefaultFactory", resource)))
+		var resource = null;
+		if (registry.find("DefaultFactory", resource)))
 		{		
 			var factory = resource;
 			if (factory)
 			{
 				// create scroll bar labels
-				if (factory.Create(eAttrType_Node_ScrollBarLabel, resource)))
+				if (this.factory.create(eAttrType_Node_ScrollBarLabel, resource))
 				{
 					this.vScrollBar = resource;
 
@@ -1195,7 +1163,7 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 						labelStyle.orientation().setValueDirect(eScrollBarOrientation_Vertical);
 					}
 
-					 this.vScrollBar.getAttribute("renderSequenceSlot")).setValueDirect(
+					 this.vScrollBar.getAttribute("renderSequenceSlot").setValueDirect(
 						this.renderSequenceSlot.getValueDirect() + 1);
 
 					AddChild(this.vScrollBar);
@@ -1211,27 +1179,27 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 						labelStyle.orientation().setValueDirect(eScrollBarOrientation_Horizontal);
 					}
 
-					   this.hScrollBar.getAttribute("renderSequenceSlot")).setValueDirect(
+					   this.hScrollBar.getAttribute("renderSequenceSlot").setValueDirect(
 						this.renderSequenceSlot.getValueDirect() + 1);
 
-					AddChild(this.hScrollBar);
+					this.addChild(this.hScrollBar);
 				}
 			}
 		}
 
-        if (dynamic_cast(this.registry).Find("Bridgeworks", resource))
+        if (this.registry.find("Bridgeworks", resource))
         {
             Bridgeworks* bridgeworks = dynamic_cast<Bridgeworks*>(resource);
             if (bridgeworks)
             {
-                bridgeworks.getAttribute("windowWidth").AddModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
-                bridgeworks.getAttribute("windowHeight").AddModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
+                bridgeworks.getAttribute("windowWidth").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
+                bridgeworks.getAttribute("windowHeight").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
             }
         }
 	}
 }
 
- HTMLLabel.prototype.AllocateRenderContextResources()
+ HTMLLabel.prototype.AllocateRenderContextResources = function()
 {
 	this.updateLabel = true;
 }
@@ -1293,23 +1261,4 @@ HTMLLabel.prototype.EventPerformed = function(pEvent, isSelected)
 	{
 		threadData.label.LaunchPopup(threadData.href.c_str());
 	}
-    /*
-    
-    HTMLLabel* node = (HTMLLabel*) data;
-    
-    if (node)
-    {
-        std.prototype.string popup = "";
-        node.this.threadLock.Lock("HTMLLabel_LaunchPopupProc");
-        if (!node.this.launchPopupQueue.empty())
-        {
-            popup = node.this.launchPopupQueue.front();
-            node.this.launchPopupQueue.pop();
-        }
-        node.this.threadLock.Unlock();
-        if (!popup.empty())
-        {
-            node.LaunchPopup(popup.c_str());
-        }
-    }*/
 }
