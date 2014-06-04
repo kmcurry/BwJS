@@ -117,5 +117,5 @@
                 </fontStyle>
             </labelStyle>
         </Label>
-   <KeyframeInterpolator target="UV_BoxG" url="./motions/Dissolve_Oscillate.mot"/>
+   <KeyframeInterpolator target="UV_BoxG" url="./envelopes/Dissolve_Oscillate.env"/>
 </Session>
