@@ -84,8 +84,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
     triggerString = trigger.getValueDirect().join("");
  	attrNdx = triggerString.lastIndexOf('/');
 
-     console.debug(triggerString);
-
  	if (attrNdx != -1)
  	{
  		var objectName = triggerString.substring(0, attrNdx);
@@ -128,8 +126,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				// value is the string between '=' && (',' || end of string)
  				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
 
-                console.debug(objectName);
-                console.debug(valueString);
  			}
  			else //TEMPEST
  			{
@@ -142,8 +138,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			}
  			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
  			attrName = triggerString.substring(attrNdx+1, valueNdx);
-
-            console.debug(attrName);
 
  			var input = resource.getAttribute(attrName);
 
@@ -164,8 +158,6 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			}
  			triggerString = objectName + "/" + attrName;
 
-            //newTrigger.execute();
-            //command.execute(trigger);
  			console.debug(trigger);
  			console.debug("\n");
  		}		
