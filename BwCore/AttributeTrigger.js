@@ -22,6 +22,8 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
 
 
     this.executionCount = _executionCount;
+
+    console.debug(this.executionCount);
     
     //this.executionCount = new NumberAttr(this.executionCount);
 
@@ -125,9 +127,10 @@ AttributeTrigger.prototype.execute = function()
 			        }
 		        }
 
-		        if (this.executionCount == 0)
+		        if (this.executionCount.getValueDirect() == 0)
 		        {
 			        this.target = null;
+                    this.input.removeModifiedCB(AttributeTrigger_InputModifiedCB,this);
 		        }
 		        else
 		        {
