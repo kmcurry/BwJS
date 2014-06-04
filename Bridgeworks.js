@@ -131,7 +131,7 @@ function formatPath(url)
                 // could be a relative path
                 var href = document.location.href;
                 
-                validPath = href.substring(0, href.lastIndexOf("/")) + "/bwcontent/" + url;
+                validPath = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/" + url;
                 
                 console.debug("Trying: " + validPath);
                 
@@ -2602,6 +2602,176 @@ Timer.prototype.getTime = function()
         
     return 0;
 }
+// From: http://www.codeproject.com/KB/scripting/dom-element-abs-pos.aspx
+
+function __getIEVersion()
+{
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName == 'Microsoft Internet Explorer')
+    {
+        var ua = navigator.userAgent;
+        var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+        if (re.exec(ua) != null)
+            rv = parseFloat(RegExp.$1);
+    }
+    return rv;
+}
+
+function __getOperaVersion()
+{
+    var rv = 0; // Default value
+    if (window.opera)
+    {
+        var sver = window.opera.version();
+        rv = parseFloat(sver);
+    }
+    return rv;
+}
+
+var __userAgent = navigator.userAgent;
+var __isIE = navigator.appVersion.match(/MSIE/) != null;
+var __IEVersion = __getIEVersion();
+var __isIENew = __isIE && __IEVersion >= 8;
+var __isIEOld = __isIE && !__isIENew;
+
+var __isFireFox = __userAgent.match(/firefox/i) != null;
+var __isFireFoxOld = __isFireFox && ((__userAgent.match(/firefox\/2./i) != null) ||
+	(__userAgent.match(/firefox\/1./i) != null));
+var __isFireFoxNew = __isFireFox && !__isFireFoxOld;
+
+var __isWebKit = navigator.appVersion.match(/WebKit/) != null;
+var __isChrome = navigator.appVersion.match(/Chrome/) != null;
+var __isOpera = window.opera != null;
+var __operaVersion = __getOperaVersion();
+var __isOperaOld = __isOpera && (__operaVersion < 10);
+
+function __parseBorderWidth(width)
+{
+    var res = 0;
+    if (typeof (width) == "string" && width != null && width != "")
+    {
+        var p = width.indexOf("px");
+        if (p >= 0)
+        {
+            res = parseInt(width.substring(0, p));
+        }
+        else
+        {
+            //do not know how to calculate other values 
+            //(such as 0.5em or 0.1cm) correctly now
+            //so just set the width to 1 pixel
+            res = 1;
+        }
+    }
+    return res;
+}
+
+//returns border width for some element
+function __getBorderWidth(element)
+{
+    var res = new Object();
+    res.left = 0; res.top = 0; res.right = 0; res.bottom = 0;
+    if (window.getComputedStyle)
+    {
+        //for Firefox
+        var elStyle = window.getComputedStyle(element, null);
+        res.left = parseInt(elStyle.borderLeftWidth.slice(0, -2));
+        res.top = parseInt(elStyle.borderTopWidth.slice(0, -2));
+        res.right = parseInt(elStyle.borderRightWidth.slice(0, -2));
+        res.bottom = parseInt(elStyle.borderBottomWidth.slice(0, -2));
+    }
+    else
+    {
+        //for other browsers
+        res.left = __parseBorderWidth(element.style.borderLeftWidth);
+        res.top = __parseBorderWidth(element.style.borderTopWidth);
+        res.right = __parseBorderWidth(element.style.borderRightWidth);
+        res.bottom = __parseBorderWidth(element.style.borderBottomWidth);
+    }
+
+    return res;
+}
+
+//returns the absolute position of some element within document
+function getElementAbsolutePos(element)
+{
+    var res = new Object();
+    res.x = 0; res.y = 0;
+    if (element !== null)
+    {
+        if (element.getBoundingClientRect)
+        {
+            var viewportElement = document.documentElement;
+            var box = element.getBoundingClientRect();
+            var scrollLeft = viewportElement.scrollLeft;
+            var scrollTop = viewportElement.scrollTop;
+
+            res.x = box.left + scrollLeft;
+            res.y = box.top + scrollTop;
+
+        }
+        else
+        { //for old browsers
+            res.x = element.offsetLeft;
+            res.y = element.offsetTop;
+
+            var parentNode = element.parentNode;
+            var borderWidth = null;
+
+            while (offsetParent != null)
+            {
+                res.x += offsetParent.offsetLeft;
+                res.y += offsetParent.offsetTop;
+
+                var parentTagName =
+					offsetParent.tagName.toLowerCase();
+
+                if ((__isIEOld && parentTagName != "table") ||
+					((__isFireFoxNew || __isChrome) &&
+						parentTagName == "td"))
+                {
+                    borderWidth = kGetBorderWidth
+							(offsetParent);
+                    res.x += borderWidth.left;
+                    res.y += borderWidth.top;
+                }
+
+                if (offsetParent != document.body &&
+				offsetParent != document.documentElement)
+                {
+                    res.x -= offsetParent.scrollLeft;
+                    res.y -= offsetParent.scrollTop;
+                }
+
+
+                //next lines are necessary to fix the problem 
+                //with offsetParent
+                if (!__isIE && !__isOperaOld || __isIENew)
+                {
+                    while (offsetParent != parentNode &&
+						parentNode !== null)
+                    {
+                        res.x -= parentNode.scrollLeft;
+                        res.y -= parentNode.scrollTop;
+                        if (__isFireFoxOld || __isWebKit)
+                        {
+                            borderWidth =
+						     kGetBorderWidth(parentNode);
+                            res.x += borderWidth.left;
+                            res.y += borderWidth.top;
+                        }
+                        parentNode = parentNode.parentNode;
+                    }
+                }
+
+                parentNode = offsetParent.parentNode;
+                offsetParent = offsetParent.offsetParent;
+            }
+        }
+    }
+    
+    return res;
+}
 /**
 *	The end behavior enumeration
 */
@@ -4168,17 +4338,39 @@ ViewVolume.prototype.setPerspective = function(fovyRadians, aspectRatio, near, f
 
     // derive planes from frustum endpoints (specify points in 
     // clockwise order so that plane normals point out of frustum)
-	this.left   = new Plane2(frontTopLeft, frontBotLeft, backBotLeft);
+    this.left   = new Plane2(frontTopLeft, frontBotLeft, backBotLeft);
     this.right  = new Plane2(frontBotRight, frontTopRight, backTopRight);
     this.top    = new Plane2(frontTopLeft,  backTopLeft,   backTopRight);
-	this.bottom = new Plane2(frontBotLeft, frontBotRight, backBotRight);
+    this.bottom = new Plane2(frontBotLeft, frontBotRight, backBotRight);
     this.near   = new Plane2(frontBotLeft,  frontTopLeft,  frontTopRight);
     this.far    = new Plane2(backBotRight,  backTopRight,  backTopLeft);
 }
 
 ViewVolume.prototype.setOrthographic = function(left, right, top, bottom, near, far)
 {
-    // TODO
+    // calculate the front and back frustum plane quadrilateral endpoints
+    // for a symmetric frustum volume
+
+    // set front quad endpoints
+    var frontTopLeft  = new Vector3D(left,  top,    near);
+    var frontTopRight = new Vector3D(right, top,    near);
+    var frontBotLeft  = new Vector3D(left,  bottom, near);
+    var frontBotRight = new Vector3D(right, bottom, near);
+
+    // back quad
+    var backTopLeft   = new Vector3D(left,  top,    far);
+    var backTopRight  = new Vector3D(right, top,    far);
+    var backBotLeft   = new Vector3D(left,  bottom, far);
+    var backBotRight  = new Vector3D(right, bottom, far);
+
+    // derive planes from frustum endpoints (specify points in 
+    // clockwise order so that plane normals point out of frustum)
+    this.left   = new Plane2(backBotLeft,   backTopLeft,   frontTopLeft);
+    this.right  = new Plane2(frontBotRight, frontTopRight, backTopRight);
+    this.top    = new Plane2(frontTopLeft,  backTopLeft,   backTopRight);
+    this.bottom = new Plane2(backBotRight,  backBotLeft,   frontBotLeft);
+    this.near   = new Plane2(frontBotLeft,  frontTopLeft,  frontTopRight);
+    this.far    = new Plane2(backBotRight,  backTopRight,  backTopLeft);
 }
 var EPSILON = 0.00000001;
 
@@ -4453,713 +4645,6 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
     
     return { result: false };
 }
-function ScaleImage(pixelFormat, widthIn, heightIn, byteAlignmentIn, dataIn, widthOut, heightOut, byteAlignmentOut, dataOut)
-{
-    // currently supporting image pixel formats: RGBA
-    if (pixelFormat != ePixelFormat.R8G8B8A8)
-    {
-        return false;
-    }
-
-    var canvasIn = document.createElement("canvas");
-    canvasIn.width = widthIn;
-    canvasIn.height = heightIn;
-    
-    var ctxIn = canvasIn.getContext("2d");
-    var imageDataIn = ctxIn.createImageData(widthIn, heightIn);
-
-    var i = 0;
-    for (var row = 0; row < heightIn; row++)
-    {
-        for (var col = 0; col < widthIn; col++)
-        {
-            for (var component = 0; component < 4; component++, i++)
-            {
-                imageDataIn.data[i] = dataIn[i];
-            }
-        }
-    }
-
-    ctxIn.putImageData(imageDataIn, 0, 0);
-
-    var canvasOut = document.createElement("canvas");
-    canvasOut.width = widthOut;
-    canvasOut.height = heightOut;
-
-    var ctxOut = canvasOut.getContext("2d");
-    
-    ctxOut.drawImage(canvasIn,
-                     0, 0, canvasIn.width, canvasIn.height,
-                     0, 0, canvasOut.width, canvasOut.height);
-               
-    var imageDataOut = ctxOut.getImageData(0, 0, widthOut, heightOut);
-
-    i = 0;
-    for (var row = 0; row < heightOut; row++)
-    {
-        for (var col = 0; col < widthOut; col++)
-        {
-            for (var component = 0; component < 4; component++, i++)
-            {
-                dataOut[i] = imageDataOut.data[i];
-            }
-        }
-    }
-
-    return true;
-}
-// filter flags for GetFrameData() filterMask parameter
-var FRAME_FILTER_SCALE_FRAME_BIT    = 0x001;    // scale frame to size of incoming buffer before copying
-var FRAME_FILTER_INVERT_FRAME_BIT   = 0x002;    // invert frame
-var FRAME_FILTER_NEGATE_COLOR_BIT   = 0x004;    // invert rgb pixel data (subtract from 255)
-var FRAME_FILTER_NEGATE_ALPHA_BIT   = 0x008;    // invert alpha pixel data (subtract from 255)
-var FRAME_FILTER_ALPHA_ONOFF_BIT    = 0x010;    // set alpha pixel to 0 or 255; alpha values in the range
-                                                // [0, 127] are set to 0, [128, 255] are set to 255
-                                                
-function MediaPlayback(container, onload)
-{
-    this.container = container;
-    this.onload = onload;
-
-    this.url = null;
-    this.video = false;
-    this.ready = false;
-    this.alphaPlayback = null;
-    this.frameRetrieved = false;
-    this.htmlImageElement = null;
-    this.imageWidth = 0;
-    this.imageHeight = 0;
-    this.imagePitch = 0;
-    this.imagePixels = null;
-}
-
-MediaPlayback.prototype.loadImage = function(url)
-{
-    this.ready = false;
-    this.frameRetrieved = false;
-    this.htmlImageElement = null;
-    this.imageWidth = 0;
-    this.imageHeight = 0;
-    this.imagePitch = 0;
-    this.imagePixels = null;
-
-    var extension = getFileExtension(url);
-
-    switch (extension)
-    {
-        case "avi":
-        case "mpg":
-        case "ogg":
-            {
-
-                this.htmlImageElement = document.createElement("video");
-                this.htmlImageElement.container = this;
-                this.htmlImageElement.controls = "controls";
-                //this.htmlImageElement.preload = "auto";
-                //this.htmlImageElement.autoplay = "autoplay";
-                //this.htmlImageElement.setAttribute("controls", "controls");
-                //this.htmlImageElement.setAttribute("preload", "preload");
-                //this.htmlImageElement.setAttribute("autoplay", "autoplay");
-
-                //this.htmlImageElement.canvas = document.createElement("canvas");
-                //this.htmlImageElement.canvasContext = this.htmlImageElement.canvas.getContext("2d");
-
-                //this.htmlImageElement.addEventListener("play", MediaTexture_OnVideoPlay, false);
-                //this.htmlImageElement.onload = MediaTexture_OnVideoLoad;
-
-                //this.onVideoPlay();
-                this.htmlImageElement.src = "http://localhost/bwjs/bwcontent/images/Bear.ogg"; //url;
-
-                this.video = true;
-                this.onVideoLoad();
-
-                /*
-                this.htmlImageElement = document.createElement("video"); //new Image();
-                this.htmlImageElement.container = this;
-                this.htmlImageElement.preload = "auto";
-                this.htmlImageElement.autoplay = "autoplay";
-                this.htmlImageElement.onload = MediaPlayback_OnVideoLoad;
-                this.htmlImageElement.src = imageFilename;
-                //this.imageSet = true;
-                //this.video = true;
-                */
-                //var resource = loadBinaryResource(imageFilename);
-                //alert(resource);
-            }
-            break;
-
-        default:
-            {
-                this.htmlImageElement = new Image(); //document.createElement("img");
-                this.htmlImageElement.container = this;
-                this.htmlImageElement.onload = MediaPlayback_OnImageLoad;
-                this.htmlImageElement.src = url;
-            }
-            break;
-    }
-
-    this.url = url;
-}
-
-MediaPlayback.prototype.onImageLoad = function()
-{
-    var image = this.htmlImageElement;
-    this.imageWidth = image.width;
-    this.imageHeight = image.height;
-    this.imagePitch = image.width * 4; // rgba
-    var canvas = document.createElement("canvas");
-    var canvasContext = canvas.getContext("2d");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    canvasContext.drawImage(image, 0, 0);
-    var imageData = canvasContext.getImageData(0, 0, image.width, image.height);
-    this.imagePixels = imageData.data;
-
-    this.ready = true;
-
-    if (this.onload)
-    {
-        this.onload.call(this);
-    }
-}
-
-MediaPlayback.prototype.onVideoLoad = function()
-{
-    this.ready = true;
-}
-
-MediaPlayback.prototype.getFrameDimensions = function()
-{
-    return { width: this.imageWidth, height: this.imageHeight, pitch: this.imagePitch };
-}
-
-MediaPlayback.prototype.getPixelFormat = function()
-{
-    return ePixelFormat.R8G8B8A8;
-}
-
-MediaPlayback.prototype.getPixelByteAlignment = function()
-{
-    return 4;
-}
-
-MediaPlayback.prototype.getBytesPerPixel = function()
-{
-    return BytesPerPixel(this.getPixelFormat());
-}
-
-/**
- * Retrieve the pixels for the current frame.
- * @param buffer        - incoming buffer to receive pixel data.
- * @param frame         - optional parameter specifying the frame number to retrieve.
- * @return number       - the frame number retrieved, -1 for single-frame images, or undefined on failure.
- */
-MediaPlayback.prototype.getFramePixels = function(buffer, frame)
-{
-    // verify validity of image data
-    if (!this.ready ||
-        this.imageWidth == 0 ||
-        this.imageHeight == 0 ||
-        !this.imagePixels)
-    {
-        return undefined;
-    }
-
-    buffer.length = this.imagePixels.length;
-    for (var i = 0; i < this.imagePixels.length; i++)
-    {
-        buffer[i] = this.imagePixels[i];
-    }
-
-    return -1; // single-frame image
-}
-
-MediaPlayback.prototype.newFrameDataAvailable = function()
-{
-    return this.ready && !this.frameRetrieved;
-}
-
-/**
- * Retrieve the pixels for the current frame in the specified pixel format and dimensions.
- * @param width         - width of the incoming buffer in pixels.
- * @param height        - height of the incoming buffer in pixels.
- * @param pitch         - width of a scan line of pixels in bytes; may differ from width * bytes
- *                        per pixel if pixels are padded to 2- or 4-byte boundaries.
- * @param pixelFormat   - pixel format of the incoming buffer.
- * @param buffer        - incoming buffer to receive pixel data.
- * @param filterMask    - zero or more OR'd filtering flags controlling how the image is filtered:
- *
- *                        FRAME_FILTER_SCALE_FRAME_BIT  - the frame is first scaled to the size 
- *                                                        of the incoming buffer before copying
- *                        FRAME_FILTER_INVERT_FRAME_BIT - the frame is inverted before copying
- *                        FRAME_FILTER_NEGATE_COLOR_BIT - the rgb pixel data is inverted (subtracted from 255) 
- *                        FRAME_FILTER_NEGATE_ALPHA_BIT - the alpha pixel data is inverted (subtracted from 255)
- *                        FRAME_FILTER_ALPHA_ONOFF_BIT  - set alpha pixel to 0 or 255; alpha values in the range
- *                                                        [0, 127] are set to 0, [128, 255] are set to 255
- *
- * @param pixelMap      - pixel mapping to perform; default: PixelMap_Default.
- * @param frame         - optional parameter specifying the frame number to retrieve.
- * @return number       - the frame number retrieved, -1 for single-frame images, or undefined on failure.
- */
-MediaPlayback.prototype.getFrameData = function(width, height, pitch, pixelFormat, buffer, filterMask, pixelMap, frame)
-{
-    // verify validity of image data
-    if (!this.ready ||
-        this.imageWidth == 0 ||
-        this.imageHeight == 0 ||
-        !this.imagePixels)
-    {
-        return undefined;
-    }
-
-    // check params
-    if (width == 0 ||
-        height == 0 ||
-        pitch < width ||
-        pixelFormat == ePixelFormat.Unknown ||
-        !buffer)
-    {
-        return undefined;
-    }
-
-    var frameRetrieved = -1;
-
-    // get filter flags
-    var scaleFrame = filterMask & FRAME_FILTER_SCALE_FRAME_BIT ? true : false;
-    var invertFrame = filterMask & FRAME_FILTER_INVERT_FRAME_BIT ? true : false;
-    var negateColor = filterMask & FRAME_FILTER_NEGATE_COLOR_BIT ? true : false;
-    var negateAlpha = filterMask & FRAME_FILTER_NEGATE_ALPHA_BIT ? true : false;
-    var alphaOnOff = filterMask & FRAME_FILTER_ALPHA_ONOFF_BIT ? true : false;
-
-    // get image dimensions
-    var dims = this.getFrameDimensions();
-    var imageWidth = dims.width;
-    var imageHeight = dims.height;
-    var imagePitch = dims.pitch;
-
-    // get image pixel format
-    var imagePixelFormat = this.getPixelFormat();
-
-    // currently supporting image pixel formats: RGBA
-    if (imagePixelFormat != ePixelFormat.R8G8B8A8)
-    {
-        return undefined;
-    }
-
-    // get image pixels
-    var pixels = [];
-    var imageFrameRetrieved = this.getFramePixels(pixels, frame);
-    if (imageFrameRetrieved == undefined)
-    {
-        return undefined;
-    }
-
-    // scale pixels if necessary
-    if (scaleFrame && (width != imageWidth || height != imageHeight))
-	{
-		var imageBytesPerPixel = this.getBytesPerPixel();
-
-		// calculate pitch (using byte aligment of "4")
-		imagePitch = width * imageBytesPerPixel;
-		imagePitch += (4 - imagePitch % 4) % 4;
-
-		var scaledPixels = [];
-		if (!ScaleImage(imagePixelFormat, imageWidth, imageHeight, this.getPixelByteAlignment(), pixels, 
-			width, height, 4, scaledPixels))
-		{
-			return undefined;
-		}
-
-		pixels = scaledPixels;
-		imageWidth = width;
-		imageHeight = height;
-	}
-
-    // if no alpha channel, rgb pixel data is not to be negated, frame is not to be inverted,
-    // and incoming buffer has same parameters as pixel buffer, copy bits
-    if (!this.alphaPlayback &&
-		!negateColor &&
-		!invertFrame &&
-		imagePitch == pitch &&
-		imageHeight == height &&
-		imagePixelFormat == pixelFormat)
-    {
-        for (var i = 0; i < buffer.length; i++)
-        {
-            buffer[i] = pixels[i];
-        }
-        
-        this.frameRetrieved = true;
-        return frameRetrieved;
-    }
-
-    // get alpha data
-    var alphaWidth = 0;
-	var alphaHeight = 0;
-	var alphaPitch = 0;
-	var alphaPixelFormat;
-	var alphaPixels = null;
-	if (this.alphaChannel)
-	{
-		// get alpha dimensions
-		dims = this.alphaChannel.getFrameDimensions();
-		alphaWidth = dims.width;
-		alphaHeight = dims.height;
-		alphaPitch = dims.pitch;
-
-		// get alpha pixel format
-		alphaPixelFormat = this.alphaChannel.getPixelFormat();
-    
-		// currently only supporting alpha pixel formats: RGBA
-		if (alphaPixelFormat != ePixelFormat.R8G8B8A8)
-		{
-			return undefined;
-		}
-
-		// get alpha pixels
-		var alphaFramePixels = [];
-		var alphaFrameRetrieved = this.alphaChannel.getFramePixels(alphaFramePixels, imageFrameRetrieved);
-		if (alphaFrameRetrieved != undefined)
-		{
-		    // scale alpha pixels to match frame data
-		    if (alphaWidth != imageWidth ||
-			    alphaHeight != imageHeight)
-		    {
-			    var alphaBytesPerPixel = this.alphaChannel.getBytesPerPixel();
-
-			    // calculate pitch (using byte aligment of "4")
-			    alphaPitch = imageWidth * alphaBytesPerPixel;
-			    alphaPitch += (4 - alphaPitch % 4) % 4;
-
-			    var scaledAlphaPixels = [];
-			    if (ScaleImage(alphaPixelFormat, alphaWidth, alphaHeight, 
-				    this.alphaChannel.getPixelByteAlignment(), alphaPixels, imageWidth, 
-				    imageHeight, 4, scaledAlphaPixels))
-			    {
-			        alphaPixels = scaledAlphaPixels;
-			        alphaWidth = imageWidth;
-			        alphaHeight = imageHeight;
-			    }
-		    }
-		    else
-		    {
-		        alphaPixels = alphaFramePixels;
-		    }
-		}
-	}
-	
-    // determine dimensions to copy
-    var copyWidth = Math.min(width, imageWidth);
-    var copyHeight = Math.min(height, imageHeight);
-
-    // set component positions for buffer pixel format
-    var rPos = 0, gPos = 0, bPos = 0, aPos = 0;
-    switch (pixelFormat)
-    {
-        case ePixelFormat.R8G8B8: rPos = 0; gPos = 1; bPos = 2; break;
-        case ePixelFormat.B8G8R8: rPos = 2; gPos = 1; bPos = 0; break;
-        case ePixelFormat.R8G8B8A8: rPos = 0; gPos = 1; bPos = 2; aPos = 3; break;
-        case ePixelFormat.B8G8R8A8: rPos = 2; gPos = 1; bPos = 0; aPos = 3; break;
-        case ePixelFormat.A8R8G8B8: rPos = 1; gPos = 2; bPos = 3; aPos = 0; break;
-        case ePixelFormat.A8B8G8R8: rPos = 3; gPos = 2; bPos = 1; aPos = 0; break;
-    }
-
-    // if frame is to be inverted, start copying from last row of data
-    var fromImage = 0, fromAlpha = 0, to = 0;
-    if (invertFrame)
-    {
-        fromImage += imagePitch * (copyHeight - 1);
-
-        if (alphaPixels)
-        {
-            fromAlpha += alphaPitch * (copyHeight - 1);
-        }
-    }
-
-    // copy pixel data to buffer
-    var pixel = new TPixel(0, 0, 0, 255);
-    var alphaPixel = new TPixel(0, 0, 0, 255);
-    for (var row = 0; row < copyHeight; row++)
-    {
-        for (var col = 0; col < copyWidth; col++)
-        {
-            // get image pixel
-            /*
-            switch (imagePixelFormat)
-            {
-            case ePixelFormat.R8G8B8:
-            pixel.red = pixels[fromImage];
-            pixel.green = pixels[fromImage + 1];
-            pixel.blue = pixels[fromImage + 2];
-            fromImage += 3;
-            break;
-
-                case ePixelFormat.B8G8R8:
-            pixel.red = pixels[fromImage + 2];
-            pixel.green = pixels[fromImage + 1];
-            pixel.blue = pixels[fromImage];
-            fromImage += 3;
-            break;
-
-                case ePixelFormat.R8G8B8A8:
-            pixel.red = pixels[fromImage];
-            pixel.green = pixels[fromImage + 1];
-            pixel.blue = pixels[fromImage + 2];
-            pixel.alpha = pixels[fromImage + 3];
-            fromImage += 4;
-            break;
-
-                case ePixelFormat.B8G8R8A8:
-            pixel.red = pixels[fromImage + 2];
-            pixel.green = pixels[fromImage + 1];
-            pixel.blue = pixels[fromImage];
-            pixel.alpha = pixels[fromImage + 3];
-            fromImage += 4;
-            break;
-
-                case ePixelFormat.A8B8G8R8:
-            pixel.red = pixels[fromImage + 3];
-            pixel.green = pixels[fromImage + 2];
-            pixel.blue = pixels[fromImage + 1];
-            pixel.alpha = pixels[fromImage];
-            fromImage += 4;
-            break;
-            }
-            */
-            pixel.red = pixels[fromImage];
-            pixel.green = pixels[fromImage + 1];
-            pixel.blue = pixels[fromImage + 2];
-            pixel.alpha = pixels[fromImage + 3];
-            fromImage += 4;
-
-            // negate rgb data if requested
-            if (negateColor)
-            {
-                pixel.red = 255 - pixel.red;
-                pixel.green = 255 - pixel.green;
-                pixel.blue = 255 - pixel.blue;
-                pixel.alpha = 255 - pixel.alpha;
-            }
-
-            // get alpha pixel
-            if (alphaPixels)
-            {
-                /*
-                switch (alphaPixelFormat)
-                {
-                case ePixelFormat.R8G8B8:
-                alphaPixel.red = alphaPixels[fromAlpha];
-                alphaPixel.green = alphaPixels[fromAlpha + 1];
-                alphaPixel.blue = alphaPixels[fromAlpha + 2];
-                fromAlpha += 3;
-                break;
-
-                    case ePixelFormat.B8G8R8:
-                alphaPixel.red = alphaPixels[fromAlpha + 2];
-                alphaPixel.green = alphaPixels[fromAlpha + 1];
-                alphaPixel.blue = alphaPixels[fromAlpha];
-                fromAlpha += 3;
-                break;
-
-                    case ePixelFormat.R8G8B8A8:
-                alphaPixel.red = alphaPixels[fromAlpha];
-                alphaPixel.green = alphaPixels[fromAlpha + 1];
-                alphaPixel.blue = alphaPixels[fromAlpha + 2];
-                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
-                fromAlpha += 4;
-                break;
-
-                    case ePixelFormat.B8G8R8A8:
-                alphaPixel.red = alphaPixels[fromAlpha + 2];
-                alphaPixel.green = alphaPixels[fromAlpha + 1];
-                alphaPixel.blue = alphaPixels[fromAlpha];
-                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
-                fromAlpha += 4;
-                break;
-                }
-                */
-                alphaPixel.red = alphaPixels[fromAlpha];
-                alphaPixel.green = alphaPixels[fromAlpha + 1];
-                alphaPixel.blue = alphaPixels[fromAlpha + 2];
-                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
-                fromAlpha += 4;
-            }
-
-            // negate alpha data if requested
-            if (negateAlpha)
-            {
-                alphaPixel.red = 255 - alphaPixel.red;
-                alphaPixel.green = 255 - alphaPixel.green;
-                alphaPixel.blue = 255 - alphaPixel.blue;
-                alphaPixel.alpha = 255 - alphaPixel.alpha;
-            }
-
-            // copy to buffer
-            switch (pixelFormat)
-            {
-                case ePixelFormat.R8G8B8:
-                case ePixelFormat.B8G8R8:
-                    buffer[to + rPos] = pixel.red;
-                    buffer[to + gPos] = pixel.green;
-                    buffer[to + bPos] = pixel.blue;
-                    to += 3;
-                    break;
-
-                case ePixelFormat.R8G8B8A8:
-                case ePixelFormat.B8G8R8A8:
-                case ePixelFormat.A8R8G8B8:
-                case ePixelFormat.A8B8G8R8:
-                    switch (pixelMap)
-                    {
-                        case ePixelMap.RGBToAlpha:
-                            buffer[to + rPos] = 0;
-                            buffer[to + gPos] = 255;
-                            buffer[to + bPos] = 0;
-                            if (alphaPixels)
-                            {
-                                buffer[to + aPos] =
-								((pixel.red + pixel.green + pixel.blue) / 3) &
-								((alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3);
-                            }
-                            else
-                            {
-                                buffer[to + aPos] = (pixel.red + pixel.green + pixel.blue) / 3;
-                            }
-                            if (alphaOnOff)
-                            {
-                                buffer[to + aPos] = (buffer[to + aPos] <= 127 ? 0 : 255);
-                            }
-                            to += 4;
-                            break;
-
-                        case ePixelMap.Default:
-                        default:
-                            buffer[to + rPos] = pixel.red;
-                            buffer[to + gPos] = pixel.green;
-                            buffer[to + bPos] = pixel.blue;
-                            if (alphaPixels)
-                            {
-                                buffer[to + aPos] = (alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3;
-                            }
-                            else
-                            {
-                                buffer[to + aPos] = pixel.alpha;
-                            }
-                            if (alphaOnOff)
-                            {
-                                buffer[to + aPos] = (buffer[to + aPos] <= 127 ? 0 : 255);
-                            }
-                            to += 4;
-                            break;
-                    }
-                    break;
-
-                case ePixelFormat.A8:
-                    if (alphaPixels)
-                    {
-                        buffer[to] = (alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3;
-                    }
-                    else // !alphaPixels
-                    {
-                        buffer[to] = (pixel.red + pixel.green + pixel.blue) / 3;
-                    }
-                    if (alphaOnOff)
-                    {
-                        buffer[to] = (buffer[to] <= 127 ? 0 : 255);
-                    }
-                    to += 1;
-                    break;
-            }
-        }
-
-        if (invertFrame) fromImage -= (2 * imagePitch);
-        if (alphaPixels)
-        {
-            if (invertFrame) fromAlpha -= (2 * alphaPitch);
-        }
-    }
-
-    this.frameRetrieved = true;
-
-    return frameRetrieved;
-}
-
-MediaPlayback.prototype.setAlphaChannel = function(playback)
-{
-    this.alphaPlayback = playback;
-}
-
-function MediaPlayback_OnImageLoad()
-{
-    this.container.onImageLoad();
-}
-/**
- *
- */
-var ePixelFormat =
-{
-    Unknown             :-1,
-    R8G8B8              : 0,  // 24-bit RGB
-    B8G8R8              : 1,  // 24-bit BGR
-    X8X8X8              : 2,  // 24-bit RGB (unspecified component order)
-    R8G8B8A8            : 3,  // 32-bit RGB Alpha
-    B8G8R8A8            : 4,  // 32-bit BGR Alpha
-    A8R8G8B8            : 5,  // 32-bit Alpha RGB
-    A8B8G8R8            : 6,  // 32-bit Alpha BGR
-    X8X8X8X8            : 7,  // 32-bit RGB Alpha (unspecified component order)
-    A8                  : 8   //  8-bit Alpha
-};
-
-var ePixelMap =
-{
-    Default             : 0,  // default mapping -- R to R, G to G, B to B, Alpha to Alpha
-    RGBToAlpha          : 1   // average RGB components and map to Alpha component
-};
-
-function BytesPerPixel(pixelFormat)
-{
-    switch (pixelFormat)
-    {
-    case ePixelFormat.R8G8B8:
-    case ePixelFormat.B8G8R8:
-    case ePixelFormat.X8X8X8:
-        return 3;
-
-    case ePixelFormat.R8G8B8A8:
-    case ePixelFormat.B8G8R8A8:
-    case ePixelFormat.A8R8G8B8:
-    case ePixelFormat.A8B8G8R8:
-    case ePixelFormat.X8X8X8X8:
-        return 4;
-
-    case ePixelFormat.A8:
-        return 1;
-
-    default:
-        return 0;
-    }
-}
-
-function TPixel(r, g, b, a)
-{
-    var red = r || 0;
-    var green = g || 0;
-    var blue = b || 0;
-    var alpha = a || 0;
-}
-
-/**
- *
- */
-var eImageFormat =
-{
-    Unknown             :-1,
-    RGB                 : 0,
-    RGBA                : 1,
-    Alpha               : 2,
-    Luminance           : 3,
-    Luminance_Alpha     : 4
-}
 var eAttrType = {
     Unknown                     :-1,
     
@@ -5183,6 +4668,7 @@ var eAttrType = {
     KeyframeAttr                :0,
     KeyframesAttr               :0,
     LabelStyleAttr              :0,
+    HTMLLabelStyleAttr          :0,
     NumberArrayAttr             :0,
     NumberAttr                  :0,
     Matrix4x4Attr               :0,
@@ -5237,6 +4723,7 @@ var eAttrType = {
     NullObject                  :0,
     
     Label                       :0,
+    HTMLLabel                   :0,
     
     PathTrace                   :0,
     
@@ -5260,6 +4747,28 @@ var eAttrType = {
     UserDefined                 :2000
 };
 
+var eAttrElemType = {
+    // unknown
+    eAttrElemType_Unknown               :0,	///
+
+    // standard C-types
+    eAttrElemType_Int                   :0,							///
+    eAttrElemType_UnsignedInt           :0,					///
+    eAttrElemType_Char                  :0,							///
+    eAttrElemType_UnsignedChar          :0,					///
+    eAttrElemType_Float                 :0,						///
+    eAttrElemType_Double                :0,						///
+
+    // attribute
+    eAttrElemType_Attribute             :0,					///
+
+    // user-defined
+    eAttrElemType_UserDefined           :0x000000FF,		///
+    
+    // force enumeration to 32-bits
+    eAttrElemType_FORCE_DWORD           :0x7FFFFFFF		///
+};
+
 function enumerateAttributeTypes()
 {
     var count = 0; 
@@ -5267,6 +4776,16 @@ function enumerateAttributeTypes()
     {
         if (eAttrType[i] == 0)
             eAttrType[i] = count++;
+    }
+}
+
+function enumerateAttributeElementTypes()
+{
+    var count = 0;
+    for (var i in eAttrElemType)
+    {
+        if (eAttrElemType[i] == 0)
+            eAttrElemType[i] = count++;
     }
 }
 var eAttrSetOp = {
@@ -5337,6 +4856,7 @@ function Attribute()
     Base.call(this);
     this.className = "Attribute";
     this.attrType = eAttrType.Attribute;
+    this.attrElemType = eAttrElemType.eAttrElemType_Attribute;
     
     this.values = [];
     this.modifiedCBs = [];
@@ -8907,13 +8427,11 @@ function webglRC(canvas, background)
     gl.cullFace(gl.BACK);
    
     // create shaders
-    var vShader = getVertexShader(gl);
-    if (!vShader) return;
-    var fShader = getFragmentShader(gl);
-    if (!fShader) return;
+    var shaders = getShaders(gl, eShaderType.VertexLighting);
+    if (!shaders.vertex || !shaders.fragment) return;
 
     // create program
-    var program = getProgram(gl, vShader, fShader);
+    var program = getProgram(gl, shaders.vertex, shaders.fragment);
     if (!program) return;
 
     // set valid flag
@@ -9118,6 +8636,20 @@ function webglRC(canvas, background)
         p._43 = -d;
         p._44 = 0;
         
+        return p;
+    }
+    
+    this.orthographicMatrixLH = function(left, right, top, bottom, near, far)
+    {
+        var p = new Matrix4x4();
+        
+        p._11 =  2 / (right - left);
+        p._22 =  2 / (top - bottom);
+        p._33 = -2 / (far - near);
+        p._41 = -((right + left) / (right - left));
+        p._42 = -((top + bottom) / (top - bottom));
+        p._43 = -((far + near) / (far - near)) / 2;
+              
         return p;
     }
     
@@ -9390,307 +8922,6 @@ function getWebGLContext(canvas, debug)
     }
 
     return gl;
-}
-
-function getVertexShader(gl)
-{
-    var shader = gl.createShader(gl.VERTEX_SHADER); 
-    if (!shader) return null;
-
-    var source = [
-        "attribute vec3 aVertexPosition;",
-        "attribute vec3 aVertexNormal;",
-        "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
-        "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
-        "", 
-        "uniform mat4 uProjectionMatrix;",
-        "uniform mat4 uModelViewMatrix;",
-        "uniform mat4 uNormalMatrix;",
-        "",
-        "varying vec4 vVertexPosition;",
-        "varying vec4 vTransformedNormal;",
-        "varying vec4 vViewPosition;",
-        "varying vec4 vViewDirection;",
-        "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-        "",
-        "void main()",
-        "{",
-        "   vVertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
-        "   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
-        "   vViewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
-        "   vViewDirection = normalize(-vViewPosition);",
-        "   vTextureCoord[0] = aTextureCoord0;",
-        "   vTextureCoord[1] = aTextureCoord1;",        
-        "   gl_Position = uProjectionMatrix * vVertexPosition;",
-        "}"
-        ].join("\n");
-        
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-    {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-    
-    return shader;
-}
-
-function getFragmentShader(gl)
-{
-    var shader = gl.createShader(gl.FRAGMENT_SHADER); 
-    if (!shader) return null;
-
-    var source = [
-        "#ifdef GL_ES",
-        "precision highp float;",
-        "#endif",
-        "",
-        "vec4 gAmbient;",
-        "vec4 gDiffuse;",
-        "vec4 gSpecular;",
-        "",
-        "uniform vec4 uGlobalAmbientLight;",
-        "",
-//        IE 11 doesn't currently support structs
-//        "struct lightSourceParameters",
-//        "{",
-//        "   int enabled;",
-//        "   vec4 ambient;",
-//        "   vec4 diffuse;",
-//        "   vec4 specular;",
-//        "   vec4 position;",
-//        "   vec4 halfVector;",
-//        "   vec4 spotDirection;",
-//        "   float spotExponent;",
-//        "   float spotCutoff;",
-//        "   float spotCosCutoff;",
-//        "   float constantAttenuation;",
-//        "   float linearAttenuation;",
-//        "   float quadraticAttenuation;",
-//        "};",
-//        "",
-//        "uniform lightSourceParameters uLightSource[" + gl_MaxLights + "];",
-        "",
-        "uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-        "uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-        "uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-        "uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-        "uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-        "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-        "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-        "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-        "",
-//        IE 11 doesn't currently support structs
-//        "struct materialParameters",
-//        "{",
-//        "   vec4 ambient;",
-//        "   vec4 diffuse;",
-//        "   vec4 specular;",
-//        "   vec4 emission;",
-//        "   float shininess;",
-//        "};",
-//        "",
-//        "uniform materialParameters uFrontMaterial;",
-        "uniform vec4 uFrontMaterial_ambient;",
-        "uniform vec4 uFrontMaterial_diffuse;",
-        "uniform vec4 uFrontMaterial_specular;",
-        "uniform vec4 uFrontMaterial_emission;",
-        "uniform float uFrontMaterial_shininess;",
-        "",
-        "uniform int uLightingEnabled;",
-        "uniform int uTexturesEnabled;",
-        "uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
-        "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
-        "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
-        "uniform int uTextureBlendOp;",
-        "",
-        "varying vec4 vVertexPosition;",
-        "varying vec4 vTransformedNormal;",
-        "varying vec4 vViewPosition;",
-        "varying vec4 vViewDirection;",
-        "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-        "",
-        "void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
-        "{",
-        "   vec3 lightDir;",
-        "   float nDotL;",      // normal . light direction
-        "   float nDotHV;",     // normal . half-vector
-        "   float pf;",         // power factor
-        "",
-	"   lightDir = normalize(vec3(position));",
-        "",	
-	"   nDotL = max(dot(normal, lightDir), 0.0);",
-	"   if (nDotL == 0.0)",
-        "   {",
-        "       pf = 0.0;",
-        "   }",
-        "   else",
-        "   {",
-        "       nDotHV = max(0.0, dot(normal, halfVector));",
-        "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-        "   }",
-        "",
-        "   gAmbient  += ambient * uFrontMaterial_ambient;",
-        "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-        "   gSpecular += specular * uFrontMaterial_specular * pf;",
-        "}",
-        "",
-        "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
-        "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
-        "{",
-        "   float nDotL;",      // normal . light direction
-        "   float nDotHV;",     // normal . light half vector
-        "   float pf;",         // power factor
-        "   float attenuation;",// computed attenuation factor
-        "   float d;",          // distance from surface to light source
-        "   vec3  L;",          // direction from surface to light position
-        "   vec3  halfVector;", //
-        "",
-        "", // Compute vector from surface to light position
-        "   L = vec3(position) - vPosition;",
-        "",
-        "", // Compute distance between surface and light position
-        "   d = length(L);",
-        "",
-        "", // Normalize the vector from surface to light position,
-        "   L = normalize(L);",
-        "",
-        "", // Compute attenuation,
-        "   attenuation = 1.0 / (constantAttenuation +",
-        "      linearAttenuation * d +",
-        "      quadraticAttenuation * d * d);",
-        "",
-        "   nDotL = max(0.0, dot(normal, L));",
-        "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
-        "",
-        "   if (nDotL == 0.0)",
-        "   {",
-        "       pf = 0.0;",
-        "   }",
-        "   else",
-        "   {",
-        "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-        "   }",
-        "",    
-        "   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-        "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-        "   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
-        "}",
-        "",
-        "void main()",
-        "{",
-        "   vec4 lightingFactor;",
-        "   if (uLightingEnabled != 0)",
-        "   {",
-        "       gAmbient = vec4(0, 0, 0, 0);",
-        "       gDiffuse = vec4(0, 0, 0, 0);",
-        "       gSpecular = vec4(0, 0, 0, 0);",
-        "",
-        "       for (int i=0; i < " + gl_MaxLights + "; i++)",
-        "       {",
-        "           if (uLightSource_enabled[i] != 0)",
-        "           {",
-        "               if (uLightSource_position[i][3] == 0.0)", // directional light
-        "               {",
-        "                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-        "                       uLightSource_diffuse[i], uLightSource_specular[i],",
-        "                       normalize(vec3(vTransformedNormal)),",
-        "                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
-        "               }",
-        "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
-        "               {",
-        "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-        "                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
-        "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
-        "                       normalize(vec3(vTransformedNormal)),",
-        "                       vec3(vViewDirection), vec3(vVertexPosition));",
-        "               }",
-        "               else", // spotlight
-        "               {",
-        "               }",   
-        "           }",
-        "       }",
-        "",
-        "       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
-        "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-        "       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
-        "                           uFrontMaterial_diffuse.a / 3.0 + ",
-        "                           uFrontMaterial_specular.a / 3.0;",
-        "   }",
-        "   else", // uLightingEnabled == 0
-        "   {",
-        "",     // TODO: use vertex color
-        "       lightingFactor = vec4(1, 1, 1, 1);",
-        "   }",
-        "",
-        "   vec4 fragmentColor;",
-        "   vec4 fragmentColor1;",
-        "   vec4 fragmentColor2;",
-        "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
-        "   {",
-        "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-        "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-        "       {",
-        "           if (fragmentColor.a == 0.0) discard;",
-        "           else gl_FragColor = fragmentColor * lightingFactor;",
-        "           gl_FragColor = vec4(gl_FragColor.r, gl_FragColor.g, gl_FragColor.b, fragmentColor.a);",
-        "       }",
-        "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-        "       {",
-        "           gl_FragColor = fragmentColor;",
-        "       }",
-        "       else",
-        "       {",
-        "           fragmentColor = vec4(1, 1, 1, 1);",
-        "           gl_FragColor = fragmentColor * lightingFactor;",
-        "       }",
-        "   }",
-        "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
-        "   {",
-        "       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-        "       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
-        "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-        "       {",
-        "           fragmentColor1.a = fragmentColor2.a;",
-        "           if (fragmentColor1.a == 0.0) discard;",
-        "           else gl_FragColor = fragmentColor1 * lightingFactor;",
-        "           gl_FragColor = vec4(gl_FragColor.r, gl_FragColor.g, gl_FragColor.b, fragmentColor1.a);",
-        "       }",
-        "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-        "       {",
-        "           gl_FragColor = fragmentColor1 * fragmentColor2;",
-        "       }",
-        "       else",
-        "       {",
-        "           fragmentColor = vec4(1, 1, 1, 1);",
-        "           gl_FragColor = fragmentColor * lightingFactor;",
-        "       }",
-        "   }",
-        "   else", // uTexturesEnabled == 0
-        "   {",
-        "       fragmentColor = vec4(1, 1, 1, 1);",
-        "       gl_FragColor = fragmentColor * lightingFactor;",
-        "   }",
-        "}"
-        ].join("\n");
-        
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-    {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-    
-    return shader;
 }
 
 function getProgram(gl, vShader, fShader)
@@ -10139,6 +9370,560 @@ function nextHighestPowerOfTwo(x)
     }
     return x + 1;
 }
+var eShaderType =
+{
+    VertexLighting: 0,
+    FragmentLighting: 1
+};
+
+function getShaders(gl, type)
+{
+    var source_vs = null;
+    var source_fs = null;
+    
+    switch (type)
+    {
+        case eShaderType.VertexLighting:
+            {
+                source_vs = [
+                    "#ifdef GL_ES",
+                    "precision highp float;",
+                    "#endif",
+                    "",
+                    "vec4 gAmbient;",
+                    "vec4 gDiffuse;",
+                    "vec4 gSpecular;",
+                    "",
+                    "attribute vec3 aVertexPosition;",
+                    "attribute vec3 aVertexNormal;",
+                    "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
+                    "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
+                    "", 
+                    "uniform mat4 uProjectionMatrix;",
+                    "uniform mat4 uModelViewMatrix;",
+                    "uniform mat4 uNormalMatrix;",
+                    "",
+                    "uniform vec4 uGlobalAmbientLight;",
+                    "",
+                    "uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+                    "",
+                    "uniform vec4 uFrontMaterial_ambient;",
+                    "uniform vec4 uFrontMaterial_diffuse;",
+                    "uniform vec4 uFrontMaterial_specular;",
+                    "uniform vec4 uFrontMaterial_emission;",
+                    "uniform float uFrontMaterial_shininess;",
+                    "",
+                    "uniform int uLightingEnabled;",
+                    "",
+                    "varying vec4 vLightingFactor;",
+                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+                    "",
+                    "void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
+                    "{",
+                    "   vec3 lightDir;",
+                    "   float nDotL;",      // normal . light direction
+                    "   float nDotHV;",     // normal . half-vector
+                    "   float pf;",         // power factor
+                    "",
+                    "   lightDir = normalize(vec3(position));",
+                    "",	
+                    "   nDotL = max(dot(normal, lightDir), 0.0);",
+                    "   if (nDotL == 0.0)",
+                    "   {",
+                    "       pf = 0.0;",
+                    "   }",
+                    "   else",
+                    "   {",
+                    "       nDotHV = max(0.0, dot(normal, halfVector));",
+                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
+                    "   }",
+                    "",
+                    "   gAmbient  += ambient * uFrontMaterial_ambient;",
+                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+                    "   gSpecular += specular * uFrontMaterial_specular * pf;",
+                    "}",
+                    "",
+                    "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+                    "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
+                    "{",
+                    "   float nDotL;",      // normal . light direction
+                    "   float nDotHV;",     // normal . light half vector
+                    "   float pf;",         // power factor
+                    "   float attenuation;",// computed attenuation factor
+                    "   float d;",          // distance from surface to light source
+                    "   vec3  L;",          // direction from surface to light position
+                    "   vec3  halfVector;", //
+                    "",
+                    "", // Compute vector from surface to light position
+                    "   L = vec3(position) - vPosition;",
+                    "",
+                    "", // Compute distance between surface and light position
+                    "   d = length(L);",
+                    "",
+                    "", // Normalize the vector from surface to light position,
+                    "   L = normalize(L);",
+                    "",
+                    "", // Compute attenuation,
+                    "   attenuation = 1.0 / (constantAttenuation +",
+                    "      linearAttenuation * d +",
+                    "      quadraticAttenuation * d * d);",
+                    "",
+                    "   nDotL = max(0.0, dot(normal, L));",
+                    "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
+                    "",
+                    "   if (nDotL == 0.0)",
+                    "   {",
+                    "       pf = 0.0;",
+                    "   }",
+                    "   else",
+                    "   {",
+                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
+                    "   }",
+                    "",    
+                    "   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+                    "   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+                    "}",
+                    "",
+                    "void main()",
+                    "{",
+                    "   vec4 vertexPosition;",
+                    "   vec4 transformedNormal;",
+                    "   vec4 viewPosition;",
+                    "   vec4 viewDirection;",
+                    "",
+                    "   if (uLightingEnabled != 0)",
+                    "   {",
+                    "       vertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
+                    "       transformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+                    "       viewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
+                    "       viewDirection = normalize(-viewPosition);",
+                    
+                    "       gAmbient = vec4(0, 0, 0, 0);",
+                    "       gDiffuse = vec4(0, 0, 0, 0);",
+                    "       gSpecular = vec4(0, 0, 0, 0);",
+                    "",
+                    "       for (int i=0; i < " + gl_MaxLights + "; i++)",
+                    "       {",
+                    "           if (uLightSource_enabled[i] != 0)",
+                    "           {",
+                    "               if (uLightSource_position[i][3] == 0.0)", // directional light
+                    "               {",
+                    "                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+                    "                       uLightSource_diffuse[i], uLightSource_specular[i],",
+                    "                       normalize(vec3(transformedNormal)),",
+                    "                       normalize(vec3(viewDirection) + vec3(uLightSource_position[i])));",
+                    "               }",
+                    "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+                    "               {",
+                    "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+                    "                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+                    "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+                    "                       normalize(vec3(transformedNormal)),",
+                    "                       vec3(viewDirection), vec3(vertexPosition));",
+                    "               }",
+                    "               else", // spotlight
+                    "               {",
+                    "               }",   
+                    "           }",
+                    "       }",
+                    "",
+                    "       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+                    "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
+                    "       vLightingFactor.a = uFrontMaterial_ambient.a / 3.0 + ",
+                    "                           uFrontMaterial_diffuse.a / 3.0 + ",
+                    "                           uFrontMaterial_specular.a / 3.0;",
+                    "   }",
+                    "   else", // uLightingEnabled == 0
+                    "   {",
+                    "",     // TODO: use vertex color
+                    "       vLightingFactor = vec4(1, 1, 1, 1);",
+                    "   }",
+                    "",
+                    "   vTextureCoord[0] = aTextureCoord0;",
+                    "   vTextureCoord[1] = aTextureCoord1;",        
+                    "   gl_Position = uProjectionMatrix * vertexPosition;",
+                    "}"
+                    ].join("\n");
+                    
+                source_fs = [
+                    "#ifdef GL_ES",
+                    "precision highp float;",
+                    "#endif",
+                    "",
+                    "uniform int uTexturesEnabled;",
+                    "uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
+                    "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
+                    "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
+                    "uniform int uTextureBlendOp;",
+                    "",
+                    "varying vec4 vLightingFactor;",
+                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+                    "",
+                    "void main()",
+                    "{",
+                    "   vec4 fragmentColor;",
+                    "   vec4 fragmentColor1;",
+                    "   vec4 fragmentColor2;",
+                    "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
+                    "   {",
+                    "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
+                    "       {",
+                    "           if (fragmentColor.a == 0.0) discard;",
+                    "           else gl_FragColor = fragmentColor * vLightingFactor;",
+                    "       }",
+                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+                    "       {",
+                    "           gl_FragColor = fragmentColor;",
+                    "       }",
+                    "       else",
+                    "       {",
+                    "           fragmentColor = vec4(1, 1, 1, 1);",
+                    "           gl_FragColor = fragmentColor * vLightingFactor;",
+                    "       }",
+                    "   }",
+                    "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
+                    "   {",
+                    "       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
+                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
+                    "       {",
+                    "           fragmentColor1.a = fragmentColor2.a;",
+                    "           if (fragmentColor1.a == 0.0) discard;",
+                    "           else gl_FragColor = fragmentColor1 * vLightingFactor;",
+                    "       }",
+                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+                    "       {",
+                    "           gl_FragColor = fragmentColor1 * fragmentColor2;",
+                    "       }",
+                    "       else",
+                    "       {",
+                    "           fragmentColor = vec4(1, 1, 1, 1);",
+                    "           gl_FragColor = fragmentColor * vLightingFactor;",
+                    "       }",
+                    "   }",
+                    "   else", // uTexturesEnabled == 0
+                    "   {",
+                    "       fragmentColor = vec4(1, 1, 1, 1);",
+                    "       gl_FragColor = fragmentColor * vLightingFactor;",
+                    "   }",
+                    "}"
+                    ].join("\n");
+            }
+            break;
+            
+        case eShaderType.FragmentLighting:
+            {
+                source_vs = [
+                    "attribute vec3 aVertexPosition;",
+                    "attribute vec3 aVertexNormal;",
+                    "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
+                    "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
+                    "", 
+                    "uniform mat4 uProjectionMatrix;",
+                    "uniform mat4 uModelViewMatrix;",
+                    "uniform mat4 uNormalMatrix;",
+                    "",
+                    "varying vec4 vVertexPosition;",
+                    "varying vec4 vTransformedNormal;",
+                    "varying vec4 vViewPosition;",
+                    "varying vec4 vViewDirection;",
+                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+                    "",
+                    "void main()",
+                    "{",
+                    "   vVertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
+                    "   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+                    "   vViewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
+                    "   vViewDirection = normalize(-vViewPosition);",
+                    "   vTextureCoord[0] = aTextureCoord0;",
+                    "   vTextureCoord[1] = aTextureCoord1;",        
+                    "   gl_Position = uProjectionMatrix * vVertexPosition;",
+                    "}"
+                    ].join("\n");
+                
+                source_fs = [
+                    "#ifdef GL_ES",
+                    "precision highp float;",
+                    "#endif",
+                    "",
+                    "vec4 gAmbient;",
+                    "vec4 gDiffuse;",
+                    "vec4 gSpecular;",
+                    "",
+                    "uniform vec4 uGlobalAmbientLight;",
+                    "",
+            //        IE 11 doesn't currently support structs
+            //        "struct lightSourceParameters",
+            //        "{",
+            //        "   int enabled;",
+            //        "   vec4 ambient;",
+            //        "   vec4 diffuse;",
+            //        "   vec4 specular;",
+            //        "   vec4 position;",
+            //        "   vec4 halfVector;",
+            //        "   vec4 spotDirection;",
+            //        "   float spotExponent;",
+            //        "   float spotCutoff;",
+            //        "   float spotCosCutoff;",
+            //        "   float constantAttenuation;",
+            //        "   float linearAttenuation;",
+            //        "   float quadraticAttenuation;",
+            //        "};",
+            //        "",
+            //        "uniform lightSourceParameters uLightSource[" + gl_MaxLights + "];",
+                    "",
+                    "uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+                    "uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+                    "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+                    "",
+            //        IE 11 doesn't currently support structs
+            //        "struct materialParameters",
+            //        "{",
+            //        "   vec4 ambient;",
+            //        "   vec4 diffuse;",
+            //        "   vec4 specular;",
+            //        "   vec4 emission;",
+            //        "   float shininess;",
+            //        "};",
+            //        "",
+            //        "uniform materialParameters uFrontMaterial;",
+                    "uniform vec4 uFrontMaterial_ambient;",
+                    "uniform vec4 uFrontMaterial_diffuse;",
+                    "uniform vec4 uFrontMaterial_specular;",
+                    "uniform vec4 uFrontMaterial_emission;",
+                    "uniform float uFrontMaterial_shininess;",
+                    "",
+                    "uniform int uLightingEnabled;",
+                    "uniform int uTexturesEnabled;",
+                    "uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
+                    "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
+                    "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
+                    "uniform int uTextureBlendOp;",
+                    "",
+                    "varying vec4 vVertexPosition;",
+                    "varying vec4 vTransformedNormal;",
+                    "varying vec4 vViewPosition;",
+                    "varying vec4 vViewDirection;",
+                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+                    "",
+                    "void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
+                    "{",
+                    "   vec3 lightDir;",
+                    "   float nDotL;",      // normal . light direction
+                    "   float nDotHV;",     // normal . half-vector
+                    "   float pf;",         // power factor
+                    "",
+                    "   lightDir = normalize(vec3(position));",
+                    "",	
+                    "   nDotL = max(dot(normal, lightDir), 0.0);",
+                    "   if (nDotL == 0.0)",
+                    "   {",
+                    "       pf = 0.0;",
+                    "   }",
+                    "   else",
+                    "   {",
+                    "       nDotHV = max(0.0, dot(normal, halfVector));",
+                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
+                    "   }",
+                    "",
+                    "   gAmbient  += ambient * uFrontMaterial_ambient;",
+                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+                    "   gSpecular += specular * uFrontMaterial_specular * pf;",
+                    "}",
+                    "",
+                    "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+                    "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
+                    "{",
+                    "   float nDotL;",      // normal . light direction
+                    "   float nDotHV;",     // normal . light half vector
+                    "   float pf;",         // power factor
+                    "   float attenuation;",// computed attenuation factor
+                    "   float d;",          // distance from surface to light source
+                    "   vec3  L;",          // direction from surface to light position
+                    "   vec3  halfVector;", //
+                    "",
+                    "", // Compute vector from surface to light position
+                    "   L = vec3(position) - vPosition;",
+                    "",
+                    "", // Compute distance between surface and light position
+                    "   d = length(L);",
+                    "",
+                    "", // Normalize the vector from surface to light position,
+                    "   L = normalize(L);",
+                    "",
+                    "", // Compute attenuation,
+                    "   attenuation = 1.0 / (constantAttenuation +",
+                    "      linearAttenuation * d +",
+                    "      quadraticAttenuation * d * d);",
+                    "",
+                    "   nDotL = max(0.0, dot(normal, L));",
+                    "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
+                    "",
+                    "   if (nDotL == 0.0)",
+                    "   {",
+                    "       pf = 0.0;",
+                    "   }",
+                    "   else",
+                    "   {",
+                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
+                    "   }",
+                    "",    
+                    "   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+                    "   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+                    "}",
+                    "",
+                    "void main()",
+                    "{",
+                    "   vec4 lightingFactor;",
+                    "   if (uLightingEnabled != 0)",
+                    "   {",
+                    "       gAmbient = vec4(0, 0, 0, 0);",
+                    "       gDiffuse = vec4(0, 0, 0, 0);",
+                    "       gSpecular = vec4(0, 0, 0, 0);",
+                    "",
+                    "       for (int i=0; i < " + gl_MaxLights + "; i++)",
+                    "       {",
+                    "           if (uLightSource_enabled[i] != 0)",
+                    "           {",
+                    "               if (uLightSource_position[i][3] == 0.0)", // directional light
+                    "               {",
+                    "                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+                    "                       uLightSource_diffuse[i], uLightSource_specular[i],",
+                    "                       normalize(vec3(vTransformedNormal)),",
+                    "                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
+                    "               }",
+                    "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+                    "               {",
+                    "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+                    "                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+                    "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+                    "                       normalize(vec3(vTransformedNormal)),",
+                    "                       vec3(vViewDirection), vec3(vVertexPosition));",
+                    "               }",
+                    "               else", // spotlight
+                    "               {",
+                    "               }",   
+                    "           }",
+                    "       }",
+                    "",
+                    "       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+                    "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
+                    "       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
+                    "                           uFrontMaterial_diffuse.a / 3.0 + ",
+                    "                           uFrontMaterial_specular.a / 3.0;",
+                    "   }",
+                    "   else", // uLightingEnabled == 0
+                    "   {",
+                    "",     // TODO: use vertex color
+                    "       lightingFactor = vec4(1, 1, 1, 1);",
+                    "   }",
+                    "",
+                    "   vec4 fragmentColor;",
+                    "   vec4 fragmentColor1;",
+                    "   vec4 fragmentColor2;",
+                    "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
+                    "   {",
+                    "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
+                    "       {",
+                    "           if (fragmentColor.a == 0.0) discard;",
+                    "           else gl_FragColor = fragmentColor * lightingFactor;",
+                    "       }",
+                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+                    "       {",
+                    "           gl_FragColor = fragmentColor;",
+                    "       }",
+                    "       else",
+                    "       {",
+                    "           fragmentColor = vec4(1, 1, 1, 1);",
+                    "           gl_FragColor = fragmentColor * lightingFactor;",
+                    "       }",
+                    "   }",
+                    "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
+                    "   {",
+                    "       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
+                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
+                    "       {",
+                    "           fragmentColor1.a = fragmentColor2.a;",
+                    "           if (fragmentColor1.a == 0.0) discard;",
+                    "           else gl_FragColor = fragmentColor1 * lightingFactor;",
+                    "       }",
+                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+                    "       {",
+                    "           gl_FragColor = fragmentColor1 * fragmentColor2;",
+                    "       }",
+                    "       else",
+                    "       {",
+                    "           fragmentColor = vec4(1, 1, 1, 1);",
+                    "           gl_FragColor = fragmentColor * lightingFactor;",
+                    "       }",
+                    "   }",
+                    "   else", // uTexturesEnabled == 0
+                    "   {",
+                    "       fragmentColor = vec4(1, 1, 1, 1);",
+                    "       gl_FragColor = fragmentColor * lightingFactor;",
+                    "   }",
+                    "}"
+                    ].join("\n");
+            }
+            break;
+        
+        default:
+            return { vertex: null, fragment: null };
+            break;
+    }
+    
+    var vs = gl.createShader(gl.VERTEX_SHADER); 
+    if (vs)
+    {
+        gl.shaderSource(vs, source_vs);
+        gl.compileShader(vs);
+
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+        {
+            alert(gl.getShaderInfoLog(vs));
+        }
+    }
+    
+    var fs = gl.createShader(gl.FRAGMENT_SHADER); 
+    if (fs) 
+    {
+        gl.shaderSource(fs, source_fs);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+        {
+            alert(gl.getShaderInfoLog(fs));
+        }
+    }
+                    
+    return { vertex: vs, fragment: fs };
+}
 ContentHandler.prototype = new AttributeContainer();
 ContentHandler.prototype.constructor = ContentHandler;
 
@@ -10314,6 +10099,93 @@ function BinaryParser(stream, bigEndian)
 	    
 	    return sum;
 	}
+}
+function TextParser(stream)
+{
+    this.stream = stream;
+    
+    var pos = 0;
+    
+    this.readCharacter = function()
+    {
+        if (pos >= this.stream.length) return null;
+        
+        return this.stream[pos++];
+    }
+    
+    this.readToken = function()
+    {
+        var c;
+        var token = "";
+        
+        if (pos >= this.stream.length) return null;
+        
+        // read leading whitespace
+        do
+        {
+            c = this.stream[pos++];
+        }
+        while (pos < this.stream.length && isSpace(c));
+        
+        // read token
+		do
+		{
+			token += c;
+			c = this.stream[pos++];
+		}
+		while (pos < this.stream.length && !isSpace(c));
+		
+		return (token.length > 0 ? token : null);
+    }
+    
+    this.readLine = function()
+    {
+        var line = "";
+        
+        if (pos >= this.stream.length) return null;
+        
+        while (pos < this.stream.length && this.stream[pos] != '\n')
+        {
+            line += this.stream[pos++];
+        }
+        pos++;
+        
+        return line;        
+    }
+    
+    this.readLineTokens = function()
+    {
+        var c;
+        var p = 0;
+        var token = "";
+        var tokens = [];
+        
+        var line = this.readLine();
+        if (line == null) return null;
+
+        while (p < line.length)
+        {
+            // read leading whitespace
+            do
+            {
+                c = line[p++];
+            }
+            while (p < line.length && isSpace(c));
+            
+            // read token
+		    do
+		    {
+			    token += c;
+			    c = line[p++];
+		    }
+		    while (p < line.length && !isSpace(c));
+    		
+		    tokens.push(token);
+		    token = "";
+		}
+		
+		return tokens;
+    }
 }
 function XMLParser(factory, registry, contentDir)
 {
@@ -10612,6 +10484,713 @@ XMLParser.prototype.parseTokenValue = function(string, delim_begin, delim_end)
 }
 
 
+/**
+ *
+ */
+var ePixelFormat =
+{
+    Unknown             :-1,
+    R8G8B8              : 0,  // 24-bit RGB
+    B8G8R8              : 1,  // 24-bit BGR
+    X8X8X8              : 2,  // 24-bit RGB (unspecified component order)
+    R8G8B8A8            : 3,  // 32-bit RGB Alpha
+    B8G8R8A8            : 4,  // 32-bit BGR Alpha
+    A8R8G8B8            : 5,  // 32-bit Alpha RGB
+    A8B8G8R8            : 6,  // 32-bit Alpha BGR
+    X8X8X8X8            : 7,  // 32-bit RGB Alpha (unspecified component order)
+    A8                  : 8   //  8-bit Alpha
+};
+
+var ePixelMap =
+{
+    Default             : 0,  // default mapping -- R to R, G to G, B to B, Alpha to Alpha
+    RGBToAlpha          : 1   // average RGB components and map to Alpha component
+};
+
+function BytesPerPixel(pixelFormat)
+{
+    switch (pixelFormat)
+    {
+    case ePixelFormat.R8G8B8:
+    case ePixelFormat.B8G8R8:
+    case ePixelFormat.X8X8X8:
+        return 3;
+
+    case ePixelFormat.R8G8B8A8:
+    case ePixelFormat.B8G8R8A8:
+    case ePixelFormat.A8R8G8B8:
+    case ePixelFormat.A8B8G8R8:
+    case ePixelFormat.X8X8X8X8:
+        return 4;
+
+    case ePixelFormat.A8:
+        return 1;
+
+    default:
+        return 0;
+    }
+}
+
+function TPixel(r, g, b, a)
+{
+    var red = r || 0;
+    var green = g || 0;
+    var blue = b || 0;
+    var alpha = a || 0;
+}
+
+/**
+ *
+ */
+var eImageFormat =
+{
+    Unknown             :-1,
+    RGB                 : 0,
+    RGBA                : 1,
+    Alpha               : 2,
+    Luminance           : 3,
+    Luminance_Alpha     : 4
+}
+function ScaleImage(pixelFormat, widthIn, heightIn, byteAlignmentIn, dataIn, widthOut, heightOut, byteAlignmentOut, dataOut)
+{
+    // currently supporting image pixel formats: RGBA
+    if (pixelFormat != ePixelFormat.R8G8B8A8)
+    {
+        return false;
+    }
+
+    var canvasIn = document.createElement("canvas");
+    canvasIn.width = widthIn;
+    canvasIn.height = heightIn;
+    
+    var ctxIn = canvasIn.getContext("2d");
+    var imageDataIn = ctxIn.createImageData(widthIn, heightIn);
+
+    var i = 0;
+    for (var row = 0; row < heightIn; row++)
+    {
+        for (var col = 0; col < widthIn; col++)
+        {
+            for (var component = 0; component < 4; component++, i++)
+            {
+                imageDataIn.data[i] = dataIn[i];
+            }
+        }
+    }
+
+    ctxIn.putImageData(imageDataIn, 0, 0);
+
+    var canvasOut = document.createElement("canvas");
+    canvasOut.width = widthOut;
+    canvasOut.height = heightOut;
+
+    var ctxOut = canvasOut.getContext("2d");
+    
+    ctxOut.drawImage(canvasIn,
+                     0, 0, canvasIn.width, canvasIn.height,
+                     0, 0, canvasOut.width, canvasOut.height);
+               
+    var imageDataOut = ctxOut.getImageData(0, 0, widthOut, heightOut);
+
+    i = 0;
+    for (var row = 0; row < heightOut; row++)
+    {
+        for (var col = 0; col < widthOut; col++)
+        {
+            for (var component = 0; component < 4; component++, i++)
+            {
+                dataOut[i] = imageDataOut.data[i];
+            }
+        }
+    }
+
+    return true;
+}
+// filter flags for GetFrameData() filterMask parameter
+var FRAME_FILTER_SCALE_FRAME_BIT    = 0x001;    // scale frame to size of incoming buffer before copying
+var FRAME_FILTER_INVERT_FRAME_BIT   = 0x002;    // invert frame
+var FRAME_FILTER_NEGATE_COLOR_BIT   = 0x004;    // invert rgb pixel data (subtract from 255)
+var FRAME_FILTER_NEGATE_ALPHA_BIT   = 0x008;    // invert alpha pixel data (subtract from 255)
+var FRAME_FILTER_ALPHA_ONOFF_BIT    = 0x010;    // set alpha pixel to 0 or 255; alpha values in the range
+                                                // [0, 127] are set to 0, [128, 255] are set to 255
+                                                
+function MediaPlayback(container, onload)
+{
+    this.container = container;
+    this.onload = onload;
+
+    this.url = null;
+    this.video = false;
+    this.ready = false;
+    this.alphaPlayback = null;
+    this.frameRetrieved = false;
+    this.htmlImageElement = null;
+    this.imageWidth = 0;
+    this.imageHeight = 0;
+    this.imagePitch = 0;
+    this.imagePixels = null;
+}
+
+MediaPlayback.prototype.loadImage = function(url)
+{
+    this.ready = false;
+    this.frameRetrieved = false;
+    this.htmlImageElement = null;
+    this.imageWidth = 0;
+    this.imageHeight = 0;
+    this.imagePitch = 0;
+    this.imagePixels = null;
+
+    var extension = getFileExtension(url);
+
+    switch (extension)
+    {
+        case "avi":
+        case "mpg":
+        case "ogg":
+            {
+
+                this.htmlImageElement = document.createElement("video");
+                this.htmlImageElement.container = this;
+                this.htmlImageElement.controls = "controls";
+                //this.htmlImageElement.preload = "auto";
+                //this.htmlImageElement.autoplay = "autoplay";
+                //this.htmlImageElement.setAttribute("controls", "controls");
+                //this.htmlImageElement.setAttribute("preload", "preload");
+                //this.htmlImageElement.setAttribute("autoplay", "autoplay");
+
+                //this.htmlImageElement.canvas = document.createElement("canvas");
+                //this.htmlImageElement.canvasContext = this.htmlImageElement.canvas.getContext("2d");
+
+                //this.htmlImageElement.addEventListener("play", MediaTexture_OnVideoPlay, false);
+                //this.htmlImageElement.onload = MediaTexture_OnVideoLoad;
+
+                //this.onVideoPlay();
+                this.htmlImageElement.src = "http://localhost/bwjs/bwcontent/images/Bear.ogg"; //url;
+
+                this.video = true;
+                this.onVideoLoad();
+
+                /*
+                this.htmlImageElement = document.createElement("video"); //new Image();
+                this.htmlImageElement.container = this;
+                this.htmlImageElement.preload = "auto";
+                this.htmlImageElement.autoplay = "autoplay";
+                this.htmlImageElement.onload = MediaPlayback_OnVideoLoad;
+                this.htmlImageElement.src = imageFilename;
+                //this.imageSet = true;
+                //this.video = true;
+                */
+                //var resource = loadBinaryResource(imageFilename);
+                //alert(resource);
+            }
+            break;
+
+        default:
+            {
+                this.htmlImageElement = new Image(); //document.createElement("img");
+                this.htmlImageElement.container = this;
+                this.htmlImageElement.onload = MediaPlayback_OnImageLoad;
+                this.htmlImageElement.src = url;
+            }
+            break;
+    }
+
+    this.url = url;
+}
+
+MediaPlayback.prototype.onImageLoad = function()
+{
+    var image = this.htmlImageElement;
+    this.imageWidth = image.width;
+    this.imageHeight = image.height;
+    this.imagePitch = image.width * 4; // rgba
+    var canvas = document.createElement("canvas");
+    var canvasContext = canvas.getContext("2d");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvasContext.drawImage(image, 0, 0);
+    var imageData = canvasContext.getImageData(0, 0, image.width, image.height);
+    this.imagePixels = imageData.data;
+
+    this.ready = true;
+
+    if (this.onload)
+    {
+        this.onload.call(this);
+    }
+}
+
+MediaPlayback.prototype.onVideoLoad = function()
+{
+    this.ready = true;
+}
+
+MediaPlayback.prototype.getFrameDimensions = function()
+{
+    return { width: this.imageWidth, height: this.imageHeight, pitch: this.imagePitch };
+}
+
+MediaPlayback.prototype.getPixelFormat = function()
+{
+    return ePixelFormat.R8G8B8A8;
+}
+
+MediaPlayback.prototype.getPixelByteAlignment = function()
+{
+    return 4;
+}
+
+MediaPlayback.prototype.getBytesPerPixel = function()
+{
+    return BytesPerPixel(this.getPixelFormat());
+}
+
+/**
+ * Retrieve the pixels for the current frame.
+ * @param buffer        - incoming buffer to receive pixel data.
+ * @param frame         - optional parameter specifying the frame number to retrieve.
+ * @return number       - the frame number retrieved, -1 for single-frame images, or undefined on failure.
+ */
+MediaPlayback.prototype.getFramePixels = function(buffer, frame)
+{
+    // verify validity of image data
+    if (!this.ready ||
+        this.imageWidth == 0 ||
+        this.imageHeight == 0 ||
+        !this.imagePixels)
+    {
+        return undefined;
+    }
+
+    buffer.length = this.imagePixels.length;
+    for (var i = 0; i < this.imagePixels.length; i++)
+    {
+        buffer[i] = this.imagePixels[i];
+    }
+
+    return -1; // single-frame image
+}
+
+MediaPlayback.prototype.newFrameDataAvailable = function()
+{
+    return this.ready && !this.frameRetrieved;
+}
+
+/**
+ * Retrieve the pixels for the current frame in the specified pixel format and dimensions.
+ * @param width         - width of the incoming buffer in pixels.
+ * @param height        - height of the incoming buffer in pixels.
+ * @param pitch         - width of a scan line of pixels in bytes; may differ from width * bytes
+ *                        per pixel if pixels are padded to 2- or 4-byte boundaries.
+ * @param pixelFormat   - pixel format of the incoming buffer.
+ * @param buffer        - incoming buffer to receive pixel data.
+ * @param filterMask    - zero or more OR'd filtering flags controlling how the image is filtered:
+ *
+ *                        FRAME_FILTER_SCALE_FRAME_BIT  - the frame is first scaled to the size 
+ *                                                        of the incoming buffer before copying
+ *                        FRAME_FILTER_INVERT_FRAME_BIT - the frame is inverted before copying
+ *                        FRAME_FILTER_NEGATE_COLOR_BIT - the rgb pixel data is inverted (subtracted from 255) 
+ *                        FRAME_FILTER_NEGATE_ALPHA_BIT - the alpha pixel data is inverted (subtracted from 255)
+ *                        FRAME_FILTER_ALPHA_ONOFF_BIT  - set alpha pixel to 0 or 255; alpha values in the range
+ *                                                        [0, 127] are set to 0, [128, 255] are set to 255
+ *
+ * @param pixelMap      - pixel mapping to perform; default: PixelMap_Default.
+ * @param frame         - optional parameter specifying the frame number to retrieve.
+ * @return number       - the frame number retrieved, -1 for single-frame images, or undefined on failure.
+ */
+MediaPlayback.prototype.getFrameData = function(width, height, pitch, pixelFormat, buffer, filterMask, pixelMap, frame)
+{
+    // verify validity of image data
+    if (!this.ready ||
+        this.imageWidth == 0 ||
+        this.imageHeight == 0 ||
+        !this.imagePixels)
+    {
+        return undefined;
+    }
+
+    // check params
+    if (width == 0 ||
+        height == 0 ||
+        pitch < width ||
+        pixelFormat == ePixelFormat.Unknown ||
+        !buffer)
+    {
+        return undefined;
+    }
+
+    var frameRetrieved = -1;
+
+    // get filter flags
+    var scaleFrame = filterMask & FRAME_FILTER_SCALE_FRAME_BIT ? true : false;
+    var invertFrame = filterMask & FRAME_FILTER_INVERT_FRAME_BIT ? true : false;
+    var negateColor = filterMask & FRAME_FILTER_NEGATE_COLOR_BIT ? true : false;
+    var negateAlpha = filterMask & FRAME_FILTER_NEGATE_ALPHA_BIT ? true : false;
+    var alphaOnOff = filterMask & FRAME_FILTER_ALPHA_ONOFF_BIT ? true : false;
+
+    // get image dimensions
+    var dims = this.getFrameDimensions();
+    var imageWidth = dims.width;
+    var imageHeight = dims.height;
+    var imagePitch = dims.pitch;
+
+    // get image pixel format
+    var imagePixelFormat = this.getPixelFormat();
+
+    // currently supporting image pixel formats: RGBA
+    if (imagePixelFormat != ePixelFormat.R8G8B8A8)
+    {
+        return undefined;
+    }
+
+    // get image pixels
+    var pixels = [];
+    var imageFrameRetrieved = this.getFramePixels(pixels, frame);
+    if (imageFrameRetrieved == undefined)
+    {
+        return undefined;
+    }
+
+    // scale pixels if necessary
+    if (scaleFrame && (width != imageWidth || height != imageHeight))
+	{
+		var imageBytesPerPixel = this.getBytesPerPixel();
+
+		// calculate pitch (using byte aligment of "4")
+		imagePitch = width * imageBytesPerPixel;
+		imagePitch += (4 - imagePitch % 4) % 4;
+
+		var scaledPixels = [];
+		if (!ScaleImage(imagePixelFormat, imageWidth, imageHeight, this.getPixelByteAlignment(), pixels, 
+			width, height, 4, scaledPixels))
+		{
+			return undefined;
+		}
+
+		pixels = scaledPixels;
+		imageWidth = width;
+		imageHeight = height;
+	}
+
+    // if no alpha channel, rgb pixel data is not to be negated, frame is not to be inverted,
+    // and incoming buffer has same parameters as pixel buffer, copy bits
+    if (!this.alphaPlayback &&
+		!negateColor &&
+		!invertFrame &&
+		imagePitch == pitch &&
+		imageHeight == height &&
+		imagePixelFormat == pixelFormat)
+    {
+        for (var i = 0; i < buffer.length; i++)
+        {
+            buffer[i] = pixels[i];
+        }
+        
+        this.frameRetrieved = true;
+        return frameRetrieved;
+    }
+
+    // get alpha data
+    var alphaWidth = 0;
+	var alphaHeight = 0;
+	var alphaPitch = 0;
+	var alphaPixelFormat;
+	var alphaPixels = null;
+	if (this.alphaChannel)
+	{
+		// get alpha dimensions
+		dims = this.alphaChannel.getFrameDimensions();
+		alphaWidth = dims.width;
+		alphaHeight = dims.height;
+		alphaPitch = dims.pitch;
+
+		// get alpha pixel format
+		alphaPixelFormat = this.alphaChannel.getPixelFormat();
+    
+		// currently only supporting alpha pixel formats: RGBA
+		if (alphaPixelFormat != ePixelFormat.R8G8B8A8)
+		{
+			return undefined;
+		}
+
+		// get alpha pixels
+		var alphaFramePixels = [];
+		var alphaFrameRetrieved = this.alphaChannel.getFramePixels(alphaFramePixels, imageFrameRetrieved);
+		if (alphaFrameRetrieved != undefined)
+		{
+		    // scale alpha pixels to match frame data
+		    if (alphaWidth != imageWidth ||
+			    alphaHeight != imageHeight)
+		    {
+			    var alphaBytesPerPixel = this.alphaChannel.getBytesPerPixel();
+
+			    // calculate pitch (using byte aligment of "4")
+			    alphaPitch = imageWidth * alphaBytesPerPixel;
+			    alphaPitch += (4 - alphaPitch % 4) % 4;
+
+			    var scaledAlphaPixels = [];
+			    if (ScaleImage(alphaPixelFormat, alphaWidth, alphaHeight, 
+				    this.alphaChannel.getPixelByteAlignment(), alphaPixels, imageWidth, 
+				    imageHeight, 4, scaledAlphaPixels))
+			    {
+			        alphaPixels = scaledAlphaPixels;
+			        alphaWidth = imageWidth;
+			        alphaHeight = imageHeight;
+			    }
+		    }
+		    else
+		    {
+		        alphaPixels = alphaFramePixels;
+		    }
+		}
+	}
+	
+    // determine dimensions to copy
+    var copyWidth = Math.min(width, imageWidth);
+    var copyHeight = Math.min(height, imageHeight);
+
+    // set component positions for buffer pixel format
+    var rPos = 0, gPos = 0, bPos = 0, aPos = 0;
+    switch (pixelFormat)
+    {
+        case ePixelFormat.R8G8B8: rPos = 0; gPos = 1; bPos = 2; break;
+        case ePixelFormat.B8G8R8: rPos = 2; gPos = 1; bPos = 0; break;
+        case ePixelFormat.R8G8B8A8: rPos = 0; gPos = 1; bPos = 2; aPos = 3; break;
+        case ePixelFormat.B8G8R8A8: rPos = 2; gPos = 1; bPos = 0; aPos = 3; break;
+        case ePixelFormat.A8R8G8B8: rPos = 1; gPos = 2; bPos = 3; aPos = 0; break;
+        case ePixelFormat.A8B8G8R8: rPos = 3; gPos = 2; bPos = 1; aPos = 0; break;
+    }
+
+    // if frame is to be inverted, start copying from last row of data
+    var fromImage = 0, fromAlpha = 0, to = 0;
+    if (invertFrame)
+    {
+        fromImage += imagePitch * (copyHeight - 1);
+
+        if (alphaPixels)
+        {
+            fromAlpha += alphaPitch * (copyHeight - 1);
+        }
+    }
+
+    // copy pixel data to buffer
+    var pixel = new TPixel(0, 0, 0, 255);
+    var alphaPixel = new TPixel(0, 0, 0, 255);
+    for (var row = 0; row < copyHeight; row++)
+    {
+        for (var col = 0; col < copyWidth; col++)
+        {
+            // get image pixel
+            /*
+            switch (imagePixelFormat)
+            {
+            case ePixelFormat.R8G8B8:
+            pixel.red = pixels[fromImage];
+            pixel.green = pixels[fromImage + 1];
+            pixel.blue = pixels[fromImage + 2];
+            fromImage += 3;
+            break;
+
+                case ePixelFormat.B8G8R8:
+            pixel.red = pixels[fromImage + 2];
+            pixel.green = pixels[fromImage + 1];
+            pixel.blue = pixels[fromImage];
+            fromImage += 3;
+            break;
+
+                case ePixelFormat.R8G8B8A8:
+            pixel.red = pixels[fromImage];
+            pixel.green = pixels[fromImage + 1];
+            pixel.blue = pixels[fromImage + 2];
+            pixel.alpha = pixels[fromImage + 3];
+            fromImage += 4;
+            break;
+
+                case ePixelFormat.B8G8R8A8:
+            pixel.red = pixels[fromImage + 2];
+            pixel.green = pixels[fromImage + 1];
+            pixel.blue = pixels[fromImage];
+            pixel.alpha = pixels[fromImage + 3];
+            fromImage += 4;
+            break;
+
+                case ePixelFormat.A8B8G8R8:
+            pixel.red = pixels[fromImage + 3];
+            pixel.green = pixels[fromImage + 2];
+            pixel.blue = pixels[fromImage + 1];
+            pixel.alpha = pixels[fromImage];
+            fromImage += 4;
+            break;
+            }
+            */
+            pixel.red = pixels[fromImage];
+            pixel.green = pixels[fromImage + 1];
+            pixel.blue = pixels[fromImage + 2];
+            pixel.alpha = pixels[fromImage + 3];
+            fromImage += 4;
+
+            // negate rgb data if requested
+            if (negateColor)
+            {
+                pixel.red = 255 - pixel.red;
+                pixel.green = 255 - pixel.green;
+                pixel.blue = 255 - pixel.blue;
+                pixel.alpha = 255 - pixel.alpha;
+            }
+
+            // get alpha pixel
+            if (alphaPixels)
+            {
+                /*
+                switch (alphaPixelFormat)
+                {
+                case ePixelFormat.R8G8B8:
+                alphaPixel.red = alphaPixels[fromAlpha];
+                alphaPixel.green = alphaPixels[fromAlpha + 1];
+                alphaPixel.blue = alphaPixels[fromAlpha + 2];
+                fromAlpha += 3;
+                break;
+
+                    case ePixelFormat.B8G8R8:
+                alphaPixel.red = alphaPixels[fromAlpha + 2];
+                alphaPixel.green = alphaPixels[fromAlpha + 1];
+                alphaPixel.blue = alphaPixels[fromAlpha];
+                fromAlpha += 3;
+                break;
+
+                    case ePixelFormat.R8G8B8A8:
+                alphaPixel.red = alphaPixels[fromAlpha];
+                alphaPixel.green = alphaPixels[fromAlpha + 1];
+                alphaPixel.blue = alphaPixels[fromAlpha + 2];
+                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
+                fromAlpha += 4;
+                break;
+
+                    case ePixelFormat.B8G8R8A8:
+                alphaPixel.red = alphaPixels[fromAlpha + 2];
+                alphaPixel.green = alphaPixels[fromAlpha + 1];
+                alphaPixel.blue = alphaPixels[fromAlpha];
+                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
+                fromAlpha += 4;
+                break;
+                }
+                */
+                alphaPixel.red = alphaPixels[fromAlpha];
+                alphaPixel.green = alphaPixels[fromAlpha + 1];
+                alphaPixel.blue = alphaPixels[fromAlpha + 2];
+                alphaPixel.alpha = alphaPixels[fromAlpha + 3];
+                fromAlpha += 4;
+            }
+
+            // negate alpha data if requested
+            if (negateAlpha)
+            {
+                alphaPixel.red = 255 - alphaPixel.red;
+                alphaPixel.green = 255 - alphaPixel.green;
+                alphaPixel.blue = 255 - alphaPixel.blue;
+                alphaPixel.alpha = 255 - alphaPixel.alpha;
+            }
+
+            // copy to buffer
+            switch (pixelFormat)
+            {
+                case ePixelFormat.R8G8B8:
+                case ePixelFormat.B8G8R8:
+                    buffer[to + rPos] = pixel.red;
+                    buffer[to + gPos] = pixel.green;
+                    buffer[to + bPos] = pixel.blue;
+                    to += 3;
+                    break;
+
+                case ePixelFormat.R8G8B8A8:
+                case ePixelFormat.B8G8R8A8:
+                case ePixelFormat.A8R8G8B8:
+                case ePixelFormat.A8B8G8R8:
+                    switch (pixelMap)
+                    {
+                        case ePixelMap.RGBToAlpha:
+                            buffer[to + rPos] = 0;
+                            buffer[to + gPos] = 255;
+                            buffer[to + bPos] = 0;
+                            if (alphaPixels)
+                            {
+                                buffer[to + aPos] =
+								((pixel.red + pixel.green + pixel.blue) / 3) &
+								((alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3);
+                            }
+                            else
+                            {
+                                buffer[to + aPos] = (pixel.red + pixel.green + pixel.blue) / 3;
+                            }
+                            if (alphaOnOff)
+                            {
+                                buffer[to + aPos] = (buffer[to + aPos] <= 127 ? 0 : 255);
+                            }
+                            to += 4;
+                            break;
+
+                        case ePixelMap.Default:
+                        default:
+                            buffer[to + rPos] = pixel.red;
+                            buffer[to + gPos] = pixel.green;
+                            buffer[to + bPos] = pixel.blue;
+                            if (alphaPixels)
+                            {
+                                buffer[to + aPos] = (alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3;
+                            }
+                            else
+                            {
+                                buffer[to + aPos] = pixel.alpha;
+                            }
+                            if (alphaOnOff)
+                            {
+                                buffer[to + aPos] = (buffer[to + aPos] <= 127 ? 0 : 255);
+                            }
+                            to += 4;
+                            break;
+                    }
+                    break;
+
+                case ePixelFormat.A8:
+                    if (alphaPixels)
+                    {
+                        buffer[to] = (alphaPixel.red + alphaPixel.green + alphaPixel.blue) / 3;
+                    }
+                    else // !alphaPixels
+                    {
+                        buffer[to] = (pixel.red + pixel.green + pixel.blue) / 3;
+                    }
+                    if (alphaOnOff)
+                    {
+                        buffer[to] = (buffer[to] <= 127 ? 0 : 255);
+                    }
+                    to += 1;
+                    break;
+            }
+        }
+
+        if (invertFrame) fromImage -= (2 * imagePitch);
+        if (alphaPixels)
+        {
+            if (invertFrame) fromAlpha -= (2 * alphaPitch);
+        }
+    }
+
+    this.frameRetrieved = true;
+
+    return frameRetrieved;
+}
+
+MediaPlayback.prototype.setAlphaChannel = function(playback)
+{
+    this.alphaPlayback = playback;
+}
+
+function MediaPlayback_OnImageLoad()
+{
+    this.container.onImageLoad();
+}
 // TODO: consider moving to a more appropriate file
 function TextureArray(textureArray)
 {
@@ -10630,6 +11209,28 @@ function TextureArray(textureArray)
     }
 }
 
+StyleMgr.prototype = new AttributeContainer();
+StyleMgr.prototype.constructor = StyleMgr;
+
+function StyleMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "StyleMgr";
+}
+
+StyleMgr.prototype.eventPerformed = function(event, node)
+{
+    var result = node.stylesMap.getStyles(event.type);
+    if (result.styles && result.enabled)
+    {
+        this.applyStyle(result.styles, result.target ? result.target : node);
+    }
+}
+
+StyleMgr.prototype.applyStyle = function(style, node)
+{
+    node.styles.updateStyle(style);
+}
 GraphMgr.prototype = new AttributeContainer();
 GraphMgr.prototype.constructor = GraphMgr;
 
@@ -11637,6 +12238,130 @@ function Camera_NearDistanceModifiedCB(attribute, container)
 function Camera_FarDistanceModifiedCB(attribute, container)
 {
     container.updateFarDistance = true;
+    container.incrementModificationCount();
+}
+OrthographicCamera.prototype = new Camera();
+OrthographicCamera.prototype.constructor = OrthographicCamera;
+
+function OrthographicCamera()
+{
+    Camera.call(this);
+    this.className = "OrthographicCamera";
+    this.attrType = eAttrType.OrthographicCamera;
+    
+    this.updateWidth = false;
+    
+    this.width = new NumberAttr(2);
+    
+    this.width.addModifiedCB(OrthographicCamera_WidthModifiedCB, this);
+    
+    this.registerAttribute(this.width, "width");
+}
+
+OrthographicCamera.prototype.update = function(params, visitChildren)
+{
+    if (this.updateWidth)
+    {
+        this.updateWidth = false;
+
+        this.updateClipPlanes = true;
+    }
+    
+    // call base-class implementation
+    Camera.prototype.update.call(this, params, visitChildren);
+}
+
+OrthographicCamera.prototype.apply = function(directive, params, visitChildren)
+{
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
+    {
+        // call base-class implementation
+        Camera.prototype.apply.call(this, directive, params, visitChildren);
+        return;
+    }
+    
+    switch (directive)
+    {
+    case "render":
+        {
+            if (!this.viewport.equals(params.viewport))
+            {
+                this.viewport = params.viewport;
+                this.updateClipPlanes = true;  
+            }
+            
+            if (this.updateClipPlanes)
+            {
+                this.updateClipPlanes = false;
+                
+                this.setClipPlanes();
+            }
+            
+            this.applyOrthographicTransform();
+        }
+        break;
+    }
+    
+    // call base-class implementation
+    Camera.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+OrthographicCamera.prototype.setClipPlanes = function()
+{
+    var width = this.width.getValueDirect();
+    var height = width * this.viewport.height / this.viewport.width;
+    
+    this.top = height / 2;
+    this.bottom = -this.top;
+    this.right = width / 2;
+    this.left = -this.right;
+    
+    this.projectionMatrix.loadMatrix(this.graphMgr.renderContext.orthographicMatrixLH(this.left, this.right,
+        this.top, this.bottom, this.near, this.far));
+        
+    // update view-volume attribute
+    var viewVolume = new ViewVolume();
+    viewVolume.setOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
+    this.viewVolume.setValueDirect(viewVolume.left, viewVolume.right, viewVolume.top, viewVolume.bottom,
+        viewVolume.near, viewVolume.far);    
+}
+
+OrthographicCamera.prototype.applyOrthographicTransform = function()
+{
+    this.graphMgr.renderContext.projectionMatrixStack.top().loadMatrix(this.projectionMatrix);
+    this.graphMgr.renderContext.applyProjectionTransform();
+}
+
+OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
+{
+    // normalize click coordinates so they span [-1, 1] on each axis
+    var normX =  ((clickPoint.x - viewport.x) / viewport.width  * 2 - 1);
+    var normY = -((clickPoint.y - viewport.y) / viewport.height * 2 - 1);
+
+    // determine the width/2 of the visible portion of the x axis on the 
+    // far clipping plane
+    var farX  = (this.right - this.left) / 2;
+
+    // determine the height/2 of the visible portion of the y axis on the
+    // far clipping plane
+    var farY  = (this.top - this.bottom) / 2;
+
+    // set ray origin as point within visible portion of x, y on the 
+    // near clipping plane corresponding to the normalized screen coordinates
+    var origin = new Vector3D(normX * farX, normY * farY, this.near);
+
+    // set ray direction as point within visible portion of x, y on the 
+    // far clipping plane corresponding to the normalized screen coordinates
+    //rayDir = CVector3Df(normX * farX, normY * farY, m_far);
+    var direction = new Vector3D(0, 0, 1);
+    
+    return { origin: origin, direction: direction };  
+}
+
+function OrthographicCamera_WidthModifiedCB(attribute, container)
+{
+    container.updateWidth = true;
     container.incrementModificationCount();
 }
 PerspectiveCamera.prototype = new Camera();
@@ -13568,86 +14293,6 @@ function TriList_NormalsModifiedCB(attribute, container)
 {
     container.updateNormals = true;
     container.incrementModificationCount();
-}
-LineList.prototype = new VertexGeometry();
-LineList.prototype.constructor = LineList;
-
-function LineList()
-{
-    VertexGeometry.call(this);
-    this.className = "LineList";
-    this.attrType = eAttrType.LineList;
-    this.width = 1;
-}
-
-LineList.prototype.update = function(params, visitChildren)
-{
-    if (!this.vertexBuffer)
-    {
-        this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
-        this.vertexBuffer.setPrimitiveType(RC_LINES);
-    }
-    
-    // call base-class implementation
-    VertexGeometry.prototype.update.call(this, params, visitChildren);
-}
-
-LineList.prototype.apply = function(directive, params, visitChildren)
-{
-    // call base-class impementation
-    VertexGeometry.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-LineList.prototype.draw = function(dissolve)
-{
-    // TODO
-    
-    this.vertexBuffer.draw();
-}
-
-LineList.prototype.buildBoundingTree = function()
-{
-    
-}
-PointList.prototype = new VertexGeometry();
-PointList.prototype.constructor = PointList;
-
-function PointList()
-{
-    VertexGeometry.call(this);
-    this.className = "PointList";
-    this.attrType = eAttrType.PointList;
-    this.width = 1;
-}
-
-PointList.prototype.update = function(params, visitChildren)
-{
-    if (!this.vertexBuffer)
-    {
-        this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
-        this.vertexBuffer.setPrimitiveType(RC_POINTS);
-    }
-    
-    // call base-class implementation
-    VertexGeometry.prototype.update.call(this, params, visitChildren);
-}
-
-PointList.prototype.apply = function(directive, params, visitChildren)
-{
-    // call base-class impementation
-    VertexGeometry.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-PointList.prototype.draw = function(dissolve)
-{
-    // TODO
-    
-    this.vertexBuffer.draw();
-}
-
-PointList.prototype.buildBoundingTree = function()
-{
-    
 }
 Material.prototype = new SGNode();
 Material.prototype.constructor = Material;
@@ -16869,6 +17514,86 @@ function Label_BalloonTipLabelStyleModifiedCB(attribute, container)
 {
     Label_DescriptionModifiedCB(container.description, container);   
 }
+LineList.prototype = new VertexGeometry();
+LineList.prototype.constructor = LineList;
+
+function LineList()
+{
+    VertexGeometry.call(this);
+    this.className = "LineList";
+    this.attrType = eAttrType.LineList;
+    this.width = 1;
+}
+
+LineList.prototype.update = function(params, visitChildren)
+{
+    if (!this.vertexBuffer)
+    {
+        this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
+        this.vertexBuffer.setPrimitiveType(RC_LINES);
+    }
+    
+    // call base-class implementation
+    VertexGeometry.prototype.update.call(this, params, visitChildren);
+}
+
+LineList.prototype.apply = function(directive, params, visitChildren)
+{
+    // call base-class impementation
+    VertexGeometry.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+LineList.prototype.draw = function(dissolve)
+{
+    // TODO
+    
+    this.vertexBuffer.draw();
+}
+
+LineList.prototype.buildBoundingTree = function()
+{
+    
+}
+PointList.prototype = new VertexGeometry();
+PointList.prototype.constructor = PointList;
+
+function PointList()
+{
+    VertexGeometry.call(this);
+    this.className = "PointList";
+    this.attrType = eAttrType.PointList;
+    this.width = 1;
+}
+
+PointList.prototype.update = function(params, visitChildren)
+{
+    if (!this.vertexBuffer)
+    {
+        this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
+        this.vertexBuffer.setPrimitiveType(RC_POINTS);
+    }
+    
+    // call base-class implementation
+    VertexGeometry.prototype.update.call(this, params, visitChildren);
+}
+
+PointList.prototype.apply = function(directive, params, visitChildren)
+{
+    // call base-class impementation
+    VertexGeometry.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+PointList.prototype.draw = function(dissolve)
+{
+    // TODO
+    
+    this.vertexBuffer.draw();
+}
+
+PointList.prototype.buildBoundingTree = function()
+{
+    
+}
 /*
 ======================================================================
 range()
@@ -17282,6 +18007,46 @@ function interpolate(time, keyframes, first, last, preBehavior, postBehavior)
     }
 
 }
+function StateRec()
+{
+    this.material = null;
+    this.renderStateRec = null;
+    this.cullBackFace = false;
+    this.textures = null;
+    this.projectionTextures = null;
+    this.globalIllumination = new Color();
+}
+
+function GetCurrentState(graphMgr)
+{
+    var rec = new StateRec();
+	
+    rec.material = graphMgr.getCurrentMaterial();
+    rec.renderStateRec = graphMgr.renderState.getState(RENDERSTATE_ALL_BITS);
+    rec.cullBackFace = graphMgr.renderContext.enabled(eRenderMode.CullBackFace);
+    rec.textures = graphMgr.textureArrayStack.top();
+    rec.projectionTextures = graphMgr.projectionTextureArrayStack.top();
+    rec.globalIllumination.copy(graphMgr.renderContext.getGlobalIllumination());
+    
+    return rec;
+}
+
+function SetCurrentState(graphMgr, stateRec)
+{
+    graphMgr.setCurrentMaterial(stateRec.material);
+    graphMgr.renderState.setState(RENDERSTATE_ALL_BITS, stateRec.renderStateRec);
+    if (stateRec.cullBackFace)
+    {
+        graphMgr.renderContext.enable(eRenderMode.CullBackFace);
+    }
+    else
+    {
+        graphMgr.renderContext.disable(eRenderMode.CullBackFace);
+    }
+    graphMgr.textureArrayStack.load(stateRec.textures);
+    graphMgr.projectionTextureArrayStack.load(stateRec.projectionTextures);
+    graphMgr.renderContext.setGlobalIllumination(stateRec.globalIllumination);
+}
 function DistanceSortRec(distance,
                          geometry,
                          dissolve)
@@ -17403,73 +18168,169 @@ function DistanceSortAgent_CompareSortRecs(rec1, rec2)
 {
     return rec2.distance - rec1.distance;
 }
-SerializeParams.prototype = new DirectiveParams();
-SerializeParams.prototype.constructor = SerializeParams();
+/// <b>Approximate</b> radius of Earth at the equator (in Km).
+/// For a more precise value, use either the Ellipsoid corresponding to a
+/// particular datum or calculate the radius for a given latitude using
+/// Synder's Formula
+/// @see
+var EARTH_RADIUS_KM_EQ = 6378;
 
-function SerializeParams()
+/// <b>Approximate</b> radius of Earth at the poles (in Km).
+var EARTH_RADIUS_KM_P = 6377;
+
+/// Maximum width of a UTM zone (taken to be at equator)
+var UTM_ZONE_WIDTH_KM = 667.956; 
+
+// EqualArc projection - Metric
+var EQ_ARC_WIDTH_KM       = 40075.16;	// Earth circumference at Equator
+var EQ_ARC_HEIGHT_KM      = 40008.0;    // Earth circumference from pole to pole
+var EQ_ARC_ONE_DEG_LAT_KM = EQ_ARC_HEIGHT_KM / 360;
+var EQ_ARC_ONE_DEG_LON_KM = EQ_ARC_WIDTH_KM / 360;
+
+// EqualArc projection - English
+var EQ_ARC_WIDTH_MI       = 24902.0;
+var EQ_ARC_HEIGHT_MI      = 24900.0;
+var EQ_ARC_ONE_DEG_LAT_MI = EQ_ARC_HEIGHT_MI / 360;
+var EQ_ARC_ONE_DEG_LON_MI = EQ_ARC_WIDTH_MI / 360;
+
+MapProjectionCalculator.prototype = new Evaluator();
+MapProjectionCalculator.prototype.constructor = MapProjectionCalculator;
+
+function MapProjectionCalculator()
 {
-    DirectiveParams.call(this);
+    Evaluator.call(this);
+    this.className = "MapProjectionCalculator";
+    this.attrType = eAttrType.MapProjectionCalculator;
+
+    this.unitsMultiplier = 1;
+    this.positionCalculators = [];
+    this.geoPositionCalculators = [];
     
-    this.serialized = "";
+    this.mapProjection = new StringAttr("equalArc");
+    this.elevationModel = new StringAttr();
+    this.center2D = new Vector2DAttr(0, 0);
+    this.units = new StringAttr("kilometers");
+    this.geoPosition = new Vector3DAttr(0, 0, 0);
+    this.pointWorld = new Vector3DAttr();
+    this.resultPosition = new Vector3DAttr();
+    this.resultGeoPosition = new Vector3DAttr();
+
+    this.units.addModifiedCB(MapProjectionCalculator_UnitsModifiedCB, this);
+    this.pointWorld.addModifiedCB(MapProjectionCalculator_PointWorldModifiedCB, this);
+    
+    this.registerAttribute(this.mapProjection, "mapProjection");
+    this.registerAttribute(this.elevationModel, "elevationModel");
+    this.registerAttribute(this.center2D, "center2d");
+    this.registerAttribute(this.units, "units");
+    this.registerAttribute(this.geoPosition, "geoPosition");
+    this.registerAttribute(this.geoPosition, "position"); // backward-compatibility
+    this.registerAttribute(this.pointWorld, "pointWorld");
+    this.registerAttribute(this.resultPosition, "resultPosition");
+    this.registerAttribute(this.resultGeoPosition, "resultGeoPosition");
+    this.registerAttribute(this.resultGeoPosition, "resultGeoLocation"); // backward-compatibility
+
+    this.positionCalculators["equalArc"] = ComputeEqualArc3DPosition;
+    this.geoPositionCalculators["equalArc"] = ComputeEqualArcGeoPosition;
+
+    this.units.setValueDirect("meters"); // invoke modified cb
 }
 
-SerializeDirective.prototype = new SGDirective();
-SerializeDirective.prototype.constructor = SerializeDirective;
-
-function SerializeDirective()
+MapProjectionCalculator.prototype.evaluate = function()
 {
-    SGDirective.call(this);
-    
-    this.className = "SerializeDirective";
-    this.attrType = eAttrType.SerializeDirective;
+    var geoPosition = this.geoPosition.getValueDirect();
 
+    var resultPosition = this.computePosition(geoPosition.x, geoPosition.y, geoPosition.z);
+    this.resultPosition.setValueDirect(resultPosition.x, resultPosition.y, resultPosition.z);
+
+    var resultGeoPosition = this.computeGeoPosition(resultPosition.x, resultPosition.y, resultPosition.z);
+    this.resultGeoPosition.setValueDirect(resultGeoPosition.x, resultGeoPosition.y, resultGeoPosition.z);
 }
 
-SerializeDirective.prototype.execute = function(root)
+MapProjectionCalculator.prototype.computePosition = function(lon, alt, lat)
 {
-    if (!root)
+    var position = undefined;
+    
+    var mapProjection = this.mapProjection.getValueDirect().join("");
+    var computeFunc = this.positionCalculators[mapProjection];
+    if (computeFunc)
     {
-		return;
+        var center2D = this.center2D.getValueDirect();
+        position = computeFunc(lon, alt, lat, center2D.x, center2D.y, this.unitsMultiplier);
+    }
+
+    return position;
+}
+
+MapProjectionCalculator.prototype.computeGeoPosition = function(x, y, z)
+{
+    var geoPosition = undefined;
+
+    var mapProjection = this.mapProjection.getValueDirect().join("");
+    var computeFunc = this.geoPositionCalculators[mapProjection];
+    if (computeFunc)
+    {
+        var center2D = this.center2D.getValueDirect();
+        geoPosition = computeFunc(x, y, z, center2D.x, center2D.y, this.unitsMultiplier);
+    }
+
+    return geoPosition;
+}
+
+function MapProjectionCalculator_UnitsModifiedCB(attribute, container)
+{
+    switch (attribute.getValueDirect().join(""))
+    {
+        case "kilometers":
+            {
+                container.unitsMultiplier = 1;
+            }
+            break;
+
+        case "meters":
+            {
+                container.unitsMultiplier = 1000;
+            }
+            break;
+    }
+}
+
+function MapProjectionCalculator_PointWorldModifiedCB(attribute, container)
+{
+    // TODO
+}
+
+function ComputeEqualArc3DPosition(lon, alt, lat, centerLon, centerLat, units)
+{
+    if (lat > 90  || lat < -90 ||
+		lon > 180 || lon < -180)
+	{
+		return undefined;
 	}
+	
+	var x = (lon - centerLon) * EQ_ARC_ONE_DEG_LON_KM * units;
+	var y = alt;
+	var z = (lat - centerLat) * EQ_ARC_ONE_DEG_LAT_KM * units;
 
-    // clear serialize string
-    this.serialized = "";
-
-    // setup serialize params structure
-    var serializeParams = new SerializeParams();
-    serializeParams.serialized = this.serialized;
-    serializeParams.userData = this.userData.getValueDirect();
-
-    // apply serialize directive
-    root.apply(eAttrType.DirectiveSerialize, serializeParams, true);
-
-    return;
+	return { x: x, y: y, z: z }
 }
 
-SerializeDirective.prototype.execute = function(path)
+function ComputeEqualArcGeoPosition(x, y, z, centerLon, centerLat, units)
 {
-    if (!path)
-    {
-        return;
-    }
-
-    // clear serialize string
-    this.serialized = "";
-
-    // setup serialize params structure
-    var serializeParams = new SerializeParams();
-    serializeParams.serialized = this.serialized;
-    serializeParams.userData = this.userData.getValueDirect();
-
-	// apply serialize directive
-    if (path.getNodeCount() > 0)
-    {
-	    path[0].apply(eAttrType.DirectiveSerialize, serializeParams, true);
-    }
-
-	return;
+	var lon = (x / units / EQ_ARC_ONE_DEG_LON_KM) + centerLon;
+	var alt = y;
+	var lat = (z / units / EQ_ARC_ONE_DEG_LAT_KM) + centerLat;   
+    
+    return { lon: lon, alt: alt, lat: lat }
 }
+NullObject.prototype = new ParentableMotionElement();
+NullObject.prototype.constructor = NullObject;
 
+function NullObject()
+{
+    ParentableMotionElement.call(this);
+    this.className = "NullObject";
+    this.attrType = eAttrType.NullObject;
+}
 Transform.prototype = new SGNode();
 Transform.prototype.constructor = Transform;
 
@@ -17563,162 +18424,6 @@ function Transform_MatrixModifiedCB(attribute, container)
 }
 
 
-Translate.prototype = new Transform();
-Translate.prototype.constructor = Translate;
-
-function Translate()
-{
-    Transform.call(this);
-    this.className = "Translate";
-    this.attrType = eAttrType.Translate;
-    
-    this.translation = new Vector3DAttr(0, 0, 0);
-    this.updateTranslation = true;
-    
-    this.translation.addModifiedCB(Translate_TranslationModifiedCB, this);
-	
-    this.registerAttribute(this.translation, "translation");
-}
-
-Translate.prototype.update = function(params, visitChildren)
-{
-    if (this.updateTranslation)
-    {
-        this.updateTranslation = false;
-
-        var t = this.translation.getValueDirect();
-
-        var matrix = new Matrix4x4();
-        matrix.loadTranslation(t.x, t.y, t.z);
-        this.matrix.setValueDirect(matrix);
-    }
-
-    // call base-class implementation
-    Transform.prototype.update.call(this, params, visitChildren);
-}
-
-Translate.prototype.apply = function(directive, params, visitChildren)
-{
-    if (!this.enabled.getValueDirect())
-    {
-        // call base-class implementation
-        Transform.prototype.apply.call(this, directive, params, visitChildren);
-        return;
-    }
-
-    // call base-class implementation
-    Transform.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-function Translate_TranslationModifiedCB(attribute, container)
-{
-    container.updateTranslation = true;
-    container.incrementModificationCount();
-}
-Scale.prototype = new Transform();
-Scale.prototype.constructor = Scale;
-
-function Scale()
-{
-    Transform.call(this);
-    this.className = "Scale";
-    this.attrType = eAttrType.Scale;
-    
-    this.scale = new Vector3DAttr(1, 1, 1);
-    this.updateScale = true;
-    
-    this.scale.addModifiedCB(Scale_ScaleModifiedCB, this);
-	
-    this.registerAttribute(this.scale, "scale");
-}
-
-Scale.prototype.update = function(params, visitChildren)
-{
-    if (this.updateScale)
-    {
-        this.updateScale = false;
-
-        var s = this.scale.getValueDirect();
-
-        var matrix = new Matrix4x4();
-        matrix.loadScale(s.x, s.y, s.z);
-        this.matrix.setValueDirect(matrix);
-    }
-
-    // call base-class implementation
-    Transform.prototype.update.call(this, params, visitChildren);
-}
-
-Scale.prototype.apply = function(directive, params, visitChildren)
-{
-    if (!this.enabled.getValueDirect())
-    {
-        // call base-class implementation
-        Transform.prototype.apply.call(this, directive, params, visitChildren);
-        return;
-    }
-
-    // call base-class implementation
-    Transform.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-function Scale_ScaleModifiedCB(attribute, container)
-{
-    container.updateScale = true;
-    container.incrementModificationCount();
-}
-Rotate.prototype = new Transform();
-Rotate.prototype.constructor = Rotate;
-
-function Rotate()
-{
-    Transform.call(this);
-    this.className = "Rotate";
-    this.attrType = eAttrType.Rotate;
-    
-    this.rotation = new Vector3DAttr(0, 0, 0);
-    this.updateRotation = true;
-    
-    this.rotation.addModifiedCB(Rotate_RotationModifiedCB, this);
-	
-    this.registerAttribute(this.rotation, "rotation");
-}
-
-Rotate.prototype.update = function(params, visitChildren)
-{
-    if (this.updateRotation)
-    {
-        this.updateRotation = false;
-
-        var r = this.rotation.getValueDirect();
-
-        var matrix = new Matrix4x4()
-        matrix.loadXYZAxisRotation(r.x, r.y, r.z);
-        this.matrix.setValueDirect(matrix);
-    }
-
-    // call base-class implementation
-    Transform.prototype.update.call(this, params, visitChildren);
-}
-
-Rotate.prototype.apply = function(directive, params, visitChildren)
-{
-    if (!this.enabled.getValueDirect())
-    {
-        // call base-class implementation
-        Transform.prototype.apply.call(this, directive, params, visitChildren);
-        return;
-    }
-
-    // call base-class implementation
-    Transform.prototype.apply.call(this, directive, params, visitChildren);
-}
-
-function Rotate_RotationModifiedCB(attribute, container)
-{
-    container.updateRotation = true;
-    container.incrementModificationCount();
-}
 QuaternionRotate.prototype = new Transform();
 QuaternionRotate.prototype.constructor = QuaternionRotate;
 
@@ -17778,192 +18483,229 @@ function QuaternionRotate_RotationQuatModifiedCB(attribute, container)
     container.updateRotationQuat = true;
     container.incrementModificationCount();
 }
-OrthographicCamera.prototype = new Camera();
-OrthographicCamera.prototype.constructor = OrthographicCamera;
+Rotate.prototype = new Transform();
+Rotate.prototype.constructor = Rotate;
 
-function OrthographicCamera()
+function Rotate()
 {
-    this.attrType = eAttrType.OrthographicCamera;
-    this.typeString = "OrthographicCamera";
-
-	this.width = new NumberAttr(2.0);
-
-	this.width.addModifiedCB(OrthographicCamera_WidthModifiedCB, this);
-
-    this.registerAttribute(this.width, "width");
-
+    Transform.call(this);
+    this.className = "Rotate";
+    this.attrType = eAttrType.Rotate;
+    
+    this.rotation = new Vector3DAttr(0, 0, 0);
+    this.updateRotation = true;
+    
+    this.rotation.addModifiedCB(Rotate_RotationModifiedCB, this);
+	
+    this.registerAttribute(this.rotation, "rotation");
 }
 
-OrthographicCamera.prototype.update = function(params, visitChildren)
+Rotate.prototype.update = function(params, visitChildren)
 {
-	//this.applyLock.lock("OrthographicCamera.prototype.Update");//(CReadWriteLock::eRWLockMode_Write);
-
-    if (this.updateWidth)
+    if (this.updateRotation)
     {
-        this.updateWidth = false;
+        this.updateRotation = false;
 
-        this.setClipPlanes = true;
+        var r = this.rotation.getValueDirect();
+
+        var matrix = new Matrix4x4()
+        matrix.loadXYZAxisRotation(r.x, r.y, r.z);
+        this.matrix.setValueDirect(matrix);
     }
-
-	//this.applyLock.unlock();//(CReadWriteLock::eRWLockMode_Write);
 
     // call base-class implementation
-    Camera.prototype.update.call(this, params, visitChildren);
-
-	//this.applyLock.lock("OrthographicCamera.prototype.Update");//(CReadWriteLock::eRWLockMode_Read);
-
-    if (params.userData)
-    {
-        var updateParams = params.userData;
-		updateParams.projMatrix = this.projectionMatrix;
-        updateParams.viewMatrix = this.transformCompound;
-        updateParams.viewMatrix.invert(); // put in view-space
-		updateParams.camera = this;
-        updateParams.cameraType = this.attrType;
-        updateParams.nearDistance = this.nearDistance.getValueDirect();
-        updateParams.farDistance = this.farDistance.getValueDirect();
-        updateParams.width = this.width.getValueDirect();
-    }
-
-	//this.applyLock.unlock();//(CReadWriteLock::eRWLockMode_Read);
+    Transform.prototype.update.call(this, params, visitChildren);
 }
 
-OrthographicCamera.prototype.apply = function(directive, params, visitChildren)
+Rotate.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled.getValueDirect())
     {
         // call base-class implementation
-        Camera.prototype.apply.call(this, directive, params, visitChildren);
+        Transform.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
 
-	//this.applyLock.lock("OrthographicCamera.prototype.Apply");//(CReadWriteLock::eRWLockMode_Read);
-
-    switch (directive)
-    {
-    case "render":
-        {
-            var jitterAmt = new Vector2D(0, 0);
-
-            
-            if (!this.viewport.equals(params.viewport))
-            {
-                this.viewport = params.viewport;
-                this.updateClipPlanes = true;
-            }
-            
-			//this.addViewport(this.viewport); // always add... viewports member can be cleared (and is cleared when render directives are finalized)
-
-            if (this.updateClipPlanes)
-            {
-                this.setClipPlanes();
-            }
-
-            jitterAmt = params.jitterAmt;
-
-            params.viewVolume.set(this.left, this.right, this.top, this.bottom, this.near, this.far);
-
-            params.cameraType = this.attrType;
-            params.nearDistance = this.nearDistance.getValueDirect();
-            params.farDistance = this.farDistance.getValueDirect();
-            params.width = this.width.getValueDirect();
-
-            this.applyOrthographicTransform(jitterAmt);
-        }
-        break;
-    }
-
-	//this.applyLock.unlock();//(CReadWriteLock::eRWLockMode_Read);
-
-	// call base class implementation
-	Camera.prototype.update.call(this, directive, params, visitChildren);
+    // call base-class implementation
+    Transform.prototype.apply.call(this, directive, params, visitChildren);
 }
 
-OrthographicCamera.prototype.applyOrthographicTransform = function(jitterAmt)
+function Rotate_RotationModifiedCB(attribute, container)
 {
-    // calculate offset to apply to jitter perspective matrix
-    var dx = -(jitterAmt.x * (this.right - this.left) / this.viewport.width);
-    var dy = -(jitterAmt.y * (this.top - this.bottom) / this.viewport.height);
-
-    // set perspective matrix
-    this.renderEngine.orthographicMatrixLH(this.left + dx, this.right + dx, this.top + dy, this.bottom + dy, this.near, this.far);
-}
-
-OrthographicCamera.prototype.setClipPlanes = function()
-{
-    var width = this.width.getValueDirect();
-    var height = width * this.viewport.height / this.viewport.width;
-
-    this.top = height / 2.0;
-    this.bottom = -this.top;
-    this.right = width / 2.0;
-    this.left = -this.right;
-
-    this.projectionMatrix.loadMatrix(this.graphMgr.renderContext.orthographicMatrixLH(this.left, this.right,
-        this.top, this.bottom, this.near, this.far));
-
-    // update view-volume attribute
-    var viewVolume = new ViewVolume();
-    viewVolume.setOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
-    this.viewVolume.setValueDirect(viewVolume.left, viewVolume.right, viewVolume.top, viewVolume.bottom,
-        viewVolume.zNear, viewVolume.zFar);
-}
-
-OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPointX, clickPointY)
-{
-    // normalize click coordinates so they span [-1, 1] on each axis
-    var normX =  ((clickPointX - viewport.x) / viewport.width  * 2 - 1);
-    var normY = -((clickPointY - viewport.y) / viewport.height * 2 - 1);
-
-    // determine the width/2 of the visible portion of the x axis on the 
-    // far clipping plane
-    var farX  = (this.right - this.left) / 2;
-
-    // determine the height/2 of the visible portion of the y axis on the
-    // far clipping plane
-    var farY  = (this.top - this.bottom) / 2;
-
-    // set ray origin as point within visible portion of x, y on the 
-    // near clipping plane corresponding to the normalized screen coordinates
-    var rayOrigin = new Vector3D(normX * farX, normY * farY, this.near);
-
-    // set ray direction as point within visible portion of x, y on the 
-    // far clipping plane corresponding to the normalized screen coordinates
-    //rayDir = CVector3Df(normX * farX, normY * farY, this.far);
-    var rayDir = new Vector3D(0, 0, 1);
-    
-    return { origin: rayOrigin, direction: rayDir };
-}
-
-function OrthographicCamera_WidthModifiedCB(attribute, container)
-{
-    container.updateWidth = true;
+    container.updateRotation = true;
     container.incrementModificationCount();
 }
+Scale.prototype = new Transform();
+Scale.prototype.constructor = Scale;
 
-StyleMgr.prototype = new AttributeContainer();
-StyleMgr.prototype.constructor = StyleMgr;
-
-function StyleMgr()
+function Scale()
 {
-    AttributeContainer.call(this);
-    this.className = "StyleMgr";
+    Transform.call(this);
+    this.className = "Scale";
+    this.attrType = eAttrType.Scale;
+    
+    this.scale = new Vector3DAttr(1, 1, 1);
+    this.updateScale = true;
+    
+    this.scale.addModifiedCB(Scale_ScaleModifiedCB, this);
+	
+    this.registerAttribute(this.scale, "scale");
 }
 
-StyleMgr.prototype.eventPerformed = function(event, node)
+Scale.prototype.update = function(params, visitChildren)
 {
-    var result = node.stylesMap.getStyles(event.type);
-    if (result.styles && result.enabled)
+    if (this.updateScale)
     {
-        this.applyStyle(result.styles, result.target ? result.target : node);
+        this.updateScale = false;
+
+        var s = this.scale.getValueDirect();
+
+        var matrix = new Matrix4x4();
+        matrix.loadScale(s.x, s.y, s.z);
+        this.matrix.setValueDirect(matrix);
     }
+
+    // call base-class implementation
+    Transform.prototype.update.call(this, params, visitChildren);
 }
 
-StyleMgr.prototype.applyStyle = function(style, node)
+Scale.prototype.apply = function(directive, params, visitChildren)
 {
-    node.styles.updateStyle(style);
+    if (!this.enabled.getValueDirect())
+    {
+        // call base-class implementation
+        Transform.prototype.apply.call(this, directive, params, visitChildren);
+        return;
+    }
+
+    // call base-class implementation
+    Transform.prototype.apply.call(this, directive, params, visitChildren);
 }
+
+function Scale_ScaleModifiedCB(attribute, container)
+{
+    container.updateScale = true;
+    container.incrementModificationCount();
+}
+Translate.prototype = new Transform();
+Translate.prototype.constructor = Translate;
+
+function Translate()
+{
+    Transform.call(this);
+    this.className = "Translate";
+    this.attrType = eAttrType.Translate;
+    
+    this.translation = new Vector3DAttr(0, 0, 0);
+    this.updateTranslation = true;
+    
+    this.translation.addModifiedCB(Translate_TranslationModifiedCB, this);
+	
+    this.registerAttribute(this.translation, "translation");
+}
+
+Translate.prototype.update = function(params, visitChildren)
+{
+    if (this.updateTranslation)
+    {
+        this.updateTranslation = false;
+
+        var t = this.translation.getValueDirect();
+
+        var matrix = new Matrix4x4();
+        matrix.loadTranslation(t.x, t.y, t.z);
+        this.matrix.setValueDirect(matrix);
+    }
+
+    // call base-class implementation
+    Transform.prototype.update.call(this, params, visitChildren);
+}
+
+Translate.prototype.apply = function(directive, params, visitChildren)
+{
+    if (!this.enabled.getValueDirect())
+    {
+        // call base-class implementation
+        Transform.prototype.apply.call(this, directive, params, visitChildren);
+        return;
+    }
+
+    // call base-class implementation
+    Transform.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+function Translate_TranslationModifiedCB(attribute, container)
+{
+    container.updateTranslation = true;
+    container.incrementModificationCount();
+}
+SerializeParams.prototype = new DirectiveParams();
+SerializeParams.prototype.constructor = SerializeParams();
+
+function SerializeParams()
+{
+    DirectiveParams.call(this);
+    
+    this.serialized = "";
+}
+
+SerializeDirective.prototype = new SGDirective();
+SerializeDirective.prototype.constructor = SerializeDirective;
+
+function SerializeDirective()
+{
+    SGDirective.call(this);
+    
+    this.className = "SerializeDirective";
+    this.attrType = eAttrType.SerializeDirective;
+
+}
+
+SerializeDirective.prototype.execute = function(root)
+{
+    if (!root)
+    {
+		return;
+	}
+
+    // clear serialize string
+    this.serialized = "";
+
+    // setup serialize params structure
+    var serializeParams = new SerializeParams();
+    serializeParams.serialized = this.serialized;
+    serializeParams.userData = this.userData.getValueDirect();
+
+    // apply serialize directive
+    root.apply(eAttrType.DirectiveSerialize, serializeParams, true);
+
+    return;
+}
+
+SerializeDirective.prototype.execute = function(path)
+{
+    if (!path)
+    {
+        return;
+    }
+
+    // clear serialize string
+    this.serialized = "";
+
+    // setup serialize params structure
+    var serializeParams = new SerializeParams();
+    serializeParams.serialized = this.serialized;
+    serializeParams.userData = this.userData.getValueDirect();
+
+	// apply serialize directive
+    if (path.getNodeCount() > 0)
+    {
+	    path[0].apply(eAttrType.DirectiveSerialize, serializeParams, true);
+    }
+
+	return;
+}
+
 var eEventType = {
     Unknown                     :-1,
     
@@ -18311,6 +19053,17 @@ EventListener.prototype.eventPerformed = function(event)
         this.numResponses.setValueDirect(numResponses-1);
     }
 }
+EventListener.prototype.getTrigger = function()
+{
+        this.trigger;
+}
+EventListener.prototype.setTrigger = function(trigger)
+{
+    if(trigger)
+    {
+        this.trigger = trigger;
+    }
+}
 
 function EventListener_EventModifiedCB(attribute, container)
 {
@@ -18647,7 +19400,6 @@ ConnectAttributesCommand.prototype.eventPerformed = function(event)
     // call base-class implementation
     Command.prototype.eventPerformed.call(this, event);
 }
-
 
 ConnectAttributesCommand.prototype.execute = function()
 {
@@ -19470,6 +20222,568 @@ function LocateCommand_TargetModifiedCB(attribute, container)
     }
 }
 
+PlayCommand.prototype = new Command();
+PlayCommand.prototype.constructor = PlayCommand;
+
+function PlayCommand()
+{
+    Command.call(this);
+    this.className = "PlayCommand";
+
+    this.evaluators = [];
+    this.negate = new BooleanAttr(false);   // if true, Pause
+    
+    this.registerAttribute(this.negate, "negate");
+    
+    this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
+
+}
+
+PlayCommand.prototype.execute = function()
+{
+    // TODO: enabled (?)
+	var renderAgent = this.registry.find("RenderAgent");
+	if (renderAgent)
+	{
+        // SetEvaluatorPlayState not implemented by RenderAgent
+        // ePlayState_* is not implemented by RenderAgent
+        if (this.evaluators.length < 1)
+        {
+			if (this.negate.getValueDirect() == false)
+			{
+				renderAgent.setEvaluatorsPlayState(ePlayState.Play);
+			}
+			else
+			{
+				renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
+			}
+        }
+        else
+        {
+            for (var i = 0; i < this.evaluators.length; i++)
+            {
+         
+    			if (this.negate.getValueDirect() == false)
+    			{
+    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Play);
+    			}
+    			else
+    			{
+    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Pause);
+    			}
+            
+            }   
+        }
+	}
+}
+
+function PlayCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var targets = target.split(",");
+
+    // find one or more evaluator to play
+    container.targets.length = 0;   // copied this from Set. What does it do?
+    for (var i = 0; i < targets.length; i++)
+    {
+        var evaluator = container.registry.find(targets[i]);
+        if (evaluator)
+        {
+            container.evaluators[i] = evaluator;
+        }
+    }
+}
+RemoveCommand.prototype = new Command();
+RemoveCommand.prototype.constructor = RemoveCommand;
+
+function RemoveCommand()
+{
+    Command.call(this);
+    this.className = "RemoveCommand";
+
+    this.targetAttribute = null;
+    
+    this.target.addModifiedCB(RemoveCommand_TargetModifiedCB, this);
+}
+
+RemoveCommand.prototype.execute = function()
+{
+    if (this.targetAttribute)
+    {
+        // if node, remove from tree, and remove/unregister all children
+        if (this.targetAttribute.isNode())
+        {
+            var i = 0;
+            var parent = null;
+            while ((parent = this.targetAttribute.getParent(i++)))
+            {
+                parent.removeChild(this.targetAttribute);
+            }
+
+            this.removeChildren(this.targetAttribute);
+        }
+
+        // remove from registry
+        this.registry.unregister(this.targetAttribute);
+        
+        // delete
+        this.targetAttribute.destroy();
+    }
+}
+
+RemoveCommand.prototype.removeChildren = function(root)
+{
+    var child = null;
+	while ((child = root.getChild(0))) // get child 0 each time because we are removing the front child
+	{
+		// recurse on child
+		this.removeChildren(child);
+
+		// remove from registry
+		this.registry.unregister(child);
+
+		// remove from root node
+		root.removeChild(child);
+	}
+}
+
+function RemoveCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    container.targetAttribute = container.registry.find(target);
+}
+
+StopCommand.prototype = new Command();
+StopCommand.prototype.constructor = StopCommand;
+
+function StopCommand()
+{
+    Command.call(this);
+    this.className = "StopCommand";
+
+    this.evaluators = [];
+    
+    this.target.addModifiedCB(StopCommand_TargetModifiedCB, this);
+
+}
+
+StopCommand.prototype.execute = function()
+{
+    // TODO: enabled (?)
+	var renderAgent = this.registry.find("RenderAgent");
+	if (renderAgent)
+	{
+        // SetEvaluatorStopState not implemented by RenderAgent
+        // eStopState_* is not implemented by RenderAgent
+        if (this.evaluators.length < 1)
+        {
+			renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
+        }
+        else
+        {
+            for (var i = 0; i < this.evaluators.length; i++)
+            {
+         
+    			renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Stop);
+            }   
+        }
+	}
+}
+
+function StopCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var targets = target.split(",");
+
+    // find one or more evaluator to play
+    container.targets.length = 0;   // copied this from Set. What does it do?
+    for (var i = 0; i < targets.length; i++)
+    {
+        var evaluator = container.registry.find(targets[i]);
+        if (evaluator)
+        {
+            container.evaluators[i] = evaluator;
+        }
+    }
+}
+CommandSequence.prototype = new Command();
+CommandSequence.prototype.constructor = CommandSequence;
+
+function CommandSequence()
+{
+    Command.call(this);
+    this.className = "CommandSequence";
+    
+    this.sequence = [];
+}
+
+CommandSequence.prototype.execute = function()
+{
+    for (var i=0; i < this.sequence.length; i++)
+    {
+        this.sequence[i].execute();
+    }
+}
+
+CommandSequence.prototype.addCommand = function(command)
+{
+    this.sequence.push(command);
+}
+CommandMgr.prototype = new AttributeContainer();
+CommandMgr.prototype.constructor = CommandMgr;
+
+function CommandMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "CommandMgr";
+    
+    this.sequenceStack = new Stack();
+    
+    this.name = new StringAttr("CommandMgr");
+    
+    this.registerAttribute(this.name, "name");
+}
+
+CommandMgr.prototype.pushCommandSequence = function(sequence)
+{
+    this.sequenceStack.push(sequence);
+}
+
+CommandMgr.prototype.popCommandSequence = function()
+{
+    this.sequenceStack.pop();
+}
+
+CommandMgr.prototype.clearCommandSequence = function()
+{
+    this.sequenceStack.clear();
+}
+
+CommandMgr.prototype.addCommand = function(command)
+{
+    if (this.sequenceStack.length > 0)
+    {
+        this.sequenceStack.top().addCommand(command);
+        return;
+    }
+    
+    // execute the command or register it for events.  If the command
+    // was NOT configured for events, then Execute it and get rid of it             
+    var events = command.getEventTypes();
+    var trigger = command.getAttribute("trigger");
+    if (events.length > 0)
+    {
+        var eventMgr = this.registry.find("EventMgr");
+        if (eventMgr)
+        {
+            for (var i=0; i < events.length; i++)
+            {
+                eventMgr.addListener(events[i], command);
+            }
+        }   
+    }
+    else if (trigger.getLength() > 0)
+    {
+		trigger.addModifiedCB(CommandMgr_CommandTriggerModifiedCB, this);
+		this.createCommandTrigger(command, trigger);
+    }
+    else // no events -- execute and remove
+    {
+        command.execute();
+        this.registry.unregister(command);
+    }
+    
+    setAttributeBin(null);
+}
+
+CommandMgr.prototype.createCommandTrigger = function(command, trigger) 
+ {
+
+ 	// TODO: Support Commands that Execute from Events AND Triggers
+
+ 	// trigger syntax based on Attributes:
+ 	// ObjectName/Attribute=value
+ 	// ObjectName/Attribute[item]=value
+ 	// ObjectName/Attribute=value,value,value,...,value
+ 	// Where "ObjectName" may be an XPath-like expression
+ 	var attrNdx = 0;
+    var valueNdx = 0;
+    var rangeNdx = 0;
+    var itemNdx = 0;
+
+    var triggerString = "";
+    triggerString = trigger.getValueDirect().join("");
+ 	attrNdx = triggerString.lastIndexOf('/');
+
+ 	if (attrNdx != -1)
+ 	{
+ 		var objectName = triggerString.substring(0, attrNdx);
+ 		var resource = bridgeworks.registry.find(objectName);
+ 		if(resource)
+ 		{
+ 			var not = false;
+
+            var attrName = "";
+            var itemString = "";
+            var valueString = "";
+            var rangeString = "";
+            
+ 			valueNdx = triggerString.lastIndexOf('!');
+ 			if (valueNdx > 0)
+ 			{
+ 			    triggerString.replace("!", ""); // erase the '!' for subsequent processing
+ 			    not = true;
+ 			}
+
+ 			valueNdx = triggerString.lastIndexOf('=');
+
+ 			if(valueNdx > 0) 
+ 			{
+ 				itemNdx = triggerString.lastIndexOf('[');
+ 				if(itemNdx > 0) 
+ 				{
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx); 
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2 - itemNdx - 1); 
+ 				}
+
+ 				var range = FLT_MAX; 
+ 				var rangeNdx = triggerString.lastIndexOf(',');
+ 				if(rangeNdx > 0)
+ 				{
+ 					var rangeString = triggerString.substring(rangeNdx+1, trigger.length()-rangeNdx-1);
+ 					range = rangeString.parseFloat(); 
+ 				}
+ 				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
+ 				// value is the string between '=' && (',' || end of string)
+ 				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
+
+ 			}
+ 			else //TEMPEST
+ 			{
+ 				itemNdx = triggerString.lastIndexOf('[');
+ 				if(itemNdx > 0) 
+ 				{
+ 					var itemNdx2 = triggerString.lastIndexOf(']', itemNdx);
+ 					itemString = triggerString.substring(itemNdx+1, itemNdx2-itemNdx-1);
+ 				}
+ 			}
+ 			valueNdx = itemNdx == -1 ? (valueNdx == -1 ? triggerString.length() : valueNdx) : itemNdx;
+ 			attrName = triggerString.substring(attrNdx+1, valueNdx);
+
+ 			var input = resource.getAttribute(attrName);
+
+ 			var attr = this.createAttribute(input, valueString);
+
+ 			if(attr)
+ 			{
+ 				var item = -1; 
+ 				if(itemString != "")
+ 				{
+ 					item = parseInt(itemString);
+ 				}
+
+ 				var numExecutions = command.numResponses;
+ 				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
+
+ 				command.setTrigger(newTrigger);
+ 			}
+ 			triggerString = objectName + "/" + attrName;
+
+ 			console.debug(trigger);
+ 			console.debug("\n");
+ 		}		
+ 	}
+ }
+
+CommandMgr.prototype.createAttribute = function(attribute, value)
+{
+	var newAttribute = null;
+	if(attribute)
+	{
+        //console.debug(attribute);
+		var etype = attribute.attrType;
+		var len = attribute.getLength();
+        //console.debug(etype);
+//			switch (etype)
+//			{
+//
+//			case eAttrType.BooleanAttr:
+//				{
+//					newAttribute = new NumberAttr();
+//		            newAttribute.setValueDirect(parseInt(value));
+//				}
+//				break;
+//            case eAttrType.NumberAttr:
+//
+//				{
+					newAttribute = new NumberAttr();
+		            newAttribute.setValueDirect(parseFloat(value));
+//				}
+//				break;
+//
+//            case eAttrType.StringAttr:
+//				{
+//					newAttribute = new StringAttr();
+//                    newAttribute.setValueDirect(value);
+//				}
+//				break;
+//
+//			default:
+//				newAttribute = null;
+//				break;
+//			}
+		  }
+        //console.debug(newAttribute);
+		return newAttribute; 
+}
+
+function CommandMgr_CommandTriggerModifiedCB(attribute, container)
+{
+	this.createCommandTrigger(attribute, container);
+}
+
+AttributeTrigger.prototype = new Command();
+AttributeTrigger.prototype.constructor = AttributeTrigger;
+
+
+function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
+{
+    this.input = input;
+    this.trigger = trigger;
+    this.target = target;
+
+    this.lastValues = [];
+
+	this.input.getValue(this.lastValues);
+	
+    this.item = item;
+    
+    this.not = _not;
+
+
+    this.executionCount = _executionCount;
+
+	this.input.addModifiedCB(AttributeTrigger_InputModifiedCB, this);
+
+	var len = this.input.getLength();
+
+	if (len == 1)
+	{
+		this.item = 0;
+	}
+}
+
+
+AttributeTrigger.prototype.execute = function()
+{
+	if (this.target)
+	{
+        var type = this.trigger.attrType;
+
+        switch (type)
+        {
+
+        case eAttrType.StringAttr:
+            {
+                var vIn = [];
+                var vTrig = [];
+            
+                this.input.getValue(vIn);
+                this.trigger.getValue(vTrig);
+
+                var pass = vIn[0] == vTrig[0] ? true : false;
+                pass = this.not ? !pass : pass;
+                if (pass)
+                {
+                    var count = this.executionCount.getValueDirect() - 1;
+                    this.executionCount.setValueDirect(count);
+                }
+
+                if (this.executionCount == 0)
+		        {
+			        this.target = null;
+		        }
+            }
+            break;
+
+        default:
+            {
+                var vIn = [];
+                var vTrig = [];
+
+		        this.input.getValue(vIn);
+		        this.trigger.getValue(vTrig);
+
+		        // match single-item Attribute OR single item of a multi-item Attribute
+		        if (this.item != -1)
+		        {
+			        // if equal OR descending past OR ascending past
+                    var pass = ((vIn[this.item] == vTrig[0]) ||
+			                     (this.lastValues[this.item] > vIn[this.item] && vIn[this.item] < vTrig[0]) ||
+			                     (this.lastValues[this.item] < vIn[this.item] && vIn[this.item] > vTrig[0]));
+                    pass = this.not ? !pass : pass;
+                    if (pass)
+			        {
+						this.target.execute();
+                        var count = this.executionCount.getValueDirect() - 1;
+				        this.executionCount.setValueDirect(count);
+			        }
+		        }
+		        else	// match every item in a multi-item Attribute
+		        {
+			        var len = this.input.getLength();
+			        var matches = 0;
+			        for (var i = 0; i < len; ++i)
+			        {
+				        // if equal OR descending past OR ascending past
+				        var pass = ((vIn[i] == vTrig[i]) ||
+				                     (this.lastValues[i] > vIn[i] && vIn[i] < vTrig[i]) ||
+				                     (this.lastValues[i] < vIn[i] && vIn[i] > vTrig[i]));
+                        pass = this.not ? !pass : pass;
+                        if (pass)
+				        {
+					        ++matches;
+				        }
+			        }
+
+			        // if every item matches simultaneously
+			        if (matches = len)
+			        {
+						err = this.target.execute();
+						this.executionCount.setValueDirect(--this.executionCount);
+			        }
+		        }
+
+		        if (this.executionCount.getValueDirect() == 0)
+		        {
+			        this.target = null;
+                    this.input.removeModifiedCB(AttributeTrigger_InputModifiedCB,this);
+		        }
+		        else
+		        {
+			        this.lastValues = vIn;
+		        }
+            }
+            break;
+        }
+	}
+
+	return;
+}
+
+function AttributeTrigger_InputModifiedCB(attribute, container)
+{
+	container.execute();
+
+	// TODO:  Expand to also support EventListener::EventPerformed
+}
+/*
+void AttributeTrigger_InputModifiedTaskProc(void* data, const bool & run)
+{
+	TAttributeTrigger* pTrigger = static_cast<TAttributeTrigger*>(data);
+	pTrigger.Execute();
+}
+*/
 BwRegistry.prototype = new AttributeRegistry();
 BwRegistry.prototype.constructor = BwRegistry;
 
@@ -20168,180 +21482,6 @@ function BwSceneInspector_SelectionOccurredCB(attribute, container)
 
 
 
-CommandSequence.prototype = new Command();
-CommandSequence.prototype.constructor = CommandSequence;
-
-function CommandSequence()
-{
-    Command.call(this);
-    this.className = "CommandSequence";
-    
-    this.sequence = [];
-}
-
-CommandSequence.prototype.execute = function()
-{
-    for (var i=0; i < this.sequence.length; i++)
-    {
-        this.sequence[i].execute();
-    }
-}
-
-CommandSequence.prototype.addCommand = function(command)
-{
-    this.sequence.push(command);
-}
-CommandMgr.prototype = new AttributeContainer();
-CommandMgr.prototype.constructor = CommandMgr;
-
-function CommandMgr()
-{
-    AttributeContainer.call(this);
-    this.className = "CommandMgr";
-    
-    this.sequenceStack = new Stack();
-    
-    this.name = new StringAttr("CommandMgr");
-    
-    this.registerAttribute(this.name, "name");
-}
-
-CommandMgr.prototype.pushCommandSequence = function(sequence)
-{
-    this.sequenceStack.push(sequence);
-}
-
-CommandMgr.prototype.popCommandSequence = function()
-{
-    this.sequenceStack.pop();
-}
-
-CommandMgr.prototype.clearCommandSequence = function()
-{
-    this.sequenceStack.clear();
-}
-
-CommandMgr.prototype.addCommand = function(command)
-{
-    if (this.sequenceStack.length > 0)
-    {
-        this.sequenceStack.top().addCommand(command);
-        return;
-    }
-    
-    // execute the command or register it for events.  If the command
-    // was NOT configured for events, then Execute it and get rid of it             
-    var events = command.getEventTypes();
-    var trigger = command.getAttribute("trigger");
-    if (events.length > 0)
-    {
-        var eventMgr = this.registry.find("EventMgr");
-        if (eventMgr)
-        {
-            for (var i=0; i < events.length; i++)
-            {
-                eventMgr.addListener(events[i], command);
-            }
-        }   
-    }
-    else if (trigger.getLength() > 0)
-    {
-        // TODO
-        console.debug("TODO: ");
-    }
-    else // no events -- execute and remove
-    {
-        command.execute();
-        this.registry.unregister(command);
-    }
-    
-    setAttributeBin(null);
-}
-ConnectionMgr.prototype = new AttributeContainer();
-ConnectionMgr.prototype.constructor = ConnectionMgr;
-
-function ConnectionMgr()
-{
-    AttributeContainer.call(this);
-    this.className = "ConnectionMgr";
-    
-    this.name = new StringAttr("ConnectionMgr");
-    
-    this.registerAttribute(this.name, "name");
-    
-    registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
-}
-
-ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
-{
-    if (!inspector || !camera) return;
-    
-    var lastCamera = inspector.getCamera();
-    if (lastCamera == camera)
-    {
-        // already connected
-        return;
-    }
-    else if (lastCamera)
-    {
-        this.disconnectSceneInspection(inspector, lastCamera);
-    }
-
-    camera.getAttribute("sectorPosition").addTarget(inspector.getAttribute("viewPosition"), eAttrSetOp.Replace, null, true);
-    camera.getAttribute("rotation").addTarget(inspector.getAttribute("viewRotation"), eAttrSetOp.Replace, null, true);
-
-    inspector.getAttribute("resultPosition").addTarget(camera.getAttribute("sectorPosition"), eAttrSetOp.Replace, null, false);
-    inspector.getAttribute("resultRotation").addTarget(camera.getAttribute("rotation"), eAttrSetOp.Replace, null, false);
-    
-    inspector.setCamera(camera);
-}
-
-ConnectionMgr.prototype.disconnectAllTargets = function(source, target)
-{
-    if (source)
-    {
-        var count = source.getAttributeCount();
-        for (var i=0; i < count; i++)
-        {
-            var attribute = source.getAttributeAt(i);
-            if (attribute)
-            {
-                attribute.removeAllTargets();
-            }
-        }
-    }
-}
-
-ConnectionMgr.prototype.disconnectSceneInspection = function(inspector, camera)
-{
-    if (!inspector || !camera) return;
-    
-    camera.getAttribute("sectorPosition").removeTarget(inspector.getAttribute("viewPosition"));
-    camera.getAttribute("rotation").removeTarget(inspector.getAttribute("viewRotation"));
-    
-    inspector.getAttribute("resultPosition").removeTarget(camera.getAttribute("sectorPosition"));
-    inspector.getAttribute("resultRotation").removeTarget(camera.getAttribute("rotation"));
-    
-    inspector.setCamera(null);
-}
-
-ConnectionMgr.prototype.connectMapProjectionCalculator = function(mpc, pme)
-{
-    if (!mpc || !pme) return;
-
-    mpc.getAttribute("resultPosition").addTarget(pme.getAttribute("position"));
-
-    mpc.evaluate();
-}
-
-ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
-{
-    if (!mpc || !pme) return;
-
-    mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
-}
-
-
 ObjectInspector.prototype = new ArcballInspector();
 ObjectInspector.prototype.constructor = ObjectInspector;
 
@@ -20822,6 +21962,131 @@ function ObjectInspector_SelectionClearedCB(attribute, container)
 }
 
 
+ConnectionMgr.prototype = new AttributeContainer();
+ConnectionMgr.prototype.constructor = ConnectionMgr;
+
+function ConnectionMgr()
+{
+    AttributeContainer.call(this);
+    this.className = "ConnectionMgr";
+    
+    this.name = new StringAttr("ConnectionMgr");
+    
+    this.registerAttribute(this.name, "name");
+    
+    // TODO: finish adding connection helpers
+    //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
+    registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
+    registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
+}
+
+ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    var lastCamera = inspector.getCamera();
+    if (lastCamera == camera)
+    {
+        // already connected
+        return;
+    }
+    else if (lastCamera)
+    {
+        this.disconnectSceneInspection(inspector, lastCamera);
+    }
+
+    camera.getAttribute("sectorPosition").addTarget(inspector.getAttribute("viewPosition"), eAttrSetOp.Replace, null, true);
+    camera.getAttribute("rotation").addTarget(inspector.getAttribute("viewRotation"), eAttrSetOp.Replace, null, true);
+
+    inspector.getAttribute("resultPosition").addTarget(camera.getAttribute("sectorPosition"), eAttrSetOp.Replace, null, false);
+    inspector.getAttribute("resultRotation").addTarget(camera.getAttribute("rotation"), eAttrSetOp.Replace, null, false);
+    
+    inspector.setCamera(camera);
+}
+
+ConnectionMgr.prototype.disconnectAllTargets = function(source, target)
+{
+    if (source)
+    {
+        var count = source.getAttributeCount();
+        for (var i=0; i < count; i++)
+        {
+            var attribute = source.getAttributeAt(i);
+            if (attribute)
+            {
+                attribute.removeAllTargets();
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectSceneInspection = function(inspector, camera)
+{
+    if (!inspector || !camera) return;
+    
+    camera.getAttribute("sectorPosition").removeTarget(inspector.getAttribute("viewPosition"));
+    camera.getAttribute("rotation").removeTarget(inspector.getAttribute("viewRotation"));
+    
+    inspector.getAttribute("resultPosition").removeTarget(camera.getAttribute("sectorPosition"));
+    inspector.getAttribute("resultRotation").removeTarget(camera.getAttribute("rotation"));
+    
+    inspector.setCamera(null);
+}
+
+ConnectionMgr.prototype.connectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").addTarget(pme.getAttribute("position"));
+
+    mpc.evaluate();
+}
+
+ConnectionMgr.prototype.disconnectMapProjectionCalculator = function(mpc, pme)
+{
+    if (!mpc || !pme) return;
+
+    mpc.getAttribute("resultPosition").removeTarget(pme.getAttribute("position"));
+}
+
+ConnectionMgr.prototype.connectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.addTarget(dissolve);
+            }
+        }
+    }
+}
+
+ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
+{
+    if (!evaluator || !target) return;
+    
+    var dissolve = target.getAttribute("dissolve");
+    if (dissolve)
+    {
+        var resultValues = evaluator.getAttribute("resultValues");
+        if (resultValues)
+        {
+            var resultValue = resultValues.getAt(0);
+            if (resultValue)
+            {
+                resultValue.removeTarget(dissolve);
+            }
+        }
+    }
+}
+
 RenderAgent.prototype = new Agent();
 RenderAgent.prototype.constructor = RenderAgent;
 
@@ -21057,6 +22322,147 @@ function RenderAgent_GlobalTimeInSecsModified(attribute, container)
     var renderAgent = container.registry.find("RenderAgent");
     renderAgent.globalTimeInSecsModified();
 }
+var FRAME_RATE_DEFAULT = 30;
+var FRAME_RATE_MAX = FRAME_RATE_DEFAULT * 32;
+var FRAME_RATE_MIN = FRAME_RATE_DEFAULT * -32;
+
+RenderController.prototype = new AttributeContainer();
+RenderController.prototype.constructor = RenderController;
+
+function RenderController(bridgeworks)
+{
+    AttributeContainer.call(this);
+    this.className = "RenderController";
+    
+    this.playState = ePlayState.Pause;
+    
+    this.renderAgent = bridgeworks.renderAgent;
+}
+
+RenderController.prototype.fastForward = function()
+{
+    this.play();
+    var rate = this.renderAgent.frameRate.getValueDirect();
+    if (rate < 0)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    }
+    
+    if (rate < FRAME_RATE_MAX)
+	{
+		this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * 2);
+	}
+	else
+	{
+		// clamp to max fast forward speed
+		this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MAX);
+	}
+}
+
+RenderController.prototype.pause = function()
+{
+    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
+}
+
+RenderController.prototype.play = function()
+{
+    this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Play);    
+}
+
+RenderController.prototype.rewind = function()
+{
+    this.play();
+    var rate = this.renderAgent.frameRate.getValueDirect();
+    if (rate > 0)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_DEFAULT);
+    }
+    if (rate > FRAME_RATE_MIN)
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(Math.abs(this.renderAgent.frameRate) * -2);
+    }
+    else
+    {
+        this.renderAgent.desiredFrameRate.setValueDirect(FRAME_RATE_MIN);    
+    }
+}
+
+RenderController.prototype.stop = function()
+{
+    this.renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
+    this.renderAgent.desiredFrameRate.setValueDirect(1);
+}
+
+
+/**
+ *	Reverses the frame rate and updates a status label with the
+ *	current playback speed.  Rewind is a negative frame rate
+ *  that doubles with each push of the button until 
+ *  BridgeworksObject.FRAME_RATE_MIN is reached
+ *	
+ *	@param void
+ *	@return void
+	
+function DVD_Rewind()
+{
+    bridgeworks.updateScene("<Play/>");
+    
+
+    if (bridgeworks.renderAgent.frameRate > 0)
+    {
+        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
+    }
+    
+    if (bridgeworks.renderAgent.frameRate > FRAME_RATE_MIN)	// if fast forwarding or playing
+	{
+		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * -2);
+	}
+	else	// max rewind value reached
+	{
+		// clamp to max rewind speed
+		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MIN);
+	}
+    
+    g_paused = false;
+
+}
+ */
+
+/**
+ *	Fast forwards the frame rate and updates a status label with the
+ *	current playback speed.  Fast forward is a positive frame rate
+ *  that doubles with each push of the button until
+ *  BridgeworksObject.FRAME_RATE_MAX is reached
+ *	
+ *	@param void
+ *	@return void
+
+function DVD_FastForward()
+{
+    bridgeworks.updateScene("<Play/>");
+    
+    if (bridgeworks.renderAgent.frameRate < 0)
+    {
+        bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_DEFAULT);
+    }
+    
+    if (bridgeworks.renderAgent.frameRate < FRAME_RATE_MAX)
+	{
+		bridgeworks.renderAgent.setDesiredFrameRate(Math.abs(bridgeworks.renderAgent.frameRate) * 2);
+	}
+	else
+	{
+		// clamp to max fast forward speed
+		bridgeworks.renderAgent.setDesiredFrameRate(FRAME_RATE_MAX);
+	}
+    
+    g_paused = false;
+
+}
+ */	
+
 function Selections()
 {
     this.viewports = [];
@@ -21553,412 +22959,655 @@ function ViewportMgr_LayoutModifiedCB(attribute, container)
         layout.getAttribute("height").setValueDirect(container.height.getValueDirect());
     }
 }
-PathTrace.prototype = new LineList();
-PathTrace.prototype.constructor = PathTrace;
+RasterComponentEventListener.prototype = new EventListener();
+RasterComponentEventListener.prototype.constructor = Command;
 
-
-function PathTrace()
+function RasterComponentEventListener()
 {
+    EventListener.call(this);
+    this.className = "RasterComponentEventListener";
 
-    LineList.call(this);
-    this.className = "PathTrace";
-    this.attrType = eAttrType.PathTrace;
+    this.rcs = [];
+    this.rcsSelectionState = [];
+    this.rcListenMap = [];
+    this.rcEventMap = [];
+    this.styleMgr = null;
     
-    this.pathLength = 0;
-    this.pathPosition = new Vector3DAttr();
-    this.sampleRate = new FloatAttr();
-    this.maxLength = new FloatAttr();
-    this.color = new ColorAttr();
-    this.trace = new BooleanAttr();
-	this.sectorOrigin = new Vector3DAttr();
-    
-	this.sectorOrigin.AddModifiedCB(PathTrace_SectorOriginModifiedCB, this);
+    this.selectionEvent = new InputEvent(eEventType.Unknown, 0, 0xffffffff, 0, eEventType.Key_Up);
 
-    this.sampleRate.setRange(0, FLT_MAX);
-    this.maxLength.setRange(0, FLT_MAX);
-
-    this.registerAttribute(this.pathPosition, "pathPosition");
-    this.registerAttribute(this.sampleRate, "sampleRate");
-    this.registerAttribute(this.maxLength, "maxLength");
-    this.registerAttribute(this.color, "color");
-    this.registerAttribute(this.trace, "trace");
-	this.registerAttribute(this.sectorOrigin, "sectorOrigin");
-
-	this.graphMgr.getAttribute("sectorOrigin").addTarget(this.sectorOrigin);
-    this.graphMgr.getNodeRegistry().registerNode(this, eAttrType_Node_PathTrace);
+	this.name.setValueDirect("RasterComponentEventListener");
+	this.numResponses.setValueDirect(-1);
 }
 
-PathTrace.prototype.reset = function()
+RasterComponentEventListener.prototype.eventPerformed = function(event)
 {
-    this.vertices.setValueDirect(0);
-    this.vertexColors.setValueDirect(0);
-    
-    this.lastPosition.setValueDirect(0,0,0);
-    this.pathLength = 0;
-}
-
-PathTrace.prototype.update = function(params, visitChildren)
-{
-	this.sectorOriginLock.Lock("PathTrace::Update");
-
-    // get current position
-    var currPosition = this.pathPosition.getValueDirect(currPosition);
-	// offset by sector origin
-	// "lock" sector origin to obtain value, to ensure the value will be synchronized
-	// with ::SectorOriginModified()
-	//var sectorOrigin = this.sectorOrigin.lock();
-	currPosition.x -= sectorOrigin[0];
-	currPosition.y -= sectorOrigin[1];
-	currPosition.z -= sectorOrigin[2];
-	//this.sectorOrigin.unlock(false);
-
-    // get current trace value
-    var trace = this.trace.getValueDirect();
-
-    // if trace value has changed since last update, add a vertex
-    if (trace != this.lastTrace)
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
     {
-        // add current position to vertices array
-        var length = this.vertices.length;
-        this.vertices.setLength(length + 3);
-        this.vertices.setElement(length  , currPosition.x);
-        this.vertices.setElement(length+1, currPosition.y); 
-        this.vertices.setElement(length+2, currPosition.z); 
-
-        // add color to vertex color array
-        var color = this.color.getValueDirect();
-        length = this.vertexColors.getLength();
-        this.vertexColors.setLength(length + 4);
-        this.vertexColors.setElement(length  , color.r);
-        this.vertexColors.setElement(length+1, color.g);
-        this.vertexColors.setElement(length+2, color.b);
-        this.vertexColors.setElement(length+3, color.a);
-
-        if (trace == false)
-        {
-            // reset path length to 0
-            this.pathLength = 0;
-        }
-
-        this.lastTrace = trace;
+        return;
     }
-
-    if (trace)
-    {
-        // if this is the first time we are tracing, sample the current position,
-        // and set as the line list's first point
-        if (this.verticesArray.length == 0)
-        {
-            this.lastPosition = this.pathPosition.getValueDirect();
-			// offset by sector origin
-			// "lock" sector origin to obtain value, to ensure the value will be synchronized
-			// with ::SectorOriginModified()
-			var sectorOrigin = this.sectorOrigin;//.lock();
-			this.lastPosition.x -= sectorOrigin[0];
-			this.lastPosition.y -= sectorOrigin[1];
-			this.lastPosition.z -= sectorOrigin[2];
-			//this.sectorOrigin.unlock(false);
-
-            this.vertices.setValueDirect(this.lastPosition.x, this.lastPosition.y, this.lastPosition.z);
-
-            var r, g, b, a;
-            var color = this.color.getValueDirect(r);
-            /*
-            Resize<float>(values, 4))) 
-            {
-                this.sectorOriginLock.unlock();
-                return;
-            }
-            */
-            this.vertexColors.setValueDirect(color.r, color.g, color.b, color.a);
-        }
-
-        // if current position - last position >= sample rate, add a line segment
-        var distance = distanceBetween(currPosition, this.lastPosition);
-        if (distance >= this.sampleRate.getValueDirect())
-        {
-            // add current position to vertices array
-            var length = this.vertices.length;
-            this.vertices.setLength(length + 6);
-            this.vertices.setElement(length  , currPosition.x);
-            this.vertices.setElement(length+1, currPosition.y); 
-            this.vertices.setElement(length+2, currPosition.z); 
-
-            this.vertices.setElement(length+3, currPosition.x);
-            this.vertices.setElement(length+4, currPosition.y); 
-            this.vertices.setElement(length+5, currPosition.z); 
-
-            // add color to vertex color array
-            var color = this.color.getValueDirect();
-            length = this.vertexColors.length;
-            this.vertexColors.setLength(length + 8);
-            this.vertexColors.setElement(length  , color.r);
-            this.vertexColors.setElement(length+1, color.g);
-            this.vertexColors.setElement(length+2, color.b);
-            this.vertexColors.setElement(length+3, color.a);
-
-            this.vertexColors.setElement(length+4, color.r);
-            this.vertexColors.setElement(length+5, color.g);
-            this.vertexColors.setElement(length+6, color.b);
-            this.vertexColors.setElement(length+7, color.a);
-
-            // save last position
-            this.lastPosition = currPosition;
-
-            // increment path length
-            this.pathLength += distance;
-        }
-
-        // check that length of path hasn't exceeded maxLength; if so, remove line segments
-        // until pathLength <= maxLength
-        var maxLength = this.maxLength.getValueDirect();
-        if (this.pathLength > maxLength)
-        {
-            /*
-            std::vector<float> vertices(this.vertices.getLength());
-            this.vertices.getValue(vertices);
-            
-            std::vector<float> vertexColors(this.vertexColors.getLength());
-            this.vertexColors.getValue(vertexColors);
-
-			var i, j;
-            var numSegments = vertices.length / 6;
-            for (i=1, j=0; i <= numSegments; i++, j+=6)
-            {
-                this.pathLength -= distanceBetween(CVector3Df(vertices[j  ], vertices[j+1], vertices[j+2]),
-                                                CVector3Df(vertices[j+3], vertices[j+4], vertices[j+5]));
-
-                if (this.pathLength <= maxLength)
-                {
-                    break;
-                }
-            }
-
-            std::vector<float>::iterator it = vertices.begin(), it2 = it + (i * 6);
-            vertices.erase(it, it2);
-
-            it = vertexColors.begin();
-            it2 = it + (i * 8);
-            vertexColors.erase(it, it2);
-
-            this.vertices.setValue(vertices);
-            this.vertexColors.setValue(vertexColors);
-            */
-        }
-    }
-
-	//this.sectorOriginLock.unlock();
-
-    // call base class implementation
-    //LineList::update(params, visitChildren);
-}
-
-PathTrace.prototype.sectorOriginModified = function()
-{
-	//this.sectorOriginLock.Lock("PathTrace::SectorOriginModified");
-	/*
-
-	// get new sector origin
-	var sectorOrigin = this.sectorOrigin.getValueDirect();
-
-	// update all vertices already in vertex list by adding old sector origin, and subtracting
-	// new sector origin
-	std::vector<float> vertices;
-	this.vertices.getValue(vertices);
-	for (unsigned int i=0; i < vertices.size(); i+=3)
+    
+    var currSelectionState, lastSelectionState, selectionEventSelectionState;
+	for (var i=0; i < this.rcs.length; i++)
 	{
-		vertices[i  ] = vertices[i  ] + this.lastSectorOrigin.x - sectorOrigin.x;
-		vertices[i+1] = vertices[i+1] + this.lastSectorOrigin.y - sectorOrigin.y;
-		vertices[i+2] = vertices[i+2] + this.lastSectorOrigin.z - sectorOrigin.z;
-	}
-	this.vertices.setValue(vertices);
+		if (!this.isListening(this.rcs[i]))
+		{
+			continue;
+		}
 
-	// update last position by adding old sector origin, and subtracting new sector origin
-	this.lastPosition = this.lastPosition + this.lastSectorOrigin - sectorOrigin;
-
-	// update last sector origin to new sector origin
-	this.lastSectorOrigin = sectorOrigin;
-	*/
-
-	//this.sectorOriginLock.unlock();
-}
-
-function PathTrace_SectorOriginModifiedCB(attribute, container)
-{
-	container.sectorOriginModified();
-}
-PlayCommand.prototype = new Command();
-PlayCommand.prototype.constructor = PlayCommand;
-
-function PlayCommand()
-{
-    Command.call(this);
-    this.className = "PlayCommand";
-
-    this.evaluators = [];
-    this.negate = new BooleanAttr(false);   // if true, Pause
-    
-    this.registerAttribute(this.negate, "negate");
-    
-    this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
-
-}
-
-PlayCommand.prototype.execute = function()
-{
-    // TODO: enabled (?)
-	var renderAgent = this.registry.find("RenderAgent");
-	if (renderAgent)
-	{
-        // SetEvaluatorPlayState not implemented by RenderAgent
-        // ePlayState_* is not implemented by RenderAgent
-        if (this.evaluators.length < 1)
-        {
-			if (this.negate.getValueDirect() == false)
-			{
-				renderAgent.setEvaluatorsPlayState(ePlayState.Play);
-			}
-			else
-			{
-				renderAgent.setEvaluatorsPlayState(ePlayState.Pause);
-			}
-        }
-        else
-        {
-            for (var i = 0; i < this.evaluators.length; i++)
-            {
-         
-    			if (this.negate.getValueDirect() == false)
-    			{
-    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Play);
-    			}
-    			else
-    			{
-    				renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Pause);
-    			}
-            
-            }   
-        }
-	}
-}
-
-function PlayCommand_TargetModifiedCB(attribute, container)
-{
-    var target = attribute.getValueDirect().join("");
-    var targets = target.split(",");
-
-    // find one or more evaluator to play
-    container.targets.length = 0;   // copied this from Set. What does it do?
-    for (var i = 0; i < targets.length; i++)
-    {
-        var evaluator = container.registry.find(targets[i]);
-        if (evaluator)
-        {
-            container.evaluators[i] = evaluator;
-        }
-    }
-}
-StopCommand.prototype = new Command();
-StopCommand.prototype.constructor = StopCommand;
-
-function StopCommand()
-{
-    Command.call(this);
-    this.className = "StopCommand";
-
-    this.evaluators = [];
-    
-    this.target.addModifiedCB(StopCommand_TargetModifiedCB, this);
-
-}
-
-StopCommand.prototype.execute = function()
-{
-    // TODO: enabled (?)
-	var renderAgent = this.registry.find("RenderAgent");
-	if (renderAgent)
-	{
-        // SetEvaluatorStopState not implemented by RenderAgent
-        // eStopState_* is not implemented by RenderAgent
-        if (this.evaluators.length < 1)
-        {
-			renderAgent.setEvaluatorsPlayState(ePlayState.Stop);
-        }
-        else
-        {
-            for (var i = 0; i < this.evaluators.length; i++)
-            {
-         
-    			renderAgent.setEvaluatorPlayState(evaluators[i], ePlayState.Stop);
-            }   
-        }
-	}
-}
-
-function StopCommand_TargetModifiedCB(attribute, container)
-{
-    var target = attribute.getValueDirect().join("");
-    var targets = target.split(",");
-
-    // find one or more evaluator to play
-    container.targets.length = 0;   // copied this from Set. What does it do?
-    for (var i = 0; i < targets.length; i++)
-    {
-        var evaluator = container.registry.find(targets[i]);
-        if (evaluator)
-        {
-            container.evaluators[i] = evaluator;
-        }
-    }
-}
-SerializeCommand.prototype = new Command();
-SerializeCommand.prototype.constructor = SerializeCommand();
-
-
-function SerializeCommand()
-{
-    Command.call(this);
-    this.className = "SerializeCommand";
-    
-    this.targetResource = null;
-    
-    this.target.addModifiedCB(SerializeCommand_TargetModifiedCB, this);
-}
-
-SerializeCommand.prototype.execute = function()
-{
-	if (this.directive)
-    {
-	    if (this.targetResource)
+		lastSelectionState = this.rcsSelectionState[i];
+		currSelectionState = this.rcs[i].eventPerformed(event);
+		
+		if (this.styleMgr)
 	    {
-            if (this.directive.execute(this.targetResource) == 0)
-            {
-                this.serialized = this.directive.getSerialized();
-                console.debug(this.serialized);
-            }
-	    }
-        else // !this.target
+		    if (currSelectionState)
+			{
+				this.styleMgr.eventPerformed(event, this.rcs[i]);
+
+				// send selected/focus/mouseover event depending upon event type and whether 
+				// component doesn't have focus/didn't have selection
+				switch (event.type)
+				{
+				case eEventType.MouseLeftClick:
+					{
+						// send element focus event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementFocus) &&
+							this.rcs[i].hasFocus.getValueDirect() <= 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementFocus;
+							
+							selectionEventSelectionState = m_rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+
+							this.rcs[i].hasFocus.setValueDirect(1);
+					    }
+					}
+					break;
+
+				case eEventType.MouseMove:
+					{
+						// send element selected event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementSelected) &&
+							this.rcs[i].selected.getValueDirect() <= 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementSelected;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+							this.rcs[i].selected.setValueDirect(1);
+						}
+
+						if (!lastSelectionState &&
+							this.isListeningEvent(this.rcs[i], eEventType.MouseOver))
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.MouseOver;
+
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+						}
+					}
+					break;
+				}
+			}
+			else // !currSelectionState
+			{
+				// send unselected/blur/mouseout event depending upon event type and whether 
+				// component has focus/had selection
+				switch (event.type)
+				{
+				case eEventType.MouseLeftDown:
+				case eEventType.MouseLeftClick:
+				case eEventType.MouseLeftDblClick:
+				case eEventType.MouseMiddleDown:
+				case eEventType.MouseMiddleClick:
+				case eEventType.MouseMiddleDblClick:
+				case eEventType.MouseRightDown:
+				case eEventType.MouseRightClick:
+				case eEventType.MouseRightDblClick:
+				case eEventType.MouseWheelDown:
+				case eEventType.MouseBothDown:
+					{
+						// send element blur event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementBlur) &&
+							this.rcs[i].hasFocus.getValueDirect() > 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementBlur;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+
+							this.rcs[i].hasFocus.setValueDirect(-1);
+						}
+					}
+					break;
+
+				case eEventType.MouseMove:
+					{
+						// send element unselected event (once)
+						if (this.isListeningEvent(this.rcs[i], eEventType.ElementUnselected) &&
+							this.rcs[i].selected.getValueDirect() > 0)
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.ElementUnselected;
+							
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+							this.rcs[i].selected.setValueDirect(-1);
+						}
+
+						if (lastSelectionState &&
+							this.isListeningEvent(this.rcs[i], eEventType.MouseOut))
+						{
+							this.selectionEvent.synchronize(event);
+							this.selectionEvent.type = eEventType.MouseOut;
+
+							selectionEventSelectionState = this.rcs[i].eventPerformed(this.selectionEvent);
+							this.styleMgr.eventPerformed(this.selectionEvent, this.rcs[i]);
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		this.rcsSelectionState[i] = currSelectionState;
+	}
+}
+
+RasterComponentEventListener.prototype.registerComponent = function(rc, before)
+{
+    if (rc)
+    {
+        if (before)
         {
-            serializeScene();
+            var i = this.rcs.indexOf(before);
+            if (i < 0) i = this.rcs.length;
+            
+            this.rcs.splice(i, 0, rc);
+            this.rcsSelectionState.splice(i, 0, rc);
+        }
+        else
+        {
+            this.rcs.push(rc);
+            this.rcsSelectionState.push(rc);
         }
     }
+}
+
+RasterComponentEventListener.prototype.unregisterComponent = function(rc)
+{
+    if (rc)
+    {
+        this.rcs.splice(this.rcs.indexOf(rc), 1);
+    }
+}
+
+RasterComponentEventListener.prototype.Listen = function(rc)
+{
+    if (rc)
+    {
+        this.rcListenMap[rc] = true;
+    }
+}
+
+RasterComponentEventListener.prototype.Ignore = function(rc)
+{
+    if (rc)
+    {
+        this.rcListenMap[rc] = false;
+    }
+}
+
+RasterComponentEventListener.prototype.listenEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc] == undefined)
+        {
+            this.rcEventMap[rc] = new Array();
+        }
+
+        this.rcEventMap[rc].push(eventType);
+    }
+}
+
+RasterComponentEventListener.prototype.ignoreEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc])
+        {
+            this.rcEventMap[rc].splice(this.rcEventMap[rc].indexOf(eventType), 1);
+        }
+    }
+}
+
+RasterComponentEventListener.prototype.setStyleMgr = function(styleMgr)
+{
+    this.styleMgr = styleMgr;
+}
+
+RasterComponentEventListener.prototype.setSelectionState = function(rc, selected)
+{
+    this.rcsSelectionState[rc] = selected;
+}
+
+RasterComponentEventListener.prototype.getComponent = function(n)
+{
+    if (n < this.rcs.length)
+    {
+        return this.rcs[n];
+    }
+
+    return null;
+}
+
+RasterComponentEventListener.prototype.isListening = function(rc)
+{
+    if (rc)
+    {
+        if (this.rcListenMap[rc])
+        {
+            return this.rcListenMap[rc];
+        }
+    }
+
+    return false;
+}
+
+RasterComponentEventListener.prototype.isListeningEvent = function(rc, eventType)
+{
+    if (rc)
+    {
+        if (this.rcEventMap[rc])
+        {
+            if (this.rcEventMap[rc].indexOf(eventType) >= 0)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
+var g_objPosMap = {};
+
+function addInspectionGroup(node, factory)
+{
+
+    // ensure that rotation group has not already been added
+	var rotGroup = getInspectionGroup(node);
+	
+    if (rotGroup) return;
+		
+	var pGrp        = new Group();
+    pGrp.setGraphMgr(factory.graphMgr);
+    var pTranslate  = new Translate();
+    pTranslate.setGraphMgr(factory.graphMgr);
+    var pScaleInv   = new Scale();
+    pScaleInv.setGraphMgr(factory.graphMgr);
+    var pQuat       = new QuaternionRotate();
+    pQuat.setGraphMgr(factory.graphMgr);
+    var pTransBack  = new Translate();
+    pTransBack.setGraphMgr(factory.graphMgr);
+    var pScale      = new Scale();
+    pScale.setGraphMgr(factory.graphMgr);
+    
+    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
+
+    pGrp.name.setValueDirect("InspectionGroup");
+	pTranslate.name.setValueDirect("Translate");
+    pScaleInv.name.setValueDirect("ScaleInverse");
+	pQuat.name.setValueDirect("Quaternion");
+	pTransBack.name.setValueDirect("TranslateBack");			
+    pScale.name.setValueDirect("Scale");
+
+	pGrp.addChild(pTranslate); // child 0
+    pGrp.addChild(pScaleInv);  // child 1
+	pGrp.addChild(pQuat);      // child 2
+    pGrp.addChild(pScale);     // child 3
+	pGrp.addChild(pTransBack); // child 4
+
+	var pChildZero = node.getChild(0);
+	if (pChildZero)
+	{
+		pChildZero.insertChild(pGrp, 0);
+	}
+
+    node.registerAttribute(pTranslate.translation, "inspectionGroup_translate");
+    node.registerAttribute(pScaleInv.scale, "inspectionGroup_scaleInverse");
+    node.registerAttribute(pQuat.rotationQuat, "inspectionGroup_rotationQuat");
+    node.registerAttribute(pQuat.enabled, "inspectionGroup_rotationEnabled");
+    node.registerAttribute(pScale.scale, "inspectionGroup_scale");
+    node.registerAttribute(pTransBack.translation, "inspectionGroup_translateBack");
+
+    pTranslate.translation.setContainer(node);
+    pScaleInv.scale.setContainer(node);
+    pQuat.rotationQuat.setContainer(node);
+    pQuat.enabled.setContainer(node);
+    pScale.scale.setContainer(node);
+    pTransBack.translation.setContainer(node);
 
 	return;
 }
 
-SerializeCommand.prototype.serializeScene = function()
+function deleteInspectionGroup(node)
 {
-    var i = 0;
-    var container = null;
-    var node = null;
-    //TContext context;
+	var rotGroup = getInspectionGroup(node);
+	if (rotGroup)
+	{
+        rotGroup.getChild(0).getAttribute("translation").setContainer(rotGroup.getChild(0));
+        rotGroup.getChild(1).getAttribute("scale").setContainer(rotGroup.getChild(1));
+        rotGroup.getChild(2).getAttribute("rotationQuat").setContainer(rotGroup.getChild(2));
+        rotGroup.getChild(2).getAttribute("enabled").setContainer(rotGroup.getChild(2));
+        rotGroup.getChild(3).getAttribute("scale").setContainer(rotGroup.getChild(3));
+        rotGroup.getChild(4).getAttribute("translation").setContainer(rotGroup.getChild(4));
+
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationEnabled"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scale"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translateBack"));
+
+        node.removeChild(rotGroup);
+
+	}
+
+	return;
+}
+
+function getInspectionGroup(moveableNode)
+{
+    var group = null;
+    
+	var childZero = moveableNode.getChild(0);
+	if (childZero)
+	{
+		group = childZero.getNamedChild("InspectionGroup")
+	}
+
+	return group;
+}
+
+function setInspectionGroupActivationState(node, enable)
+{
+	var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+		var pQuat = pRotGroup.getChild(2);
+		if (pQuat)
+		{
+			pQuat.enabled.setValueDirect(enable);
+
+			if (!enable)
+			{
+				var quat = new Quaternion();
+				quat.loadIdentity();
+
+				var quatAttr = pQuat.rotationQuat;
+				quatAttr.setValueDirect(quat);
+			}
+		}
+		
+		var pPos = node.getAttribute("position");
+		if (enable)
+		{
+			if (!(node in g_objPosMap))
+			{
+				g_objPosMap[node] = pPos.getValueDirect();
+			}
+		}
+		else // !enable
+		{
+			var pos = g_objPosMap[node];
+			pPos.setValueDirect(pos);
+		}
+		
+	}
+
+	return;
+}
+
+function setInspectionGroupContainer(node)
+{
+
+	var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationEnabled"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_scale"));
+        node.unregisterAttribute(node.getAttribute("inspectionGroup_translateBack"));
+
+        node.registerAttribute(pRotGroup.getChild(0).getAttribute("translation"), "inspectionGroup_translate");
+        node.registerAttribute(pRotGroup.getChild(1).getAttribute("scale"), "inspectionGroup_scaleInverse");
+        node.registerAttribute(pRotGroup.getChild(2).getAttribute("rotationQuat"), "inspectionGroup_rotationQuat");
+        node.registerAttribute(pRotGroup.getChild(2).getAttribute("enabled"), "inspectionGroup_rotationEnabled");
+        node.registerAttribute(pRotGroup.getChild(3).getAttribute("scale"), "inspectionGroup_scale");
+        node.registerAttribute(pRotGroup.getChild(4).getAttribute("translation"), "inspectionGroup_translateBack");
+
+        pRotGroup.getChild(0).getAttribute("translation").setContainer(node);
+        pRotGroup.getChild(1).getAttribute("scale").setContainer(node);
+        pRotGroup.getChild(2).getAttribute("rotationQuat").setContainer(node);
+        pRotGroup.getChild(2).getAttribute("enabled").setContainer(node);
+        pRotGroup.getChild(3).getAttribute("scale").setContainer(node);
+        pRotGroup.getChild(4).getAttribute("translation").setContainer(node);
+
+    }
+
+    return;
+}
+
+
+// Isn't called. Commented out in RenderAgent.cpp
+function zeroInspectionGroup(node)
+{
+   var pRotGroup = getInspectionGroup(node);
+	if (pRotGroup)
+	{	
+		var pQuat = pRotGroup.getChild(2);
+		if (pQuat)
+		{
+			var quat = new Quaternion();
+			quat.loadIdentity();
+
+			var quatAttr = pQuat.rotationQuat;
+			quatAttr.setValueDirect(quat);
+		}
+    }
+
+    return;
+}
+
+function clearObjectPositionMap()
+{
+	g_objPosMap = {};
+
+	return;
+}
+
+// Doesn't do anything.
+function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
+{
+    /* 
+    CQuaternionf q;
+	CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
+	if (quat)
+	{
+		quat.getValueDirect(q);
+	}
+    */
+}
+
+function SerializeCommand()
+{
+	this.typeString = "Serialize";
+    this.target = null; 
+	AddPrototype = this.AddPrototype;
+    this.directive = null; 
+    this.serialized("");
+}
+
+SerializeCommand.prototype.ClonePrototype = function()
+{
+    var c = ++s_count;
+    return c;
+}
+
+SerializeCommand.prototype.Execute = function()
+{
+    if (this.directive)
+    {
+	    if (this.target && this.directive)
+	    {
+            if (this.directive.execute(this.target === 0))
+            {
+                this.serialized = this.directive.getSerialized();
+            }
+	    }
+        else // !this.target
+        {
+            SerializeScene();
+        }
+    }
+
+	return ;
+}
+
+SerializeCommand.prototype.SerializeScene = function()
+{
+    var i;
+    var container = NULL;
+    var node = NULL;
+    var context;
 
     // root element open tag
     this.serialized = "<Session broadcast='false'>";
 
-    if (this.registry)
+    var attrContainerRegistry = this.registry.find(attrContainerRegistry);
+    if (attrContainerRegistry)
     {
+        var serializer = new XMLSerializer();
+        // set minimum flag so that only the minimum required for recreation is serialized
+        //var serializeMinimum = serializer.getAttribute("serializeMinimum");
+        //serializeMinimum.setValueDirect(true);
 
+        var count = attrContainerRegistry.getObjectCount();
+
+        // serialize device handlers
+        for (i=0; i < count; i++)
+        {
+            container = attrContainerRegistry.getObject(i);
+            if (container)
+            {
+                context.attribute = container;
+                var buffer = "";
+
+                // serialize
+                serializer.Serialize(context, buffer);
+                this.serialized += buffer;
+            }
+        }
+
+        // serialize root nodes (nodes without parents)
+        for (i=0; i < count; i++)
+        {
+            if (node = attrContainerRegistry.getObject(i) &&
+                !node.getParent(0))
+            {
+                this.directive.Execute(node);
+                this.serialized += this.directive.getSerialized();
+            }
+        }
+
+        // serialize non-device handlers, non-nodes, non-commands (commands need to be serialized last so that the objects
+        // they affect will be declared first)
+        for (i=0; i < count; i++)
+        {
+            container = attrContainerRegistry.getObject(i); if (!container) continue;
+            if (!container && !container && !container)
+            {
+                if (!strcmp(container.getTypeString(), "SelectionListener"))
+                {
+                    var computePivotDistance = container.getAttribute("computePivotDistance")
+                       .getValueDirect();
+
+                    this.serialized += ".set target=\"Selector\" computePivotDistance=\"";
+                    this.serialized += (computePivotDistance ? "true" : "false");
+                    this.serialized += "\"/>";
+                }
+                else
+                {
+                    context.attribute = container;
+                    var buffer = "";
+
+                    // serialize
+                    serializer.Serialize(context, buffer);
+                    this.serialized += buffer;
+                }
+            }
+        }
+
+        // serialize any DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
+        for (i=0; i < count; i++)
+        {
+            container = attrContainerRegistry.getObject(i); if (!container) continue;
+            if (container && !strcmp(container.getTypeString(), "DisconnectAttributes"))
+            {
+                context.attribute = container;
+                var buffer = "";
+
+                // serialize
+                serializer.Serialize(context, buffer);
+                this.serialized += buffer;
+            }
+        }
+
+        // serialize remaining commands (DisconnectAttributes already serialized above)
+        for (i=0; i < count; i++)
+        {
+            container = attrContainerRegistry.getObject(i); if (!container) continue;
+            if (container && strcmp(container.getTypeString(), "DisconnectAttributes"))
+            {
+                context.attribute = container;
+                var buffer = "";
+
+                // serialize
+                serializer.Serialize(context, buffer);
+                this.serialized += buffer;
+            }
+        }
+        /*
+        // updateSectorOrigin
+        const char* substr = NULL;
+        std.prototype.string name = "";
+        if ((substr = strstr(this.serialized.c_str(), "PerspectiveCamera")) ||
+            (substr = strstr(this.serialized.c_str(), "OrthographicCamera")))
+        {
+            if (substr = strstr(substr, "<name>"))
+            {
+                substr += 6; // skip "<name>"
+                while (*substr != '<')
+                {
+                    name += *substr++;
+                }
+
+                this.serialized += ".set target=\"";
+                this.serialized += name;
+                this.serialized += "\" updateSectorOrigin=\"true\"/>";
+            }
+        }
+        */
+        // TODO: pivotCone
     }
 
     // root element close tag
@@ -21967,14 +23616,55 @@ SerializeCommand.prototype.serializeScene = function()
     return;
 }
 
-function SerializeCommand_TargetModifiedCB(attribute, container)
+SerializeCommand.prototype.Undo = function()
 {
-    var target = attribute.getValueDirect().join("");
-    var resource = container.registry.find(target);
-    if (resource)
-    {
-        container.targetResource = resource;
-    }
+	return ;
+}
+
+SerializeCommand.prototype.MatchesType = function(type) 
+{
+	var matches = 0;
+    matches = !(_stricmp(type, "Serialize"));
+    return matches;
+}
+
+SerializeCommand.prototype.setRegistr = function(registry)
+{
+    // create serialize directive
+	var sg = NULL;
+	var graphMgr = NULL;
+    var resource = NULL;
+	if (registry.Find("DefaultFactory", resource))
+	{
+		var defaultFactory = resource;
+		if (defaultFactory && (sg = defaultFactory.getSceneGraph()) != NULL &&
+		   (graphMgr = sg.getGraphMgr()) != NULL)
+		{
+			if (this.directive == graphMgr) //New<GcSerializeDirective, GcGraphMgr&>(*graphMgr))
+            {
+                this.directive.setRegistry(registry);
+            }
+		}
+	}
+
+    // call base-class implementation
+	CCommand.prototype.setRegistry(registry);
+}
+
+SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(attr, data)
+{
+	var command = data;
+	var target = attr;
+	var registry = command.this.registry;
+	if (target && registry)
+	{
+		var name = [256];
+		target.getValueDirect(name, sizeof(name));
+
+		if (_SUCCEEDED(registry.Find(name, command.this.target)))
+        {
+        }
+	}
 }
 // TODO
 var eLWObjectTokens = 
@@ -23806,7 +25496,7 @@ LWObjectBuilder.prototype.mapXYZtoUV = function(x, y, z, textureCenter, textureS
         }
 
         u = modf(1 - (lon / TWOPI * widthWrapAmt)).fractionalPart;
-        v = 1 - modf(0.5 - (lat / PI * heightWrapAmt)).fractionalPart;
+        v = 1 - modf(0.5 - (lat / Math.PI * heightWrapAmt)).fractionalPart;
 
         break;
     }
@@ -23904,13 +25594,22 @@ LWSceneBuilder.prototype.matchesType = function(type)
 
 LWSceneBuilder.prototype.allocateSceneElement = function(tokens)
 {
+    
+    
     switch (tokens[0])
     {
+        case "LoadObjectLayer":
+        {
+            
+        }
+        break;
         case "NumChannels":
         {
             var numChannels = parseInt(tokens[1], 10);
             
-            this.evaluators[this.evaluators.length-1].setNumChannels(numChannels);
+            var eval = this.evaluators[this.evaluators.length-1];
+            
+            eval.setNumChannels(numChannels);
             
             // attach to target (if specified)
             switch (numChannels)
@@ -23936,7 +25635,10 @@ LWSceneBuilder.prototype.allocateSceneElement = function(tokens)
         
         case "Key":
         {
+            if (this.evaluators.length <= 0) break;
+            
             var keyframes = this.evaluators[this.evaluators.length-1].getAttribute("channels").getAt(this.currChannel);
+            if (!keyframes) break;
             
             var keyframe = new KeyframeAttr();
             for (var i=1; i < tokens.length; i++)
@@ -24010,11 +25712,17 @@ LWSceneBuilder.prototype.allocateSceneElement = function(tokens)
         
         case "Behaviors":
         {
+            if (this.evaluators.length <= 0) break;
+            
+            var preBehaviors = this.evaluators[this.evaluators.length-1].getAttribute("preBehaviors").getAt(this.currChannel);
+            var postBehaviors = this.evaluators[this.evaluators.length-1].getAttribute("postBehaviors").getAt(this.currChannel);
+            if (!preBehaviors || !postBehaviors) break;
+            
             var pre = parseInt(tokens[1], 10);
             var post = parseInt(tokens[2], 10);
             
-            this.evaluators[this.evaluators.length-1].getAttribute("preBehaviors").getAt(this.currChannel).setValueDirect(pre);
-            this.evaluators[this.evaluators.length-1].getAttribute("postBehaviors").getAt(this.currChannel).setValueDirect(post);            
+            preBehaviors.setValueDirect(pre);
+            postBehaviors.setValueDirect(post);            
         }
         break;
     }
@@ -24177,6 +25885,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Group"] = newSGNode;
     this.newResourceProcs["Isolator"] = newSGNode;
     this.newResourceProcs["Label"] = newSGNode;
+    this.newResourceProcs["HTMLLabel"] = newSGNode;
     this.newResourceProcs["LineList"] = newSGNode;
     this.newResourceProcs["MediaTexture"] = newSGNode;
     this.newResourceProcs["Model"] = newModel;
@@ -24314,6 +26023,7 @@ function newSGNode(name, factory)
     case "Group":               resource = new Group(); break;
     case "Isolator":            resource = new Isolator(); break;
     case "Label":               resource = new Label(); break;
+    case "HTMLLabel":           resource = new HTMLLabel(); break;
     case "LineList":            resource = new LineList(); break;
     case "MediaTexture":        resource = new MediaTexture(); break;
     case "OrthographicCamera":  resource = new OrthographicCamera(); registerParentableAttributes(resource, factory); break;
@@ -24589,6 +26299,7 @@ function finalizeEvaluator(evaluator, factory)
             
             contentHandler.parseFileStream(pathInfo[0]); 
         }
+        AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
         break;
     }
 }
@@ -24596,26 +26307,21 @@ function finalizeEvaluator(evaluator, factory)
 function registerEvaluatorAttributes(evaluator, factory)
 {
     // url
-	var url = new StringAttr("");
-	evaluator.registerAttribute(url, "url");
-	
-	// target
-	var target = new StringAttr("");
-	evaluator.registerAttribute(target, "target");
+    var url = new StringAttr("");
+    evaluator.registerAttribute(url, "url");
 
-	// renderAndRelease
-	var renderAndRelease = new BooleanAttr(false);
-	evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+    // target
+    var target = new StringAttr("");
+    evaluator.registerAttribute(target, "target");
+
+    // renderAndRelease
+    var renderAndRelease = new BooleanAttr(false);
+    evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
 	
-    // TODO
-    console.debug("TODO: " + arguments.callee.name);
-    /*
     // targetConnectionType
-	CStringAttr* targetConnectionType = new CStringAttr("transform");
-	targetConnectionType->AddModifiedCB(DefaultFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
-	evaluator->RegisterAttribute(targetConnectionType, "targetConnectionType");
-
-    */
+    var targetConnectionType = new StringAttr("transform");
+    targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
+    evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
 }
 
 function registerParentableAttributes(pme, factory)
@@ -24691,6 +26397,19 @@ function AttributeFactory_ParentableWorldPositionModifiedCB(attribute, container
     //console.debug("TODO: " + arguments.callee.name);
 }
 
+function AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(attribute, container)
+{  
+    var evaluator = attribute.getContainer();
+    if (evaluator)
+    {
+        var connect = new ConnectAttributesCommand();
+        connect.setRegistry(container.registry);
+        connect.getAttribute("sourceContainer").copyValue(evaluator.getAttribute("name"));
+        connect.getAttribute("targetContainer").copyValue(evaluator.getAttribute("target"));
+        connect.getAttribute("connectionType").copyValue(attribute);
+        connect.execute();
+    }
+}
 Bridgeworks.prototype = new AttributeContainer();
 Bridgeworks.prototype.constructor = Bridgeworks;
 
@@ -24760,6 +26479,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.viewportMgr.getAttribute("layout").setValueDirect(this.layout);
     
     enumerateAttributeTypes();
+    enumerateAttributeElementTypes();
     
     // TODO: remove the following when onLoadModified is defined
     console.debug("TODO: " + arguments.callee.name);
