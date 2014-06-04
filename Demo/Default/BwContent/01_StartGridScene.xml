@@ -110,4 +110,12 @@
     <rotation x="0" y="700" z="0"/>>
   </AutoInterpolate>-->
   <!--<Locate transition="false" target="UV_BoxG"/>-->
+  <Label name="foo" parent="cylinderLeft" text="foo" show="true">
+            <labelStyle>
+                <fontStyle>
+                    <size>16</size>
+                </fontStyle>
+            </labelStyle>
+        </Label>
+   <KeyframeInterpolator target="UV_BoxG" url="./motions/Dissolve_Oscillate.mot"/>
 </Session>
