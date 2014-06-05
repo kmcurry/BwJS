@@ -9,7 +9,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.renderContext =  newRenderContext("webgl", canvas, bgImage);
     if (!this.renderContext) return;
 
-    contentDir = contentDir == null? "bwcontent" : contentDir;
+    contentDir = contentDir == null? "BwContent" : contentDir;
 
     this.canvas = canvas;
     this.contentDir = contentDir;
