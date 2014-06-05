@@ -6,7 +6,7 @@ function HTMLLabel()
 	this.attrType = eAttrType.Node.HTMLLabel;
 	this.typeString = "HTMLLabel";
 
-	this.windowHandle = new PointerAttr();  //ASK KEVIN
+	this.windowHandle = null;//new PointerAttr();  //ASK KEVIN
 	this.labelWidth = new NumberAttr(); 
 	this.labelHeight = new NumberAttr(); 
 	this.pageWidth = new NumberAttr();
@@ -14,10 +14,10 @@ function HTMLLabel()
 	this.htmlLabelStyle = new HTMLLabelStyleAttr();
 
 	this.styles.addModifiedCB(HTMLLabel_StylesModifiedCB, this);
-	this.windowHandle.addModifiedCB(HTMLLabel_WindowHandleModifiedCB, this);
+	//this.windowHandle.addModifiedCB(HTMLLabel_WindowHandleModifiedCB, this);
     this.renderSequenceSlot.addModifiedCB(HTMLLabel_RenderSequenceSlotModifiedCB, this);
 
-    this.registerAttribute(this.windowHandle, "windowHandle");
+    //this.registerAttribute(this.windowHandle, "windowHandle");
     this.registerAttribute(this.labelWidth, "labelWidth");
     this.registerAttribute(this.labelHeight, "labelHeight");
     this.registerAttribute(this.pageWidth, "pageWidth");
@@ -27,7 +27,8 @@ function HTMLLabel()
 
 	//this.wb = webBrowser.prototype.Instance(eWebBrowserAPI_IWebBrowser2); ASK KEVIN
 
-	this.labelRect.left = this.labelRect.top = this.labelRect.right = this.labelRect.bottom = 0;
+	//this.labelRect.left = this.labelRect.top = this.labelRect.right = this.labelRect.bottom = 0;
+	this.labelRect = new Rect(0,0,0,0);
 
 	//this.graphMgr.getNodeRegistry().RegisterNode(this, eAttrType_Node_HTMLLabel); ASK KEVIN
 }
@@ -54,15 +55,19 @@ function HTMLLabel()
         // added this block in response to Navigate fails, which was causing repeated fails due to timing issues (?)
         // it throttles back the time between calls, and addresses the problem effectively; this could be made threaded, 
         // but this change is less impactful for now.
-        else if (this.updateLabelHTML) 
+        else if(this.show.getValueDirect()) 
+        {
+        	this.updateLabe(false); 
+        }
+/*        else if (this.updateLabelHTML)  //ASK KEVIN IF THIS WAS RIGHT: COMMENTED OUT FOLLOWING ELSE IF STATEMENTS
         {
            // this.wait(50);
-        }
+        }*/
 	}
-	else if (this.show.getValueDirect())
+/*	else if (this.show.getValueDirect())
 	{
 		this.updateLabel(false);
-	}
+	}*/
 
     this.updateMouseOver();
 
@@ -81,7 +86,7 @@ function HTMLLabel()
 
     switch (directive)
     {
-	case eAttrType_Directive_Render:
+	case eAttrType.RenderDirective:
 		{
             var drawNow = true;
             var renderParams = params;
@@ -117,7 +122,7 @@ function HTMLLabel()
 		}
 		break;
 
-	case eAttrType_Directive_RayPick:
+	case eAttrType.RayPickDirective:
         {
             var rayPickParams = params;
             if (rayPickParams)
@@ -166,7 +171,7 @@ HTMLLabel.prototype.updateWebBrowser = function()
         this.wb.getAttribute("windowHandle").setValueDirect(windowHandle);
     }
 
-    return ; //this.wb ? eNO_ERR : eERR_FAIL;
+    return this.wb ? true : false; //this.wb ? eNO_ERR : eERR_FAIL;
 }
 
 HTMLLabel.prototype.updateLabel = function(navigate)
@@ -1178,16 +1183,12 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
 				}
 			}
 		}
-
-        if (this.registry.find("Bridgeworks", resource))
-        {
-            //Bridgeworks* bridgeworks = dynamic_cast<Bridgeworks*>(resource); ASK KEVIN
             if (bridgeworks)
             {
-                bridgeworks.getAttribute("windowWidth").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
-                bridgeworks.getAttribute("windowHeight").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
+                bridgeworks.viewportMgr.getAttribute("width").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
+                bridgeworks.viewportMgr.getAttribute("height").addModifiedCB(HTMLLabel_Bridgeworks_WindowDimensionsModifiedCB, this);
             }
-        }
+        
 	}
 }
 
@@ -1198,19 +1199,19 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
 
  HTMLLabel_StylesModifiedCB = function(attr, data)
 {
-	var node =  data;
+	var node = data;
     
     if (node)
     {
-		node.this.updateLabel = true;
+		node.updateLabel = true;
 
-        if (attr == node.this.htmlLabelStyle.html() ||
-            attr == node.this.htmlLabelStyle.url())
+        if (attr == node.htmlLabelStyle ||
+            attr == node.htmlLabelStylea)
         {
             node.this.updateLabelHTML = true;
         }
 
-		node.IncrementModificationCount();
+		//node.incrementModificationCount();
 	}
 }
 
@@ -1220,7 +1221,7 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
     
     if (node && node.this.wb)
     {
-		node.this.wb.getAttribute("windowHandle").CopyValue(attr);
+		node.this.wb.getAttribute("windowHandle").copyValue(attr);
 	}
 }
 
@@ -1230,7 +1231,7 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
     
     if (node)
     {
-		node.RenderSequenceSlotModified();
+		node.renderSequenceSlotModified();
 	}
 }
 
@@ -1240,7 +1241,7 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
     
     if (node)
     {
-        node.this.updateWebBrowser = true;
+        node.updateWebBrowser = true;
     }
 }
 
