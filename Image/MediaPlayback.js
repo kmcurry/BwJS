@@ -58,7 +58,7 @@ MediaPlayback.prototype.loadImage = function(url)
                 //this.htmlImageElement.onload = MediaTexture_OnVideoLoad;
 
                 //this.onVideoPlay();
-                this.htmlImageElement.src = "http://localhost/bwjs/bwcontent/images/Bear.ogg"; //url;
+                this.htmlImageElement.src = "http://localhost/bwjs/BwContent/images/Bear.ogg"; //url;
 
                 this.video = true;
                 this.onVideoLoad();

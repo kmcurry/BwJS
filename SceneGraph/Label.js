@@ -471,7 +471,7 @@ function CreateHTMLLabel(id, labelId, iconId)
                 {
                     newIconImg.setAttribute("class", "labelIcon");
                     newIconImg.style.visibility = "hidden";
-                    newIconImg.src = "bwcontent/images/1x1.png";
+                    newIconImg.src = "BwContent/images/1x1.png";
                     //newIconImg.onmousedown = function(){onMouseDown();};
                     newIconImg.onmouseup = function() { /*onMouseUp();*/ };
                     newIconImg.onmousemove = function() { /*onMouseMove();*/ };
@@ -652,7 +652,7 @@ function Label_IconStyleUrlModifiedCB(attribute, container)
         break;
 
     default:
-        container.htmlIconImg.src = document.location.href + "/../bwcontent/" + url;
+        container.htmlIconImg.src = document.location.href + "/../BwContent/" + url;
         break;
     }
 }
