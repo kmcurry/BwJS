@@ -3,7 +3,7 @@
 <?bwplugin url="BBD3D8Engine" action="load"?>
 <?bwinclude url="DefaultPreferences.xml"?>
 <Scene>
-	<Isolator name="Root">
+	<Isolator name="Root" isolateTransforms="true">
 		<Selector name="Cameras">
 			<PerspectiveCamera name="Camera" zoom="3.2" nearDistance="5" farDistance="50000">
 				<position x="-203.119" y="14020.4" z="-839.134"/>
@@ -23,7 +23,7 @@
 			</PointLight>
 		</Group>
 		<Group name="Models">
-			<Model name="EGYPT" url="objects/EGYPT.lwo"/>
+		<Model name="EGYPT" url="objects/EGYPT.lwo"/>
 			<Model name="GreatPyramid (1)" url="objects/GreatPyramid.lwo">
 				<position x="116.492" y="0" z="-492.851"/>
 			</Model>
@@ -34,15 +34,15 @@
 				<position x="-521.325" y="0" z="-1328.76"/>
 			</Model>
 			<Model name="Site_SkyDome" url="objects/Site_SkyDome.lwo"/>
-			<Model name="Artifact_01" url="objects/Artifact_01.lwo" dissolve="1">
+			<Model name="Artifact_01" url="objects/Artifact_01.lwo">
 				<position x="244.377" y="20" z="-299.878"/>
 				<rotation x="-14.6" y="146" z="6.1"/>
 			</Model>
-			<Model name="Artifact_02" url="objects/Artifact_02.lwo" dissolve="1">
+			<Model name="Artifact_02" url="objects/Artifact_02.lwo">
 				<position x="-130.198" y="34.8224" z="-724.492"/>
 				<rotation x="0" y="-47.6" z="0"/>
 			</Model>
-			<Model name="Artifact_03" url="objects/Artifact_03.lwo" dissolve="1">
+			<Model name="Artifact_03" url="objects/Artifact_03.lwo">
 				<position x="-435.347" y="9" z="-1249.14"/>
 				<rotation x="0" y="142.3" z="0"/>
 			</Model>
@@ -54,21 +54,21 @@
 	</Isolator>
 	<RenderDirective name="RenderDirective"/>
 	<Animations>
-		<KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
-		<KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
-		<KeyframeInterpolator name="EGYPTMotion" url="motions/EGYPT.mot" target="EGYPT"/>
-		<KeyframeInterpolator name="GreatPyramid (1)Motion" url="motions/GreatPyramid (1).mot" target="GreatPyramid (1)"/>
-		<KeyframeInterpolator name="KhafrePyramidMotion" url="motions/KhafrePyramid.mot" target="KhafrePyramid"/>
-		<KeyframeInterpolator name="MenkaurePyramidMotion" url="motions/MenkaurePyramid.mot" target="MenkaurePyramid"/>
-		<KeyframeInterpolator name="Site_SkyDomeMotion" url="motions/Site_SkyDome.mot" target="Site_SkyDome"/>
-		<KeyframeInterpolator name="Artifact_01Motion" url="motions/Artifact_01.mot" target="Artifact_01"/>
-		<KeyframeInterpolator name="Artifact_01Dissolve" url="envelopes/Artifact_01.env" target="Artifact_01" targetConnectionType="dissolve"/>
-		<KeyframeInterpolator name="Artifact_02Motion" url="motions/Artifact_02.mot" target="Artifact_02"/>
-		<KeyframeInterpolator name="Artifact_02Dissolve" url="envelopes/Artifact_02.env" target="Artifact_02" targetConnectionType="dissolve"/>
-		<KeyframeInterpolator name="Artifact_03Motion" url="motions/Artifact_03.mot" target="Artifact_03"/>
-		<KeyframeInterpolator name="Artifact_03Dissolve" url="envelopes/Artifact_03.env" target="Artifact_03" targetConnectionType="dissolve"/>
-		<KeyframeInterpolator name="GreatPyramid (2)Motion" url="motions/GreatPyramid (2).mot" target="GreatPyramid (2)"/>
-		<KeyframeInterpolator name="GreatSphinxMotion" url="motions/GreatSphinx.mot" target="GreatSphinx"/>
+	<KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+		    <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+            <KeyframeInterpolator name="EGYPTMotion" url="motions/EGYPT.mot" target="EGYPT"/>
+            <KeyframeInterpolator name="GreatPyramid (1)Motion" url="motions/GreatPyramid (1).mot" target="GreatPyramid (1)"/>
+            <KeyframeInterpolator name="KhafrePyramidMotion" url="motions/KhafrePyramid.mot" target="KhafrePyramid"/>
+            <KeyframeInterpolator name="MenkaurePyramidMotion" url="motions/MenkaurePyramid.mot" target="MenkaurePyramid"/>
+            <KeyframeInterpolator name="Site_SkyDomeMotion" url="motions/Site_SkyDome.mot" target="Site_SkyDome"/>
+            <KeyframeInterpolator name="Artifact_01Motion" url="motions/Artifact_01.mot" target="Artifact_01"/>
+            <KeyframeInterpolator name="Artifact_01Dissolve" url="envelopes/Artifact_01_Edit.env" target="Artifact_01"/>
+            <KeyframeInterpolator name="Artifact_02Motion" url="motions/Artifact_02.mot" target="Artifact_02"/>
+            <KeyframeInterpolator name="Artifact_02Dissolve" url="envelopes/Artifact_02_Edit.env" target="Artifact_02"/>
+            <KeyframeInterpolator name="Artifact_03Motion" url="motions/Artifact_03.mot" target="Artifact_03"/>
+            <KeyframeInterpolator name="Artifact_03Dissolve" url="envelopes/Artifact_03_Edit.env" target="Artifact_03"/>
+            <KeyframeInterpolator name="GreatPyramid (2)Motion" url="motions/GreatPyramid (2).mot" target="GreatPyramid (2)"/>
+            <KeyframeInterpolator name="GreatSphinxMotion" url="motions/GreatSphinx.mot" target="GreatSphinx"/>-->
 	</Animations>
 	<ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
 </Scene>
