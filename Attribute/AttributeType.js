@@ -77,6 +77,7 @@
     
     Label                       :0,
     HTMLLabel                   :0,
+    BalloonTipLabel             :0,
     
     PathTrace                   :0,
     
