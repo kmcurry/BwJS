@@ -21,6 +21,7 @@
     KeyframeAttr                :0,
     KeyframesAttr               :0,
     LabelStyleAttr              :0,
+    HTMLLabelStyleAttr          :0,
     NumberArrayAttr             :0,
     NumberAttr                  :0,
     Matrix4x4Attr               :0,
@@ -75,6 +76,8 @@
     NullObject                  :0,
     
     Label                       :0,
+    HTMLLabel                   :0,
+    BalloonTipLabel             :0,
     
     PathTrace                   :0,
     

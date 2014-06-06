@@ -419,7 +419,7 @@ Label.prototype.labelStyleFontBorderModified = function()
                           + color.a + ")" + " 0px 0px " + width * 2 + "px";
     }
  
-    this.htmlLabel.style.setProperty("text-shadow", shadow, "normal");
+    this.htmlLabel.style.textShadow = shadow;
 }
 
 function CreateHTMLLabel(id, labelId, iconId)
@@ -471,7 +471,7 @@ function CreateHTMLLabel(id, labelId, iconId)
                 {
                     newIconImg.setAttribute("class", "labelIcon");
                     newIconImg.style.visibility = "hidden";
-                    newIconImg.src = "bwcontent/images/1x1.png";
+                    newIconImg.src = "BwContent/images/1x1.png";
                     //newIconImg.onmousedown = function(){onMouseDown();};
                     newIconImg.onmouseup = function() { /*onMouseUp();*/ };
                     newIconImg.onmousemove = function() { /*onMouseMove();*/ };
@@ -562,12 +562,10 @@ function Label_LabelStyleBackgroundColorModifiedCB(attribute, container)
 {
     var color = attribute.getValueDirect();
     color.a *= attribute.getContainer().getAttribute("backgroundOpacity").getValueDirect();
-    container.htmlLabel.style.setProperty("background-color", 
-                                          "rgba(" + color.r * 255 + "," 
-                                                  + color.g * 255 + "," 
-                                                  + color.b * 255 + ","
-                                                  + color.a + ")", 
-                                          "normal");
+    container.htmlLabel.style.backgroundColor = "rgba(" + color.r * 255 + "," 
+                                                        + color.g * 255 + "," 
+                                                        + color.b * 255 + ","
+                                                        + color.a + ")";
 }
 
 function Label_LabelStyleBackgroundOpacityModifiedCB(attribute, container)
@@ -584,17 +582,15 @@ function Label_LabelStyleFontStyleColorModifiedCB(attribute, container)
 {
     var color = attribute.getValueDirect();
     color.a *= attribute.getContainer().getAttribute("opacity").getValueDirect();
-    container.htmlLabel.style.setProperty("color", 
-                                          "rgba(" + color.r * 255 + "," 
-                                                  + color.g * 255 + "," 
-                                                  + color.b * 255 + ","
-                                                  + color.a + ")", 
-                                          "normal");     
+    container.htmlLabel.style.color = "rgba(" + color.r * 255 + "," 
+                                              + color.g * 255 + "," 
+                                              + color.b * 255 + ","
+                                              + color.a + ")";
 }
 
 function Label_LabelStyleFontStyleFontModifiedCB(attribute, container)
 {
-    container.htmlLabel.style.setProperty("font-family", attribute.getValueDirect().join(""), "normal");
+    container.htmlLabel.style.fontFamily = attribute.getValueDirect().join("");
 }
 
 function Label_LabelStyleFontStyleOpacityModifiedCB(attribute, container)
@@ -605,7 +601,7 @@ function Label_LabelStyleFontStyleOpacityModifiedCB(attribute, container)
 
 function Label_LabelStyleFontStyleSizeModifiedCB(attribute, container)
 {
-    container.htmlLabel.style.setProperty("font-size", attribute.getValueDirect() + "pt", "normal");   
+    container.htmlLabel.style.fontSize = attribute.getValueDirect() + "pt";
 }
 
 function Label_LabelStyleFontStyleStyleModifiedCB(attribute, container)
@@ -613,19 +609,19 @@ function Label_LabelStyleFontStyleStyleModifiedCB(attribute, container)
     switch (attribute.getValueDirect().join(""))
     {
     case "Bold":
-        container.htmlLabel.style.setProperty("font-weight", "bold", "normal");
+        container.htmlLabel.style.fontWeight = "bold";
         break;
         
     case "Heavy":
-        container.htmlLabel.style.setProperty("font-weight", "bolder", "normal");    
+        container.htmlLabel.style.fontWeight = "bolder";  
         break;
         
     case "Normal":
-        container.htmlLabel.style.setProperty("font-weight", "normal", "normal");    
+        container.htmlLabel.style.fontWeight = "normal";
         break;
         
     case "Thin":
-        container.htmlLabel.style.setProperty("font-weight", "lighter", "normal");    
+        container.htmlLabel.style.fontWeight = "lighter";
         break;
     }
 }
@@ -633,17 +629,17 @@ function Label_LabelStyleFontStyleStyleModifiedCB(attribute, container)
 function Label_LabelStyleFormatModifiedCB(attribute, container)
 {
     var format = attribute.getValueDirect().join("");
-    //container.htmlLabel.style.setProperty("text-align", format, "normal");
+    //container.htmlLabel.style.setProperty("textAlign", format, "normal");
     // TODO
 }
 
 function Label_LabelStylePaddingModifiedCB(attribute, container)
 {
     var padding = attribute.getValueDirect() + "px";
-    container.htmlLabel.style.setProperty("padding-left", padding, "normal");
-    container.htmlLabel.style.setProperty("padding-right", padding, "normal");
-    container.htmlLabel.style.setProperty("padding-top", padding, "normal");
-    container.htmlLabel.style.setProperty("padding-bottom", padding, "normal");    
+    container.htmlLabel.style.paddingLeft = padding;
+    container.htmlLabel.style.paddingRight = padding;
+    container.htmlLabel.style.paddingTop = padding;
+    container.htmlLabel.style.paddingBottom = padding;    
 }
 
 function Label_IconStyleUrlModifiedCB(attribute, container)
@@ -656,7 +652,7 @@ function Label_IconStyleUrlModifiedCB(attribute, container)
         break;
 
     default:
-        container.htmlIconImg.src = document.location.href + "/../bwcontent/" + url;
+        container.htmlIconImg.src = document.location.href + "/../BwContent/" + url;
         break;
     }
 }

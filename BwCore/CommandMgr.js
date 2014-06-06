@@ -105,6 +105,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  			}
 
  			valueNdx = triggerString.lastIndexOf('=');
+
  			if(valueNdx > 0) 
  			{
  				itemNdx = triggerString.lastIndexOf('[');
@@ -124,6 +125,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				rangeNdx = rangeNdx == -1 ? triggerString.length : rangeNdx;
  				// value is the string between '=' && (',' || end of string)
  				valueString = triggerString.substring(valueNdx+1, valueNdx+(rangeNdx-valueNdx));
+
  			}
  			else //TEMPEST
  			{
@@ -148,6 +150,7 @@ CommandMgr.prototype.createCommandTrigger = function(command, trigger)
  				{
  					item = parseInt(itemString);
  				}
+
  				var numExecutions = command.numResponses;
  				var newTrigger = new AttributeTrigger(input, attr, command, item, not, numExecutions);
 

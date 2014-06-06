@@ -166,7 +166,7 @@
         <KeyframeInterpolator name="PistonRodMotion" url="motions/PistonRod.mot" target="PistonRod"/>
         <KeyframeInterpolator name="SmallGearMotion" url="motions/SmallGear.mot" target="SmallGear"/>
         <KeyframeInterpolator name="PistonMotion" url="motions/Piston.mot" target="Piston"/>
-    </Animations>
+</Animations>
     <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
-    <Pause trigger="RenderAgent/globalTimeInSecs=1"/>
+    <Pause trigger="RenderAgent/elapsedTimeInSecs=10"/>
 </Scene>
