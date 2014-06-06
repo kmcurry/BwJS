@@ -34,5 +34,4 @@
         <KeyframeInterpolator name="Shadow_MULE_T_HIGHMotion" url="motions/Shadow_MULE_T_HIGH.mot" target="Shadow_MULE_T_HIGH"/>
     </Animations>
     <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
-   <HTMLLabel text="These are words" /> 
 </Scene>
