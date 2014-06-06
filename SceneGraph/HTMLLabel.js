@@ -57,7 +57,7 @@ function HTMLLabel()
         // but this change is less impactful for now.
         else if(this.show.getValueDirect()) 
         {
-        	this.updateLabe(false); 
+        	this.updateLabel(false);
         }
 /*        else if (this.updateLabelHTML)  //ASK KEVIN IF THIS WAS RIGHT: COMMENTED OUT FOLLOWING ELSE IF STATEMENTS
         {
