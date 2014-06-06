@@ -27,16 +27,16 @@ BalloonTipLabel.prototype.initialize = function()
 	if (!(this.balloonTipLabelStyle == new BalloonTipLabelStyleAttr())) return;
 
 	this.windowHandle.addModifiedCB(BalloonTipLabel_windowHandleModifiedCB, this);
-	this.balloonTipLabelStyle.bgColor().AddModifiedCB(BalloonTipLabel_balloonTipLabelStyleBgColorModifiedCB, this);
-	this.balloonTipLabelStyle.HtmlLabelStyle().AddModifiedCB(BalloonTipLabel_BalloonTipLabelStyleHTMLLabelStyleModifiedCB, this);
-	this.balloonTipLabelStyle.displayMode().AddModifiedCB(BalloonTipLabel_balloonTipLabelStyleDisplayModeModifiedCB, this);
-	this.show.AddModifiedCB(BalloonTipLabel_showModifiedCB, this);
-	this.renderSequenceSlot.AddModifiedCB(BalloonTipLabel_renderSequenceSlotModifiedCB, this);
+	this.balloonTipLabelStyle.bgColor().addModifiedCB(BalloonTipLabel_balloonTipLabelStyleBgColorModifiedCB, this);
+	this.balloonTipLabelStyle.HTMLLabelStyle().addModifiedCB(BalloonTipLabel_BalloonTipLabelStyleHTMLLabelStyleModifiedCB, this);
+	this.balloonTipLabelStyle.displayMode().addModifiedCB(BalloonTipLabel_balloonTipLabelStyleDisplayModeModifiedCB, this);
+	this.show.addModifiedCB(BalloonTipLabel_showModifiedCB, this);
+	this.renderSequenceSlot.addModifiedCB(BalloonTipLabel_renderSequenceSlotModifiedCB, this);
 
 
-	registerAttribute(this.windowHandle, "windowHandle");
-	registerAttribute(this.labelWidth, "labelWidth");
-	registerAttribute(this.labelHeight, "labelHeight");
+	this.registerAttribute(this.windowHandle, "windowHandle");
+	this.registerAttribute(this.labelWidth, "labelWidth");
+	this.registerAttribute(this.labelHeight, "labelHeight");
 
 	this.styles.registerStyle(this.balloonTipLabelStyle, "balloonTipLabelStyle");
 
@@ -46,7 +46,7 @@ BalloonTipLabel.prototype.initialize = function()
 
 	this.graphMgr.getNodeRegistry().registerNode(this, eAttrType.BalloonTipLabelStyleAttr);
 
-	loadImages();
+	this.loadImages();
 
 	//this.renderSequenceSlot.setValueDirect(BALLOONTIPLABEL_RENDER_SEQ_SLOT);
 }
@@ -59,7 +59,7 @@ BalloonTipLabel.prototype.initialize = function()
 	var success = false;
 	while (1) // avoid goto//
 	{
-		var hInstance = getModuleHandle(module.c_str());
+		var hInstance = this.getModuleHandle(module.c_str());
 		if (!hInstance)
 		{
 			break;
