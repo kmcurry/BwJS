@@ -7,7 +7,9 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     this.input = input;
     this.trigger = trigger;
     this.target = target;
-    
+
+    this.lastValues = [];
+
 	this.input.getValue(this.lastValues);
 	
     this.item = item;
@@ -16,16 +18,8 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
 
 
     this.executionCount = _executionCount;
-    
-    //this.executionCount = new NumberAttr(this.executionCount);
 
-	this.input.addRef();
-
-	this.input.addModifiedSink(AttributeTrigger_InputModifiedCB, this);
-
-	this.target.setUndoable(false);
-
-	this.input.getValue(this.lastValues);
+	this.input.addModifiedCB(AttributeTrigger_InputModifiedCB, this);
 
 	var len = this.input.getLength();
 
@@ -40,14 +34,15 @@ AttributeTrigger.prototype.execute = function()
 {
 	if (this.target)
 	{
-        var type = this.trigger.attrElemType;
+        var type = this.trigger.attrType;
 
         switch (type)
         {
-        case type.eAttrElemType_Char:
+
+        case eAttrType.StringAttr:
             {
-                var vIn;
-                var vTrig;
+                var vIn = [];
+                var vTrig = [];
             
                 this.input.getValue(vIn);
                 this.trigger.getValue(vTrig);
@@ -56,8 +51,8 @@ AttributeTrigger.prototype.execute = function()
                 pass = this.not ? !pass : pass;
                 if (pass)
                 {
-					err = this.target.execute();
-					executionCount.setValueDirect(--this.executionCount);
+                    var count = this.executionCount.getValueDirect() - 1;
+                    this.executionCount.setValueDirect(count);
                 }
 
                 if (this.executionCount == 0)
@@ -69,8 +64,8 @@ AttributeTrigger.prototype.execute = function()
 
         default:
             {
-                var vIn;
-                var vTrig;
+                var vIn = [];
+                var vTrig = [];
 
 		        this.input.getValue(vIn);
 		        this.trigger.getValue(vTrig);
@@ -85,8 +80,9 @@ AttributeTrigger.prototype.execute = function()
                     pass = this.not ? !pass : pass;
                     if (pass)
 			        {
-						err = this.target.execute();
-				        this.executionCount.setValueDirect(--this.executionCount);
+						this.target.execute();
+                        var count = this.executionCount.getValueDirect() - 1;
+				        this.executionCount.setValueDirect(count);
 			        }
 		        }
 		        else	// match every item in a multi-item Attribute
@@ -114,9 +110,10 @@ AttributeTrigger.prototype.execute = function()
 			        }
 		        }
 
-		        if (this.executionCount == 0)
+		        if (this.executionCount.getValueDirect() == 0)
 		        {
 			        this.target = null;
+                    this.input.removeModifiedCB(AttributeTrigger_InputModifiedCB,this);
 		        }
 		        else
 		        {

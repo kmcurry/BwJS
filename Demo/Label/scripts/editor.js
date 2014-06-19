@@ -89,14 +89,14 @@ function listDirectory(url, panel)
     
 }
 
-function load(u)
+function load(u, x, y, z)
 {
     var url = u == null ? $('#url').val() : u;
     var ext = getFileExtension(url);
     console.debug(ext);
     switch(ext) {
     case "lwo":
-        loadModel(url);
+        loadModel(url, x, y, z);
         break;
     case "mot":
         loadMotion(url);
@@ -109,8 +109,10 @@ function load(u)
 
 var count = 1;
 
-function loadModel(url)
+function loadModel(url, x, y, z)
 {
+
+
     var name = url.substring(url.lastIndexOf("/")+1, url.lastIndexOf("."));
     name = count.toString() + ". " + name;
     count++;
@@ -127,10 +129,12 @@ function loadModel(url)
     
     var pointWorld = bridgeworks.selector.pointWorld.getValueDirect();
     
-    var pos = xml.getElementsByTagName("position")[0];
-    pos.attributes["x"].value = pointWorld.x.toString();
-    pos.attributes["y"].value = pointWorld.y.toString();
-    pos.attributes["z"].value = pointWorld.z.toString();
+    
+        var pos = xml.getElementsByTagName("position")[0];
+        pos.attributes["x"].value = x; //pointWorld.x.toString();
+        pos.attributes["y"].value = y; //pointWorld.y.toString();
+        pos.attributes["z"].value = z; //pointWorld.z.toString();
+
     
     
     var xstr = (new XMLSerializer()).serializeToString(xml);
