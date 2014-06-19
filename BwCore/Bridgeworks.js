@@ -155,11 +155,49 @@ Bridgeworks.prototype.initEventListeners = function()
 
 Bridgeworks.prototype.onLoadModified = function()
 {
-    this.registry.clear();
-    
-    this.initRegistry();
-    this.initEventListeners();
+    this.renderAgent.stop();
+    //this.iscetAgent.stop(); There is no isectAgent in javascript version
+    this.selector.stop();
+    this.rasterComponentEventListener.stop();
+
+    this.commandMgr.clearCommandSequence();
+    this.eventMgr.clear();
+    //this.resouceMgr.clear(); There is no resourceMgr in javascript version
+    this.selector.clearSelections();
+    this.selector.getAttribute("lastSelectedName").setValueDirect("");
     this.viewportMgr.initLayout();
+
+/*    std::map<std::string, std::pair<CAttribute*, CAttribute*> >::const_iterator it;
+ for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
+ {
+ it->second.first->AddRef();
+ it->second.second->AddRef();
+ }*/
+
+    this.registry.clear();
+    this.initEventListeners();
+    this.initRegistry();
+
+    /*	for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
+     {
+     std::string data_name(it->first.c_str());
+     data_name += "_data";
+
+     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.first, it->first.c_str());
+     it->second.first->Release();
+     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.second, data_name.c_str());
+     it->second.second->Release();
+     }*/
+
+    this.renderAgent.getAttribute("globalTimeInSecs").setValueDirect(0);
+
+    this.graphMgr.reset();
+
+    this.renderAgent.start();
+    //this.iscetAgent.start(); There is no isectAgent in javascript version
+    this.selector.start();
+    this.rasterComponentEventListener.start();
+
     
     // TODO
     console.debug("TODO: " + arguments.callee.name);

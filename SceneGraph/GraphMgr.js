@@ -67,3 +67,15 @@ GraphMgr.prototype.getNextLabelIndex = function()
 {
     return this.labelIndex++;
 }
+GraphMgr.prototype.reset = function ()
+{
+    //DO WE EVEN NEED THIS FUNCTION??
+//    setCurrentCamera(NULL); No set current camera function
+    this.setCurrentDissolve(null);
+    this.setCurrentMaterial(null);
+//    this.setCurrentProjector(null); No set current Projector function
+//    this.nodeRegistry.clear();
+//    this.agentRegistry.clear();
+//    this.directiveRegistry.clear();
+    this.sectorOrigin.setValueDirect(0, 0, 0);
+}
