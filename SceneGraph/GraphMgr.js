@@ -77,5 +77,5 @@ GraphMgr.prototype.reset = function ()
 //    this.nodeRegistry.clear();
 //    this.agentRegistry.clear();
 //    this.directiveRegistry.clear();
-    this.sectorOrigin.setValueDirect(0, 0, 0);
+//    this.sectorOrigin.setValueDirect(0, 0, 0);
 }
