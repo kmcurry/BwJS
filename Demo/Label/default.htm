@@ -370,8 +370,8 @@
                 }
                 break;
                 case 'X'.charCodeAt(0): {      // x
-                        this.bridgeworks.onLoadModified();
-                        bridgeworks.updateScene("NewScene.xml");
+                        bridgeworks.onLoadModified();
+                        bridgeworks.updateScene("grid-100.xml");
                 }
                 break;
                 
@@ -490,7 +490,7 @@
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
                 
-                bridgeworks = init("grid.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("grid-100.xml", document.getElementById("BwContainer"));
                 
                 listLibrary();
                 

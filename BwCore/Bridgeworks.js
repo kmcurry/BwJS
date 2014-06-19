@@ -165,7 +165,7 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.resouceMgr.clear(); There is no resourceMgr in javascript version
     this.selector.clearSelections();
     this.selector.getAttribute("lastSelectedName").setValueDirect("");
-
+    this.viewportMgr.initLayout();
 /*    std::map<std::string, std::pair<CAttribute*, CAttribute*> >::const_iterator it;
  for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
  {
@@ -176,7 +176,6 @@ Bridgeworks.prototype.onLoadModified = function()
     this.registry.clear();
     this.initEventListeners();
     this.initRegistry();
-    this.viewportMgr.initLayout();
 
     /*	for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
      {
@@ -198,7 +197,7 @@ Bridgeworks.prototype.onLoadModified = function()
     this.selector.start();
     this.rasterComponentEventListener.start();
 
-    
+
     // TODO
     console.debug("TODO: " + arguments.callee.name);
 }
