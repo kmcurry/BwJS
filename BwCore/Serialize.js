@@ -1,17 +1,14 @@
+SerializeCommand.prototype = new Command();
+SerializeCommand.prototype.constructor = SerializeCommand;
 
 function SerializeCommand()
 {
+	Command.call(this);
 	this.typeString = "Serialize";
-    this.target = null; 
-	AddPrototype = this.AddPrototype;
-    this.directive = null; 
+	this.targetAttribute = null;
+    this.target.addModifiedCB(SerializeCommand_TargetModifiedCB, this);
+	this.directive = null; 
     this.serialized("");
-}
-
-SerializeCommand.prototype.ClonePrototype = function()
-{
-    var c = ++s_count;
-    return c;
 }
 
 SerializeCommand.prototype.Execute = function()
@@ -92,7 +89,7 @@ SerializeCommand.prototype.SerializeScene = function()
                     var computePivotDistance = container.getAttribute("computePivotDistance")
                        .getValueDirect();
 
-                    this.serialized += ".set target=\"Selector\" computePivotDistance=\"";
+                    this.serialized += "<Set target=\"Selector\" computePivotDistance=\"";
                     this.serialized += (computePivotDistance ? "true" : "false");
                     this.serialized += "\"/>";
                 }
@@ -172,13 +169,6 @@ SerializeCommand.prototype.Undo = function()
 	return ;
 }
 
-SerializeCommand.prototype.MatchesType = function(type) 
-{
-	var matches = 0;
-    matches = !(_stricmp(type, "Serialize"));
-    return matches;
-}
-
 SerializeCommand.prototype.setRegistr = function(registry)
 {
     // create serialize directive
@@ -204,16 +194,6 @@ SerializeCommand.prototype.setRegistr = function(registry)
 
 SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(attr, data)
 {
-	var command = data;
-	var target = attr;
-	var registry = command.this.registry;
-	if (target && registry)
-	{
-		var name = [256];
-		target.getValueDirect(name, sizeof(name));
-
-		if (_SUCCEEDED(registry.Find(name, command.this.target)))
-        {
-        }
-	}
+	var target = attribute.getValueDirect().join("");
+    container.targetAttribute = container.registry.find(target);
 }
