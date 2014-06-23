@@ -169,7 +169,16 @@ AttributeRegistry.prototype.updateName = function(container, name)
 
 AttributeRegistry.prototype.clear = function()
 {
+    for (var i in this.typeRegistry)
+    {
+        this.typeRegistry[i].length = 0;
+    }
     this.typeRegistry.length = 0;
+    
+    for (var i in this.nameRegistry)
+    {
+        this.nameRegistry[i].length = 0;
+    } 
     this.nameRegistry.length = 0;
 }
 
