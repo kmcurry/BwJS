@@ -169,8 +169,8 @@ AttributeRegistry.prototype.updateName = function(container, name)
 
 AttributeRegistry.prototype.clear = function()
 {
-    this.typeRegistry.length = 0;
-    this.nameRegistry.length = 0;
+    this.typeRegistry = [];
+    this.nameRegistry = [];
 }
 
 function AttributeRegistry_AttributeContainerNameModifiedCB(attribute, container)

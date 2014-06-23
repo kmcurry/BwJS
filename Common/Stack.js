@@ -59,7 +59,7 @@ Stack.prototype.empty = function()
 
 Stack.prototype.clear = function()
 {
-    this.stack.length = 0;
+    this.stack = [];
 }
 
 Stack.prototype.copy = function()

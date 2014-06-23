@@ -93,5 +93,5 @@ EventMgr.prototype.clearEvents = function()
 
     this.removeAllListeners();
     */
-    this.listeners.length = 0;
+    this.listeners = [];
 }

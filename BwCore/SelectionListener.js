@@ -8,11 +8,11 @@ function Selections()
     
     this.clear = function()
     {
-        this.viewports.length = 0;
-        this.cameras.length = 0;
-        this.lights.length = 0;
-        this.models.length = 0;
-        this.surfaces.length = 0;
+        this.viewports = [];
+        this.cameras = [];
+        this.lights = [];
+        this.models = [];
+        this.surfaces = [];
     }
 }
 
