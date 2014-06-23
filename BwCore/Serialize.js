@@ -193,6 +193,11 @@ SerializeCommand.prototype.setRegistry = function(registry)
     // call base-class implementation
     CCommand.prototype.setRegistry(registry);
 }
+SerializeCommand.prototype.getSerialized = function()
+{
+    return this.serialized;
+    //return this.serialized.c_str();
+}
 SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(container, attribute)
 {
     var target = attribute.getValueDirect().join("");
