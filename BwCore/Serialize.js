@@ -3,11 +3,11 @@ SerializeCommand.prototype.constructor = SerializeCommand;
 
 function SerializeCommand()
 {
-	Command.call(this);
-	this.typeString = "Serialize";
-	this.targetAttribute = null;
-    this.target.addModifiedCB(SerializeCommand_TargetModifiedCB, this);
-	this.directive = null; 
+    Command.call(this);
+    this.typeString = "Serialize";
+    this.targetAttribute = null;
+    this.target.addModifiedCB(this.SerializeCommand_TargetModifiedCB, this);
+    this.directive = null;
     this.serialized("");
 }
 
@@ -15,33 +15,32 @@ SerializeCommand.prototype.Execute = function()
 {
     if (this.directive)
     {
-	    if (this.target && this.directive)
-	    {
+        if (this.target && this.directive)
+        {
             if (this.directive.execute(this.target === 0))
             {
                 this.serialized = this.directive.getSerialized();
             }
-	    }
+        }
         else // !this.target
         {
-            SerializeScene();
+            this.serializeScene();
         }
     }
-
-	return ;
 }
 
-SerializeCommand.prototype.SerializeScene = function()
+SerializeCommand.prototype.serializeScene = function()
 {
     var i;
-    var container = NULL;
-    var node = NULL;
+    var container = null;
+    var node = null;
     var context;
 
     // root element open tag
     this.serialized = "<Session broadcast='false'>";
 
-    var attrContainerRegistry = this.registry.find(attrContainerRegistry);
+    //var attrContainerRegistry = this.registry.getAttributeContainerRegistry();
+    var attrContainerRegistry = this.registry.find("attrContainerRegistry");
     if (attrContainerRegistry)
     {
         var serializer = new XMLSerializer();
@@ -84,10 +83,11 @@ SerializeCommand.prototype.SerializeScene = function()
             container = attrContainerRegistry.getObject(i); if (!container) continue;
             if (!container && !container && !container)
             {
-                if (!strcmp(container.getTypeString(), "SelectionListener"))
+                if(container.toString() == "SelectionListener")
+                //if (!strcmp(container.getTypeString(), "SelectionListener"))
                 {
                     var computePivotDistance = container.getAttribute("computePivotDistance")
-                       .getValueDirect();
+                        .getValueDirect();
 
                     this.serialized += "<Set target=\"Selector\" computePivotDistance=\"";
                     this.serialized += (computePivotDistance ? "true" : "false");
@@ -109,7 +109,8 @@ SerializeCommand.prototype.SerializeScene = function()
         for (i=0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i); if (!container) continue;
-            if (container && !strcmp(container.getTypeString(), "DisconnectAttributes"))
+            if(container &&(container.toString()=="DisconnectAttributes"))
+            //if (container && !strcmp(container.getTypeString(), "DisconnectAttributes"))
             {
                 context.attribute = container;
                 var buffer = "";
@@ -124,7 +125,8 @@ SerializeCommand.prototype.SerializeScene = function()
         for (i=0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i); if (!container) continue;
-            if (container && strcmp(container.getTypeString(), "DisconnectAttributes"))
+            if(container && (container.toString() == "DisconnectAttributes"))
+            //if (container && strcmp(container.getTypeString(), "DisconnectAttributes"))
             {
                 context.attribute = container;
                 var buffer = "";
@@ -135,26 +137,26 @@ SerializeCommand.prototype.SerializeScene = function()
             }
         }
         /*
-        // updateSectorOrigin
-        const char* substr = NULL;
-        std.prototype.string name = "";
-        if ((substr = strstr(this.serialized.c_str(), "PerspectiveCamera")) ||
-            (substr = strstr(this.serialized.c_str(), "OrthographicCamera")))
-        {
-            if (substr = strstr(substr, "<name>"))
-            {
-                substr += 6; // skip "<name>"
-                while (*substr != '<')
-                {
-                    name += *substr++;
-                }
+         // updateSectorOrigin
+         const char* substr = NULL;
+         std.prototype.string name = "";
+         if ((substr = strstr(this.serialized.c_str(), "PerspectiveCamera")) ||
+         (substr = strstr(this.serialized.c_str(), "OrthographicCamera")))
+         {
+         if (substr = strstr(substr, "<name>"))
+         {
+         substr += 6; // skip "<name>"
+         while (*substr != '<')
+         {
+         name += *substr++;
+         }
 
-                this.serialized += ".set target=\"";
-                this.serialized += name;
-                this.serialized += "\" updateSectorOrigin=\"true\"/>";
-            }
-        }
-        */
+         this.serialized += ".set target=\"";
+         this.serialized += name;
+         this.serialized += "\" updateSectorOrigin=\"true\"/>";
+         }
+         }
+         */
         // TODO: pivotCone
     }
 
@@ -163,37 +165,41 @@ SerializeCommand.prototype.SerializeScene = function()
 
     return;
 }
-
+SerializeCommand.prototype.getSerialized = function()
+{
+    return this.serialized;
+    //return m_serialized.c_str();
+}
 SerializeCommand.prototype.Undo = function()
 {
-	return ;
+
 }
 
-SerializeCommand.prototype.setRegistr = function(registry)
+SerializeCommand.prototype.setRegistry = function(registry)
 {
     // create serialize directive
-	var sg = NULL;
-	var graphMgr = NULL;
-    var resource = NULL;
-	if (registry.Find("DefaultFactory", resource))
-	{
-		var defaultFactory = resource;
-		if (defaultFactory && (sg = defaultFactory.getSceneGraph()) != NULL &&
-		   (graphMgr = sg.getGraphMgr()) != NULL)
-		{
-			if (this.directive == graphMgr) //New<GcSerializeDirective, GcGraphMgr&>(*graphMgr))
+    var sg = null;
+    var graphMgr = null;
+    var resource = null;
+    if (registry.find("DefaultFactory", resource))
+    {
+        var defaultFactory = resource;
+        if (defaultFactory && (sg = defaultFactory.getSceneGraph()) != null &&
+            (graphMgr = sg.getGraphMgr()) != null)
+        {
+            if (this.directive == graphMgr) //New<GcSerializeDirective, GcGraphMgr&>(*graphMgr))
             {
                 this.directive.setRegistry(registry);
             }
-		}
-	}
+        }
+    }
 
     // call base-class implementation
-	CCommand.prototype.setRegistry(registry);
+    //CCommand.prototype.setRegistry(registry); Where is CCommand located?
 }
 
-SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(attr, data)
+SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(container, attribute)
 {
-	var target = attribute.getValueDirect().join("");
+    var target = attribute.getValueDirect().join("");
     container.targetAttribute = container.registry.find(target);
 }
