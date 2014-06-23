@@ -316,12 +316,11 @@
                     }
                 }
                 break;
-                case 'X'.charCodeAt(0): {      // x
-                    if (e.metaKey || e.ctrlKey) {
-                        e.preventDefault();
-                        cut();
-                    }
-                }
+                  case 'X'.charCodeAt(0): {      // x
+                      console.log("HIT");
+                      bridgeworks.onLoadModified();
+                      bridgeworks.updateScene("grid-100.xml");
+                  }
                 break;
                 
               }

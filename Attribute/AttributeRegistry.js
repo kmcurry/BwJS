@@ -6,6 +6,8 @@ function AttributeRegistry()
     AttributeContainer.call(this);
     this.className = "AttributeRegistry";
     this.attrType = eAttrType.AttributeRegistry;
+
+    this.objectCount = 0;
     
     this.typeRegistry = [];
     this.nameRegistry = [];
@@ -19,6 +21,7 @@ AttributeRegistry.prototype.registerByType = function(attribute, type)
     }
     
     this.typeRegistry[type].push(attribute);
+    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.registerByName = function(attribute, name)
@@ -34,13 +37,14 @@ AttributeRegistry.prototype.registerByName = function(attribute, name)
     }
 
     this.nameRegistry[name].push(attribute);
+    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.register = function(attribute)
 {
     // register using type
     this.registerByType(attribute, attribute.attrType);
-    
+    this.objectCount += 1;
     // register using name attribute if container
     if (attribute.isContainer())
     {
@@ -60,10 +64,12 @@ AttributeRegistry.prototype.unregisterByType = function(attribute, type)
     {
         this.typeRegistry[type].splice(this.typeRegistry[type].indexOf(attribute), 1);
     }
+    this.objectCount -= 1;
 }
 
 AttributeRegistry.prototype.unregisterByName = function(attribute, name)
 {
+    this.objectCount -= 1;
     if (name.length == 0)
     {
         name = "unnamed";
@@ -79,6 +85,7 @@ AttributeRegistry.prototype.unregister = function(attribute)
 {
     // register using type
     this.unregisterByType(attribute, attribute.attrType);
+    this.objectCount -= 1;
     
     // register using name attribute if container
     if (attribute.isContainer())
@@ -180,6 +187,38 @@ AttributeRegistry.prototype.clear = function()
         this.nameRegistry[i] = [];
     } 
     this.nameRegistry = [];
+
+    this.objectCount = 0;
+}
+AttributeRegistry.prototype.getObjectCount = function ()
+{
+    return this.objectCount;
+}
+AttributeRegistry.prototype.getObjectCount = function(Type)
+{
+    var objectList = this.objectTypeMap[type];
+    return objectList.size();
+}
+AttributeRegistry.prototype.getObject = function(N)
+{
+    if(n >= this.objectCount)
+    {
+        return null;
+    }
+    //std::vector<_Object*>::const_iterator vec_it;
+    //stdext::hash_map<_Type, std::vector<_Object*> >::const_iterator map_it;
+    for (map_it = this.objectTypeMap.begin(); map_it != this.objectTypeMap.end(); map_it++)
+    {
+        for (vec_it = map_it.second.begin(); vec_it != map_it.second.end(); vec_it++, i++)
+        {
+            if (i == n)
+            {
+                return vec_it;
+            }
+        }
+    }
+
+    return null;
 }
 
 function AttributeRegistry_AttributeContainerNameModifiedCB(attribute, container)

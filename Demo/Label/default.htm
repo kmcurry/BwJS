@@ -361,12 +361,12 @@
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
-                    if (e.metaKey || e.ctrlKey){
-                        if (document.activeElement.id != 'url') {
-                            e.preventDefault();
-                            paste();
-                        }
-                    }
+                    var scene = bridgeworks.getRegistry().find("SceneInspector");
+                    scene.panDelta.values[2] += 10;
+                    scene.evaluate();
+                    console.log(scene);
+                    bridgeworks.updateScene();
+                    //console.log(scene.panDelta);
                 }
                 break;
                 case 'X'.charCodeAt(0): {      // x
