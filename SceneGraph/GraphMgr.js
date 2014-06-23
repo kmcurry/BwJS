@@ -78,4 +78,9 @@ GraphMgr.prototype.reset = function ()
 //    this.agentRegistry.clear();
 //    this.directiveRegistry.clear();
 //    this.sectorOrigin.setValueDirect(0, 0, 0);
+
+    for (var i=0; i < gl_MaxLights; i++)
+    {
+        this.renderContext.enableLight(i, false);
+    }
 }
