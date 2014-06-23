@@ -71,8 +71,11 @@ GraphMgr.prototype.reset = function ()
 {
     //DO WE EVEN NEED THIS FUNCTION??
 //    setCurrentCamera(NULL); No set current camera function
+    this.lightIndex = 0;
+    this.labelIndex = 1;
     this.setCurrentDissolve(null);
     this.setCurrentMaterial(null);
+    this.setDrawTextures(true);
 //    this.setCurrentProjector(null); No set current Projector function
 //    this.nodeRegistry.clear();
 //    this.agentRegistry.clear();
