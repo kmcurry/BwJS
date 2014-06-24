@@ -151,6 +151,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["BBoxDirective"] = configureDirective;
     this.configureProcs["RayPickDirective"] = configureDirective;
     this.configureProcs["RenderDirective"] = configureDirective;
+    this.configureProcs["SerializeDirective"] = configureDirective;
     this.configureProcs["UpdateDirective"] = configureDirective;    
 }
 
