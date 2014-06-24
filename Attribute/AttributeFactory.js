@@ -133,6 +133,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Pause"] = newCommand;
     this.newResourceProcs["Play"] = newCommand;
     this.newResourceProcs["Remove"] = newCommand;
+    this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
 
