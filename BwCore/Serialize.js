@@ -175,21 +175,8 @@ SerializeCommand.prototype.Undo = function()
 SerializeCommand.prototype.setRegistry = function(registry)
 {
     // create serialize directive
-    var sg = null;
-    var graphMgr = null;
-    var resource = null;
-    if (bridgeworks.registry.find("AttributeFactory", resource))
-    {
-        var attributeFactory = resource;
-        if (attributeFactory && (sg = attributeFactory.getSceneGraph()) != null &&
-            (graphMgr = sg.getGraphMgr()) != null)
-        {
-            if (this.directive == graphMgr) //New<GcSerializeDirective, GcGraphMgr&>(*graphMgr))
-            {
-                this.directive.setRegistry(registry);
-            }
-        }
-    }
+    var factory = this.registry.find("AttributeFactory");
+    this.directive = factory.create("SerializeDirective");
 
     // call base-class implementation
     Command.prototype.setRegistry(registry);
