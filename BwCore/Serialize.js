@@ -4,11 +4,12 @@ SerializeCommand.prototype.constructor = SerializeCommand;
 function SerializeCommand()
 {
     Command.call(this);
-    this.typeString = "Serialize";
+    this.className = "Serialize";
+
     this.targetAttribute = null;
     this.target.addModifiedCB(this.SerializeCommand_TargetModifiedCB, this);
     this.directive = null;
-    this.serialized("");
+    this.serialized = "";
 }
 
 SerializeCommand.prototype.Execute = function()
@@ -177,10 +178,10 @@ SerializeCommand.prototype.setRegistry = function(registry)
     var sg = null;
     var graphMgr = null;
     var resource = null;
-    if (registry.find("DefaultFactory", resource))
+    if (bridgeworks.registry.find("AttributeFactory", resource))
     {
-        var defaultFactory = resource;
-        if (defaultFactory && (sg = defaultFactory.getSceneGraph()) != null &&
+        var attributeFactory = resource;
+        if (attributeFactory && (sg = attributeFactory.getSceneGraph()) != null &&
             (graphMgr = sg.getGraphMgr()) != null)
         {
             if (this.directive == graphMgr) //New<GcSerializeDirective, GcGraphMgr&>(*graphMgr))
@@ -191,7 +192,7 @@ SerializeCommand.prototype.setRegistry = function(registry)
     }
 
     // call base-class implementation
-    CCommand.prototype.setRegistry(registry);
+    Command.prototype.setRegistry(registry);
 }
 SerializeCommand.prototype.getSerialized = function()
 {

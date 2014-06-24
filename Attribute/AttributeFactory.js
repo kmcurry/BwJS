@@ -559,6 +559,11 @@ function registerParentableAttributes(pme, factory)
 	pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
 }
 
+function getSceneGraph()
+{
+    return this.sceneGraph;
+}
+
 function AttributeFactory_DirectiveRootModifiedCB(root, factory)
 {
     var directive = root.getContainer();
