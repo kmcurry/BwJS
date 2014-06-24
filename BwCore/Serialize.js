@@ -12,7 +12,7 @@ function SerializeCommand()
     this.serialized = "";
 }
 
-SerializeCommand.prototype.Execute = function()
+SerializeCommand.prototype.execute = function()
 {
     if (this.directive)
     {
@@ -25,12 +25,12 @@ SerializeCommand.prototype.Execute = function()
         }
         else // !this.target
         {
-            this.SerializeScene();
+            this.serializeScene();
         }
     }
 }
 
-SerializeCommand.prototype.SerializeScene = function()
+SerializeCommand.prototype.serializeScene = function()
 {
     var i;
     var container = null;
@@ -175,7 +175,7 @@ SerializeCommand.prototype.Undo = function()
 SerializeCommand.prototype.setRegistry = function(registry)
 {
     // create serialize directive
-    var factory = this.registry.find("AttributeFactory");
+    var factory = bridgeworks.registry.find("AttributeFactory");
     this.directive = factory.create("SerializeDirective");
 
     // call base-class implementation

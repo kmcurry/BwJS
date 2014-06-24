@@ -110,6 +110,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
     this.newResourceProcs["RayPickDirective"] = newSGDirective;
     this.newResourceProcs["RenderDirective"] = newSGDirective;
+    this.newResourceProcs["SerializeDirective"] = newSGDirective;
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
 
     // evaluators
@@ -162,6 +163,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["BBoxDirective"] = finalizeDirective;
     this.finalizeProcs["RayPickDirective"] = finalizeDirective;
     this.finalizeProcs["RenderDirective"] = finalizeDirective;
+    this.finalizeProcs["SerializeDirective"] = finalizeDirective;
     this.finalizeProcs["UpdateDirective"] = finalizeDirective;
 
     // evaluators 
@@ -264,7 +266,7 @@ function newSGDirective(name, factory)
     case "BBoxDirective":       resource = new BBoxDirective(); break;
     case "RayPickDirective":    resource = new RayPickDirective(); break;
     case "RenderDirective":     resource = new RenderDirective(); break;  
-    case "SerializeDirective":  resource = new RenderDirective(); break;  
+    case "SerializeDirective":  resource = new SerializeDirective(); break;
     case "UpdateDirective":     resource = new UpdateDirective(); break;
     }
     
