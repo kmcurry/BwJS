@@ -16,17 +16,17 @@ SerializeCommand.prototype.execute = function()
 {
     if (this.directive)
     {
-        if (this.target && this.directive)
-        {
-            if (this.directive.execute(this.target === 0))
-            {
-                this.serialized = this.directive.getSerialized();
-            }
-        }
-        else // !this.target
-        {
+//        if (this.target && this.directive)
+//        {
+//            if (this.directive.execute(this.target === 0))
+//            {
+//                this.serialized = this.directive.getSerialized();
+//            }
+//        }
+//        else // !this.target
+//        {
             this.serializeScene();
-        }
+//        }
     }
 }
 
@@ -41,7 +41,7 @@ SerializeCommand.prototype.serializeScene = function()
     this.serialized = "<Session broadcast='false'>";
 
     //var attrContainerRegistry = this.registry.getAttributeContainerRegistry();
-    var attrContainerRegistry = this.registry.find("BwRegistry");
+    var attrContainerRegistry = bridgeworks.registry;
     if (attrContainerRegistry)
     {
         var serializer = new XMLSerializer();

@@ -192,26 +192,26 @@ AttributeRegistry.prototype.clear = function()
 }
 AttributeRegistry.prototype.getObjectCount = function ()
 {
-    return this.objectCount;
+    return this.typeRegistry.length;
 }
-AttributeRegistry.prototype.getObjectCount = function(Type)
+//AttributeRegistry.prototype.getObjectCount = function(Type)
+//{
+//    var objectList = this.typeRegistry.length;
+//    return objectList.size();
+//}
+AttributeRegistry.prototype.getObject = function(num)
 {
-    var objectList = this.objectTypeMap[type];
-    return objectList.size();
-}
-AttributeRegistry.prototype.getObject = function(N)
-{
-    if(n >= this.objectCount)
+    if(num >= this.typeRegistry.length)
     {
         return null;
     }
     //std::vector<_Object*>::const_iterator vec_it;
     //stdext::hash_map<_Type, std::vector<_Object*> >::const_iterator map_it;
-    for (map_it = this.objectTypeMap.begin(); map_it != this.objectTypeMap.end(); map_it++)
+    for (var map_it = 0; map_it != this.typeRegistry.length; map_it++)
     {
-        for (vec_it = map_it.second.begin(); vec_it != map_it.second.end(); vec_it++, i++)
+        for (var vec_it = map_it.second.begin(); vec_it != map_it.second.end(); vec_it++, i++)
         {
-            if (i == n)
+            if (i == num)
             {
                 return vec_it;
             }
