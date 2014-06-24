@@ -308,12 +308,9 @@
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
-                    if (e.metaKey || e.ctrlKey){
-                        if (document.activeElement.id != 'url') {
-                            e.preventDefault();
-                            paste();
-                        }
-                    }
+                    var cmd = "\<Serialize'/>";
+                    console.log(cmd);
+                    bridgeworks.updateScene(cmd);
                 }
                 break;
                   case 'X'.charCodeAt(0): {      // x
