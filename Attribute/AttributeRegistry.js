@@ -207,7 +207,8 @@ AttributeRegistry.prototype.getObject = function(num)
     }
     //std::vector<_Object*>::const_iterator vec_it;
     //stdext::hash_map<_Type, std::vector<_Object*> >::const_iterator map_it;
-    for (var map_it = 0; map_it != this.typeRegistry.length; map_it++)
+    var i = 0;
+    for (var map_it = this.typeRegistry.begin(); map_it != this.typeRegistry.end(); map_it++)
     {
         for (var vec_it = map_it.second.begin(); vec_it != map_it.second.end(); vec_it++, i++)
         {

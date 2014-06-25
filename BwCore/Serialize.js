@@ -36,6 +36,7 @@ SerializeCommand.prototype.serializeScene = function()
     var container = null;
     var node = null;
     var context;
+    var xstr;
 
     // root element open tag
     this.serialized = "<Session broadcast='false'>";
@@ -62,6 +63,9 @@ SerializeCommand.prototype.serializeScene = function()
 
                 // serialize
                 serializer.Serialize(context, buffer);
+                xstr = serializer.serializeToString(context, buffer);
+
+                console.log(xstr);
                 this.serialized += buffer;
             }
         }
