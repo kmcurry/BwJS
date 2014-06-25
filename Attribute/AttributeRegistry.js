@@ -195,7 +195,6 @@ AttributeRegistry.prototype.getObjectCount = function ()
 {
     return this.typeRegistry.length;
 }
-
 AttributeRegistry.prototype.getObject = function(num)
 {
     var count = 0;
@@ -204,6 +203,7 @@ AttributeRegistry.prototype.getObject = function(num)
         for (var j=0; j < this.typeRegistry[i].length; j++, count++)
         {
             if (count == num)
+
             {
                 return this.typeRegistry[i][j];
             }

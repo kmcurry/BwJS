@@ -53,17 +53,18 @@ SerializeCommand.prototype.serializeScene = function()
         var count = attrContainerRegistry.getObjectCount();
 
         // serialize device handlers
-        for (i=0; i < count; i++)
+        for (i=1; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
             if (container)
             {
-                context.attribute = container;
+                //context.attribute = container; What exactly is context.attribute??
+                context = container;
                 var buffer = "";
 
                 // serialize
-                serializer.Serialize(context, buffer);
-                xstr = serializer.serializeToString(context, buffer);
+                //serializer.Serialize(context,buffer);
+                xstr = serializer.serializeToString(context);
 
                 console.log(xstr);
                 this.serialized += buffer;
