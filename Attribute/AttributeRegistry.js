@@ -190,35 +190,26 @@ AttributeRegistry.prototype.clear = function()
 
     this.objectCount = 0;
 }
+
 AttributeRegistry.prototype.getObjectCount = function ()
 {
     return this.typeRegistry.length;
 }
-//AttributeRegistry.prototype.getObjectCount = function(Type)
-//{
-//    var objectList = this.typeRegistry.length;
-//    return objectList.size();
-//}
+
 AttributeRegistry.prototype.getObject = function(num)
 {
-    if(num >= this.typeRegistry.length)
+    var count = 0;
+    for (var i in this.typeRegistry)
     {
-        return null;
-    }
-    //std::vector<_Object*>::const_iterator vec_it;
-    //stdext::hash_map<_Type, std::vector<_Object*> >::const_iterator map_it;
-    var i = 0;
-    for (var map_it = this.typeRegistry.begin(); map_it != this.typeRegistry.end(); map_it++)
-    {
-        for (var vec_it = map_it.second.begin(); vec_it != map_it.second.end(); vec_it++, i++)
+        for (var j=0; j < this.typeRegistry[i].length; j++, count++)
         {
-            if (i == num)
+            if (count == num)
             {
-                return vec_it;
+                return this.typeRegistry[i][j];
             }
         }
     }
-
+    
     return null;
 }
 
