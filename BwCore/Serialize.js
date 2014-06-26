@@ -59,7 +59,8 @@ SerializeCommand.prototype.serializeScene = function()
             if (container)
             {
                 //context.attribute = container; What exactly is context.attribute??
-                context = container;
+                context = document.createElement("Scene");
+                var inside = context.setAttribute("text",container);
                 var buffer = "";
 
                 // serialize

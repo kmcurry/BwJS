@@ -298,15 +298,14 @@
               }
               
           }
-          
+          var serializer = new XMLSerializer();
           function handleKey(e)
           {
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
-                    if (e.metaKey || e.ctrlKey){
-                        e.preventDefault();
-                        copy();
-                    }      // c
+                    var xstr = serializer.serializeToString(document.body);
+
+                    console.log(xstr);
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
