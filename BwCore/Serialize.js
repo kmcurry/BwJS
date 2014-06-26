@@ -35,7 +35,7 @@ SerializeCommand.prototype.serializeScene = function()
     var i;
     var container = null;
     var node = null;
-    var context;
+    var context = new Context();
     var xstr;
 
     // root element open tag
@@ -58,13 +58,13 @@ SerializeCommand.prototype.serializeScene = function()
             container = attrContainerRegistry.getObject(i);
             if (container)
             {
-                //context.attribute = container; What exactly is context.attribute??
-                context = document.createElement("Scene");
-                var inside = context.setAttribute("text",container);
+                context.attribute = container;
+                //context = document.createElement("Scene");
+                //var inside = context.setAttribute("text",container);
                 var buffer = "";
 
                 // serialize
-                //serializer.Serialize(context,buffer);
+                serializer.Serialize(context,buffer);
                 xstr = serializer.serializeToString(context);
 
                 console.log(xstr);
