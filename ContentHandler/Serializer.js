@@ -234,7 +234,7 @@ Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
                             refName = tmpName;
                         }
                     }
-                    itemAttr.put_text(_bstr_t(refName.c_str()));
+                    itemAttr.put_text(_bstr_t(refName));
                     attrMap.setNamedItem(itemAttr, pOldChild);
                 }
             }
@@ -245,14 +245,12 @@ Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
     }
 }
 
-eERR_CODE MSXMLSerializer::SerializeModel(GcModel* pModel)
+Serializer.prototype.SerializeModel = function (pModel)
 {
-    eERR_CODE err = eERR_FAIL;
-
     // surround <Model> and <Set> tags so that both will serialize (previously the
     // <Set> was overwriting the <Model> as the root)
     BSTR bstr = null;
-    IXMLDOMElement* element = null;
+    var element = null;
     if (this.pDom)
     {
         bstr = StringToBSTR("ModelRoot");
@@ -269,46 +267,46 @@ eERR_CODE MSXMLSerializer::SerializeModel(GcModel* pModel)
     if (pModel)
     {
         // serialize Model
-        err = SerializeAttributeContainer(pModel);
+        SerializeAttributeContainer(pModel);
 
         // add set command for rotation group's quaternion rotation, to retain rotation caused by object inspection
-        GcGroup* pRotGroup = null;
+        var pRotGroup = null;
         if (_SUCCEEDED(Util_GetInspectionGroup(pModel, &pRotGroup)))
         {
             CAttributeContainer* container = pModel;
             CAttribute* attr = pRotGroup.GetChild(2).GetAttribute("rotationQuat");
 
-            std::string containerName;
+            var containerName;
             CStringAttr* containerNameAttr = dynamic_cast<CStringAttr*>(container.GetAttribute("name"));
-            containerNameAttr.GetValueDirect(containerName);
+            containerNameAttr.getValueDirect(containerName);
 
             CCommand* pCmd = null;
-            if (_SUCCEEDED(CCommand::FindAndClone("Set", &pCmd)))
+            if (_SUCCEEDED(CCommand::FindAndClone("Set", pCmd)))
             {
-                dynamic_cast<CStringAttr*>(pCmd.GetAttribute("target")).SetValueDirect(containerName.c_str());
-                pCmd.GetAttribute("target").FlagDeserializedFromXML();
+                pCmd.getAttribute("target").setValueDirect(containerName);
+                pCmd.getAttribute("target").flagDeserializedFromXML();
 
-                dynamic_cast<SetCommand*>(pCmd).RegisterTargetAttributes(container, containerName.c_str());
+                pCmd.registerTargetAttributes(container, containerName);
 
-                std::vector<float> fvalues;
-                attr.GetValue(fvalues);
+                var fvalues;
+                attr.getValue(fvalues);
 
-                char cvalue[32];
-                std::vector<char> cvalues;
-                for (unsigned int i=0; i < 4; i++)
+                var cvalue = [32];
+                var cvalues;
+                for (var i=0; i < 4; i++)
                 {
                     _snprintf(cvalue, sizeof(cvalue), "%0.2f", fvalues[i]);
-                    for (unsigned int j=0; j < strlen(cvalue)+1; j++)
+                    for (var j=0; j < strlen(cvalue)+1; j++)
                     {
-                        if (!(Push_Back<char>(cvalues, cvalue[j]))) return eERR_OUT_OF_MEMORY;
+                        if (!(Push_Back<char>(cvalues, cvalue[j]))
                     }
                 }
 
                 if (!(Push_Back<std::pair<CAttribute*, std::vector<char> > >(dynamic_cast<SetCommand*>(pCmd).this.attributeValuePairs, std::pair<CAttribute*, std::vector<char> >(attr, cvalues)))) return eERR_OUT_OF_MEMORY;
 
-                err = SerializeCommand(pCmd);
+                SerializeCommand(pCmd);
 
-                pCmd.Release();
+                pCmd.release();
             }
         }
     }
@@ -321,19 +319,16 @@ eERR_CODE MSXMLSerializer::SerializeModel(GcModel* pModel)
     {
         SysFreeString(bstr);
     }
-
-    return err;
 }
 
-eERR_CODE MSXMLSerializer::SerializeCommand(CCommand* pCmd)
+Serializer.prototype.SerializeCommand(pCmd)
 {
-    eERR_CODE err = eERR_FAIL;
     // 1. create the start tag.
 
     if (pCmd && this.pDom)
     {
-        IXMLDOMElement* element = null;
-        const char* pcszType = pCmd.GetTypeString();
+        var element = null;
+        var pcszType = pCmd.getTypeString();
 
         BSTR bstr = StringToBSTR(pcszType);
         if (bstr)
@@ -345,37 +340,37 @@ eERR_CODE MSXMLSerializer::SerializeCommand(CCommand* pCmd)
 
                 // 2. serialize the native attributes (except "sourceContainer", "sourceEvaluator",
                 //    "sourceAttribute", "sourceOutput", "source", "targetContainer", "targetAttribute", "target")
-                unsigned int i;
+                var i;
                 CAttribute* pAttribute = null;
-                const char* pcszName = null;
-                unsigned int uiAttrCount = pCmd.GetAttributeCount();
+                var pcszName = null;
+                var uiAttrCount = pCmd.getAttributeCount();
                 for (i = 0; i < uiAttrCount; ++i)
                 {
-                    pAttribute = pCmd.GetAttribute(i, pcszName);
-                    if (!pCmd.IsBorrowed(pAttribute) &&
-                        strcmp(pcszName, "sourceContainer") &&
-                        strcmp(pcszName, "sourceEvaluator") &&
-                        strcmp(pcszName, "sourceAttribute") &&
-                        strcmp(pcszName, "sourceOutput") &&
-                        strcmp(pcszName, "source") &&
-                        strcmp(pcszName, "targetContainer") &&
-                        strcmp(pcszName, "targetAttribute") &&
-                        strcmp(pcszName, "target"))
+                    pAttribute = pCmd.getAttribute(i, pcszName);
+                    if (!pCmd.isBorrowed(pAttribute) &&
+                        (pcszName == "sourceContainer")&&
+                        (pcszName == "sourceEvaluator")&&
+                        (pcszName == "sourceAttribute")&&
+                        (pcszName == "sourceOutput")&&
+                        (pcszName == "source")&&
+                        (pcszName == "targetContainer")&&
+                        (pcszName == "targetAttribute")&&
+                        (pcszName == "target"))
                     {
-                        err = SerializeAttribute(pAttribute, -1, pcszName);
+                        this.SerializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
                 // 3. serialize "sourceContainer", "targetContainer"
-                pAttribute = pCmd.GetAttribute("sourceContainer");
+                pAttribute = pCmd.getAttribute("sourceContainer");
                 if (pAttribute)
                 {
-                    err = SerializeAttribute(pAttribute, -1, "sourceContainer");
+                    this.SerializeAttribute(pAttribute, -1, "sourceContainer");
                 }
-                pAttribute = pCmd.GetAttribute("targetContainer");
+                pAttribute = pCmd.getAttribute("targetContainer");
                 if (pAttribute)
                 {
-                    err = SerializeAttribute(pAttribute, -1, "targetContainer");
+                    this.SerializeAttribute(pAttribute, -1, "targetContainer");
                 }
 
                 // 4. serialize "sourceAttribute", "targetAttribute", "target" (may be multiple source/target pairs)
@@ -383,53 +378,52 @@ eERR_CODE MSXMLSerializer::SerializeCommand(CCommand* pCmd)
                 std::vector<CAttribute*> targets;
                 for (i = 0; i < uiAttrCount; ++i)
                 {
-                    pAttribute = pCmd.GetAttribute(i, pcszName);
-                    if (!strcmp(pcszName, "sourceAttribute"))
+                    pAttribute = pCmd.getAttribute(i, pcszName);
+                    if (pcszName != "sourceAttribute")
                     {
-                        if (!(Push_Back<CAttribute*>(sources, pAttribute))) return eERR_OUT_OF_MEMORY;
+                        if (!(Push_Back<CAttribute*>(sources, pAttribute)))
                     }
-                    else if (!strcmp(pcszName, "targetAttribute"))
+                    else if (pcszName != "targetAttribute")
                     {
-                        if (!(Push_Back<CAttribute*>(targets, pAttribute))) return eERR_OUT_OF_MEMORY;
+                        if (!(Push_Back<CAttribute*>(targets, pAttribute)))
                     }
                 }
                 // source/target pairs must be serialized together
                 for (i = 0; i < sources.size() && i < targets.size(); i++)
                 {
-                    err = SerializeAttribute(sources[i], -1, "sourceAttribute");
-                    err = SerializeAttribute(targets[i], -1, "targetAttribute");
+                    this.SerializeAttribute(sources[i], -1, "sourceAttribute");
+                    this.SerializeAttribute(targets[i], -1, "targetAttribute");
                 }
                 // if "targetAttribute" specified, don't serialize "target"
                 if (targets.empty())
                 {
-                    pAttribute = pCmd.GetAttribute("target");
+                    pAttribute = pCmd.getAttribute("target");
                     if (pAttribute)
                     {
-                        err = SerializeAttribute(pAttribute, -1, "target");
+                        this.SerializeAttribute(pAttribute, -1, "target");
                     }
                 }
 
                 // 5. serialize the borrowed attributes that were modified by the command
-                std::vector<char> vNewVal;
+                var vNewVal;
                 CAttribute* pRef;
                 for (i = 0; i < uiAttrCount; ++i)
                 {
-                    pAttribute = pCmd.GetAttribute(i, pcszName);
-                    if (pCmd.IsBorrowedAndValueModified(pAttribute, vNewVal))
+                    pAttribute = pCmd.getAttribute(i, pcszName);
+                    if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal))
                     {
                         // have to take the value that is imposed by the Set, not necessarily the current value
                         CAttribute* pNewAttribute = NewAttribute(pAttribute.GetAttributeType());
                         if (pNewAttribute)
                         {
-                            SetAttributeValue(pNewAttribute, vNewVal);
-                            pNewAttribute.FlagDeserializedFromXML();
-                            err = SerializeAttribute(pNewAttribute, -1, pcszName);
-                            SAFE_RELEASE(pNewAttribute);
+                            this.setAttributeValue(pNewAttribute, vNewVal);
+                            pNewAttribute.flagDeserializedFromXML();
+                            this.SerializeAttribute(pNewAttribute, -1, pcszName);
                         }
                     }
-                    else if (pCmd.IsBorrowedAndReferenceModified(pAttribute, pRef))
+                    else if (pCmd.isBorrowedAndReferenceModified(pAttribute, pRef))
                     {
-                        err = SerializeAttributeReference(pAttribute, pRef);
+                        this.SerializeAttributeReference(pAttribute, pRef);
                     }
                 }
 
@@ -441,7 +435,6 @@ eERR_CODE MSXMLSerializer::SerializeCommand(CCommand* pCmd)
     }
 
     // 6. create the end tag.
-    return err;
 }
 
 eERR_CODE MSXMLSerializer::SerializeAttributeContainer(CAttributeContainer* pContainer)
@@ -477,7 +470,7 @@ eERR_CODE MSXMLSerializer::SerializeAttributeContainer(CAttributeContainer* pCon
                 }
 
                 // 1. if serialization of children is requested, serialize children
-                if (this.serializeChildren.GetValueDirect())
+                if (this.serializeChildren.getValueDirect())
                 {
                     SerializeChildren(dynamic_cast<CNode*>(pContainer));
                 }
@@ -528,7 +521,7 @@ eERR_CODE MSXMLSerializer::SerializeAttributeCollection(CAttributeContainer* pCo
                     std::string elementName;
                     std::vector<char> baseName;
                     if (!(Resize<char>(baseName, __max(attrVec.GetBaseName().GetLength(), 1), 0))) return eERR_OUT_OF_MEMORY;
-                    attrVec.GetBaseName().GetValueDirect(&baseName[0], baseName.size());
+                    attrVec.GetBaseName().getValueDirect(&baseName[0], baseName.size());
 
                     unsigned int size = attrVec.size();
                     for (unsigned int i=0; i < size; i++)
@@ -644,25 +637,25 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
     {
         case(eAttrType_Integer):
         {
-            int i = (dynamic_cast<CIntegerAttr*>(pAttr)).GetValueDirect();
+            int i = (dynamic_cast<CIntegerAttr*>(pAttr)).getValueDirect();
             strValue = convertToString(i);
         }
             break;
         case(eAttrType_UnsignedInteger):
         {
-            unsigned int i = (dynamic_cast<CUnsignedIntegerAttr*>(pAttr)).GetValueDirect();
+            unsigned int i = (dynamic_cast<CUnsignedIntegerAttr*>(pAttr)).getValueDirect();
             strValue = convertToString(i);
         }
             break;
         case(eAttrType_Boolean):
         {
-            bool b = (dynamic_cast<CBooleanAttr*>(pAttr)).GetValueDirect();
+            bool b = (dynamic_cast<CBooleanAttr*>(pAttr)).getValueDirect();
             strValue = b == true ? "true" : "false";
         }
             break;
         case(eAttrType_Float):
         {
-            float f = (dynamic_cast<CFloatAttr*>(pAttr)).GetValueDirect();
+            float f = (dynamic_cast<CFloatAttr*>(pAttr)).getValueDirect();
             strValue = convertToString(f);
         }
             break;
@@ -672,7 +665,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
             int len = pAttr.GetLength();
             string s;
             if (!(Resize(s, len))) return eERR_OUT_OF_MEMORY;
-            const char* c = pstrAttr.GetValueDirect(&s[0], len);
+            const char* c = pstrAttr.getValueDirect(&s[0], len);
             strValue = c;
         }
             break;
@@ -684,7 +677,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
         case(eAttrType_QuaternionFloat):
         {
             std::vector<float> vecVal_F;
-            pAttr.GetValue(vecVal_F);
+            pAttr.getValue(vecVal_F);
             if (item == -1)
             {
                 for (unsigned int i = 0; i < vecVal_F.size(); ++i)
@@ -708,7 +701,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
         case(eAttrType_Vector3DInteger):
         {
             std::vector<int> vecVal_I;
-            pAttr.GetValue(vecVal_I);
+            pAttr.getValue(vecVal_I);
             if (item == -1)
             {
                 for (unsigned int i = 0; i < vecVal_I.size(); ++i)
@@ -744,7 +737,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
 void MSXML_MixedModifiedCB(CAttribute* pAttr, void* pData)
 {
     vector<int> v;
-    pAttr.GetValue(v);
+    pAttr.getValue(v);
     MSXMLSerializer* pSerializer = static_cast<MSXMLSerializer*>(pData);
     if ((unsigned int)pSerializer != 0xffffffff)
     {
