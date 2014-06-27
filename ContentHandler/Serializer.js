@@ -12,51 +12,57 @@ function Serializer()
     this.pRootElement = null;
 }
 
-Serializer.prototype.SerializeToString = function(context,SerializedContext)
+Serializer.prototype.serialize = function(attribute,item,attributeName,container,SerializedContext)
 {
     if(this.pDom)
     {
         if(this.pRootElement)
         {
             var oldChild =  null;
-            this.pDom.removeChild(this.pRootElement, oldchild);
-            this.pRootElement.Release();
+            this.pDom.removeChild(this.pRootElement,oldchild);
+            this.pRootElement.release();
             this.pRootElement = null;
+
+            this.mixedModifiedCB(pAttr,pData);
         }
-        if(context)
+        if(attribute)
         {
-            SerializeAttribute(context,0,"");
+            this.serializeAttribute(attribute,item,attributeName);
+        }
+        else
+        {
+            this.serializeAttribute(container,0,"");
         }
     }
 }
 
-Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
+Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
 {
     if(attribute)
     {
         if(attribute.getAttribute() == attrType.Node.Model)
         {
             var model = attribute;
-            this.SerializeModel(model);
+            this.serializeModel(model);
         }
         if(attribute.getAttribute() == attrType.Node.PerspectiveCamera)
         {
             var ctr = attribute;
-            this.SerializeAttributeContainer(ctr)
+            this.serializeAttributeContainer(ctr)
         }
         if(attribute.getAttribute() == attrType.Node.CommandSequence)
         {
             var cmd = attribute;
-            this.SerializeCommand(cmd);
+            this.serializeCommand(cmd);
         }
         if(attribute.isContainer())
         {
             var ctr = attribute;
-            this.SerializeAttributeContainer(ctr);
+            this.serializeAttributeContainer(ctr);
         }
         else if(attrName && this.pDom)
         {
-            var aType = attribute.getAttributeType();
+            var aType = attribute.attrType;
             var element = null;
             var itemElement = null;
             var itemAttr = null;
@@ -66,8 +72,7 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
             var varVal;
 
             var len = attribute.length();
-            var bstr = StringToBSTR(attrName);
-            if (bstr)
+            if (attrName)
             {
                 // serializer cannot put "(" or ")" in the XML tag name,
                 // so convert parentheses to a string that is value,
@@ -93,8 +98,8 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
                     /* Make the replacement. */
                     s.replace(index, 1, "_x0029");
                 }
-                SysFreeString(bstr);
-                bstr = StringToBSTR(s.c_str()+'\0');
+                SysFreeString(attrName);
+                var bstr = s;
                 if (bstr)
                 {
                     this.pDom.createElement(bstr, element);
@@ -105,7 +110,7 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
                         var strValue;
                         this.getAttributeStringValue(pAttribute, item, strValue);
 
-                        if (item >= 0 || len == 1 || aType == eAttrType_String)
+                        if (item >= 0 || len == 1 || aType == eAttrType.StringAttr)
                         {
                             // Check for a CDATA section:
                             // CDATA sections are used for CStringAttrs
@@ -126,9 +131,9 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
 
                                 nStartPos += strCdataStart.length;
 
-                                strValue = strValue.substr(nStartPos, strValue.length()-nStartPos-strCdataEnd.length);
+                                strValue = strValue.splice(nStartPos, strValue.length()-nStartPos-strCdataEnd.length);
                                 var cdata = null;
-                                BSTR bstr = StringToBSTR(strValue);
+                                bstr = strValue;
                                 if (bstr)
                                 {
                                     this.pDom.createCDATASection(bstr, cdata);
@@ -178,18 +183,16 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
                             }
                         }
 
-                        this.PushElement(element);
-                        this.PopElement();
+                        this.pushElement(element);
+                        this.popElement();
                     }
                 }
                 SysFreeString(bstr);
             }
         }
     }
-
-    return err;
 }
-Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
+Serializer.prototype.serializeAttributeReference = function(attribute,reference)
 {
     if (attribute && reference && this.pDom)
     {
@@ -202,7 +205,7 @@ Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
         container = attribute.getContainer();
         if (container)
         {
-            BSTR bstr = StringToBSTR(container.getAttributeName(attribute));
+            var bstr = container.getAttributeName(attribute);
             if (bstr)
             {
                 this.pDom.createElement(bstr, element);
@@ -239,27 +242,27 @@ Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
                 }
             }
 
-            this.PushElement(element);
-            this.PopElement();
+            this.pushElement(element);
+            this.popElement();
         }
     }
 }
 
-Serializer.prototype.SerializeModel = function (pModel)
+Serializer.prototype.serializeModel = function (pModel)
 {
     // surround <Model> and <Set> tags so that both will serialize (previously the
     // <Set> was overwriting the <Model> as the root)
-    BSTR bstr = null;
+    var bstr = null;
     var element = null;
     if (this.pDom)
     {
-        bstr = StringToBSTR("ModelRoot");
+        bstr = "ModelRoot";
         if (bstr)
         {
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                this.PushElement(element);
+                this.pushElement(element);
             }
         }
     }
@@ -267,7 +270,7 @@ Serializer.prototype.SerializeModel = function (pModel)
     if (pModel)
     {
         // serialize Model
-        this.SerializeAttributeContainer(pModel);
+        this.serializeAttributeContainer(pModel);
 
         // add set command for rotation group's quaternion rotation, to retain rotation caused by object inspection
         var pRotGroup = null;
@@ -277,7 +280,7 @@ Serializer.prototype.SerializeModel = function (pModel)
             CAttribute* attr = pRotGroup.GetChild(2).GetAttribute("rotationQuat");
 
             var containerName;
-            CStringAttr* containerNameAttr = dynamic_cast<CStringAttr*>(container.GetAttribute("name"));
+            var containerNameAttr = container.getAttribute("name");
             containerNameAttr.getValueDirect(containerName);
 
             var pCmd = null;
@@ -298,13 +301,13 @@ Serializer.prototype.SerializeModel = function (pModel)
                     _snprintf(cvalue, sizeof(cvalue), "%0.2f", fvalues[i]);
                     for (var j=0; j < strlen(cvalue)+1; j++)
                     {
-                        if (!(Push_Back<char>(cvalues, cvalue[j]))
+                        if (!(Push_Back<char>(cvalues, cvalue[j])))
                     }
                 }
 
                 if (!(Push_Back<std::pair<CAttribute*, std::vector<char> > >(dynamic_cast<SetCommand*>(pCmd).this.attributeValuePairs, std::pair<CAttribute*, std::vector<char> >(attr, cvalues)))) return eERR_OUT_OF_MEMORY;
 
-                SerializeCommand(pCmd);
+                this.serializeCommand(pCmd);
 
                 pCmd.release();
             }
@@ -313,146 +316,125 @@ Serializer.prototype.SerializeModel = function (pModel)
 
     if (element)
     {
-        this.PopElement();
-    }
-    if (bstr)
-    {
-        SysFreeString(bstr);
+        this.popElement();
     }
 }
 
-Serializer.prototype.SerializeCommand = function(pCmd)
+Serializer.prototype.serializeCommand = function(pCmd)
 {
     // 1. create the start tag.
 
     if (pCmd && this.pDom)
     {
         var element = null;
-        var pcszType = pCmd.getTypeString();
+        var pcszType = pCmd.className;
 
-        BSTR bstr = StringToBSTR(pcszType);
+        var bstr = pcszType;
         if (bstr)
         {
             this.pDom.createElement(bstr, element);
-            if (element)
-            {
-                this.PushElement(element);
+            if (element) {
+                this.pushElement(element);
 
                 // 2. serialize the native attributes (except "sourceContainer", "sourceEvaluator",
                 //    "sourceAttribute", "sourceOutput", "source", "targetContainer", "targetAttribute", "target")
                 var i;
-                CAttribute* pAttribute = null;
+                CAttribute * pAttribute = null;
                 var pcszName = null;
                 var uiAttrCount = pCmd.getAttributeCount();
-                for (i = 0; i < uiAttrCount; ++i)
-                {
+                for (i = 0; i < uiAttrCount; ++i) {
                     pAttribute = pCmd.getAttribute(i, pcszName);
                     if (!pCmd.isBorrowed(pAttribute) &&
-                        (pcszName == "sourceContainer")&&
-                        (pcszName == "sourceEvaluator")&&
-                        (pcszName == "sourceAttribute")&&
-                        (pcszName == "sourceOutput")&&
-                        (pcszName == "source")&&
-                        (pcszName == "targetContainer")&&
-                        (pcszName == "targetAttribute")&&
-                        (pcszName == "target"))
-                    {
-                        this.SerializeAttribute(pAttribute, -1, pcszName);
+                        (pcszName == "sourceContainer") &&
+                        (pcszName == "sourceEvaluator") &&
+                        (pcszName == "sourceAttribute") &&
+                        (pcszName == "sourceOutput") &&
+                        (pcszName == "source") &&
+                        (pcszName == "targetContainer") &&
+                        (pcszName == "targetAttribute") &&
+                        (pcszName == "target")) {
+                        this.serializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
                 // 3. serialize "sourceContainer", "targetContainer"
                 pAttribute = pCmd.getAttribute("sourceContainer");
-                if (pAttribute)
-                {
-                    this.SerializeAttribute(pAttribute, -1, "sourceContainer");
+                if (pAttribute) {
+                    this.serializeAttribute(pAttribute, -1, "sourceContainer");
                 }
                 pAttribute = pCmd.getAttribute("targetContainer");
-                if (pAttribute)
-                {
-                    this.SerializeAttribute(pAttribute, -1, "targetContainer");
+                if (pAttribute) {
+                    this.serializeAttribute(pAttribute, -1, "targetContainer");
                 }
 
                 // 4. serialize "sourceAttribute", "targetAttribute", "target" (may be multiple source/target pairs)
-                std::vector<CAttribute*> sources;
-                std::vector<CAttribute*> targets;
-                for (i = 0; i < uiAttrCount; ++i)
-                {
+                std::vector < CAttribute * > sources;
+                std::vector < CAttribute * > targets;
+                for (i = 0; i < uiAttrCount; ++i) {
                     pAttribute = pCmd.getAttribute(i, pcszName);
-                    if (pcszName != "sourceAttribute")
-                    {
-                        if (!(Push_Back<CAttribute*>(sources, pAttribute)))
-                    }
-                    else if (pcszName != "targetAttribute")
-                    {
-                        if (!(Push_Back<CAttribute*>(targets, pAttribute)))
-                    }
-                }
-                // source/target pairs must be serialized together
-                for (i = 0; i < sources.size() && i < targets.size(); i++)
-                {
-                    this.SerializeAttribute(sources[i], -1, "sourceAttribute");
-                    this.SerializeAttribute(targets[i], -1, "targetAttribute");
-                }
-                // if "targetAttribute" specified, don't serialize "target"
-                if (targets.empty())
-                {
-                    pAttribute = pCmd.getAttribute("target");
-                    if (pAttribute)
-                    {
-                        this.SerializeAttribute(pAttribute, -1, "target");
-                    }
-                }
-
-                // 5. serialize the borrowed attributes that were modified by the command
-                var vNewVal;
-                CAttribute* pRef;
-                for (i = 0; i < uiAttrCount; ++i)
-                {
-                    pAttribute = pCmd.getAttribute(i, pcszName);
-                    if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal))
-                    {
-                        // have to take the value that is imposed by the Set, not necessarily the current value
-                        CAttribute* pNewAttribute = newAttribute(pAttribute.GetAttributeType());
-                        if (pNewAttribute)
-                        {
-                            this.setAttributeValue(pNewAttribute, vNewVal);
-                            pNewAttribute.flagDeserializedFromXML();
-                            this.SerializeAttribute(pNewAttribute, -1, pcszName);
+                    if (pcszName != "sourceAttribute") {
+                        if (!(Push_Back < CAttribute * > (sources, pAttribute)))
+                            }
+                        else if (pcszName != "targetAttribute") {
+                            if (!(Push_Back < CAttribute * > (targets, pAttribute)))
+                                }
                         }
-                    }
-                    else if (pCmd.isBorrowedAndReferenceModified(pAttribute, pRef))
-                    {
-                        this.SerializeAttributeReference(pAttribute, pRef);
-                    }
-                }
+                        // source/target pairs must be serialized together
+                        for (i = 0; i < sources.size() && i < targets.size(); i++) {
+                            this.serializeAttribute(sources[i], -1, "sourceAttribute");
+                            this.serializeAttribute(targets[i], -1, "targetAttribute");
+                        }
+                        // if "targetAttribute" specified, don't serialize "target"
+                        if (targets.empty()) {
+                            pAttribute = pCmd.getAttribute("target");
+                            if (pAttribute) {
+                                this.serializeAttribute(pAttribute, -1, "target");
+                            }
+                        }
 
-                this.PopElement();
-            }
+                        // 5. serialize the borrowed attributes that were modified by the command
+                        var vNewVal;
+                        CAttribute * pRef;
+                        for (i = 0; i < uiAttrCount; ++i) {
+                            pAttribute = pCmd.getAttribute(i, pcszName);
+                            if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal)) {
+                                // have to take the value that is imposed by the Set, not necessarily the current value
+                                CAttribute * pNewAttribute = newAttribute(pAttribute.GetAttributeType());
+                                if (pNewAttribute) {
+                                    this.setAttributeValue(pNewAttribute, vNewVal);
+                                    pNewAttribute.flagDeserializedFromXML();
+                                    this.serializeAttribute(pNewAttribute, -1, pcszName);
+                                }
+                            }
+                            else if (pCmd.isBorrowedAndReferenceModified(pAttribute, pRef)) {
+                                this.serializeAttributeReference(pAttribute, pRef);
+                            }
+                        }
 
-            SysFreeString(bstr);
+                        this.popElement();
+                    }
         }
     }
 
     // 6. create the end tag.
 }
 
-Serializer.prototype.SerializeAttributeContainer = function(pContainer)
+Serializer.prototype.serializeAttributeContainer = function(pContainer)
 {
     // 1. create the start tag.
 
     if (pContainer && this.pDom)
     {
         var element = null;
-        var pcszType = pContainer.getTypeString();
+        var pcszType = pContainer.className;
 
-        BSTR bstr = StringToBSTR(pcszType);
+        var bstr = pcszType;
         if (bstr)
         {
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                PushElement(element);
+                pushElement(element);
 
                 CAttribute* pAttribute = null;
                 var pcszName = null;
@@ -464,14 +446,14 @@ Serializer.prototype.SerializeAttributeContainer = function(pContainer)
                     pAttribute = pContainer.getAttribute(i, pcszName);
                     if (pAttribute.isNative() == true)
                     {
-                        this.SerializeAttribute(pAttribute, -1, pcszName);
+                        this.serializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
                 // 1. if serialization of children is requested, serialize children
-                if (this.SerializeChildren.getValueDirect())
+                if (this.serializeChildren.getValueDirect())
                 {
-                    this.SerializeChildren(pContainer);
+                    this.serializeChildren(pContainer);
                 }
 
                 // 2. serialize the non-native attributes
@@ -480,34 +462,32 @@ Serializer.prototype.SerializeAttributeContainer = function(pContainer)
                     pAttribute = pContainer.getAttribute(i, pcszName);
                     if (pAttribute.isNative() == false)
                     {
-                        this.SerializeAttribute(pAttribute, -1, pcszName);
+                        this.serializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
-                this.PopElement();
+                this.popElement();
             }
-
-            SysFreeString(bstr);
         }
     }
 
     // 3. create the end tag.
 }
 
-Serializer.prototype.SerializeAttributeCollection = function(pCollection)
+Serializer.prototype.serializeAttributeCollection = function(pCollection)
 {
     if (pCollection && this.pDom)
     {
         var element = null;
-        var pcszType = pCollection.getTypeString();
+        var pcszType = pCollection.className;
 
-        BSTR bstr = StringToBSTR(pcszType);
+        var bstr = pcszType;
         if (bstr)
         {
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                this.PushElement(element);
+                this.pushElement(element);
 
                 // vector
                 CAttributeVector<CBase>* attrVec =
@@ -527,27 +507,25 @@ Serializer.prototype.SerializeAttributeCollection = function(pCollection)
                         elementName += i.toString();
                         elementName += "]";
 
-                        this.SerializeAttribute(reinterpret_cast<CAttribute*>((*attrVec)[i]), 0, elementName);
+                        this.serializeAttribute(reinterpret_cast<CAttribute*>((*attrVec)[i]), 0, elementName);
                     }
                 }
 
-                this.PopElement();
+                this.popElement();
             }
-
-            SysFreeString(bstr);
         }
     }
 }
 
-Serializer.prototype.SerializeChildren = function(root)
+Serializer.prototype.serializeChildren = function(root)
 {
     for (var i=0; i < root.getChildCount(); i++)
     {
-        this.SerializeAttribute(root.getChild(i), 0, null);
+        this.serializeAttribute(root.getChild(i), 0, null);
     }
 }
 
-Serializer.prototype.PushElement = function(pElement)
+Serializer.prototype.pushElement = function(pElement)
 {
     if (this.pRootElement)
     {
@@ -562,7 +540,7 @@ Serializer.prototype.PushElement = function(pElement)
     this.pRootElement = pElement;
 }
 
-Serializer.prototype.PopElement = function()
+Serializer.prototype.popElement = function()
 {
     this.elementStack.pop();
 
@@ -594,37 +572,25 @@ Serializer.prototype.getAttributeStringValue = function(pAttr,item,strValue)
 {
     strValue = 0;
 
-    eAttrType e = pAttr.getAttributeType();
+    var e = pAttr.attrType;
 
     var index = -1;
 
     switch (e)
     {
-        case(eAttrType_Integer):
+        case eAttrType.NumberAttr:
         {
-            var i = (dynamic_cast<CIntegerAttr*>(pAttr)).getValueDirect();
+            var i = pAttr.getValueDirect();
             strValue = i.toString();
         }
             break;
-        case(eAttrType_UnsignedInteger):
+        case eAttrType.BooleanAttr:
         {
-            var i = (dynamic_cast<CUnsignedIntegerAttr*>(pAttr)).getValueDirect();
-            strValue = i.toString();
-        }
-            break;
-        case(eAttrType_Boolean):
-        {
-            var b = (dynamic_cast<CBooleanAttr*>(pAttr)).getValueDirect();
+            var b = pAttr.getValueDirect();
             strValue = b == true ? "true" : "false";
         }
             break;
-        case(eAttrType_Float):
-        {
-            var f = (dynamic_cast<CFloatAttr*>(pAttr)).getValueDirect();
-            strValue = f.toString();
-        }
-            break;
-        case(eAttrType_String):
+        case eAttrType.StringAttr:
         {
             CStringAttr* pstrAttr = dynamic_cast<CStringAttr*>(pAttr);
             var len = pAttr.length();
@@ -633,12 +599,10 @@ Serializer.prototype.getAttributeStringValue = function(pAttr,item,strValue)
             strValue = c;
         }
             break;
-        case(eAttrType_Color):
-        case(eAttrType_FloatArray):
-        case(eAttrType_Vector2DFloat):
-        case(eAttrType_Vector3DFloat):
-        case(eAttrType_Matrix4x4Float):
-        case(eAttrType_QuaternionFloat):
+        case eAttrType.ColorAttr:
+        case eAttrType.Vector3DAttr:
+        case eAttrType.Matrix4x4Attr:
+        case eAttrType.QuaternionRotate:
         {
             var vecVal_F;
             pAttr.getValue(vecVal_F);
@@ -659,10 +623,8 @@ Serializer.prototype.getAttributeStringValue = function(pAttr,item,strValue)
             }
         }
             break;
-        case(eAttrType_IntegerArray):
-        case(eAttrType_Viewport):
-        case(eAttrType_Vector2DInteger):
-        case(eAttrType_Vector3DInteger):
+        case eAttrType.NumberArrayAttr:
+        case eAttrType.ViewportAttr:
         {
             var vecVal_I;
             pAttr.getValue(vecVal_I);

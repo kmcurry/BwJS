@@ -64,8 +64,8 @@ SerializeCommand.prototype.serializeScene = function()
                 var buffer = "";
 
                 // serialize
-                serializer.Serialize(context,buffer);
-                xstr = serializer.serializeToString(context);
+                serializer.serialize(context.attribute,context.item,context.attributeName,context.container,buffer);
+                xstr = serializer.serializeToString(context.attribute);
 
                 console.log(xstr);
                 this.serialized += buffer;
