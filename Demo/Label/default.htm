@@ -361,19 +361,17 @@
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
-                    if (e.metaKey || e.ctrlKey){
-                        if (document.activeElement.id != 'url') {
-                            e.preventDefault();
-                            paste();
-                        }
-                    }
+                    var scene = bridgeworks.getRegistry().find("SceneInspector");
+                    scene.panDelta.values[2] += 10;
+                    scene.evaluate();
+                    console.log(scene);
+                    bridgeworks.updateScene();
+                    //console.log(scene.panDelta);
                 }
                 break;
                 case 'X'.charCodeAt(0): {      // x
-                    if (e.metaKey || e.ctrlKey) {
-                        e.preventDefault();
-                        cut();
-                    }
+                        bridgeworks.onLoadModified();
+                        bridgeworks.updateScene("grid-100.xml");
                 }
                 break;
                 
@@ -492,7 +490,7 @@
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
                 
-                bridgeworks = init("grid.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("grid-100.xml", document.getElementById("BwContainer"));
                 
                 listLibrary();
                 

@@ -110,6 +110,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
     this.newResourceProcs["RayPickDirective"] = newSGDirective;
     this.newResourceProcs["RenderDirective"] = newSGDirective;
+    this.newResourceProcs["SerializeDirective"] = newSGDirective;
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
 
     // evaluators
@@ -133,6 +134,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Pause"] = newCommand;
     this.newResourceProcs["Play"] = newCommand;
     this.newResourceProcs["Remove"] = newCommand;
+    this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
 
@@ -149,6 +151,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["BBoxDirective"] = configureDirective;
     this.configureProcs["RayPickDirective"] = configureDirective;
     this.configureProcs["RenderDirective"] = configureDirective;
+    this.configureProcs["SerializeDirective"] = configureDirective;
     this.configureProcs["UpdateDirective"] = configureDirective;    
 }
 
@@ -161,6 +164,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["BBoxDirective"] = finalizeDirective;
     this.finalizeProcs["RayPickDirective"] = finalizeDirective;
     this.finalizeProcs["RenderDirective"] = finalizeDirective;
+    this.finalizeProcs["SerializeDirective"] = finalizeDirective;
     this.finalizeProcs["UpdateDirective"] = finalizeDirective;
 
     // evaluators 
@@ -263,7 +267,7 @@ function newSGDirective(name, factory)
     case "BBoxDirective":       resource = new BBoxDirective(); break;
     case "RayPickDirective":    resource = new RayPickDirective(); break;
     case "RenderDirective":     resource = new RenderDirective(); break;  
-    case "SerializeDirective":  resource = new RenderDirective(); break;  
+    case "SerializeDirective":  resource = new SerializeDirective(); break;
     case "UpdateDirective":     resource = new UpdateDirective(); break;
     }
     
@@ -556,6 +560,11 @@ function registerParentableAttributes(pme, factory)
 
 	// misc modified callbacks
 	pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
+}
+
+function getSceneGraph()
+{
+    return this.sceneGraph;
 }
 
 function AttributeFactory_DirectiveRootModifiedCB(root, factory)

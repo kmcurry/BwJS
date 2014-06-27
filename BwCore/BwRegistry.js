@@ -89,6 +89,16 @@ BwRegistry.prototype.unregister = function(container)
     // TODO
 }
 
+BwRegistry.prototype.clear = function()
+{
+    this.rootPtr.setValueDirect(null);
+    this.subtreePtr.setValueDirect(null);
+    this.sgPointer.setValueDirect(null);
+    
+    // call base-class implementation
+    AttributeRegistry.prototype.clear.call(this);    
+}
+
 BwRegistry.prototype.updateTree = function(node)
 {
     var root = this.rootPtr.getValueDirect();

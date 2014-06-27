@@ -67,3 +67,16 @@ GraphMgr.prototype.getNextLabelIndex = function()
 {
     return this.labelIndex++;
 }
+GraphMgr.prototype.reset = function ()
+{
+    this.lightIndex = 0;
+    this.labelIndex = 1;
+    this.setCurrentDissolve(null);
+    this.setCurrentMaterial(null);
+    this.setDrawTextures(true);
+
+    for (var i=0; i < gl_MaxLights; i++)
+    {
+        this.renderContext.enableLight(i, false);
+    }
+}

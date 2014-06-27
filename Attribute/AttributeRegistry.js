@@ -6,6 +6,8 @@ function AttributeRegistry()
     AttributeContainer.call(this);
     this.className = "AttributeRegistry";
     this.attrType = eAttrType.AttributeRegistry;
+
+    this.objectCount = 0;
     
     this.typeRegistry = [];
     this.nameRegistry = [];
@@ -19,6 +21,7 @@ AttributeRegistry.prototype.registerByType = function(attribute, type)
     }
     
     this.typeRegistry[type].push(attribute);
+    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.registerByName = function(attribute, name)
@@ -34,13 +37,14 @@ AttributeRegistry.prototype.registerByName = function(attribute, name)
     }
 
     this.nameRegistry[name].push(attribute);
+    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.register = function(attribute)
 {
     // register using type
     this.registerByType(attribute, attribute.attrType);
-    
+    this.objectCount += 1;
     // register using name attribute if container
     if (attribute.isContainer())
     {
@@ -60,10 +64,12 @@ AttributeRegistry.prototype.unregisterByType = function(attribute, type)
     {
         this.typeRegistry[type].splice(this.typeRegistry[type].indexOf(attribute), 1);
     }
+    this.objectCount -= 1;
 }
 
 AttributeRegistry.prototype.unregisterByName = function(attribute, name)
 {
+    this.objectCount -= 1;
     if (name.length == 0)
     {
         name = "unnamed";
@@ -79,6 +85,7 @@ AttributeRegistry.prototype.unregister = function(attribute)
 {
     // register using type
     this.unregisterByType(attribute, attribute.attrType);
+    this.objectCount -= 1;
     
     // register using name attribute if container
     if (attribute.isContainer())
@@ -169,8 +176,41 @@ AttributeRegistry.prototype.updateName = function(container, name)
 
 AttributeRegistry.prototype.clear = function()
 {
-    this.typeRegistry.length = 0;
-    this.nameRegistry.length = 0;
+    for (var i in this.typeRegistry)
+    {
+        this.typeRegistry[i] = [];
+    }
+    this.typeRegistry = [];
+    
+    for (var i in this.nameRegistry)
+    {
+        this.nameRegistry[i] = [];
+    } 
+    this.nameRegistry = [];
+
+    this.objectCount = 0;
+}
+
+AttributeRegistry.prototype.getObjectCount = function ()
+{
+    return this.typeRegistry.length;
+}
+AttributeRegistry.prototype.getObject = function(num)
+{
+    var count = 0;
+    for (var i in this.typeRegistry)
+    {
+        for (var j=0; j < this.typeRegistry[i].length; j++, count++)
+        {
+            if (count == num)
+
+            {
+                return this.typeRegistry[i][j];
+            }
+        }
+    }
+    
+    return null;
 }
 
 function AttributeRegistry_AttributeContainerNameModifiedCB(attribute, container)

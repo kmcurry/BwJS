@@ -9,7 +9,8 @@
     <script type="text/javascript" src="../../Common/xmlsax.js"></script>
     <script type="text/javascript" src="../../Common/Timer.js"></script>  
     <script type="text/javascript" src="../../Common/DomAbsPos.js"></script>   
-    <script type="text/javascript" src="../../Common/Enums.js"></script>     
+    <script type="text/javascript" src="../../Common/Enums.js"></script>
+    <script type="text/javascript" src="../../Common/Context.js"></script>
     <script type="text/javascript" src="../../Math/MathUtil.js"></script>
     <script type="text/javascript" src="../../Math/Vector2D.js"></script>
     <script type="text/javascript" src="../../Math/Vector3D.js"></script>
@@ -90,6 +91,7 @@
     <script type="text/javascript" src="../../SceneGraph/Label.js"></script>
     <script type="text/javascript" src="../../SceneGraph/LineList.js"></script>
     <script type="text/javascript" src="../../SceneGraph/PointList.js"></script>
+    <script type="text/javascript" src="../../SceneGraph/SerializeDirective.js"></script>
     <script type="text/javascript" src="../../SceneGraph/Interpolate.js"></script>
     <script type="text/javascript" src="../../SceneGraph/State.js"></script>              
     <script type="text/javascript" src="../../SceneGraph/DistanceSortAgent.js"></script> 
@@ -126,7 +128,8 @@
     <script type="text/javascript" src="../../BwCore/ConnectionMgr.js"></script>
     <script type="text/javascript" src="../../BwCore/RenderAgent.js"></script>
     <script type="text/javascript" src="../../BwCore/RenderController.js"></script>
-    <script type="text/javascript" src="../../BwCore/SelectionListener.js"></script>    
+    <script type="text/javascript" src="../../BwCore/SelectionListener.js"></script>
+    <script type="text/javascript" src="../../BwCore/Serialize.js"></script>
     <script type="text/javascript" src="../../BwCore/ViewportLayout.js"></script>
     <script type="text/javascript" src="../../BwCore/GridLayout.js"></script>
     <script type="text/javascript" src="../../BwCore/ViewportMgr.js"></script>
@@ -296,32 +299,27 @@
               }
               
           }
-          
+          var serializer = new XMLSerializer();
           function handleKey(e)
           {
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
-                    if (e.metaKey || e.ctrlKey){
-                        e.preventDefault();
-                        copy();
-                    }      // c
+                    var xstr = serializer.serializeToString(document.body);
+
+                    console.log(xstr);
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
-                    if (e.metaKey || e.ctrlKey){
-                        if (document.activeElement.id != 'url') {
-                            e.preventDefault();
-                            paste();
-                        }
-                    }
+                    var cmd = "\<Serialize/>";
+                    console.log(cmd);
+                    bridgeworks.updateScene(cmd);
                 }
                 break;
-                case 'X'.charCodeAt(0): {      // x
-                    if (e.metaKey || e.ctrlKey) {
-                        e.preventDefault();
-                        cut();
-                    }
-                }
+                  case 'X'.charCodeAt(0): {      // x
+                      console.log("HIT");
+                      bridgeworks.onLoadModified();
+                      bridgeworks.updateScene("grid-100.xml");
+                  }
                 break;
                 
               }

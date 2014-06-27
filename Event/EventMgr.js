@@ -62,3 +62,36 @@ EventMgr.prototype.processEvent = function(event)
         this.registry.unregister(expired[i]);
     }
 }
+EventMgr.prototype.clearEvents = function()
+{
+/*
+    this.bProcessingQs = false;
+    this.bPendingRegistrations = false;
+
+    while (!this.pendingAddsQ.empty())
+    {
+        var elp = m_pendingAddsQ.front();
+        var elist = elp.second;
+        this.elist.clear();
+//        SAFE_DELETE(elist);
+        this.pendingAddsQ.pop();
+    }
+
+    while (!this.userInputEventsQ.empty())
+    {
+        var pEvent = this.userInputEventsQ.front();
+        this.userInputEventsQ.pop();
+//        SAFE_RELEASE(pEvent);
+    }
+
+    while (!this.sceneOutputEventsQ.empty())
+    {
+        var pEvent = this.sceneOutputEventsQ.front();
+        this.sceneOutputEventsQ.pop();
+//        SAFE_RELEASE(pEvent);
+    }
+
+    this.removeAllListeners();
+    */
+    this.listeners.length = 0;
+}
