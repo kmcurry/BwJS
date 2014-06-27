@@ -37,22 +37,22 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
         if(attribute.getAttribute() == attrType.Node.Model)
         {
             var model = attribute;
-            SerializeModel(model);
+            this.SerializeModel(model);
         }
         if(attribute.getAttribute() == attrType.Node.PerspectiveCamera)
         {
             var ctr = attribute;
-            SerializeAttributeContainer(ctr)
+            this.SerializeAttributeContainer(ctr)
         }
         if(attribute.getAttribute() == attrType.Node.CommandSequence)
         {
             var cmd = attribute;
-            SerializeCommand(cmd);
+            this.SerializeCommand(cmd);
         }
         if(attribute.isContainer())
         {
             var ctr = attribute;
-            SerializeAttributeContainer(ctr);
+            this.SerializeAttributeContainer(ctr);
         }
         else if(attrName && this.pDom)
         {
@@ -100,10 +100,10 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
                     this.pDom.createElement(bstr, element);
                     if (element)
                     {
-                        IXMLDOMNode* pOldChild = null;
+                        var pOldChild = null;
 
                         var strValue;
-                        err = GetAttributeStringValue(pAttribute, item, strValue);
+                        this.getAttributeStringValue(pAttribute, item, strValue);
 
                         if (item >= 0 || len == 1 || aType == eAttrType_String)
                         {
@@ -178,8 +178,8 @@ Serializer.prototype.SerializeAttribute = function (attribute,item,attrName)
                             }
                         }
 
-                        PushElement(element);
-                        PopElement();
+                        this.PushElement(element);
+                        this.PopElement();
                     }
                 }
                 SysFreeString(bstr);
@@ -239,8 +239,8 @@ Serializer.prototype.SerializeAttributeReference = function(attribute,reference)
                 }
             }
 
-            PushElement(element);
-            PopElement();
+            this.PushElement(element);
+            this.PopElement();
         }
     }
 }
@@ -259,7 +259,7 @@ Serializer.prototype.SerializeModel = function (pModel)
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                PushElement(element);
+                this.PushElement(element);
             }
         }
     }
@@ -267,7 +267,7 @@ Serializer.prototype.SerializeModel = function (pModel)
     if (pModel)
     {
         // serialize Model
-        SerializeAttributeContainer(pModel);
+        this.SerializeAttributeContainer(pModel);
 
         // add set command for rotation group's quaternion rotation, to retain rotation caused by object inspection
         var pRotGroup = null;
@@ -280,7 +280,7 @@ Serializer.prototype.SerializeModel = function (pModel)
             CStringAttr* containerNameAttr = dynamic_cast<CStringAttr*>(container.GetAttribute("name"));
             containerNameAttr.getValueDirect(containerName);
 
-            CCommand* pCmd = null;
+            var pCmd = null;
             if (_SUCCEEDED(CCommand::FindAndClone("Set", pCmd)))
             {
                 pCmd.getAttribute("target").setValueDirect(containerName);
@@ -313,7 +313,7 @@ Serializer.prototype.SerializeModel = function (pModel)
 
     if (element)
     {
-        PopElement();
+        this.PopElement();
     }
     if (bstr)
     {
@@ -321,7 +321,7 @@ Serializer.prototype.SerializeModel = function (pModel)
     }
 }
 
-Serializer.prototype.SerializeCommand(pCmd)
+Serializer.prototype.SerializeCommand = function(pCmd)
 {
     // 1. create the start tag.
 
@@ -336,7 +336,7 @@ Serializer.prototype.SerializeCommand(pCmd)
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                PushElement(element);
+                this.PushElement(element);
 
                 // 2. serialize the native attributes (except "sourceContainer", "sourceEvaluator",
                 //    "sourceAttribute", "sourceOutput", "source", "targetContainer", "targetAttribute", "target")
@@ -413,7 +413,7 @@ Serializer.prototype.SerializeCommand(pCmd)
                     if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal))
                     {
                         // have to take the value that is imposed by the Set, not necessarily the current value
-                        CAttribute* pNewAttribute = NewAttribute(pAttribute.GetAttributeType());
+                        CAttribute* pNewAttribute = newAttribute(pAttribute.GetAttributeType());
                         if (pNewAttribute)
                         {
                             this.setAttributeValue(pNewAttribute, vNewVal);
@@ -427,7 +427,7 @@ Serializer.prototype.SerializeCommand(pCmd)
                     }
                 }
 
-                PopElement();
+                this.PopElement();
             }
 
             SysFreeString(bstr);
@@ -437,15 +437,14 @@ Serializer.prototype.SerializeCommand(pCmd)
     // 6. create the end tag.
 }
 
-eERR_CODE MSXMLSerializer::SerializeAttributeContainer(CAttributeContainer* pContainer)
+Serializer.prototype.SerializeAttributeContainer = function(pContainer)
 {
-    eERR_CODE err = eERR_FAIL;
     // 1. create the start tag.
 
     if (pContainer && this.pDom)
     {
-        IXMLDOMElement* element = null;
-        const char* pcszType = pContainer.GetTypeString();
+        var element = null;
+        var pcszType = pContainer.getTypeString();
 
         BSTR bstr = StringToBSTR(pcszType);
         if (bstr)
@@ -456,36 +455,36 @@ eERR_CODE MSXMLSerializer::SerializeAttributeContainer(CAttributeContainer* pCon
                 PushElement(element);
 
                 CAttribute* pAttribute = null;
-                const char* pcszName = null;
-                unsigned int uiAttrCount = pContainer.GetAttributeCount();
+                var pcszName = null;
+                var uiAttrCount = pContainer.getAttributeCount();
 
                 // 0. serialize any native attributes first
-                for (unsigned int i = 0; i < uiAttrCount; ++i)
+                for (var i = 0; i < uiAttrCount; ++i)
                 {
-                    pAttribute = pContainer.GetAttribute(i, pcszName);
-                    if (pAttribute.IsNative() == true)
+                    pAttribute = pContainer.getAttribute(i, pcszName);
+                    if (pAttribute.isNative() == true)
                     {
-                        err = SerializeAttribute(pAttribute, -1, pcszName);
+                        this.SerializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
                 // 1. if serialization of children is requested, serialize children
-                if (this.serializeChildren.getValueDirect())
+                if (this.SerializeChildren.getValueDirect())
                 {
-                    SerializeChildren(dynamic_cast<CNode*>(pContainer));
+                    this.SerializeChildren(pContainer);
                 }
 
                 // 2. serialize the non-native attributes
-                for (unsigned int i = 0; i < uiAttrCount; ++i)
+                for (var i = 0; i < uiAttrCount; ++i)
                 {
-                    pAttribute = pContainer.GetAttribute(i, pcszName);
-                    if (pAttribute.IsNative() == false)
+                    pAttribute = pContainer.getAttribute(i, pcszName);
+                    if (pAttribute.isNative() == false)
                     {
-                        err = SerializeAttribute(pAttribute, -1, pcszName);
+                        this.SerializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
 
-                PopElement();
+                this.PopElement();
             }
 
             SysFreeString(bstr);
@@ -493,17 +492,14 @@ eERR_CODE MSXMLSerializer::SerializeAttributeContainer(CAttributeContainer* pCon
     }
 
     // 3. create the end tag.
-    return err;
 }
 
-eERR_CODE MSXMLSerializer::SerializeAttributeCollection(CAttributeContainer* pCollection)
+Serializer.prototype.SerializeAttributeCollection = function(pCollection)
 {
-    eERR_CODE err = eERR_FAIL;
-
     if (pCollection && this.pDom)
     {
-        IXMLDOMElement* element = null;
-        const char* pcszType = pCollection.GetTypeString();
+        var element = null;
+        var pcszType = pCollection.getTypeString();
 
         BSTR bstr = StringToBSTR(pcszType);
         if (bstr)
@@ -511,72 +507,51 @@ eERR_CODE MSXMLSerializer::SerializeAttributeCollection(CAttributeContainer* pCo
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                PushElement(element);
+                this.PushElement(element);
 
                 // vector
                 CAttributeVector<CBase>* attrVec =
                 reinterpret_cast<CAttributeVector<CBase>*>(pCollection);
                 if (attrVec)
                 {
-                    std::string elementName;
-                    std::vector<char> baseName;
-                    if (!(Resize<char>(baseName, __max(attrVec.GetBaseName().GetLength(), 1), 0))) return eERR_OUT_OF_MEMORY;
-                    attrVec.GetBaseName().getValueDirect(&baseName[0], baseName.size());
+                    var elementName;
+                    var baseName;
+                    if (!(Resize<char>(baseName, __max(attrVec.getBaseName().length(), 1), 0)))
+                    attrVec.getBaseName().getValueDirect(baseName[0], baseName.size());
 
-                    unsigned int size = attrVec.size();
-                    for (unsigned int i=0; i < size; i++)
+                    var size = attrVec.size();
+                    for (var i=0; i < size; i++)
                     {
-                        elementName = &baseName[0];
+                        elementName = baseName[0];
                         elementName += "[";
-                        elementName += convertToString(i);
+                        elementName += i.toString();
                         elementName += "]";
 
-                        err = SerializeAttribute(reinterpret_cast<CAttribute*>((*attrVec)[i]), 0, elementName.c_str());
+                        this.SerializeAttribute(reinterpret_cast<CAttribute*>((*attrVec)[i]), 0, elementName);
                     }
                 }
 
-                PopElement();
+                this.PopElement();
             }
 
             SysFreeString(bstr);
         }
     }
-
-    return err;
 }
 
-eERR_CODE MSXMLSerializer::SerializeChildren(CNode* root)
+Serializer.prototype.SerializeChildren = function(root)
 {
-    if (!root)
+    for (var i=0; i < root.getChildCount(); i++)
     {
-        return eERR_null_PARAM;
+        this.SerializeAttribute(root.getChild(i), 0, null);
     }
-
-    for (unsigned int i=0; i < root.GetChildCount(); i++)
-    {
-        SerializeAttribute(root.GetChild(i), 0, null);
-    }
-
-    return eNO_ERR;
 }
 
-eERR_CODE MSXMLSerializer::PushElement(IXMLDOMElement* pElement)
+Serializer.prototype.PushElement = function(pElement)
 {
-    if (!pElement)
-    {
-        return eERR_null_PARAM;
-    }
-
-    if (!this.pDom)
-    {
-        return eERR_FAIL;
-    }
-
-    if (!(Push<IXMLDOMElement*>(this.elementStack, pElement))) return eERR_OUT_OF_MEMORY;
-
     if (this.pRootElement)
     {
-        IXMLDOMNode* pOldChild = null;
+        var pOldChild = null;
         this.pRootElement.appendChild(pElement, pOldChild);
     }
     else // !this.pRootElement
@@ -585,87 +560,76 @@ eERR_CODE MSXMLSerializer::PushElement(IXMLDOMElement* pElement)
     }
 
     this.pRootElement = pElement;
-
-    return eNO_ERR;
 }
 
-eERR_CODE MSXMLSerializer::PopElement()
+Serializer.prototype.PopElement = function()
 {
-    if (this.elementStack.empty())
-    {
-        return eERR_FAIL;
-    }
-
     this.elementStack.pop();
 
     if (this.elementStack.size() > 0)
     {
         this.pRootElement = this.elementStack.top();
     }
-
-    return eNO_ERR;
 }
 
-CSerializer* MSXMLSerializer::ClonePrototype()
+Serializer.prototype.ClonePrototype = function()
 {
     CSerializer *s = New<MSXMLSerializer, int>(1);
     return s;
 }
 
-bool MSXMLSerializer::MatchesType(const char* pcszType)
+Serializer.prototype.MatchesType = function(pcszType)
 {
-    bool matches = false;
-    if (pcszType && strlen(pcszType) == 5)
+    var matches = false;
+    if (pcszType && pcszType.length == 5)
     {
-        matches = !_stricmp(pcszType, "msxml") ||
-            !_stricmp(pcszType, "msdom");
+        matches = !(pcszType == "msxml") || !(pcszType ==  "msdom");
+        //matches = !_stricmp(pcszType, "msxml") ||
+        //    !_stricmp(pcszType, "msdom");
     }
     return matches;
 }
 
-eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
+Serializer.prototype.getAttributeStringValue = function(pAttr,item,strValue)
 {
-    eERR_CODE err = eERR_FAIL;
+    strValue = 0;
 
-    strValue.erase();
+    eAttrType e = pAttr.getAttributeType();
 
-    eAttrType e = pAttr.GetAttributeType();
-
-    int index = -1;
+    var index = -1;
 
     switch (e)
     {
         case(eAttrType_Integer):
         {
-            int i = (dynamic_cast<CIntegerAttr*>(pAttr)).getValueDirect();
-            strValue = convertToString(i);
+            var i = (dynamic_cast<CIntegerAttr*>(pAttr)).getValueDirect();
+            strValue = i.toString();
         }
             break;
         case(eAttrType_UnsignedInteger):
         {
-            unsigned int i = (dynamic_cast<CUnsignedIntegerAttr*>(pAttr)).getValueDirect();
-            strValue = convertToString(i);
+            var i = (dynamic_cast<CUnsignedIntegerAttr*>(pAttr)).getValueDirect();
+            strValue = i.toString();
         }
             break;
         case(eAttrType_Boolean):
         {
-            bool b = (dynamic_cast<CBooleanAttr*>(pAttr)).getValueDirect();
+            var b = (dynamic_cast<CBooleanAttr*>(pAttr)).getValueDirect();
             strValue = b == true ? "true" : "false";
         }
             break;
         case(eAttrType_Float):
         {
-            float f = (dynamic_cast<CFloatAttr*>(pAttr)).getValueDirect();
-            strValue = convertToString(f);
+            var f = (dynamic_cast<CFloatAttr*>(pAttr)).getValueDirect();
+            strValue = f.toString();
         }
             break;
         case(eAttrType_String):
         {
             CStringAttr* pstrAttr = dynamic_cast<CStringAttr*>(pAttr);
-            int len = pAttr.GetLength();
-            string s;
-            if (!(Resize(s, len))) return eERR_OUT_OF_MEMORY;
-            const char* c = pstrAttr.getValueDirect(&s[0], len);
+            var len = pAttr.length();
+            var s;
+            var c = pstrAttr.getValueDirect(s[0], len);
             strValue = c;
         }
             break;
@@ -676,13 +640,13 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
         case(eAttrType_Matrix4x4Float):
         case(eAttrType_QuaternionFloat):
         {
-            std::vector<float> vecVal_F;
+            var vecVal_F;
             pAttr.getValue(vecVal_F);
             if (item == -1)
             {
-                for (unsigned int i = 0; i < vecVal_F.size(); ++i)
+                for (var i = 0; i < vecVal_F.size(); ++i)
                 {
-                    strValue += convertToString(vecVal_F[i]);
+                    strValue += vecVal_F[i].toString());
                     if (i < vecVal_F.size() - 1)
                     {
                         strValue += ",";
@@ -691,7 +655,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
             }
             else
             {
-                strValue += convertToString(vecVal_F[item]);
+                strValue += vecVal_F[item].toString();
             }
         }
             break;
@@ -700,13 +664,13 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
         case(eAttrType_Vector2DInteger):
         case(eAttrType_Vector3DInteger):
         {
-            std::vector<int> vecVal_I;
+            var vecVal_I;
             pAttr.getValue(vecVal_I);
             if (item == -1)
             {
-                for (unsigned int i = 0; i < vecVal_I.size(); ++i)
+                for (var i = 0; i < vecVal_I.size(); ++i)
                 {
-                    strValue += convertToString(vecVal_I[i]);
+                    strValue += vecVal_I[i].toString();
                     if (i < vecVal_I.size() - 1)
                     {
                         strValue += ",";
@@ -715,7 +679,7 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
             }
             else
             {
-                strValue += convertToString(vecVal_I[item]);
+                strValue += vecVal_I[item].toString();
             }
         }
             break;
@@ -724,24 +688,16 @@ eERR_CODE GetAttributeStringValue(CAttribute* pAttr, int item, string &strValue)
         }
             break;
     }
-
-    //strValue += '\0';
-
-    if (!strValue.empty())
-    {
-        err = eNO_ERR;
-    }
-    return err;
 }
 
-void MSXML_MixedModifiedCB(CAttribute* pAttr, void* pData)
+Serializer.prototype.mixedModifiedCB = function(pAttr,pData)
 {
-    vector<int> v;
+    var v;
     pAttr.getValue(v);
-    MSXMLSerializer* pSerializer = static_cast<MSXMLSerializer*>(pData);
-    if ((unsigned int)pSerializer != 0xffffffff)
+    var pSerializer = pData;
+    if (pSerializer != 0xffffffff)
     {
-        pSerializer.this.bMixed = (bool)v[0];
+        pSerializer.this.bMixed = v[0];
     }
 }
 
