@@ -79,12 +79,12 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                 // which is then converted back to parentheses in the result
                 // of serialization
                // std::string s((_bstr_t(bstr)));
-                size_t index = 0;
+                var index = 0;
                 while (true)
                 {
                     /* Locate the substring to replace. */
-                    index = s.find("(");
-                    if (index == string::npos) break;
+                    index = s.indexOf("(");
+                    if (!(s.indexOf("("))) break;
 
                     /* Make the replacement. */
                     s.replace(index, 1, "_x0028");
@@ -92,13 +92,12 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                 while (true)
                 {
                     /* Locate the substring to replace. */
-                    index = s.find(")");
-                    if (index == string::npos) break;
+                    index = s.indexOf(")");
+                    if (!(s.indexOf("("))) break;
 
                     /* Make the replacement. */
                     s.replace(index, 1, "_x0029");
                 }
-                SysFreeString(attrName);
                 var bstr = s;
                 if (bstr)
                 {
@@ -125,7 +124,7 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                             var strCdataEnd = "]]>";
 
                             var nStartPos = 0;
-                            var nEndPos = strValue.find(strCdataEnd);
+                            var nEndPos = strValue.indexOf(strCdataEnd);
                             if (nStartPos != -1 && nEndPos != -1)
                             {
 
@@ -137,7 +136,6 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                                 if (bstr)
                                 {
                                     this.pDom.createCDATASection(bstr, cdata);
-                                    SysFreeString(bstr);
                                 }
                                 element.appendChild(cdata, pOldChild);
                             }
@@ -162,7 +160,7 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
 
                                 if (this.bMixed)
                                 {
-                                    this.pDom.createElement(_bstr_t(strItemAttr), &itemElement);
+                                    this.pDom.createElement(_bstr_t(strItemAttr),itemElement);
                                     itemElement.put_text(_bstr_t(sv));
                                     element.appendChild(itemElement,pOldChild);
                                 }
@@ -171,7 +169,7 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                                     element.get_attributes(attrMap);
                                     if (attrMap)
                                     {
-                                        this.pDom.createAttribute(_bstr_t(strItemAttr.c_str()), itemAttr);
+                                        this.pDom.createAttribute(_bstr_t(strItemAttr), itemAttr);
 
                                         if (itemAttr)
                                         {
@@ -187,7 +185,6 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                         this.popElement();
                     }
                 }
-                SysFreeString(bstr);
             }
         }
     }
@@ -209,7 +206,6 @@ Serializer.prototype.serializeAttributeReference = function(attribute,reference)
             if (bstr)
             {
                 this.pDom.createElement(bstr, element);
-                SysFreeString(bstr);
             }
         }
         if (element)
@@ -274,17 +270,17 @@ Serializer.prototype.serializeModel = function (pModel)
 
         // add set command for rotation group's quaternion rotation, to retain rotation caused by object inspection
         var pRotGroup = null;
-        if (_SUCCEEDED(Util_GetInspectionGroup(pModel, &pRotGroup)))
+        if (getInspectionGroup(pModel,pRotGroup))
         {
-            CAttributeContainer* container = pModel;
-            CAttribute* attr = pRotGroup.GetChild(2).GetAttribute("rotationQuat");
+            var container = pModel;
+            var attr = pRotGroup.getChild(2).getAttribute("rotationQuat");
 
             var containerName;
             var containerNameAttr = container.getAttribute("name");
             containerNameAttr.getValueDirect(containerName);
 
             var pCmd = null;
-            if (_SUCCEEDED(CCommand::FindAndClone("Set", pCmd)))
+            if (CCommand::FindAndClone("Set", pCmd)) //ASK MICHAEL
             {
                 pCmd.getAttribute("target").setValueDirect(containerName);
                 pCmd.getAttribute("target").flagDeserializedFromXML();
@@ -301,15 +297,12 @@ Serializer.prototype.serializeModel = function (pModel)
                     _snprintf(cvalue, sizeof(cvalue), "%0.2f", fvalues[i]);
                     for (var j=0; j < strlen(cvalue)+1; j++)
                     {
-                        if (!(Push_Back<char>(cvalues, cvalue[j])))
+                        if (!(Push_Back<char>(cvalues, cvalue[j]))) //ASK MICHAEL
                     }
                 }
-
-                if (!(Push_Back<std::pair<CAttribute*, std::vector<char> > >(dynamic_cast<SetCommand*>(pCmd).this.attributeValuePairs, std::pair<CAttribute*, std::vector<char> >(attr, cvalues)))) return eERR_OUT_OF_MEMORY;
-
                 this.serializeCommand(pCmd);
 
-                pCmd.release();
+                pCmd.release(); //ASK MICHAEL
             }
         }
     }
@@ -339,12 +332,12 @@ Serializer.prototype.serializeCommand = function(pCmd)
                 // 2. serialize the native attributes (except "sourceContainer", "sourceEvaluator",
                 //    "sourceAttribute", "sourceOutput", "source", "targetContainer", "targetAttribute", "target")
                 var i;
-                CAttribute * pAttribute = null;
+                var pAttribute = null;
                 var pcszName = null;
                 var uiAttrCount = pCmd.getAttributeCount();
                 for (i = 0; i < uiAttrCount; ++i) {
                     pAttribute = pCmd.getAttribute(i, pcszName);
-                    if (!pCmd.isBorrowed(pAttribute) &&
+                    if (!pCmd.isBorrowed(pAttribute) && //FIND FUNCTION IN C++
                         (pcszName == "sourceContainer") &&
                         (pcszName == "sourceEvaluator") &&
                         (pcszName == "sourceAttribute") &&
@@ -368,12 +361,12 @@ Serializer.prototype.serializeCommand = function(pCmd)
                 }
 
                 // 4. serialize "sourceAttribute", "targetAttribute", "target" (may be multiple source/target pairs)
-                std::vector < CAttribute * > sources;
-                std::vector < CAttribute * > targets;
+                var sources = [];
+                var targets = [];
                 for (i = 0; i < uiAttrCount; ++i) {
                     pAttribute = pCmd.getAttribute(i, pcszName);
                     if (pcszName != "sourceAttribute") {
-                        if (!(Push_Back < CAttribute * > (sources, pAttribute)))
+                        if (!(Push_Back < CAttribute * > (sources, pAttribute))) //ASK MICHAEL
                             }
                         else if (pcszName != "targetAttribute") {
                             if (!(Push_Back < CAttribute * > (targets, pAttribute)))
@@ -394,12 +387,12 @@ Serializer.prototype.serializeCommand = function(pCmd)
 
                         // 5. serialize the borrowed attributes that were modified by the command
                         var vNewVal;
-                        CAttribute * pRef;
+                        var pRef;
                         for (i = 0; i < uiAttrCount; ++i) {
                             pAttribute = pCmd.getAttribute(i, pcszName);
-                            if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal)) {
+                            if (pCmd.isBorrowedAndValueModified(pAttribute, vNewVal)) { // FIND FUNCTION IN C++
                                 // have to take the value that is imposed by the Set, not necessarily the current value
-                                CAttribute * pNewAttribute = newAttribute(pAttribute.GetAttributeType());
+                                var pNewAttribute = newAttribute(pAttribute.attrType);
                                 if (pNewAttribute) {
                                     this.setAttributeValue(pNewAttribute, vNewVal);
                                     pNewAttribute.flagDeserializedFromXML();
@@ -415,8 +408,6 @@ Serializer.prototype.serializeCommand = function(pCmd)
                     }
         }
     }
-
-    // 6. create the end tag.
 }
 
 Serializer.prototype.serializeAttributeContainer = function(pContainer)
@@ -434,9 +425,9 @@ Serializer.prototype.serializeAttributeContainer = function(pContainer)
             this.pDom.createElement(bstr, element);
             if (element)
             {
-                pushElement(element);
+                this.pushElement(element);
 
-                CAttribute* pAttribute = null;
+                var pAttribute = null;
                 var pcszName = null;
                 var uiAttrCount = pContainer.getAttributeCount();
 
@@ -444,7 +435,7 @@ Serializer.prototype.serializeAttributeContainer = function(pContainer)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     pAttribute = pContainer.getAttribute(i, pcszName);
-                    if (pAttribute.isNative() == true)
+                    if (pAttribute.isNative() == true) //FIND FUNCTION IN C++
                     {
                         this.serializeAttribute(pAttribute, -1, pcszName);
                     }
@@ -465,7 +456,6 @@ Serializer.prototype.serializeAttributeContainer = function(pContainer)
                         this.serializeAttribute(pAttribute, -1, pcszName);
                     }
                 }
-
                 this.popElement();
             }
         }
@@ -490,7 +480,8 @@ Serializer.prototype.serializeAttributeCollection = function(pCollection)
                 this.pushElement(element);
 
                 // vector
-                CAttributeVector<CBase>* attrVec =
+                //var attrVec = [pCollection];
+                CAttributeVector<CBase>* attrVec = //ASK MICHAEL
                 reinterpret_cast<CAttributeVector<CBase>*>(pCollection);
                 if (attrVec)
                 {
@@ -507,7 +498,7 @@ Serializer.prototype.serializeAttributeCollection = function(pCollection)
                         elementName += i.toString();
                         elementName += "]";
 
-                        this.serializeAttribute(reinterpret_cast<CAttribute*>((*attrVec)[i]), 0, elementName);
+                        this.serializeAttribute(attrVec[i], 0, elementName);
                     }
                 }
 
@@ -549,21 +540,12 @@ Serializer.prototype.popElement = function()
         this.pRootElement = this.elementStack.top();
     }
 }
-
-Serializer.prototype.ClonePrototype = function()
-{
-    CSerializer *s = New<MSXMLSerializer, int>(1);
-    return s;
-}
-
 Serializer.prototype.MatchesType = function(pcszType)
 {
     var matches = false;
     if (pcszType && pcszType.length == 5)
     {
         matches = !(pcszType == "msxml") || !(pcszType ==  "msdom");
-        //matches = !_stricmp(pcszType, "msxml") ||
-        //    !_stricmp(pcszType, "msdom");
     }
     return matches;
 }
@@ -592,10 +574,9 @@ Serializer.prototype.getAttributeStringValue = function(pAttr,item,strValue)
             break;
         case eAttrType.StringAttr:
         {
-            CStringAttr* pstrAttr = dynamic_cast<CStringAttr*>(pAttr);
             var len = pAttr.length();
             var s;
-            var c = pstrAttr.getValueDirect(s[0], len);
+            var c = pAttr.getValueDirect(s[0], len);
             strValue = c;
         }
             break;
@@ -659,7 +640,7 @@ Serializer.prototype.mixedModifiedCB = function(pAttr,pData)
     var pSerializer = pData;
     if (pSerializer != 0xffffffff)
     {
-        pSerializer.this.bMixed = v[0];
+        pSerializer.this.bMixed = v[0]; //ASK MICHAEL
     }
 }
 
