@@ -280,29 +280,21 @@ Serializer.prototype.serializeModel = function (pModel)
             containerNameAttr.getValueDirect(containerName);
 
             var pCmd = null;
-            if (CCommand::FindAndClone("Set", pCmd)) //ASK MICHAEL
+            var factory = this.registry.find("AttributeFactory");
+            pCmd = factory.create("SetCommand");
+            if (pCmd)
             {
                 pCmd.getAttribute("target").setValueDirect(containerName);
                 pCmd.getAttribute("target").flagDeserializedFromXML();
 
                 pCmd.registerTargetAttributes(container, containerName);
 
-                var fvalues;
-                attr.getValue(fvalues);
+                var values;
+                attr.getValue(values);
 
-                var cvalue = [32];
-                var cvalues;
-                for (var i=0; i < 4; i++)
-                {
-                    _snprintf(cvalue, sizeof(cvalue), "%0.2f", fvalues[i]);
-                    for (var j=0; j < strlen(cvalue)+1; j++)
-                    {
-                        if (!(Push_Back<char>(cvalues, cvalue[j]))) //ASK MICHAEL
-                    }
-                }
+                pCmd.attributeValuePairs.push(new Pair(attr, values));
+                
                 this.serializeCommand(pCmd);
-
-                pCmd.release(); //ASK MICHAEL
             }
         }
     }
@@ -364,12 +356,14 @@ Serializer.prototype.serializeCommand = function(pCmd)
                 var sources = [];
                 var targets = [];
                 for (i = 0; i < uiAttrCount; ++i) {
-                    pAttribute = pCmd.getAttribute(i, pcszName);
-                    if (pcszName != "sourceAttribute") {
-                        if (!(Push_Back < CAttribute * > (sources, pAttribute))) //ASK MICHAEL
-                            }
-                        else if (pcszName != "targetAttribute") {
-                            if (!(Push_Back < CAttribute * > (targets, pAttribute)))
+                    //pAttribute = pCmd.getAttribute(i, pcszName);
+                    var attr = pCmd.getAttribute(i);
+                    var attrName = pCmd.getAttributeName(attr);
+                    if (attrName != "sourceAttribute") {
+                        sources.push(attr);
+                       }
+                        else if (attrName != "targetAttribute") {
+                            targets.push(attr);
                                 }
                         }
                         // source/target pairs must be serialized together
@@ -480,15 +474,10 @@ Serializer.prototype.serializeAttributeCollection = function(pCollection)
                 this.pushElement(element);
 
                 // vector
-                //var attrVec = [pCollection];
-                CAttributeVector<CBase>* attrVec = //ASK MICHAEL
-                reinterpret_cast<CAttributeVector<CBase>*>(pCollection);
-                if (attrVec)
+                var attrVec = pCollection;
                 {
                     var elementName;
-                    var baseName;
-                    if (!(Resize<char>(baseName, __max(attrVec.getBaseName().length(), 1), 0)))
-                    attrVec.getBaseName().getValueDirect(baseName[0], baseName.size());
+                    var baseName = attrVec.baseName.getValueDirect();
 
                     var size = attrVec.size();
                     for (var i=0; i < size; i++)
@@ -640,7 +629,7 @@ Serializer.prototype.mixedModifiedCB = function(pAttr,pData)
     var pSerializer = pData;
     if (pSerializer != 0xffffffff)
     {
-        pSerializer.this.bMixed = v[0]; //ASK MICHAEL
+        pSerializer.bMixed = v[0]; //ASK MICHAEL
     }
 }
 
