@@ -117,5 +117,12 @@
                 </fontStyle>
             </labelStyle>
         </Label>
+   <BalloonTipLabel name="bar" parent="cylinderRight" show="true">
+       <balloonTipLabelStyle>
+           <htmlLabelStyle>
+               <html>Test</html>
+           </htmlLabelStyle>
+       </balloonTipLabelStyle>
+   </BalloonTipLabel>
    <KeyframeInterpolator target="UV_BoxG" url="./envelopes/Dissolve_Oscillate.env" targetConnectionType="dissolve"/>
 </Session>
