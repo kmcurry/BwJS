@@ -46,6 +46,7 @@ SerializeCommand.prototype.serializeScene = function()
     if (attrContainerRegistry)
     {
         var serializer = new XMLSerializer();
+        var serial  = new Serializer();
         // set minimum flag so that only the minimum required for recreation is serialized
         //var serializeMinimum = serializer.getAttribute("serializeMinimum");
         //serializeMinimum.setValueDirect(true);
@@ -64,7 +65,8 @@ SerializeCommand.prototype.serializeScene = function()
                 var buffer = "";
 
                 // serialize
-                serializer.serialize(context.attribute,context.item,context.attributeName,context.container,buffer);
+                //serializer
+                serial.serialize(context.attribute,context.item,context.attributeName,context.container,buffer);
                 xstr = serializer.serializeToString(context.attribute);
 
                 console.log(xstr);
