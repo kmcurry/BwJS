@@ -55,7 +55,7 @@ BalloonTipLabel.prototype.update = function(params, visitChildren)
     }
 
     // call base-class implementation
-    RasterComponent.prototype.update(params, visitChildren);
+    RasterComponent.prototype.update.call(this, params, visitChildren);
 }
 
 BalloonTipLabel.prototype.apply = function(directive, params, visitChildren)
