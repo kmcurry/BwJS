@@ -1,6 +1,8 @@
 BalloonTipLabel.prototype = new RasterComponent();
 BalloonTipLabel.prototype.constructor = BalloonTipLabel;
 
+var g_hb1 = null;
+
 function BalloonTipLabel()
 {
     RasterComponent.call(this);
@@ -35,7 +37,7 @@ BalloonTipLabel.prototype.setGraphMgr = function(graphMgr)
     this.id = "BalloonTipLabel" + this.graphMgr.getNextBalloonTipLabelIndex();
     
     // create html div for canvas overlay
-    var htmlBalloonTipLabel = document.getElementById("");//CreateHTMLBalloonTipLabel(this.id);
+    var htmlBalloonTipLabel = CreateHTMLBalloonTipLabel(this.id);
     this.htmlBalloonTipLabel = htmlBalloonTipLabel;
 }
 
@@ -117,19 +119,26 @@ BalloonTipLabel.prototype.draw = function()
     // determine the rendering positions
     var positions = this.getRenderingPositions();
     
-    var labelWidth = 0;//this.htmlBalloonTipLabel.offsetWidth; // * this.htmlLabel.style.zoom;
-    var labelHeight = 0;//this.htmlBalloonTipLabel.offsetHeight; // * this.htmlLabel.style.zoom;
+    var labelWidth = this.htmlBalloonTipLabel.offsetWidth; // * this.htmlLabel.style.zoom;
+    var labelHeight = this.htmlBalloonTipLabel.offsetHeight; // * this.htmlLabel.style.zoom;
     
     // update positions if visible
     //if (this.htmlBalloonTipLabel.style.visibility == "visible")
     {
-        //this.htmlBalloonTipLabelLabel.style.left = bworks.canvas.offsetLeft + positions.labelX;
-        //this.htmlBalloonTipLabel.style.top = bworks.canvas.offsetTop + positions.labelY;
+        this.htmlBalloonTipLabel.style.left = bworks.canvas.offsetLeft + positions.labelX;
+        this.htmlBalloonTipLabel.style.top = bworks.canvas.offsetTop + positions.labelY;
 
         this.labelRect.load(bworks.canvas.offsetLeft + positions.labelX,
                             bworks.canvas.offsetTop + positions.labelY,
                             this.labelRect.left + labelWidth,
                             this.labelRect.top + labelHeight);
+        
+        if (g_hb1){
+        var id = 'a[id=' + this.id + ']';  
+        //$(id).qtip("reposition");
+        var api = $(id).qtip("api");
+        api.reposition(null, false); // Reposition without animation
+        }
     }
     //else
     {
@@ -143,14 +152,6 @@ BalloonTipLabel.prototype.draw = function()
         screenRect.loadRect(this.labelRect);
     }
     this.screenRect.setValueDirect(screenRect);
-    
-    var id = '#' + "BTL";//this.id;
-    /*$(id).qtip(
-    {
-        content : 'This is an active list element'//,
-        //show : 'mouseover',
-        //hide : 'mouseout'
-    })
 }
 
 BalloonTipLabel.prototype.getRenderingPositions = function()
@@ -237,31 +238,42 @@ BalloonTipLabel.prototype.showModified = function(show)
 
 function CreateHTMLBalloonTipLabel(id)
 {
-    var newDiv = null;
+    var newA = null;
 
     // Needs further refactoring. Currently set in an app Helper
     // because we don't have container scope here to append these elements
     if (bridgeworks.rasterComponents)
     {
         // containing div
-        newDiv = document.createElement("div");
-        if (newDiv)
+        newA = document.createElement("a");
+        if (newA)
         {
-            newDiv.setAttribute("id", id);
-            newDiv.style.visibility = "hidden";
-            newDiv.style.position = "absolute";
-            newDiv.style.zIndex = 3;
-            newDiv.onmousedown = function() { /*onMouseDown();*/ };
-            newDiv.onmouseup = function() { /*onMouseUp();*/ };
-            newDiv.onmousemove = function() { /*onMouseMove();*/ };
-            // disable selection
-            newDiv.onselectstart = new Function("return false");
+            newA.setAttribute("id", id);
+            newA.innerHTML = "Test";
+            newA.style.visibility = "hidden";
+            newA.style.position = "absolute";
 
-            bridgeworks.rasterComponents.appendChild(newDiv);
+            bridgeworks.rasterComponents.appendChild(newA);
         }
     }
 
-    return { div : newDiv };
+    var aid = 'a[id=' + id + ']';
+    g_hb1 = $(aid).qtip(
+    {
+        style :
+        {
+            classes : 'qtip-bootstrap qtip-rounded qtip-shadow'
+        },
+        content :
+        {
+            text : '<html><body><H1 id="H1">BalloonTipLabel</H1></body></html>'
+        },
+        //show : true,
+        hide : false
+    });
+    g_hb1.qtip("show");
+   
+    return newA;
 }
 
 function BalloonTipLabel_balloonTipLabelStyleModifiedCB(attribute, container)

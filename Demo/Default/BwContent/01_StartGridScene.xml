@@ -117,7 +117,7 @@
                 </fontStyle>
             </labelStyle>
         </Label>
-   <BalloonTipLabel name="bar" parent="cylinderRight" show="true">
+   <BalloonTipLabel name="bar" parent="F16" show="true">
        <balloonTipLabelStyle>
            <htmlLabelStyle>
                <html>Test</html>
