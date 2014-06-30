@@ -170,10 +170,7 @@
             }
 		</script>
 
-<a id="sub1" href="#">vitae odio</a>
-		
-<div id="BTL">T</div>
-<a href="#test" title="Tooltip text" onmouseover="bttest();" onmouseout="bttest2();">Sample link</a>
+<a id="sub2" href="#test" onmouseover="bttest();" onmouseout="bttest2();">Mouseover for BalloonTip!</a>
 		<!--<video controls="controls" src="http://localhost/bwjs/bwcontent/images/quake.mpg">
 		Your browser does not support the video tag.
 		</video>-->
@@ -195,18 +192,15 @@
                 
             }
             
-            var hb1 = null;
-            function bttest()
-            {
-             	 hb1 = new HelpBalloon({
-					title: 'Non-Ajax Balloon',
+            var hb1 = new HelpBalloon({
+					title: '',
 					content: 'This is an example of static '
 							+ 'balloon content.',
-							icon: $('BTL'),
-							useEvent: []
-
+							icon: $('sub2')
 				});
-				hb1.show();
+            function bttest()
+            {
+             	 hb1.show();
             }
             function bttest2()
             {
