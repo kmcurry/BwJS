@@ -409,7 +409,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
 {
     // 1. create the start tag.
 
-    if (container && this.DOM)
+    if (container) //this.DOM
     {
         var element = null;
         var pcszType = container.className;
