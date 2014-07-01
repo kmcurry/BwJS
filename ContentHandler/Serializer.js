@@ -14,8 +14,8 @@ function Serializer()
 
 Serializer.prototype.serialize = function(attribute,item,attributeName,container,SerializedContext)
 {
-    if(this.DOM)
-    {
+    //if(this.DOM)
+    //{
         if(this.RootElement)
         {
             var oldChild =  null;
@@ -32,28 +32,28 @@ Serializer.prototype.serialize = function(attribute,item,attributeName,container
         {
             this.serializeAttribute(container,0,"");
         }
-    }
+    //}
 }
 
 Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
 {
     if(attribute)
     {
-        if(attribute.getAttribute() == attrType.Node.Model)
+        if(attribute.getAttribute() == eAttrType.Model)
         {
             var model = attribute;
             this.serializeModel(model);
         }
-        if(attribute.getAttribute() == attrType.Node.PerspectiveCamera)
+        if(attribute.getAttribute() == eAttrType.PerspectiveCamera)
         {
             var ctr = attribute;
             this.serializeAttributeContainer(ctr)
         }
-        if(attribute.getAttribute() == attrType.Node.CommandSequence)
-        {
-            var cmd = attribute;
-            this.serializeCommand(cmd);
-        }
+//        if(attribute.getAttribute() == eAttrType.Node.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
+//        {
+//            var cmd = attribute;
+//            this.serializeCommand(cmd);
+//        }
         if(attribute.isContainer())
         {
             var ctr = attribute;
