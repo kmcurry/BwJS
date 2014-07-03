@@ -49,11 +49,11 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
             var ctr = attribute;
             this.serializeAttributeContainer(ctr)
         }
-//        if(attribute.getAttribute() == eAttrType.Node.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
-//        {
-//            var cmd = attribute;
-//            this.serializeCommand(cmd);
-//        }
+        if(attribute.getAttribute() == eAttrType.Node.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
+        {
+            var cmd = attribute;
+            this.serializeCommand(cmd);
+        }
         if(attribute.isContainer())
         {
             var ctr = attribute;
@@ -409,7 +409,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
 {
     // 1. create the start tag.
 
-    if (container) //this.DOM
+    if (container && this.DOM)
     {
         var element = null;
         var pcszType = container.className;
