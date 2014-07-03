@@ -1,13 +1,14 @@
 BalloonTipLabel.prototype = new RasterComponent();
 BalloonTipLabel.prototype.constructor = BalloonTipLabel;
 
-var g_hb1 = null;
-
 function BalloonTipLabel()
 {
     RasterComponent.call(this);
     this.className = "BallonTipLabel";
     this.attrType = eAttrType.BalloonTipLabel;
+    
+    this.qtip = null;
+    this.qtip_api = null;
     
     this.labelRect = new Rect(0, 0, 0, 0);
     
@@ -36,9 +37,13 @@ BalloonTipLabel.prototype.setGraphMgr = function(graphMgr)
     // create id
     this.id = "BalloonTipLabel" + this.graphMgr.getNextBalloonTipLabelIndex();
     
-    // create html div for canvas overlay
+    // create html components for canvas overlay
     var htmlBalloonTipLabel = CreateHTMLBalloonTipLabel(this.id);
-    this.htmlBalloonTipLabel = htmlBalloonTipLabel;
+    this.htmlBalloonTipLabel = htmlBalloonTipLabel.label;
+    this.qtip = htmlBalloonTipLabel.qtip;
+    
+    // get qtip api 
+    this.qtip_api = $('a[id=' + this.id + ']').qtip("api");
 }
 
 BalloonTipLabel.prototype.update = function(params, visitChildren)
@@ -50,7 +55,7 @@ BalloonTipLabel.prototype.update = function(params, visitChildren)
         {
             this.updateLabel = false;
 
-            updateLabel(updateParams.viewport);
+            //updateLabel(updateParams.viewport);
         }
     }
 
@@ -123,7 +128,7 @@ BalloonTipLabel.prototype.draw = function()
     var labelHeight = this.htmlBalloonTipLabel.offsetHeight; // * this.htmlLabel.style.zoom;
     
     // update positions if visible
-    //if (this.htmlBalloonTipLabel.style.visibility == "visible")
+    //if (this.show.getValueDirect())
     {
         this.htmlBalloonTipLabel.style.left = bworks.canvas.offsetLeft + positions.labelX;
         this.htmlBalloonTipLabel.style.top = bworks.canvas.offsetTop + positions.labelY;
@@ -133,21 +138,20 @@ BalloonTipLabel.prototype.draw = function()
                             this.labelRect.left + labelWidth,
                             this.labelRect.top + labelHeight);
         
-        if (g_hb1){
-        var id = 'a[id=' + this.id + ']';  
-        //$(id).qtip("reposition");
-        var api = $(id).qtip("api");
-        api.reposition(null, false); // Reposition without animation
+        if (this.qtip_api)
+        {
+            this.qtip_api.reposition(null, false); // Reposition without animation
+            //this.qtip_api.show();
         }
     }
     //else
-    {
-        this.labelRect.load(0, 0, 0, 0);
-    }
+    //{
+    //    this.labelRect.load(0, 0, 0, 0);
+    //}
     
     // update screen rect
     var screenRect = new Rect(0, 0, 0, 0);
-    //if (this.htmlBalloonTipLabel.style.visibility == "visible")
+    //if (this.show.getValueDirect())
     {
         screenRect.loadRect(this.labelRect);
     }
@@ -186,46 +190,53 @@ BalloonTipLabel.prototype.eventPerformed = function(event)
 
 BalloonTipLabel.prototype.balloonTipLabelStyleModified = function(update)
 {
-    var labelStyle = this.styles.getStyle();
-    if (labelStyle)
-    {
-        // displayMode
-        var displayMode;
-        labelStyle.displayMode().getValueDirect(displayMode);
-        if (!displayMode.empty())
-        {
-            if (!strcmp("default", displayMode[0]))
-            {
-                this.show.setValueDirect(true, false);
-            }
-            else
-            if (!strcmp("hide", displayMode[0]))
-            {
-                // don't hide if parent has focus
-                if (this.motionParent && this.motionParent.getAttribute("hasFocus").getValueDirect() > 0)
-                {
-                    // a bit kludgy for this programmer, but this is nessary to get the "Google Earth"-like behavior [MCB]
-                    this.hasFocus.setValueDirect(1);
-                    //DisableInspectionState();
-                }
-                else
-                {
-                    this.show.setValueDirect(false, false);
-                }
-            }
-        }
-    }
-
-    this.updateLabel = update;
-    incrementModificationCount();
 }
 
 BalloonTipLabel.prototype.balloonTipLabelStyleBgColorModified = function()
 {
 }
 
-BalloonTipLabel.prototype.balloonTipLabelStyleDisplayModeModifiedCB = function(mode)
+BalloonTipLabel.prototype.balloonTipLabelStyleDisplayModeModified = function(mode)
 {
+    switch (mode)
+    {
+        case "default":
+        {
+            this.show.setValueDirect(true, false);
+        }
+        break;
+        
+        case "hide":
+        {
+            // don't hide if parent has focus
+            if (this.motionParent && this.motionParent.getAttribute("hasFocus").getValueDirect() > 0)
+            {
+                // a bit kludgy for this programmer, but this is nessary to get the "Google Earth"-like behavior [MCB]
+                this.hasFocus.setValueDirect(1);
+                //DisableInspectionState();
+            }
+            else
+            {
+                this.show.setValueDirect(false, false);
+            }
+        }
+        break;
+    }
+        
+    this.incrementModificationCount();
+}
+
+BalloonTipLabel.prototype.balloonTipLabelStyleHtmlLabelStyleModified = function()
+{
+    // html
+    var html = this.balloonTipLabelStyle.htmlLabelStyle.html.getValueDirect().join("");
+    
+    if (this.qtip_api)
+    {
+        this.qtip_api.set("content.text", html);
+    }
+    
+    this.incrementModificationCount();
 }
 
 BalloonTipLabel.prototype.renderSequenceSlotModified = function()
@@ -234,6 +245,17 @@ BalloonTipLabel.prototype.renderSequenceSlotModified = function()
 
 BalloonTipLabel.prototype.showModified = function(show)
 {
+    if (this.qtip_api)
+    {
+        if (show)
+        {
+            this.qtip_api.show();
+        }
+        else
+        {
+            this.qtip_api.hide();
+        }
+    }
 }
 
 function CreateHTMLBalloonTipLabel(id)
@@ -244,12 +266,11 @@ function CreateHTMLBalloonTipLabel(id)
     // because we don't have container scope here to append these elements
     if (bridgeworks.rasterComponents)
     {
-        // containing div
         newA = document.createElement("a");
         if (newA)
         {
             newA.setAttribute("id", id);
-            newA.innerHTML = "Test";
+            //newA.innerHTML = "";
             newA.style.visibility = "hidden";
             newA.style.position = "absolute";
 
@@ -257,27 +278,31 @@ function CreateHTMLBalloonTipLabel(id)
         }
     }
 
-    var aid = 'a[id=' + id + ']';
-    g_hb1 = $(aid).qtip(
+    var id = 'a[id=' + id + ']';
+    var qtip = $(id).qtip(
     {
-        style :
+        style:
         {
-            classes : 'qtip-bootstrap qtip-rounded qtip-shadow'
+            classes: 'qtip-bootstrap qtip-rounded qtip-shadow qtip-close'
         },
         content :
         {
-            text : '<html><body><H1 id="H1">BalloonTipLabel</H1></body></html>'
+            text: '',
+            button: true
         },
         //show : true,
-        hide : false
+        hide:
+        {
+            event: false
+        }
     });
-    g_hb1.qtip("show");
    
-    return newA;
+    return { label: newA, qtip: qtip };
 }
 
 function BalloonTipLabel_balloonTipLabelStyleModifiedCB(attribute, container)
 {
+    container.balloonTipLabelStyleModified();
 }
 
 function BalloonTipLabel_balloonTipLabelStyleBgColorModifiedCB(attribute, container)
@@ -286,10 +311,12 @@ function BalloonTipLabel_balloonTipLabelStyleBgColorModifiedCB(attribute, contai
 
 function BalloonTipLabel_balloonTipLabelStyleDisplayModeModifiedCB(attribute, container)
 {
+    container.balloonTipLabelStyleDisplayModeModified(attribute.getValueDirect().join(""));
 }
 
 function BalloonTipLabel_BalloonTipLabelStyleHTMLLabelStyleModifiedCB(attribute, container)
 {
+    container.balloonTipLabelStyleHtmlLabelStyleModified();
 }
 
 function BalloonTipLabel_HTMLLabel_PageDimensionsModifiedCB(attribute, container)
@@ -298,6 +325,7 @@ function BalloonTipLabel_HTMLLabel_PageDimensionsModifiedCB(attribute, container
 
 function BalloonTipLabel_showModifiedCB(attribute, container)
 {
+    container.showModified(attribute.getValueDirect());
 }
 
 function BalloonTipLabel_renderSequenceSlotModifiedCB(attribute, container)
