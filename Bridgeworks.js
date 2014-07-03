@@ -13394,9 +13394,9 @@ RenderDirective.prototype.execute = function(root)
 
 function RenderDirective_ViewportModifiedCB(attribute, container)
 {
-    var vp = container.viewport.getValueDirect();
-    var url = container.backgroundImageFilename.getValueDirect().join("");
-    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
+//    var vp = container.viewport.getValueDirect();
+//    var url = container.backgroundImageFilename.getValueDirect().join("");
+//    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
 }
 
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
@@ -26618,6 +26618,7 @@ Bridgeworks.prototype.onLoadModified = function()
 
     this.commandMgr.clearCommandSequence();
     this.eventMgr.clearEvents();
+    $('#RasterComponents').empty();
     //this.resouceMgr.clear(); There is no resourceMgr in javascript version
     this.selector.clearSelections();
     this.selector.getAttribute("lastSelectedName").setValueDirect("");
