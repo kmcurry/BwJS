@@ -14,12 +14,12 @@ function Serializer()
 
 Serializer.prototype.serialize = function(attribute,item,attributeName,container,SerializedContext)
 {
-    //if(this.DOM)
-    //{
+    if(this.DOM)
+    {
         if(this.RootElement)
         {
             var oldChild =  null;
-            this.DOM.removeChild(this.RootElement,oldchild);
+            this.DOM.removeChild(this.RootElement,oldChild);
             this.RootElement = null;
 
             this.mixedModifiedCB(attr,data);
@@ -32,7 +32,7 @@ Serializer.prototype.serialize = function(attribute,item,attributeName,container
         {
             this.serializeAttribute(container,0,"");
         }
-    //}
+    }
 }
 
 Serializer.prototype.serializeAttribute = function (attribute,item,attrName)

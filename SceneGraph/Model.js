@@ -155,7 +155,7 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
     }
 }
 
-/*Model.prototype.postClone = function(clone,pathSrc,pathClone)
+Model.prototype.postClone = function(clone,pathSrc,pathClone)
 {
     var i;
     var j;
@@ -226,7 +226,8 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
     }
 
     // setup m_geometry, m_geometryIndicesMap, m_geometryBBoxesMap, and m_surfaceNameMap
-    GcModel* modelClone = dynamic_cast<GcModel*>(clone); //ASK MICHAEL
+    //ASK MICHAEL
+    /*GcModel* modelClone = dynamic_cast<GcModel*>(clone);
 
     // find geometry nodes under the clone
     var geometryNodesClone = [];
@@ -261,7 +262,7 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
         srcBBox = GetGeometryBBox(srcGeometry);
 
         if (!(Push_Back<GcGeometry*>(modelClone->m_geometry, geometry))) return;
-        if (srcIndices) modelClone->m_geometryIndicesMap[geometry] = *srcIndices;
+        if (srcIndices) modelClone.m_geometryIndicesMap[geometry] = *srcIndices;
         if (srcBBox) modelClone->m_geometryBBoxesMap[geometry] = *srcBBox;
 
         modelClone->UpdateGeometryAttrConnections(geometry, true);
@@ -303,11 +304,11 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
         }
 
         modelClone->UpdateSurfaceAttrConnections(surface, true);
-    }
+    }*/
 
     // call base-class implementation
     this.postClone(clone, pathSrc, pathClone);
-}*/
+}
 
 Model.prototype.setGraphMgr = function(graphMgr)
 {
