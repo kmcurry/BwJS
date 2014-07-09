@@ -12,16 +12,14 @@ function Transform()
     this.className = "Transform";
     this.attrType = eAttrType.Transform;
     
-    this.matrixTransform = null;
-    
     this.matrix = new Matrix4x4Attr
-    (1, 0, 0, 0,
+       (1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1);
-                         
+        
+    this.matrixTransform = this.matrix.getValueDirect();
     this.updateMatrix = true;
-    
 
     this.matrix.addModifiedCB(Transform_MatrixModifiedCB, this);
 

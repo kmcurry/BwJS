@@ -119,7 +119,7 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                                                   params.doubleSided, params.clipPlanes);
                     if (intersectRecord)
                     {
-                        params.directive.addPickRecord(new RayPickRecord(params.path, intersectRecord, params.camera));
+                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
                     }
                 }
             }

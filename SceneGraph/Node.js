@@ -9,6 +9,10 @@ function Node()
     
     this.children = [];
     this.parents = [];
+    this.modificationCount = 0;
+    this.thisModified = false;
+    this.childModified = false;
+    this.childrenModified = [];
     
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
@@ -28,6 +32,8 @@ Node.prototype.addChild = function(child)
 {
     this.children.push(child);
     
+    this.incrementModificationCount();
+    
     child.addParent(this);
 }
 
@@ -35,12 +41,16 @@ Node.prototype.insertChild = function(child, before)
 {
     this.children.splice(before, 0, child);
     
+    this.incrementModificationCount();
+    
     child.addParent(this);
 }
 
 Node.prototype.removeChild = function(child)
 {
     this.children.splice(this.children.indexOf(child), 1);
+    
+    this.incrementModificationCount();
     
     child.removeParent(this);
 }
@@ -107,7 +117,16 @@ Node.prototype.removeParent = function(parent)
 
 Node.prototype.update = function(params, visitChildren)
 {
-    params.path.push(this);
+    // only update if this and/or child has been modified
+    if (!this.thisModified && !this.childModified)
+    {
+        // no need to update; inform parent this node is unmodified
+        this.setChildModified(false, false);
+        params.visited.push(this);
+        return;
+    }
+    
+    params.visited.push(this);
     
     if (visitChildren)
     {
@@ -118,12 +137,25 @@ Node.prototype.update = function(params, visitChildren)
         }
     }
     
-    params.path.pop();
+    this.childModified = this.isChildModified();
 }
 
 Node.prototype.updateNode = function(node, params, visitChildren)
 {
+    // only update if this and/or child has been modified
+    if (!this.thisModified && !this.childModified)
+    {
+        // no need to update; inform parent this node is unmodified
+        this.setChildModified(false, false);
+        params.visited.push(this);
+        return;
+    }
+    
+    params.visited.push(this);
+    
     node.update(params, visitChildren);
+    
+    this.childModified = this.isChildModified();
 }
 
 Node.prototype.apply = function(directive, params, visitChildren)
@@ -134,21 +166,78 @@ Node.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
-    params.path.push(this);
-    
     if (visitChildren)
     {
-        // call for all children
-        for (var i=0; i < this.children.length; i++)
+        if (params.path)
         {
-            this.children[i].apply(directive, params, visitChildren);
-        }  
+            // call for next node in path if next node in path is a child of this node
+            if (params.path.length > params.pathIndex)
+            {
+                for (var i=0; i < this.children.length; i++)
+                {
+                    var next = params.path[params.pathIndex];
+
+                    if (this.children[i] == next)
+                    {
+                        params.pathIndex++;
+                        this.children[i].apply(directive, params, visitChildren);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // call for all children
+            for (var i=0; i < this.children.length; i++)
+            {
+                this.children[i].apply(directive, params, visitChildren);
+            }
+        }
     }
-    
-    params.path.pop();
 }
 
 Node.prototype.applyNode = function(node, directive, params, visitChildren)
 {
     node.apply(directive, params, visitChildren);
+}
+
+Node.prototype.setModified = function()
+{
+    this.thisModified = true;
+
+    // notify parent(s) of modification so that display lists can be maintained
+    this.setChildModified(true, true);
+}
+
+Node.prototype.incrementModificationCount = function()
+{
+    this.modificationCount++;
+    
+    this.setModified();
+}
+
+Node.prototype.setChildModified = function(modified, recurse)
+{
+    // set on parent(s) of this; recurse if specified
+    var parent = null;
+    for (var i=0; i < this.parents.length; i++)
+    {
+        parent = this.parents[i];
+        if (parent)
+        {
+            parent.childrenModified[this] = modified;
+            parent.childModified = modified ? true : parent.isChildModified();
+            if (recurse) parent.setChildModified(modified, recurse);
+        }
+    }
+}
+
+Node.prototype.isChildModified = function()
+{
+    for (var i in this.childrenModified)
+    {
+        if (this.childrenModified[i] == true) return true;
+    }
+
+    return false;
 }

@@ -7,7 +7,6 @@ function SGNode()
     this.className = "SGNode";
     
     this.graphMgr = null;
-    this.modificationCount = 0;
 }
 
 SGNode.prototype.setGraphMgr = function(graphMgr)
@@ -17,17 +16,108 @@ SGNode.prototype.setGraphMgr = function(graphMgr)
 
 SGNode.prototype.update = function(params, visitChildren)
 {
-    // call base-class implementation
-    Node.prototype.update.call(this, params, visitChildren);
+    // don't update if not enabled and not modified
+    if (!(this.enabled.getValueDirect()) && !this.thisModified)
+    {
+        return;
+    }
+
+    // only update if this and/or child has been modified
+    if (!this.thisModified && !this.childModified)
+    {
+        // no need to update; inform parent this node is unmodified
+        this.setChildModified(false, false);
+        params.visited.push(this);
+        return;
+    }
+    
+    params.visited.push(this);
+    
+    var subtreeModified = false;
+
+    if (this.thisModified)
+    {
+        subtreeModified = true;
+        this.thisModified = false;
+    }
+
+    if (this.childModified)
+    {
+        subtreeModified = true;
+    }
+    
+    if (visitChildren)
+    {
+        // call for all children
+        for (var i=0; i < this.children.length; i++)
+        {
+            this.children[i].update(params, visitChildren);
+        }
+    }
+    
+    this.childModified = this.isChildModified();
 }
 
 SGNode.prototype.apply = function(directive, params, visitChildren)
 {
-    // call base-class implementation
-    Node.prototype.apply.call(this, directive, params, visitChildren);
-}
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
+    {
+        return;
+    }
+    
+    switch (directive)
+    {
+        case "rayPick":
+            {
+                params.currentNodePath.push(this);
+            }
+            break;
+            
+        default:
+            {
+                // call base-class implementation
+                Node.prototype.apply.call(this, directive, params, visitChildren);
+                return;
+            }
+            break;
+    }
+        
+    if (visitChildren)
+    {
+        if (params.path)
+        {
+            // call for next node in path if next node in path is a child of this node
+            if (params.path.length > params.pathIndex)
+            {
+                for (var i=0; i < this.children.length; i++)
+                {
+                    var next = params.path[params.pathIndex];
 
-SGNode.prototype.incrementModificationCount = function()
-{
-    this.modificationCount++;
+                    if (this.children[i] == next)
+                    {
+                        params.pathIndex++;
+                        this.children[i].apply(directive, params, visitChildren);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // call for all children
+            for (var i=0; i < this.children.length; i++)
+            {
+                this.children[i].apply(directive, params, visitChildren);
+            }
+        }
+    }
+    
+    switch (directive)
+    {
+        case "rayPick":
+            {
+                params.currentNodePath.pop();
+            }
+            break;
+    }
 }

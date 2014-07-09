@@ -432,6 +432,11 @@ Matrix4x4.prototype.multiply = function(rhs)
 {
     var result = new Matrix4x4();
     
+    if (!rhs)
+    {
+        return;    
+    }
+    
     result.load
     (
         this._11 * rhs._11 + this._12 * rhs._21 + this._13 * rhs._31 + this._14 * rhs._41,
