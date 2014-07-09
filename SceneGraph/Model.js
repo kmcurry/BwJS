@@ -8,7 +8,9 @@ function Model()
     this.attrType = eAttrType.Model;
     
     this.geometryBBoxesMap = [];
-    
+    this.geometryAttrConnections = [];
+    this.surfaceAttrConnections = [];
+
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);
     this.selectable = new BooleanAttr(true);
@@ -227,15 +229,16 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
 
     // setup m_geometry, m_geometryIndicesMap, m_geometryBBoxesMap, and m_surfaceNameMap
     //ASK MICHAEL
-    /*GcModel* modelClone = dynamic_cast<GcModel*>(clone);
+    var modelClone = clone;
 
     // find geometry nodes under the clone
     var geometryNodesClone = [];
     clone.searchesTree(names, types, false, true, false, null, null, null, geometryNodesClone);
 
     // synchronize m_geometryAttrConnections using "OR" operation (this will ensure attributes set inline on the clone are not lost)
-    std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
-    std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
+    //std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
+    //this.geometryAttrConnections[]
+    //std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
     for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
          it != m_geometryAttrConnections.end(), clone_it != modelClone->m_geometryAttrConnections.end();
          it++, clone_it++)
@@ -304,12 +307,59 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
         }
 
         modelClone->UpdateSurfaceAttrConnections(surface, true);
-    }*/
+    }
 
     // call base-class implementation
     this.postClone(clone, pathSrc, pathClone);
 }
 
+Model.prototype.initializeSurfaceAttrConnectionsMap = function()
+{
+    this.surfaceAttrConnections.push(new Pair(this.color, false));
+    this.surfaceAttrConnections.push(new Pair(this.ambientLevel, false));
+    this.surfaceAttrConnections.push(new Pair(this.diffuseLevel, false));
+    this.surfaceAttrConnections.push(new Pair(this.specularLevel, false));
+    this.surfaceAttrConnections.push(new Pair(this.emissiveLevel, false));
+    this.surfaceAttrConnections.push(new Pair(this.ambient, false));
+    this.surfaceAttrConnections.push(new Pair(this.diffuse, false));
+    this.surfaceAttrConnections.push(new Pair(this.specular, false));
+    this.surfaceAttrConnections.push(new Pair(this.emissive, false));
+    this.surfaceAttrConnections.push(new Pair(this.glossiness, false));
+    this.surfaceAttrConnections.push(new Pair(this.opacity, false));
+    this.surfaceAttrConnections.push(new Pair(this.doubleSided, false));
+    this.surfaceAttrConnections.push(new Pair(this.texturesEnabled, false));
+    this.surfaceAttrConnections.push(new Pair(this.renderSequenceSlot, false));
+}
+
+Model.prototype.initializeGeometryAttrConnectionsMap = function()
+{
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_selectable, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_cullable, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_show, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_approximationLevels, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_showApproximationLevel, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_sortPolygons, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_flipPolygons, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_intersector, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_intersectee, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_stationary, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_shadowCaster, false)))) return;
+    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_shadowTarget, false)))) return;
+}
+
+void GcModel::ClearSurfaceAttrConnectionsMap()
+{
+    m_surfaceAttrConnections.clear();
+
+    InitializeSurfaceAttrConnectionsMap();
+}
+
+void GcModel::ClearGeometryAttrConnectionsMap()
+{
+    m_geometryAttrConnections.clear();
+
+    InitializeGeometryAttrConnectionsMap();
+}
 Model.prototype.setGraphMgr = function(graphMgr)
 {
     this.isolatorNode.setGraphMgr(graphMgr);
