@@ -51,4 +51,6 @@ UpdateDirective.prototype.execute = function(root)
             nodes[i].update(params, false);
         }
     }
+    
+    return params.visited;
 }

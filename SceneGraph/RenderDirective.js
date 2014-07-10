@@ -61,7 +61,7 @@ RenderDirective.prototype.execute = function(root)
     root = root || this.rootNode.getValueDirect();
 
     // update
-    this.updateDirective.execute(root);
+    var visited = this.updateDirective.execute(root);
 
     // render
     var params = new RenderParams();
@@ -84,7 +84,7 @@ RenderDirective.prototype.execute = function(root)
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-    root.apply("render", params, true);
+    visited[0].apply("render", params, true);
 
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())
