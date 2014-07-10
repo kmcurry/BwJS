@@ -65,7 +65,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
     var expired = evaluator.getAttribute("expired").getValueDirect();
     var orphan = evaluator.getAttribute("orphan").getValueDirect();
 
-    if (enabled && !expired)
+    if (enabled)
     {
         switch (evaluator.className)
         {
@@ -73,6 +73,21 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
             {
                 var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
                 evaluator.getAttribute("time").setValue(time, params);
+                
+                // setting the time updates the expired flag
+                expired = evaluator.getAttribute("expired").getValueDirect();
+                
+                // if not expired, evaluate
+                if (!expired)
+                {
+                    evaluator.evaluate();
+                }
+            }
+            break;
+            
+            default:
+            {
+                
             }
             break;
         }
@@ -80,6 +95,52 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
         // don't evaluate scene/object inspection here, or any other evaluator not in the scene graph
         if (!orphan) evaluator.evaluate();
     }
+
+    // if evaluator has expired, and it's set to "renderAndRelease", release it
+    if (expired && evaluator.getAttribute("renderAndRelease").getValueDirect())
+    {
+        this.registry.unregister(evaluator);
+    }
+}
+
+RenderAgent.prototype.animateEvaluator = function(evaluator, time)
+{
+    var enabled = evaluator.getAttribute("enabled").getValueDirect();
+    var expired = evaluator.getAttribute("expired").getValueDirect();
+    
+    switch (evaluator.className)
+    {
+        case "KeyframeInterpolator":
+        {
+            var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
+            evaluator.getAttribute("time").setValue(time, params);
+            
+            // setting the time updates the expired flag
+            expired = evaluator.getAttribute("expired").getValueDirect();
+            
+            // if not expired, evaluate
+            if (!expired)
+            {
+                evaluator.evaluate();
+            }
+        }
+        break;
+        
+        default:
+        {
+            // if non-KFI and not an orphan, enabled and not expired, and not set to evaluate on Update(), evaluate
+            if (enabled && !expired)
+            {
+                // don't evaluate scene/object inspectors here, or any other evaluator not in the scene graph
+                if (evaluator.getAttribute("orphan").getValueDirect == false)
+                {   
+                    evaluator.evaluate();
+                }
+            }
+        }
+        break;
+    }
+
 
     // if evaluator has expired, and it's set to "renderAndRelease", release it
     if (expired && evaluator.getAttribute("renderAndRelease").getValueDirect())
