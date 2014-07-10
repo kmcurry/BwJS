@@ -228,7 +228,6 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
     }
 
     // setup m_geometry, m_geometryIndicesMap, m_geometryBBoxesMap, and m_surfaceNameMap
-    //ASK MICHAEL
     var modelClone = clone;
 
     // find geometry nodes under the clone
@@ -239,9 +238,10 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
     //std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
     //this.geometryAttrConnections[]
     //std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
-    for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
+   /* for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
          it != m_geometryAttrConnections.end(), clone_it != modelClone->m_geometryAttrConnections.end();
-         it++, clone_it++)
+         it++, clone_it++)*/
+    for(var i = 0;i<this.geometryAttrConnections.length;i++)
     {
         // if this node has had a geometry attribute set, and the clone has not, copy the value from this
         if (it->second && !clone_it->second)
@@ -333,33 +333,34 @@ Model.prototype.initializeSurfaceAttrConnectionsMap = function()
 
 Model.prototype.initializeGeometryAttrConnectionsMap = function()
 {
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_selectable, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_cullable, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_show, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_approximationLevels, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_showApproximationLevel, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_sortPolygons, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_flipPolygons, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_intersector, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_intersectee, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_stationary, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_shadowCaster, false)))) return;
-    this.geometryAttrConnections, std::pair<CAttribute*, bool>(m_shadowTarget, false)))) return;
+    this.geometryAttrConnections.push(new Pair(this.selectable, false));
+    this.geometryAttrConnections.push(new Pair(this.cullable, false));
+    this.geometryAttrConnections.push(new Pair(this.show, false));
+    this.geometryAttrConnections.push(new Pair(this.approximationLevels, false));
+    this.geometryAttrConnections.push(new Pair(this.showApproximationLevel, false));
+    this.geometryAttrConnections.push(new Pair(this.sortPolygons, false));
+    this.geometryAttrConnections.push(new Pair(this.flipPolygons, false));
+    this.geometryAttrConnections.push(new Pair(this.intersector, false));
+    this.geometryAttrConnections.push(new Pair(this.intersectee, false));
+    this.geometryAttrConnections.push(new Pair(this.stationary, false));
+    this.geometryAttrConnections.push(new Pair(this.shadowCaster, false));
+    this.geometryAttrConnections.push(new Pair(this.shadowTarget, false));
 }
 
-void GcModel::ClearSurfaceAttrConnectionsMap()
+Model.prototype.clearSurfaceAttrConnectionMap = function()
 {
-    m_surfaceAttrConnections.clear();
+    this.surfaceAttrConnections = [];
 
-    InitializeSurfaceAttrConnectionsMap();
+    this.initializeSurfaceAttrConnectionsMap();
 }
 
-void GcModel::ClearGeometryAttrConnectionsMap()
+Model.prototype.clearGeometryAttrConnectionsMap = function()
 {
-    m_geometryAttrConnections.clear();
+    this.geometryAttrConnections = [];
 
-    InitializeGeometryAttrConnectionsMap();
+    this.initializeGeometryAttrConnectionsMap();
 }
+
 Model.prototype.setGraphMgr = function(graphMgr)
 {
     this.isolatorNode.setGraphMgr(graphMgr);
