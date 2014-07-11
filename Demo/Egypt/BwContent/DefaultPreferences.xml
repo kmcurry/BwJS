@@ -43,12 +43,12 @@
 	</ConnectAttributes>
 	
   <!--MOUSE VIEW RELATIVE PAN-->
-  <ConnectAttributes name="MButtonBoth.Scene" event="MButton1+MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
-    <sourceAttribute>deltaX</sourceAttribute>
-    <targetAttribute>invertedPanDelta:0</targetAttribute>
-    <sourceAttribute>deltaY</sourceAttribute>
-    <targetAttribute>invertedPanDelta:1</targetAttribute>
-  </ConnectAttributes>
+    <ConnectAttributes name="MButtonBoth.Scene" event="MButton1+MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>invertedPanDelta:0</targetAttribute>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>invertedPanDelta:1</targetAttribute>
+    </ConnectAttributes>
 	<!--<ConnectAttributes name="MButton2.Scene" event="MButton2.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">
 		<sourceAttribute>deltaX</sourceAttribute>
 		<targetAttribute>translationDelta:0</targetAttribute>
