@@ -5,6 +5,7 @@ function CommandSequence()
 {
     Command.call(this);
     this.className = "CommandSequence";
+    this.attrType = eAttrType.CommandSequence;
     
     this.sequence = [];
 }

@@ -5,6 +5,7 @@ function AppendNodeCommand()
 {
     Command.call(this);
     this.className = "AppendNodeCommand";
+    this.attrType = eAttrType.AppendNode;
 
     this.parent = new StringAttr("");
     this.child = new StringAttr("");

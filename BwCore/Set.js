@@ -5,6 +5,7 @@ function SetCommand()
 {
     Command.call(this);
     this.className = "SetCommand";
+    this.attrType = eAttrType.Set;
     
     this.attributeValuePairs = [];
     

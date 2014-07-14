@@ -11,10 +11,12 @@ function GraphMgr()
     this.lightIndex = 0;
     this.material = null;
     this.dissolve = null;
+    this.balloonTipLabel = null;
     this.drawTextures = true;
     this.textureArrayStack = new Stack(new TextureArray());
     this.projectionTextureArrayStack = new Stack(new TextureArray());
     this.labelIndex = 1;
+    this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
     
     this.name = new StringAttr("GraphMgr");
@@ -53,6 +55,16 @@ GraphMgr.prototype.setCurrentDissolve = function(dissolve)
     this.dissolve = dissolve;
 }
 
+GraphMgr.prototype.getCurrentBalloonTipLabel = function()
+{
+    return this.balloonTipLabel;
+}
+
+GraphMgr.prototype.setCurrentBalloonTipLabel = function(balloonTipLabel)
+{
+    this.balloonTipLabel = balloonTipLabel;
+}
+
 GraphMgr.prototype.getDrawTextures = function()
 {
     return this.drawTextures;
@@ -66,4 +78,25 @@ GraphMgr.prototype.setDrawTextures = function(drawTextures)
 GraphMgr.prototype.getNextLabelIndex = function()
 {
     return this.labelIndex++;
+}
+
+GraphMgr.prototype.getNextBalloonTipLabelIndex = function()
+{
+    return this.balloonTipLabelIndex++;    
+}
+
+GraphMgr.prototype.reset = function ()
+{
+    this.lightIndex = 0;
+    this.labelIndex = 1;
+    this.balloonTipLabelIndex = 1;
+    this.setCurrentDissolve(null);
+    this.setCurrentMaterial(null);
+    this.setCurrentBalloonTipLabel(null);
+    this.setDrawTextures(true);
+
+    for (var i=0; i < gl_MaxLights; i++)
+    {
+        this.renderContext.enableLight(i, false);
+    }
 }

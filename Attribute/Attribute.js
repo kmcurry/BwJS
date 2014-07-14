@@ -406,3 +406,16 @@ Attribute.prototype.setRegistry = function(registry)
 {
     this.registry = registry;
 }
+Attribute.prototype.flagDeserializedFromXML = function()
+{
+    this.deserialized = true;
+
+    if (this.attrContainer) // also flag container if present, otherwise serialization won't occur
+    {
+        this.attrContainer.flagDeserializedFromXML();
+    }
+}
+Attribute.prototype.isFlagDeserializedFromXML = function()
+{
+    return this.deserialized;
+}
