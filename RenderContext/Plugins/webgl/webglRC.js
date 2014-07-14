@@ -71,6 +71,8 @@ function webglRC(canvas, background)
     
     this.applyModelViewTransform = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyModelViewTransform, null);
+        
         gl.uniformMatrix4fv(program.modelViewMatrix, false, new Float32Array(this.modelViewMatrixStack.top().flatten()));
 
         var normalMatrix = new Matrix4x4();
@@ -82,33 +84,43 @@ function webglRC(canvas, background)
     
     this.applyProjectionTransform = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyProjectionTransform, null);
+        
         gl.uniformMatrix4fv(program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
     }
     
     this.clear = function()
     {
-        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, new Array());
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, null);
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);// | gl.STENCIL_BUFFER_BIT);
     }
 
     this.clearColor = function(r, g, b, a)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearColor, [r, g, b, a]);
+        
         gl.clearColor(r, g, b, a);
     }
     
     this.createVertexBuffer = function(numVerticesPerPrimitive)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateVertexBuffer, [numVerticesPerPrimitive]);
+        
         return new webglVB(gl, program, numVerticesPerPrimitive);
     }
     
     this.createTextureObject = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateTextureObject, null);
+        
         return new webglTO(gl, program);
     }
 
     this.disable = function(cap)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Disable, [cap]);
+        
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
@@ -135,6 +147,8 @@ function webglRC(canvas, background)
 
     this.enable = function(cap)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Enable, [cap]);
+        
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
@@ -161,6 +175,8 @@ function webglRC(canvas, background)
 
     this.enabled = function(cap)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Enabled, [cap]);
+        
         var e = false;
 
         switch (cap)
@@ -191,6 +207,8 @@ function webglRC(canvas, background)
 
     this.enableLight = function(index, enable)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableLight, [index, enable]);
+        
         gl.uniform1i(program.lightSource[index].enabled, enable);
 
         vLightEnabledStates[index] = enable;
@@ -198,16 +216,22 @@ function webglRC(canvas, background)
     
     this.enableTextureStage = function(stage, enable)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableTextureStage, [stage, enable]);
+        
         gl.uniform1i(program.textureStageEnabled[stage], enable);
     }
     
     this.finish = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Finish, null);
+        
         gl.finish();
     }
 
     this.getEnabledLights = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetEnabledLights, null);
+        
         var indices = [];
 
         for (var i = 0; i < vLightEnabledStates.length; i++)
@@ -223,6 +247,8 @@ function webglRC(canvas, background)
 
     this.getGlobalIllumination = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
+        
         var values = gl.getUniform(program, program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
@@ -230,21 +256,29 @@ function webglRC(canvas, background)
     
     this.getLight = function(index)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetLight, [index]);
+        
         return { desc: vLightDescs[index], matrix: vLightMatrices[index] };
     }
     
     this.getMaxLightCount = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetMaxLightCount, null);
+        
         return gl_MaxLights;
     }
     
     this.getMaxTextureStages = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetMaxTextureStages, null);
+        
         return gl_MaxTextureStages;
     }
     
     this.perspectiveMatrixLH = function(left, right, top, bottom, near, far)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.PerspectiveMatrixLH, [left, right, top, bottom, near, far]);
+        
         var p = new Matrix4x4();
         
         var a = (right + left) / (right - left);
@@ -266,6 +300,8 @@ function webglRC(canvas, background)
     
     this.orthographicMatrixLH = function(left, right, top, bottom, near, far)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.OrthographicMatrixLH, [left, right, top, bottom, near, far]);
+        
         var p = new Matrix4x4();
         
         p._11 =  2 / (right - left);
@@ -280,6 +316,8 @@ function webglRC(canvas, background)
     
     this.setBlendFactor = function(sfactor, dfactor)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendFactor, [sfactor, dfactor]);
+        
         var gl_SrcFactor;
         switch (sfactor)
         {
@@ -315,6 +353,8 @@ function webglRC(canvas, background)
 
     this.setEnabledLights = function(indices)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledLights, [indices]);
+        
         // disable all previously enabled lights
         for (var i = 0; i < vLightEnabledStates.length; i++)
         {
@@ -333,6 +373,8 @@ function webglRC(canvas, background)
     
     this.setFrontMaterial = function(desc)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetFrontMaterial, [desc]);
+        
         // ambient
         if (desc.validMembersMask & MATERIALDESC_AMBIENT_BIT)
         {
@@ -381,6 +423,8 @@ function webglRC(canvas, background)
 
     this.setGlobalIllumination = function(ambient)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetGlobalIllumination, [ambient]);
+        
         var values = [ ambient.r, ambient.g, ambient.g, ambient.a ];
 
         gl.uniform4fv(program.globalAmbientLight, new Float32Array(values));
@@ -388,6 +432,8 @@ function webglRC(canvas, background)
 
     this.setLight = function(index, desc)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
+        
         // get current modelView transform
         var modelViewMatrix = this.modelViewMatrixStack.top();
 
@@ -505,6 +551,8 @@ function webglRC(canvas, background)
 
     this.setTextureBlendFactor = function(factor)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureBlendFactor, [factor]);
+        
         // update material diffuse component alpha to blend factor
         var diffuse = [ this.frontMaterial.diffuse.r, this.frontMaterial.diffuse.g, this.frontMaterial.diffuse.b, factor ];
         gl.uniform4fv(program.frontMaterial.diffuse, new Float32Array(diffuse));
@@ -512,11 +560,15 @@ function webglRC(canvas, background)
     
     this.setTextureBlendOp = function(op)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureBlendOp, [op]);
+        
         gl.uniform1i(program.textureBlendOp, op);
     }
 
     this.setViewport = function(x, y, width, height)
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetViewport, [x, y, width, height]);
+        
         gl.viewport(x, y, width, height);
     }
 }
