@@ -169,13 +169,13 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.IsRenderModeEnabled:
         {
-                
+            return this.renderContext.isRenderModeEnabled(desc.params[0]);
         }
         break;
         
         case eRenderMethod.SetViewport:
         {
-
+            this.renderContext.setViewport(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
         }
         break;
     
@@ -183,37 +183,38 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.Clear:
         {
-            
+            this.renderContext.clear(desc.params[0], desc.params[1], desc.params[2], desc.params[3],
+                desc.params[4], desc.params[5], desc.params[6], desc.params[7], desc.params[8]);            
         }
         break;
         
         case eRenderMethod.SetMatrixMode:
         {
-            
+            this.renderContext.setMatrixMode(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.PushMatrix:
         {
-            
+            this.renderContext.pushMatrix();
         }
         break;
         
         case eRenderMethod.PopMatrix:
         {
-            
+            this.renderContext.popMatrix();    
         }
         break;
         
         case eRenderMethod.LoadMatrix:
         {
-            
+            this.renderContext.loadMatrix(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.MultMatrix:
         {
-            
+            this.renderContext.multMatrix(desc.params[0]);    
         }
         break;
         
@@ -221,25 +222,29 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.PerspectiveMatrixLH:
         {
-            
+            this.renderContext.perspectiveMatrixLH(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5]);    
         }
         break;
         
         case eRenderMethod.PerspectiveMatrixRH:
         {
-            
+            this.renderContext.perspectiveMatrixRH(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5]);        
         }
         break;
         
         case eRenderMethod.OrthographicMatrixLH:
         {
-            
+            this.renderContext.OrthographicMatrixLH(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5]);    
         }
         break;
         
         case eRenderMethod.OrthographicMatrixRH:
         {
-            
+            this.renderContext.OrthographicMatrixRH(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5]);    
         }
         break;
         
@@ -247,7 +252,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetLight:
         {
-            
+            this.renderContext.setLight(desc.params[0], desc.params[1]);   
         }
         break;
         
@@ -255,19 +260,19 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.EnableLight:
         {
-            
+            this.renderContext.enableLight(desc.params[0], desc.params[1]);   
         }
         break;
         
         case eRenderMethod.IsLightEnabled:
         {
-            
+            return this.renderContext.isLightEnabled(desc.params[0]);   
         }
         break;
         
         case eRenderMethod.SetEnabledLights:
         {
-            
+            this.renderContext.setEnabledLights(desc.params[0]);   
         }
         break;
         
@@ -289,7 +294,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetGlobalIllumination:
         {
-            
+            this.renderContext.setGlobalIllumination(desc.params[0]);
         }
         break;
         
@@ -297,7 +302,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetShadeModel:
         {
-            
+            this.renderContext.setShadeModel(desc.params[0]);
         }
         break;
         
@@ -305,7 +310,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetColor:
         {
-            
+            this.renderContext.setColor(desc.params[0]);
         }
         break;
         
@@ -313,7 +318,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetMaterial:
         {
-            
+            this.renderContext.setMaterial(desc.params[0]);    
         }
         break;
         
@@ -321,7 +326,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetBlendFactor:
         {
-            
+            this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);    
         }
         break;
         
@@ -331,43 +336,43 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.DrawPrimitives:
         {
-            
+            this.renderContext.drawPrimitives(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.CreateVertexBuffer:
         {
-            
+            return this.renderContext.createVertexBuffer(desc.params[0]);   
         }
         break;
         
         case eRenderMethod.DeleteVertexBuffer:
         {
-            
+            this.renderContext.deleteVertexBuffer(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.CreateIndexBuffer:
         {
-            
+            return this.renderContext.createIndexBuffer();    
         }
         break;
         
         case eRenderMethod.DeleteIndexBuffer:
         {
-            
+            this.renderContext.deleteIndexBuffer(desc.params[0]);   
         }
         break;
         
         case eRenderMethod.CreateTexture:
         {
-            
+            return this.renderContext.createTexture(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.DeleteTexture:
         {
-            
+            this.renderContext.deleteTexture(desc.params[0]);    
         }
         break;
         
@@ -375,43 +380,43 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.EnableTextureStage:
         {
-            
+            this.renderContext.enableTextureStage(desc.params[0], desc.params[1]);    
         }
         break;
         
         case eRenderMethod.SetTextureBlendOp:
         {
-            
+            this.renderContext.setTextureBlendOp(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetTextureBlendFactor:
         {
-            
+            this.renderContext.setTextureBlendFactor(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetTextureWrap:
         {
-            
+            this.renderContext.setTextureWrap(desc.params[0], desc.params[1], desc.params[2]);    
         }
         break;
         
         case eRenderMethod.SetTextureBorderColor:
         {
-            
+            this.renderContext.setTextureBorderColor(desc.params[0], desc.params[1]);    
         }
         break;
         
         case eRenderMethod.DrawSphere:
         {
-            
+            this.renderContext.drawSphere(desc.params[0], desc.params[1], desc.params[2]);    
         }
         break;
         
         case eRenderMethod.DrawBox:
         {
-            
+            this.renderContext.drawBox(desc.params[0], desc.params[1]);    
         }
         break;
         
@@ -419,55 +424,61 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.ReadFrameBuffer:
         {
-            
+            return this.renderContext.readFrameBuffer(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5]);    
         }
         break;
         
         case eRenderMethod.ReadAuxBuffer:
         {
-            
+            return this.renderContext.readAuxBuffer(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5], desc.params[6]);   
         }
         break;
         
         case eRenderMethod.WriteFrameBuffer:
         {
-            
+            this.renderContext.writeFrameBuffer(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5], desc.params[6], desc.params[7],
+                desc.params[8]);    
         }
         break;
         
         case eRenderMethod.WriteAuxBuffer:
         {
-            
+            this.renderContext.writeAuxBuffer(desc.params[0], desc.params[1], desc.params[2],
+                desc.params[3], desc.params[4], desc.params[5], desc.params[6], desc.params[7],
+                desc.params[8], desc.params[9]);   
         }
         break;
         
         case eRenderMethod.SetPointSize:
         {
-            
+            this.renderContext.setPointSize(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetLineWidth:
         {
-            
+            this.renderContext.setLineWidth(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SupportsPixelFormat:
         {
-            
+            return this.renderContext.supportsPixelFormat(desc.params[0]);   
         }
         break;
         
         case eRenderMethod.SupportsAntialiasing:
         {
-            
+            return this.renderContext.supportsAntialising();    
         }
         break;
         
         case eRenderMethod.SetUserMaxTextureSize:
         {
-            
+            this.renderContext.setUserMaxTextureSize(desc.params[0]);    
         }
         break;
         
@@ -475,7 +486,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetFogParameters:
         {
-            
+            this.renderContext.setFogParameters(desc.params[0]);    
         }
         break;
         
@@ -483,7 +494,7 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.SetPolygonWindingOrder:
         {
-            
+            this.renderContext.setPolygonWindingOrder(desc.params[0]);    
         }
         break;
         
@@ -491,37 +502,37 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.ReversePolygonWindingOrder:
         {
-            
+            this.renderContext.reversePolygonWindingOrder();    
         }
         break;
         
         case eRenderMethod.SetDepthFunc:
         {
-            
+            this.renderContext.setDepthFunc(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetStencilFunc:
         {
-            
+            this.renderContext.setStencilFunc(desc.params[0], desc.params[1], desc.params[2]);    
         }
         break;
         
         case eRenderMethod.SetStencilWriteMask:
         {
-            
+            this.renderContext.setStencilWriteMask(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetStencilOp:
         {
-            
+            this.renderContext.setStencilOp(desc.params[0], desc.params[1], desc.params[2]);    
         }
         break;
         
         case eRenderMethod.SetPolygonOffset:
         {
-            
+            this.renderContext.setPolygonOffset(desc.params[0], desc.params[1]);    
         }
         break;
         
@@ -531,19 +542,19 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         
         case eRenderMethod.CreateDisplayList:
         {
-            
+            return this.renderContext.createDisplayList();    
         }
         break;
         
         case eRenderMethod.DeleteDisplayList:
         {
-            
+            this.renderContext.deleteDisplayList(desc.params[0]);    
         }
         break;
         
         case eRenderMethod.SetRenderTarget:
         {
-            
+            this.renderContext.setRenderTarget(desc.params[0]);    
         }
         break;
 
