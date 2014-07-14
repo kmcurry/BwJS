@@ -61,16 +61,30 @@ RenderDirective.prototype.execute = function(root)
     root = root || this.rootNode.getValueDirect();
 
     // update
-    this.updateDirective.execute(root);
+    var visited = this.updateDirective.execute(root);
 
     // render
     var params = new RenderParams();
+    /*
+    renderParams.path = NULL;//m_path;
+    renderParams.pathIndex = 1;
+    renderParams.viewport = m_currentViewport;
+    renderParams.jitterAmt = m_currentJitterAmt + jitterAmt; // RenderDirective jitter + AA jitter
+    renderParams.distanceSortAgent = m_distanceSortAgent;
+    renderParams.polygonSortAgent = m_polygonSortAgent;
+    renderParams.renderSequenceAgent = m_renderSequenceAgent;
+    renderParams.shadowRenderAgent = m_shadowRenderAgent;
+    renderParams.drawTextures = m_texturesEnabled->GetValueDirect();
+    renderParams.userData = m_userData->GetValueDirect();
+     */
     params.directive = this;
+    params.path = null;
+    params.pathIndex = 1;
     params.viewport.loadViewport(this.viewport.getValueDirect());
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-    root.apply("render", params, true);
+    visited[0].apply("render", params, true);
 
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())

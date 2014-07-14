@@ -6,6 +6,8 @@ function UpdateParams()
     DirectiveParams.call(this);
     
     this.pass = 0;
+    this.timeIncrement = 0;
+    this.visited = [];
     this.nextPass = [];
 }
 
@@ -49,4 +51,6 @@ UpdateDirective.prototype.execute = function(root)
             nodes[i].update(params, false);
         }
     }
+    
+    return params.visited;
 }
