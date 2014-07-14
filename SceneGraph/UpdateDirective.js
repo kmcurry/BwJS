@@ -9,6 +9,8 @@ function UpdateParams()
     this.timeIncrement = 0;
     this.visited = [];
     this.nextPass = [];
+    this.displayListObj = null;
+    this.disableDisplayLists = false;
 }
 
 UpdateDirective.prototype = new SGDirective();

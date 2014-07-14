@@ -434,6 +434,11 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     this.synchronizeSectorPosition();       
 }
 
+ParentableMotionElement.prototype.updateChildDisplayLists = function()
+{
+    
+}
+
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
 {
     container.updatePosition = true;

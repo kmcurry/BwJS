@@ -13,6 +13,9 @@ function RenderParams()
     this.opacity = 1;
     this.distanceSortAgent = null;
     this.drawTextures = true;
+    this.displayListObj = null;
+    this.disableDisplayLists = false;
+    this.resetDisplayLists = false;
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -46,6 +49,7 @@ function RenderDirective()
     this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
        
     this.updateDirective = new UpdateDirective();
+    this.resetDisplayLists = false;
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)

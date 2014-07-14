@@ -7,11 +7,23 @@ function SGNode()
     this.className = "SGNode";
     
     this.graphMgr = null;
+    this.recordDisplayList = false;
+    this.disableDisplayLists = false;
+    this.displayListObj = null;
+    
+    this.enableDisplayList = new BooleanAttr(true);
+    this.autoDisplayList = new BooleanAttr(true);
+    this.updateDisplayList = new PulseAttr();
+    
+    this.registerAttribute(this.enableDisplayList, "enableDisplayList");
+    this.registerAttribute(this.autoDisplayList, "autoDisplayList");
+    this.registerAttribute(this.updateDisplayList, "updateDisplayList");
 }
 
 SGNode.prototype.setGraphMgr = function(graphMgr)
 {
     this.graphMgr = graphMgr;
+    this.displayListObj = new DisplayListObj(this.graphMgr.renderContext);
 }
 
 SGNode.prototype.update = function(params, visitChildren)
@@ -120,4 +132,29 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
             }
             break;
     }
+}
+
+SGNode.prototype.isRecordingDisplayList = function()
+{
+    
+}
+
+SGNode.prototype.enableDisplayListModified = function()
+{
+    
+}
+
+function SGNode_EnableDisplayListModifiedCB(attribute, container)
+{
+    
+}
+
+function SGNode_AutoDisplayListModifiedCB(attribute, container)
+{
+    
+}
+
+function SGNode_UpdateDisplayListModifiedCB(attribute, container)
+{
+    
 }

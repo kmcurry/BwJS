@@ -31,6 +31,11 @@ Group.prototype.proxyChildAttrsModified = function()
     // TODO
 }
 
+Group.prototype.childAutoDisplayListModified = function()
+{
+    
+}
+
 function Group_ProxyChildAttrsModifiedCB(attribute, container)
 {
     container.proxyChildAttrsModified();
@@ -40,3 +45,19 @@ function Group_ProxiedAttrModifiedCB(attribute, data)
 {
     data.group.proxiedAttrModified(data.proxiedNodeTypeString, attribute, data.proxiedAttrName);
 }
+
+function Group_EnableDisplayListModifiedCB(attribute, container)
+{
+    
+}
+
+function Group_AutoDisplayListModifiedCB(attribute, container)
+{
+    
+}
+
+function Group_ChildAutoDisplayListModifiedCB(attribute, container)
+{
+    
+}
+
