@@ -119,5 +119,528 @@ function RenderContextMethodDesc(object, method, params)
 
 function DisplayListObj()
 {
-	
+    this.displayList = [];
+    this.renderContext = null;	
+}
+
+DisplayListObj.prototype.record_begin = function()
+{
+    
+}
+
+DisplayListObj.prototype.record_end = function()
+{
+    
+}
+
+DisplayListObj.prototype.play = function()
+{
+    for (var i=0; i < this.displayList.length; i++)
+    e{
+        this.invokeMethod(this.displayList[i]);
+    }    
+}
+
+DisplayListObj.prototype.addMethodDesc = function(desc)
+{
+    
+}
+
+DisplayListObj.prototype.clear = function()
+{
+    this.displayList = [];    
+}
+
+DisplayListObj.prototype.invokeMethod = function(desc)
+{
+    switch (desc.method)
+    {
+        case eRenderMethod.SetGlobalState:
+        {
+            this.renderContext.setGlobalState();    
+        }   
+        break;
+        
+        case eRenderMethod.enableRenderMode:
+        {
+            this.renderContext.enableRenderMode(desc.params[0], desc.params[1]);
+        }   
+        break;
+        
+        case eRenderMethod.IsRenderModeEnabled:
+        {
+                
+        }
+        break;
+        
+        case eRenderMethod.SetViewport:
+        {
+
+        }
+        break;
+    
+        //GetViewport
+        
+        case eRenderMethod.Clear:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetMatrixMode:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.PushMatrix:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.PopMatrix:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.LoadMatrix:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.MultMatrix:
+        {
+            
+        }
+        break;
+        
+        //GetMatrix
+        
+        case eRenderMethod.PerspectiveMatrixLH:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.PerspectiveMatrixRH:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.OrthographicMatrixLH:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.OrthographicMatrixRH:
+        {
+            
+        }
+        break;
+        
+        //GetMaxLightCount
+        
+        case eRenderMethod.SetLight:
+        {
+            
+        }
+        break;
+        
+        //GetLight
+        
+        case eRenderMethod.EnableLight:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.IsLightEnabled:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetEnabledLights:
+        {
+            
+        }
+        break;
+        
+        //GetEnabledLights
+        
+        //GetMaxClipPlaneCount
+        
+        //SetClipPlane
+        
+        //GetClipPlane
+        
+        //EnableClipPlane
+        
+        //IsClipPlaneEnabled
+        
+        //SetEnabledClipPlanes
+        
+        //GetEnabledClipPlanes
+        
+        case eRenderMethod.SetGlobalIllumination:
+        {
+            
+        }
+        break;
+        
+        //GetGlobalIllumination
+        
+        case eRenderMethod.SetShadeModel:
+        {
+            
+        }
+        break;
+        
+        //GetShadeModel
+        
+        case eRenderMethod.SetColor:
+        {
+            
+        }
+        break;
+        
+        //GetColor
+        
+        case eRenderMethod.SetMaterial:
+        {
+            
+        }
+        break;
+        
+        //GetMaterial
+        
+        case eRenderMethod.SetBlendFactor:
+        {
+            
+        }
+        break;
+        
+        //GetMaxPrimitiveCount
+        
+        //GetMaxVertexIndex
+        
+        case eRenderMethod.DrawPrimitives:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.CreateVertexBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DeleteVertexBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.CreateIndexBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DeleteIndexBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.CreateTexture:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DeleteTexture:
+        {
+            
+        }
+        break;
+        
+        //GetMaxTextureStages
+        
+        case eRenderMethod.EnableTextureStage:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetTextureBlendOp:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetTextureBlendFactor:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetTextureWrap:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetTextureBorderColor:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DrawSphere:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DrawBox:
+        {
+            
+        }
+        break;
+        
+        //GetFrameBufferOrigin
+        
+        case eRenderMethod.ReadFrameBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.ReadAuxBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.WriteFrameBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.WriteAuxBuffer:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetPointSize:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetLineWidth:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SupportsPixelFormat:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SupportsAntialiasing:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetUserMaxTextureSize:
+        {
+            
+        }
+        break;
+        
+        //GetUserMaxTextureSize
+        
+        case eRenderMethod.SetFogParameters:
+        {
+            
+        }
+        break;
+        
+        //GetFogParameters
+        
+        case eRenderMethod.SetPolygonWindingOrder:
+        {
+            
+        }
+        break;
+        
+        //GetPolygonWindingOrder
+        
+        case eRenderMethod.ReversePolygonWindingOrder:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetDepthFunc:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetStencilFunc:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetStencilWriteMask:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetStencilOp:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetPolygonOffset:
+        {
+            
+        }
+        break;
+        
+        //GetPolygonOffset
+        
+        //GetTransparentAlphaValue
+        
+        case eRenderMethod.CreateDisplayList:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.DeleteDisplayList:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.SetRenderTarget:
+        {
+            
+        }
+        break;
+
+        case eRenderMethod.VertexBufferObj_SetLength:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetVertices:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetVerticesVolatile:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetColors:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetColorsVolatile:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetNormals:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetNormalsVolatile:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetUVCoords:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetUVCoordsVolatile:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_SetTextureStage:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_Draw:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.VertexBufferObj_DrawIndexed:
+        {
+            
+        }
+        break;
+            
+        case eRenderMethod.IndexBufferObj_SetLength:
+        {
+            
+        }
+        break;
+        
+        //IndexBufferObj_GetLength
+        
+        case eRenderMethod.IndexBufferObj_SetIndices:
+        {
+            
+        }
+        break;
+        
+        case eRenderMethod.IndexBufferObj_SetIndicesVolatile:
+        {
+            
+        }
+        break;
+
+        //TextureObj_SetImage
+        
+        //TextureObj_SetSubImage
+    }
 }
