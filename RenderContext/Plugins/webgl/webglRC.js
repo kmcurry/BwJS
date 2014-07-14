@@ -87,6 +87,8 @@ function webglRC(canvas, background)
     
     this.clear = function()
     {
+        DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, new Array());
+        
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);// | gl.STENCIL_BUFFER_BIT);
     }
 

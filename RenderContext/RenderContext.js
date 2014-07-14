@@ -140,6 +140,13 @@ function RenderContext(canvas, background)
     
     this.frontMaterial = new MaterialDesc();
     
+    this.displayListObj = null;
+    
+    this.setDisplayList = function(displayListObj)
+    {
+        this.displayListObj = displayListObj;
+    }
+    
     this.getFrontMaterial = function()
     {
         var material = new MaterialDesc();
