@@ -5,6 +5,7 @@ function StopCommand()
 {
     Command.call(this);
     this.className = "StopCommand";
+    this.attrType = eAttrType.Stop;
 
     this.evaluators = [];
     

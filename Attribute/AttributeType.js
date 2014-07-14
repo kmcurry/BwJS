@@ -97,8 +97,21 @@ var eAttrType = {
     ObjectInspector             :1006,
     
     Evaluator_End               :1999, // all evaluator types must be given a type between Evaluator and Evaluator_End
-    
-    UserDefined                 :2000
+
+    Command                     :2000,
+    CommandSequence             :2001,
+    AppendNode                  :2002,
+    AttributeTrigger            :2003,
+    AutoInterpolate             :2004,
+    Locate                      :2005,
+    Play                        :2006,
+    Remove                      :2007,
+    Serialize                   :2008,
+    Set                         :2009,
+    Stop                        :2010,
+    Command_End                 :2999,
+
+    UserDefined                 :3000
 };
 
 var eAttrElemType = {

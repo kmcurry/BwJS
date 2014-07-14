@@ -122,19 +122,19 @@ function Model()
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
     this.isolatorNode.getAttribute("isolateDissolves").setValueDirect(true);
-    this.isolatorNode.setCreatedByParent(true);
+    //this.isolatorNode.setCreatedByParent(true);
     this.addChild(this.isolatorNode);
 
     this.dissolveNode = new Dissolve();
     this.dissolveNode.getAttribute("name").setValueDirect("Dissolve");
     this.addChild(this.dissolveNode);
     this.dissolve.addTarget(this.dissolveNode.getAttribute("dissolve"));
-    this.dissolve.setCreatedByParent(true);
+    //this.dissolve.setCreatedByParent(true);
 
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
-    this.surfacesNode.setCreatedByParent(true);
+    //this.surfacesNode.setCreatedByParent(true);
 }
 
 Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
@@ -157,7 +157,7 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
     }
 }
 
-Model.prototype.postClone = function(clone,pathSrc,pathClone)
+/*Model.prototype.postClone = function(clone,pathSrc,pathClone)
 {
     var i;
     var j;
@@ -238,10 +238,11 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
     //std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
     //this.geometryAttrConnections[]
     //std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
+    */
    /* for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
          it != m_geometryAttrConnections.end(), clone_it != modelClone->m_geometryAttrConnections.end();
          it++, clone_it++)*/
-    for(var i = 0;i<this.geometryAttrConnections.length;i++)
+    /*for(var i = 0;i<this.geometryAttrConnections.length;i++)
     {
         // if this node has had a geometry attribute set, and the clone has not, copy the value from this
         if (it->second && !clone_it->second)
@@ -312,7 +313,7 @@ Model.prototype.postClone = function(clone,pathSrc,pathClone)
     // call base-class implementation
     this.postClone(clone, pathSrc, pathClone);
 }
-
+*/
 Model.prototype.initializeSurfaceAttrConnectionsMap = function()
 {
     this.surfaceAttrConnections.push(new Pair(this.color, false));

@@ -5,6 +5,7 @@ function RemoveCommand()
 {
     Command.call(this);
     this.className = "RemoveCommand";
+    this.attrType = eAttrType.Remove;
 
     this.targetAttribute = null;
     

@@ -8,7 +8,7 @@ function Serializer()
 
     this.pbMixed = null;
     this.bMixed = false;
-    this.DOM  = null;
+    this.DOM  = document;
     this.RootElement = null;
 }
 
@@ -44,17 +44,17 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
             var model = attribute;
             this.serializeModel(model);
         }
-        if(attribute.getAttribute() == eAttrType.PerspectiveCamera)
+        else if(attribute.getAttribute() == eAttrType.PerspectiveCamera)
         {
             var ctr = attribute;
             this.serializeAttributeContainer(ctr)
         }
-        if(attribute.getAttribute() == eAttrType.Node.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
+        else if(attribute.getAttribute() == eAttrType.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
         {
             var cmd = attribute;
             this.serializeCommand(cmd);
         }
-        if(attribute.isContainer())
+        else if(attribute.isContainer())
         {
             var ctr = attribute;
             this.serializeAttributeContainer(ctr);
@@ -316,7 +316,8 @@ Serializer.prototype.serializeCommand = function(command)
         var bstr = pcszType;
         if (bstr)
         {
-            this.DOM.createElement(bstr, element);
+            //this.DOM.createElement(bstr, element); Can only pass in a string value for this and only has 1 parameter
+            this.DOM.createElement(bstr);
             if (element) {
                 this.pushElement(element);
 

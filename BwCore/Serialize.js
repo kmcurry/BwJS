@@ -5,6 +5,7 @@ function SerializeCommand()
 {
     Command.call(this);
     this.className = "Serialize";
+    this.attrType = eAttrType.Serialize;
 
     this.targetAttribute = null;
     this.target.addModifiedCB(this.SerializeCommand_TargetModifiedCB, this);
