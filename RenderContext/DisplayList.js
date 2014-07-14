@@ -110,7 +110,14 @@ var eRenderContextMethod =
     //TextureObj_SetSubImage				: 100
 }
 
-function RenderContextMethodDesc()
+function RenderContextMethodDesc(object, method, params)
+{
+	this.object = object;
+	this.method = method;
+	this.params = params;
+}
+
+function DisplayListObj()
 {
 	
 }
