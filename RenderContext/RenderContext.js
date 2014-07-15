@@ -142,6 +142,11 @@ function RenderContext(canvas, background)
     
     this.displayListObj = null;
     
+    this.getDisplayList = function()
+    {
+        return this.displayListObj;    
+    }
+    
     this.setDisplayList = function(displayListObj)
     {
         this.displayListObj = displayListObj;

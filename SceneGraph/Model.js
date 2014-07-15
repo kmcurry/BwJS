@@ -130,6 +130,10 @@ function Model()
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
+    
+    // enable auto-display lists
+    this.autoDisplayList.setValueDirect(true);
+    this.autoDisplayList.addModifiedCB(Model_AutoDisplayListModifiedCB, this);
 }
 
 Model.prototype.setGraphMgr = function(graphMgr)
@@ -369,6 +373,16 @@ Model.prototype.updateBBox = function()
     this.center.setValueDirect(center.x, center.y, center.z);
 }
 
+Model.prototype.autoDisplayListModified = function()
+{
+    
+}
+
+function Model_AutoDisplayListModifiedCB(attribute, container)
+{
+    container.autoDisplayListModified();
+}
+
 function Model_SortPolygonsModifiedCB(attribute, container)
 {
     // TODO
@@ -377,20 +391,39 @@ function Model_SortPolygonsModifiedCB(attribute, container)
     
 function Model_RenderSequenceSlotModifiedCB(attribute, container)
 {
-    // TODO
-    //container.renderSequenceSlotModified();
+    var slot = attribute.getValueDirect();
+
+    // if render seqence slot is non-zero, cannot use display lists
+    if (slot > 0)
+    {
+        container.autoDisplayList.setValueDirect(false);
+        container.enableDisplayList.setValueDirect(false);
+    }
 }
 
 function Model_DissolveModifiedCB(attribute, container)
 {
-    // TODO
-    //container.dissolveModified();
+    var dissolve = attribute.getValueDirect();
+
+    if (dissolve > 0)
+    {
+        container.autoDisplayList.setValueDirect(false);
+        container.enableDisplayList.setValueDirect(false);
+    }
+
+    //this.updateDisableOnDissolve(); // TODO
 }
 
 function Model_OpacityModifiedCB(attribute, container)
 {
-    // TODO
-    //container.opacityModified(attribute);
+    var opacity = attribute.getValueDirect();
+    
+    // if opacity is less than 1, cannot use display lists
+    if (opacity < 1)
+    {
+        container.autoDisplayList.setValueDirect(false);
+        container.enableDisplayList.setValueDirect(false);
+    }
 }
 
 function Model_TextureOpacityModifiedCB(attribute, container)
@@ -400,8 +433,14 @@ function Model_TextureOpacityModifiedCB(attribute, container)
 
 function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 {
-    // TODO
-    //container.surface_NumTransparencyTexturesModified(attribute);
+    var numTransparencyTextures = attribute.getValueDirect();
+    
+    // if count is greater than 0, cannot use display lists
+    if (numTransparencyTextures > 0)
+    {
+        container.autoDisplayList.setValueDirect(false);
+        container.enableDisplayList.setValueDirect(false);
+    }
 }
 
 function Model_GeometryBBoxModifiedCB(attribute, container)

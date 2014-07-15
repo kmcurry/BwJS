@@ -28,7 +28,16 @@ var eRenderContextMethod =
     SetLight 			                    : 24,
     SetTextureBlendFactor					: 25,
     SetTextureBlendOp						: 26,
-    SetViewport						        : 27
+    SetViewport						        : 27,
+    VB_SetPrimitiveType                     : 28,
+    VB_SetVertices                          : 29,
+    VB_SetNormals                           : 30,
+    VB_SetUVCoords                          : 31,
+    VB_SetTextureStage                      : 32,
+    VB_Draw                                 : 33,
+    TO_SetImage                             : 34,
+    TO_SetImageData                         : 35,
+    TO_SetVideo                             : 36
 }
 
 function RenderContextMethodDesc(method, params)
@@ -76,168 +85,224 @@ DisplayListObj.prototype.invokeMethod = function(desc)
 {  
     switch (desc.method)
     {
-        case eRenderMethod.ApplyModelViewTransform:
+        case eRenderContextMethod.ApplyModelViewTransform:
         {
             this.renderContext.applyModelViewTransform();    
         }   
         break;
         
-        case eRenderMethod.ApplyProjectionTransform:
+        case eRenderContextMethod.ApplyProjectionTransform:
         {
             this.renderContext.applyProjectionTransform();
         }   
         break;
         
-        case eRenderMethod.Clear:
+        case eRenderContextMethod.Clear:
         {
             return this.renderContext.clear();
         }
         break;
         
-        case eRenderMethod.ClearColor:
+        case eRenderContextMethod.ClearColor:
         {
             this.renderContext.clearColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
         }
         break;
         
-        case eRenderMethod.CreateVertexBuffer:
+        case eRenderContextMethod.CreateVertexBuffer:
         {
             return this.renderContext.createVertexBuffer(desc.params[0]);            
         }
         break;
         
-        case eRenderMethod.CreateTextureObject:
+        case eRenderContextMethod.CreateTextureObject:
         {
             this.renderContext.createTextureObject();    
         }
         break;
         
-        case eRenderMethod.Disable:
+        case eRenderContextMethod.Disable:
         {
             this.renderContext.disable(desc.params[0]);
         }
         break;
         
-        case eRenderMethod.Enable:
+        case eRenderContextMethod.Enable:
         {
             this.renderContext.enable(desc.params[0]);    
         }
         break;
         
-        case eRenderMethod.Enabled:
+        case eRenderContextMethod.Enabled:
         {
             return this.renderContext.enabled(desc.params[0]);    
         }
         break;
         
-        case eRenderMethod.EnableLight:
+        case eRenderContextMethod.EnableLight:
         {
             this.renderContext.enableLight(desc.params[0], desc.params[1]);    
         }
         break;
         
-        case eRenderMethod.EnableTextureStage:
+        case eRenderContextMethod.EnableTextureStage:
         {
             this.renderContext.enableTextureStage(desc.params[0], desc.params[1]);    
         }
         break;
         
-        case eRenderMethod.Finish:
+        case eRenderContextMethod.Finish:
         {
             this.renderContext.finish();        
         }
         break;
         
-        case eRenderMethod.GetEnabledLights:
+        case eRenderContextMethod.GetEnabledLights:
         {
             return this.renderContext.getEnabledLights();    
         }
         break;
         
-        case eRenderMethod.GetGlobalIllumination:
+        case eRenderContextMethod.GetGlobalIllumination:
         {
             return this.renderContext.getGlobalIllumination();    
         }
         break;
         
-        case eRenderMethod.GetLight:
+        case eRenderContextMethod.GetLight:
         {
             return this.renderContext.getLight(desc.params[0]);   
         }
         break;
             
-        case eRenderMethod.GetMaxLightCount:
+        case eRenderContextMethod.GetMaxLightCount:
         {
             return this.renderContext.getMaxLightCount();   
         }
         break;
         
-        case eRenderMethod.getMaxTextureStages:
+        case eRenderContextMethod.getMaxTextureStages:
         {
             return this.renderContext.getMaxTextureStages();
         }
         break;
         
-        case eRenderMethod.PerspectiveMatrixLH:
+        case eRenderContextMethod.PerspectiveMatrixLH:
         {
             this.renderContext.perspectiveMatrixLH(desc.params[0], desc.params[1], desc.params[2],
                 desc.params[3], desc.params[4], desc.params[5]);   
         }
         break;
         
-        case eRenderMethod.OrthographicMatrixLH:
+        case eRenderContextMethod.OrthographicMatrixLH:
         {
             this.renderContext.orthographicMatrixLH(desc.params[0], desc.params[1], desc.params[2],
                 desc.params[3], desc.params[4], desc.params[5]);
         }
         break;
         
-        case eRenderMethod.SetBlendFactor:
+        case eRenderContextMethod.SetBlendFactor:
         {
             this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);
         }
         break;
 
-        case eRenderMethod.SetEnabledLights:
+        case eRenderContextMethod.SetEnabledLights:
         {
             this.renderContext.setEnabledLights(desc.params[0]);
         }
         break;
         
-        case eRenderMethod.SetFrontMaterial:
+        case eRenderContextMethod.SetFrontMaterial:
         {
             this.renderContext.setFrontMaterial(desc.params[0]);    
         }
         break;
         
-        case eRenderMethod.SetGlobalIllumination:
+        case eRenderContextMethod.SetGlobalIllumination:
         {
             this.renderContext.setGlobalIllumination(desc.params[0]);    
         }
         break;
         
-        case eRenderMethod.SetLight:
+        case eRenderContextMethod.SetLight:
         {
             this.renderContext.setLight(desc.params[0], desc.params[1]);    
         }
         break;
         
-        case eRenderMethod.SetTextureBlendFactor:
+        case eRenderContextMethod.SetTextureBlendFactor:
         {
             this.renderContext.setTextureBlendFactor(desc.params[0]);   
         }
         break;
         
-        case eRenderMethod.SetTextureBlendOp:
+        case eRenderContextMethod.SetTextureBlendOp:
         {
             this.renderContext.setTextureBlendOp(desc.params[0]);    
         }
         break;
         
-        case eRenderMethod.SetViewport:
+        case eRenderContextMethod.SetViewport:
         {
             this.renderContext.setViewport(desc.params[0], desc.params[1], desc.params[2],
                 desc.params[3]);    
+        }
+        break;
+        
+        case eRenderContextMethod.VB_SetPrimitiveType:
+        {
+            desc.params[0].setPrimitiveType(desc.params[1]);
+        }
+        break;
+        
+        case eRenderContextMethod.VB_SetVertices:
+        {
+            desc.params[0].setVertices(desc.params[1]);
+        }
+        break;
+        
+        case eRenderContextMethod.VB_SetNormals:
+        {
+            desc.params[0].setNormals(desc.params[1]);
+        }
+        break;
+        
+        case eRenderContextMethod.VB_SetUVCoords:
+        {
+            desc.params[0].setUVCoords(desc.params[1], desc.params[2]);
+        }
+        break;
+        
+        case eRenderContextMethod.VB_SetTextureStage:
+        {
+            desc.params[0].setTextureStage(desc.params[1], desc.params[2], desc.params[3],
+                desc.params[4], desc.params[5], desc.params[6]);
+        }
+        break;
+        
+        case eRenderContextMethod.VB_Draw:
+        {
+            desc.params[0].draw();
+        }
+        break;
+        
+        case eRenderContextMethod.TO_SetImage:
+        {
+            desc.params[0].setImage(desc.params[1], desc.params[2], desc.params[3]);   
+        }
+        break;
+        
+        case eRenderContextMethod.TO_SetImageData:
+        {
+            desc.params[0].setImageData(desc.params[1], desc.params[2], desc.params[3], 
+                desc.params[4], desc.params[5]);
+        }
+        break;
+        
+        case eRenderContextMethod.TO_SetVideo:
+        {
+            desc.params[0].setVideo(desc.params[1]);
         }
         break;
     }

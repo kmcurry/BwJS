@@ -107,14 +107,14 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateVertexBuffer, [numVerticesPerPrimitive]);
         
-        return new webglVB(gl, program, numVerticesPerPrimitive);
+        return new webglVB(this, gl, program, numVerticesPerPrimitive);
     }
     
     this.createTextureObject = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateTextureObject, null);
         
-        return new webglTO(gl, program);
+        return new webglTO(this, gl, program);
     }
 
     this.disable = function(cap)
