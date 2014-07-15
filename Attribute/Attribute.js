@@ -139,6 +139,7 @@ Attribute.prototype.setValue = function(values, params)
             {
                 case eAttrSetOp.Add: this.values[0] += values; break;
                 case eAttrSetOp.Replace: this.values[0] = values; break;
+                case eAttrSetOp.AND: this.values[0] &= values; break;
                 default: alert("unsupported operation passed to Attribute::setValue"); break; // TODO: add support
             }
         }
@@ -150,6 +151,7 @@ Attribute.prototype.setValue = function(values, params)
                 {
                     case eAttrSetOp.Add: this.values[i] += values[i]; break;
                     case eAttrSetOp.Replace: this.values[i] = values[i]; break;
+                    case eAttrSetOp.AND: this.values[i] &= values[i]; break;
                     default: alert("unsupported operation passed to Attribute::setValue"); break; // TODO: add support
                 }
             }

@@ -64,8 +64,12 @@ RenderDirective.prototype.execute = function(root)
 {
     root = root || this.rootNode.getValueDirect();
 
-    // update
-    var visited = this.updateDirective.execute(root);
+    // update; combined CUpdateParams & GtUpdateParams in this version
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+    params.disableDisplayLists = this.resetDisplayLists;
+     
+    var visited = this.updateDirective.execute(root, params);
 
     // render
     var params = new RenderParams();
@@ -88,6 +92,13 @@ RenderDirective.prototype.execute = function(root)
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
+	// if resetting display lists, set the disableDisplayLists renderParams flag this render
+    if (this.resetDisplayLists)
+    {
+    	params.resetDisplayLists = true;
+        this.resetDisplayLists = false;
+    }
+        
     visited[0].apply("render", params, true);
 
     // sort and draw semi-transparent geometries (if any)
