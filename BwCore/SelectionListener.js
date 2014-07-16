@@ -5,14 +5,16 @@ function Selections()
     this.lights = [];
     this.models = [];
     this.surfaces = [];
+    this.labels = [];
     
     this.clear = function()
     {
-        this.viewports.length = 0;
-        this.cameras.length = 0;
-        this.lights.length = 0;
-        this.models.length = 0;
-        this.surfaces.length = 0;
+        this.viewports = [];
+        this.cameras = [];
+        this.lights = [];
+        this.models = [];
+        this.surfaces = [];
+        this.labels = [];
     }
 }
 
@@ -185,8 +187,8 @@ SelectionListener.prototype.processPick = function(pick)
 
             case eAttrType.Label:
             {
-                this.selections.label.push(node);
-                this.registerRasterComponentSelection(node,element);
+                this.selections.labels.push(node);
+                this.registerRasterComponentSelection(node, element);
             }
         }
     }

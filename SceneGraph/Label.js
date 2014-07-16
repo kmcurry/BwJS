@@ -125,6 +125,24 @@ Label.prototype.apply = function(directive, params, visitChildren)
             this.draw(params.viewport);
         }
         break;
+        
+    case "rayPick":
+        {
+            if (this.selectable.getValueDirect() == true &&
+                this.show.getValueDirect() == true)
+            {
+                if (this.isSelected(params.clickPoint.x, params.clickPoint.y))
+                {
+                    var intersectRecord = new RayIntersectRecord();
+                    intersectRecord.distance = 0;
+                    
+                    params.currentNodePath.push(this);           
+                    params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));                   
+                    params.currentNodePath.pop();
+                }
+            }    
+        }
+        break;
     }
     
     // call base-class implementation
