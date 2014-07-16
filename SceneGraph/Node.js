@@ -308,24 +308,6 @@ Node.prototype.update = function(params, visitChildren)
     this.childModified = this.isChildModified();
 }
 
-Node.prototype.updateNode = function(node, params, visitChildren)
-{
-    // only update if this and/or child has been modified
-    if (!this.thisModified && !this.childModified)
-    {
-        // no need to update; inform parent this node is unmodified
-        this.setChildModified(false, false);
-        params.visited.push(this);
-        return;
-    }
-    
-    params.visited.push(this);
-    
-    node.update(params, visitChildren);
-    
-    this.childModified = this.isChildModified();
-}
-
 Node.prototype.apply = function(directive, params, visitChildren)
 {
     var enabled = this.enabled.getValueDirect();

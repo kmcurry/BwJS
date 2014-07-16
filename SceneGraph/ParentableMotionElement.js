@@ -196,6 +196,14 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
     RenderableElement.prototype.apply.call(this, directive, params, visitChildren);
 }
 
+ParentableMotionElement.prototype.updateChildDisplayLists = function()
+{
+    for (var i=0; i < this.motionChildren.length; i++)
+    {
+        this.motionChildren[i].updateDisplayList.pulse();
+    }
+}
+
 ParentableMotionElement.prototype.applyTransform = function()
 {
     // TODO: if scaling factors are not 1, apply inverse scale before this transformation is
@@ -275,6 +283,9 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
     
             this.transformSimple.loadMatrix(psr.multiply(this.translationMatrix));
             this.sectorTransformSimple.loadMatrix(psr.multiply(this.sectorTranslationMatrix));
+            
+            // force any motion children to update their display lists
+            this.updateChildDisplayLists();
         }
     }
 }
@@ -432,6 +443,11 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     
     // set sector position to account for parenting
     this.synchronizeSectorPosition();       
+}
+
+ParentableMotionElement.prototype.updateChildDisplayLists = function()
+{
+    
 }
 
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
