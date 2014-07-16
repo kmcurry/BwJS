@@ -309,7 +309,7 @@
                     }
                     break;
                 case "click": {
-                    if (!e.metaKey && !e.ctrlKey) {
+                    /*if (!e.metaKey && !e.ctrlKey) {
                         selectedModel = bridgeworks.selector.selections.models[0];
                         if (selectedModel) {
                             var pos = selectedModel.position.getValueDirect();
@@ -326,7 +326,9 @@
                             $('#objectname').val(selectedModel.name.getValueDirect().join(""));
                             
                         }
-                    }
+                    }*/
+                    var selected = bridgeworks.selector.selectedName;
+                    console.log(selected);
                     
                     capture = false;
                 }
