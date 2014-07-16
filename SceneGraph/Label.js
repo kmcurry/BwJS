@@ -51,7 +51,7 @@ Label.prototype.setGraphMgr = function(graphMgr)
     RasterComponent.prototype.setGraphMgr.call(this, graphMgr);
     
     // create id
-    this.id = "Label" + this.graphMgr.getNextLabelIndex();
+    this.id = this.name.getValueDirect().join("");
     this.labelId = this.id + "_label";
     this.iconId = this.id + "_icon";
     
