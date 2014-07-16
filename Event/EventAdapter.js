@@ -51,7 +51,7 @@ EventAdapter.prototype.createMouseEvent = function(event)
             } 
         }
         break;
-       
+
     case "dblclick":
         {
             switch (event.button)

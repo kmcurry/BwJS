@@ -168,6 +168,7 @@
           var g_labelCount = 0;
           var g_labelName = null;
           var g_countStr = "";
+          var selected;
           var url = document.location.href + "/../BwContent/objects/Cube.lwo";
           var motion = document.location.href + "/../BwContent/motions/spin-y.mot";
           
@@ -327,7 +328,7 @@
                             
                         }
                     }*/
-                    var selected = bridgeworks.selector.selectedName;
+                    selected = bridgeworks.selector.selectedName.getValueDirect().join("");
                     console.log(selected);
                     
                     capture = false;
@@ -356,10 +357,11 @@
           {
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
-                    if (e.metaKey || e.ctrlKey){
-                        e.preventDefault();
-                        copy();
-                    }      // c
+                    var cmd = "\<Remove target='"+selected+"'/>";
+                   // bridgeworks.updateScene(cmd);
+                    var blah = document.getElementById(selected);
+                    console.log(blah);
+                    //console.log(cmd);
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v
