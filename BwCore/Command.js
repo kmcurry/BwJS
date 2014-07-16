@@ -5,6 +5,7 @@ function Command()
 {
     EventListener.call(this);
     this.className = "Command";
+    this.attrType = eAttrType.Command;
     
     this.target = new StringAttr("");
     

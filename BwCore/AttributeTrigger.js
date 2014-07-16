@@ -11,6 +11,7 @@ function AttributeTrigger(input, trigger, target, item, _not, _executionCount)
     this.lastValues = [];
 
 	this.input.getValue(this.lastValues);
+    this.attrType = eAttrType.AttributeTrigger;
 	
     this.item = item;
     

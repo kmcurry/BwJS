@@ -5,6 +5,7 @@ function LocateCommand()
 {
     Command.call(this);
     this.className = "LocateCommand";
+    this.attrType = eAttrType.Locate;
 
     this.targetNode = null;
     this.directive = new BBoxDirective();
