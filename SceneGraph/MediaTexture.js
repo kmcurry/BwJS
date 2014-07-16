@@ -136,6 +136,9 @@ MediaTexture.prototype.loadMedia = function()
     {
         // TODO: remove texture
     }
+    
+    // increment modification count
+    this.incrementModificationCount();
 }
 
 MediaTexture.prototype.setImageSize = function()
