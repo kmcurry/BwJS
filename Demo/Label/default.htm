@@ -171,6 +171,7 @@
           var selected;
           var url = document.location.href + "/../BwContent/objects/Cube.lwo";
           var motion = document.location.href + "/../BwContent/motions/spin-y.mot";
+          var selectedId;
           
           var selectedModel = null;
           
@@ -330,6 +331,7 @@
                     }*/
                     selected = bridgeworks.selector.selectedName.getValueDirect().join("");
                     console.log(selected);
+                    selectedId = bridgeworks.selector.getAttribute("Selected").id;
                     
                     capture = false;
                 }
@@ -358,9 +360,9 @@
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
                     var cmd = "\<Remove target='"+selected+"'/>";
-                   // bridgeworks.updateScene(cmd);
-                    var blah = document.getElementById(selected);
-                    console.log(blah);
+                    var div = document.getElementById(selectedId);
+                    bridgeworks.updateScene(cmd);
+                    div.parentNode.removeChild(div);
                     //console.log(cmd);
                 }
                 break;
