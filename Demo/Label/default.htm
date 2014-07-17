@@ -168,8 +168,10 @@
           var g_labelCount = 0;
           var g_labelName = null;
           var g_countStr = "";
+          var selected;
           var url = document.location.href + "/../BwContent/objects/Cube.lwo";
           var motion = document.location.href + "/../BwContent/motions/spin-y.mot";
+          var selectedId;
           
           var selectedModel = null;
           
@@ -309,7 +311,7 @@
                     }
                     break;
                 case "click": {
-                    if (!e.metaKey && !e.ctrlKey) {
+                    /*if (!e.metaKey && !e.ctrlKey) {
                         selectedModel = bridgeworks.selector.selections.models[0];
                         if (selectedModel) {
                             var pos = selectedModel.position.getValueDirect();
@@ -326,7 +328,10 @@
                             $('#objectname').val(selectedModel.name.getValueDirect().join(""));
                             
                         }
-                    }
+                    }*/
+                    selected = bridgeworks.selector.selectedName.getValueDirect().join("");
+                    console.log(selected);
+                    selectedId = bridgeworks.selector.getAttribute("Selected").id;
                     
                     capture = false;
                 }
@@ -354,10 +359,11 @@
           {
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
-                    if (e.metaKey || e.ctrlKey){
-                        e.preventDefault();
-                        copy();
-                    }      // c
+                    var cmd = "\<Remove target='"+selected+"'/>";
+                    var div = document.getElementById(selectedId);
+                    bridgeworks.updateScene(cmd);
+                    div.parentNode.removeChild(div);
+                    //console.log(cmd);
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v

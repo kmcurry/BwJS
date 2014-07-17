@@ -135,6 +135,27 @@ ConnectAttributesCommand.prototype.addOrRemoveTargets = function(add)
             {
                 desc.sourceAttribute.addElementTarget(desc.targetAttribute, desc.sourceIndex, desc.targetIndex);
             }
+            
+            // detect connection of a screenPosition to anything and disable display lists
+            var container = desc.sourceAttribute.getContainer();
+            if (container)
+            {   
+                var screenPosition = container.getAttribute("screenPosition");
+                if (screenPosition && screenPosition == desc.sourceAttribute)
+                {
+                    var autoDL = container.getAttribute("autoDisplayList");
+                    if (autoDL)
+                    {
+                        autoDL.setValueDirect(false);    
+                    }
+                    
+                    var enableDL = container.getAttribute("enableDisplayList");
+                    if (enableDL)
+                    {
+                        enableDL.setValueDirect(false);    
+                    }
+                }
+            }
         }
     }
 }
