@@ -71,4 +71,5 @@
             <KeyframeInterpolator name="GreatSphinxMotion" url="motions/GreatSphinx.mot" target="GreatSphinx"/>-->
 	</Animations>
 	<ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+	<Pause trigger="CameraMotion/time=5"/>
 </Scene>

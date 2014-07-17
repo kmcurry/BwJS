@@ -119,7 +119,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
             expired = evaluator.getAttribute("expired").getValueDirect();
             
             // if not expired, evaluate
-            if (!expired)
+            if (enabled && !expired)
             {
                 evaluator.evaluate();
             }
