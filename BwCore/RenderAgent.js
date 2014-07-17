@@ -63,50 +63,6 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
 {
     var enabled = evaluator.getAttribute("enabled").getValueDirect();
     var expired = evaluator.getAttribute("expired").getValueDirect();
-    var orphan = evaluator.getAttribute("orphan").getValueDirect();
-
-    if (enabled)
-    {
-        switch (evaluator.className)
-        {
-            case "KeyframeInterpolator":
-            {
-                var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
-                evaluator.getAttribute("time").setValue(time, params);
-                
-                // setting the time updates the expired flag
-                expired = evaluator.getAttribute("expired").getValueDirect();
-                
-                // if not expired, evaluate
-                if (!expired)
-                {
-                    evaluator.evaluate();
-                }
-            }
-            break;
-            
-            default:
-            {
-                
-            }
-            break;
-        }
-
-        // don't evaluate scene/object inspection here, or any other evaluator not in the scene graph
-        if (!orphan) evaluator.evaluate();
-    }
-
-    // if evaluator has expired, and it's set to "renderAndRelease", release it
-    if (expired && evaluator.getAttribute("renderAndRelease").getValueDirect())
-    {
-        this.registry.unregister(evaluator);
-    }
-}
-
-RenderAgent.prototype.animateEvaluator = function(evaluator, time)
-{
-    var enabled = evaluator.getAttribute("enabled").getValueDirect();
-    var expired = evaluator.getAttribute("expired").getValueDirect();
     
     switch (evaluator.className)
     {
@@ -119,7 +75,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
             expired = evaluator.getAttribute("expired").getValueDirect();
             
             // if not expired, evaluate
-            if (!expired)
+            if (enabled && !expired)
             {
                 evaluator.evaluate();
             }
