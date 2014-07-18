@@ -63,6 +63,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
 {
     var enabled = evaluator.getAttribute("enabled").getValueDirect();
     var expired = evaluator.getAttribute("expired").getValueDirect();
+
     var orphan = evaluator.getAttribute("orphan").getValueDirect();
 
     if (enabled && !expired)

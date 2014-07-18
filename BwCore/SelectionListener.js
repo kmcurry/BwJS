@@ -5,14 +5,16 @@ function Selections()
     this.lights = [];
     this.models = [];
     this.surfaces = [];
+    this.labels = [];
     
     this.clear = function()
     {
-        this.viewports.length = 0;
-        this.cameras.length = 0;
-        this.lights.length = 0;
-        this.models.length = 0;
-        this.surfaces.length = 0;
+        this.viewports = [];
+        this.cameras = [];
+        this.lights = [];
+        this.models = [];
+        this.surfaces = [];
+        this.labels = [];
     }
 }
 
@@ -182,6 +184,12 @@ SelectionListener.prototype.processPick = function(pick)
                 this.selections.surfaces.push(node);
             }
             break;
+
+            case eAttrType.Label:
+            {
+                this.selections.labels.push(node);
+                this.registerRasterComponentSelection(node, element);
+            }
         }
     }
     
@@ -210,6 +218,29 @@ SelectionListener.prototype.processPicks = function(picks)
     return false;
 }
 
+SelectionListener.prototype.registerRasterComponentSelection = function(rc,element)
+{
+    // if a GUI has already been selected, replace if node paramter has a greater renderedSlot value
+    if (this.selected)
+    {
+        var selected = this.selected;
+        if (selected)
+        {
+            var renderedSlotSelection = rc.renderedSlot.getValueDirect();
+            var renderedSlotSelected = selected.renderedSlot.getValueDirect();
+
+            if (renderedSlotSelection > renderedSlotSelected)
+            {
+                return this.registerSelection(rc, element, true);
+            }
+        }
+    }
+    else // no previous selection, register
+    {
+        this.registerSelection(rc, element);
+    }
+
+}
 SelectionListener.prototype.clickPointModified = function()
 {
     var point = this.getAttribute("clickPoint").getValueDirect();

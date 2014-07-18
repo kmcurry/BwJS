@@ -226,4 +226,22 @@ SceneInspector.prototype.transformDirectionVector = function(x, y, z, matrix)
     m.transpose(); // invert rotation
     
     return m.transform(x, y, z, 0);
-} 
+}
+
+/*
+SceneInspector.prototype.zoomIn = function()
+{
+   var x = bridgeworks.registry.find("SceneInspector");
+   x.panDelta.z+=30;
+    x.panDelta.setValueDirect(this.panDelta.x, this.panDelta.y, this.panDelta.z, this.viewTransform);
+    x.updateScene();
+}
+
+SceneInspector.prototype.zoomOut = function()
+{
+    this.panDelta.z-=30;
+    this.panDelta.setValueDirect(this.panDelta.x, this.panDelta.y, this.panDelta.z,this.viewTransform);
+    this.updateScene();
+}
+*/
+

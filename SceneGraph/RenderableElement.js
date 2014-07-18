@@ -14,6 +14,7 @@ function RenderableElement()
     this.styles = new StylesAttr();
     this.stylesMap = new StylesMapAttr();
     this.renderableElementStyle = new RenderableElementStyleAttr();
+    this.renderedSlot = new NumberAttr(0);
     
     this.registerAttribute(this.bbox, "bbox");
     this.registerAttribute(this.renderSequenceSlot, "renderSequenceSlot");
@@ -22,6 +23,7 @@ function RenderableElement()
     this.registerAttribute(this.styles, "styles");
     this.registerAttribute(this.stylesMap, "stylesMap");
     this.registerAttribute(this.renderableElementStyle, "renderableElementStyle");
+    this.registerAttribute(this.renderedSlot, "renderedSlot");
 }
 
 RenderableElement.prototype.setRegistry = function(registry)
