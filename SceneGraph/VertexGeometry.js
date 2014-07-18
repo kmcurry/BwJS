@@ -314,7 +314,7 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     }
 
     // TODO
-
+    /*
     // if object doesn't contain any specularity textures,
     // make an additional pass to add specular highlights;
     // skip this step if fog is enabled (causes ultra-white surface artifacts)
@@ -360,7 +360,7 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
             texture0 = null;
         }
     }
-
+    */
     // disable texture stage 0
     this.graphMgr.renderContext.enableTextureStage(0, 0);
     

@@ -63,40 +63,24 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
 {
     var enabled = evaluator.getAttribute("enabled").getValueDirect();
     var expired = evaluator.getAttribute("expired").getValueDirect();
-    
-    switch (evaluator.className)
-    {
-        case "KeyframeInterpolator":
-        {
-            var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
-            evaluator.getAttribute("time").setValue(time, params);
-            
-            // setting the time updates the expired flag
-            expired = evaluator.getAttribute("expired").getValueDirect();
-            
-            // if not expired, evaluate
-            if (enabled && !expired)
-            {
-                evaluator.evaluate();
-            }
-        }
-        break;
-        
-        default:
-        {
-            // if non-KFI and not an orphan, enabled and not expired, and not set to evaluate on Update(), evaluate
-            if (enabled && !expired)
-            {
-                // don't evaluate scene/object inspectors here, or any other evaluator not in the scene graph
-                if (evaluator.getAttribute("orphan").getValueDirect == false)
-                {   
-                    evaluator.evaluate();
-                }
-            }
-        }
-        break;
-    }
 
+    var orphan = evaluator.getAttribute("orphan").getValueDirect();
+
+    if (enabled && !expired)
+    {
+        switch (evaluator.className)
+        {
+            case "KeyframeInterpolator":
+            {
+                var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
+                evaluator.getAttribute("time").setValue(time, params);
+            }
+            break;
+        }
+
+        // don't evaluate scene/object inspection here, or any other evaluator not in the scene graph
+        if (!orphan) evaluator.evaluate();
+    }
 
     // if evaluator has expired, and it's set to "renderAndRelease", release it
     if (expired && evaluator.getAttribute("renderAndRelease").getValueDirect())
@@ -121,119 +105,119 @@ RenderAgent.prototype.executeRenderDirectives = function()
 // never executes
 RenderAgent.prototype.globalTimeInSecsModified = function()
 {
-	var globalTime = this.globalTimeInSecs.getValueDirect();
+    var globalTime = this.globalTimeInSecs.getValueDirect();
 
-	// synchronize elapsed time
-	this.elapsedTimeInSecs.setValueDirect(globalTime);
+    // synchronize elapsed time
+    this.elapsedTimeInSecs.setValueDirect(globalTime);
 
-	// get all evaluators and set their time to globalTimeInSecs
-	if (this.registry)
-	{
-		var evaluators = this.registry.getByType(eAttrType.Evaluator);
-		if (evaluators)
-		{
-			for (var i=0; i < evaluators.length; i++)
-			{
-				var evaluator = evaluators[i];
-				if (evaluator)
-				{
-					var time = evaluator.getAttribute("time");
-					if (time)
-					{
+    // get all evaluators and set their time to globalTimeInSecs
+    if (this.registry)
+    {
+        var evaluators = this.registry.getByType(eAttrType.Evaluator);
+        if (evaluators)
+        {
+            for (var i=0; i < evaluators.length; i++)
+            {
+                var evaluator = evaluators[i];
+                if (evaluator)
+                {
+                    var time = evaluator.getAttribute("time");
+                    if (time)
+                    {
                         var globalTimeSyncEnabled = evaluator.getAttribute("globalTimeSyncEnabled");
                         if ((globalTimeSyncEnabled && globalTimeSyncEnabled.getValueDirect()) ||
                             !globalTimeSyncEnabled)
                         {
-						    time.setValueDirect(globalTime);
+                            time.setValueDirect(globalTime);
                         }
-					}
-					
-					evaluator.evaluate(); // calling Evaluate() will reset "expired" flag based upon global time
-				}
-			}
-		}
+                    }
+                    
+                    evaluator.evaluate(); // calling Evaluate() will reset "expired" flag based upon global time
+                }
+            }
+        }
 
-		// disable the rotation inspection group for the models in the scene;
-		// this is required b/c user may have rotated models during
-		// object inspection and Object Inspection uses transformation
-		// nodes that will still be affecting the target
-		var models = this.registry.getByType(eAttrType.Model);
-		if (models)
-		{
-			for (var i=0; i < models.length; i++)
-			{
+        // disable the rotation inspection group for the models in the scene;
+        // this is required b/c user may have rotated models during
+        // object inspection and Object Inspection uses transformation
+        // nodes that will still be affecting the target
+        var models = this.registry.getByType(eAttrType.Model);
+        if (models)
+        {
+            for (var i=0; i < models.length; i++)
+            {
                 setInspectionGroupActivationState(models[i], false);
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 RenderAgent.prototype.setEvaluatorPlayState = function(evaluator, state)
 {
-	if (!evaluator)
-	{
-		return this.setEvaluatorPlayState(state);
-	}
+    if (!evaluator)
+    {
+        return this.setEvaluatorPlayState(state);
+    }
     
-	// perform state-specific processing
+    // perform state-specific processing
     var en = evaluator.getAttribute("enabled");
-	switch (state)
-	{
-	case ePlayState.Play:
-		{
-			en.setValueDirect(true);
-		}
-		break;
+    switch (state)
+    {
+    case ePlayState.Play:
+        {
+            en.setValueDirect(true);
+        }
+        break;
 
-	case ePlayState.Pause:
-		{
-			en.setValueDirect(false);
-		}
-		break;
+    case ePlayState.Pause:
+        {
+            en.setValueDirect(false);
+        }
+        break;
 
-	case ePlayState.Stop:
-		{
-			en.setValueDirect(false);
+    case ePlayState.Stop:
+        {
+            en.setValueDirect(false);
 
-			// if kfi, set time to 0 and evaluate once to reset outputs to time 0
-			switch (evaluator.className)
-			{
-			case "KeyframeInterpolator":
-				{
-					evaluator.getAttribute("time").setValueDirect(0);
-					evaluator.evaluate();
-				}
-			}
-		}
-		break;
-	}
+            // if kfi, set time to 0 and evaluate once to reset outputs to time 0
+            switch (evaluator.className)
+            {
+            case "KeyframeInterpolator":
+                {
+                    evaluator.getAttribute("time").setValueDirect(0);
+                    evaluator.evaluate();
+                }
+            }
+        }
+        break;
+    }
     
     clearObjectPositionMap();
 }
 
 RenderAgent.prototype.setEvaluatorsPlayState = function(state)
 {
-	if (this.registry)
-	{
-		var evaluators = this.registry.getByType(eAttrType.Evaluator);
-		if (evaluators)
-		{
-			for (i=0; i < evaluators.length; i++)
-			{
-				var evaluator = evaluators[i];
+    if (this.registry)
+    {
+        var evaluators = this.registry.getByType(eAttrType.Evaluator);
+        if (evaluators)
+        {
+            for (i=0; i < evaluators.length; i++)
+            {
+                var evaluator = evaluators[i];
                 
                 var type = evaluator.attrType;
 
-				// don't set play state for inspectors or any evaluators not in scenegraph
+                // don't set play state for inspectors or any evaluators not in scenegraph
                 var orphan = evaluator.getAttribute("orphan").getValueDirect();
-				if (!orphan)
-				{
-					this.setEvaluatorPlayState(evaluator, state)
-				}
+                if (!orphan)
+                {
+                    this.setEvaluatorPlayState(evaluator, state)
+                }
 
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 RenderAgent.prototype.setDesiredFrameRate = function(rate)
