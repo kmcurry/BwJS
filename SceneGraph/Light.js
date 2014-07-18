@@ -51,7 +51,7 @@ Light.prototype.setGraphMgr = function(graphMgr)
 }
 
 Light.prototype.update = function(params, visitChildren)
-{
+{  
     if (this.updateAmbient)
     {
         this.updateAmbient = false;
@@ -104,6 +104,9 @@ Light.prototype.update = function(params, visitChildren)
     {
         this.setLightDesc = true;
     }
+    
+    // ensure continued update (lights are transformed by view matrix)
+    this.setModified();
     
     // call base-class implementation
     ParentableMotionElement.prototype.update.call(this, params, visitChildren);

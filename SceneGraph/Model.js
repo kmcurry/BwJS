@@ -135,7 +135,6 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
 
-    
     // enable auto-display lists
     this.autoDisplayList.setValueDirect(true);
     this.autoDisplayList.addModifiedCB(Model_AutoDisplayListModifiedCB, this);
