@@ -130,7 +130,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 // push transforms
                 if (isolateTransforms)
                 {
-                    // TODO
+                    lastWorldMatrix = params.worldMatrix;
                 }
             }
             break;
@@ -199,7 +199,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 // pop transforms
                 if (isolateTransforms)
                 {
-                    // TODO
+                    params.worldMatrix = lastWorldMatrix;
                 }
             }
             break;

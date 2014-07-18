@@ -56,7 +56,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
     
     if (params.worldMatrix)
     {
-        params.worldMatrix = params.worldMatrix.multiply(this.matrixTransform);
+        params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
     }
             
     switch (directive)
@@ -66,7 +66,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
             this.applyTransform();
         }
         break;
-            
+         
         default:
             break;
     }
