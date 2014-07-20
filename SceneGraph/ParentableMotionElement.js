@@ -210,7 +210,8 @@ ParentableMotionElement.prototype.applyTransform = function()
     // applied to avoid translation caused by scaling  
     
     // set transformation matrix
-    this.graphMgr.renderContext.modelViewMatrixStack.leftMultiply(this.sectorTransformCompound);
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.leftMultMatrix(this.sectorTransformCompound);
     this.graphMgr.renderContext.applyModelViewTransform();
     
 // TODO: if invsere scale was applied, re-apply scale
