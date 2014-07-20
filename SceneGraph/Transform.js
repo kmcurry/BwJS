@@ -78,7 +78,8 @@ Transform.prototype.apply = function(directive, params, visitChildren)
 Transform.prototype.applyTransform = function()
 {
     // set transformation matrix
-    this.graphMgr.renderContext.modelViewMatrixStack.leftMultiply(this.matrixTransform);
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.leftMultMatrix(this.matrixTransform);
     this.graphMgr.renderContext.applyModelViewTransform();
 }
 
