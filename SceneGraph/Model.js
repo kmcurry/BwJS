@@ -457,12 +457,14 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
 Model.prototype.pushMatrix = function()
 {
-    this.graphMgr.renderContext.modelViewMatrixStack.push();
+	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.pushMatrix();
 }
 
 Model.prototype.popMatrix = function()
 {
-    this.graphMgr.renderContext.modelViewMatrixStack.pop();
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.popMatrix();
     this.graphMgr.renderContext.applyModelViewTransform();    
 }
 

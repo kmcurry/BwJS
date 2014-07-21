@@ -37,7 +37,13 @@ var eRenderContextMethod =
     VB_Draw                                 : 33,
     TO_SetImage                             : 34,
     TO_SetImageData                         : 35,
-    TO_SetVideo                             : 36
+    TO_SetVideo                             : 36,
+    SetMatrixMode							: 37,
+    PushMatrix								: 38,
+    PopMatrix								: 39,
+    LoadMatrix								: 40,
+    LeftMultMatrix							: 41,
+    RightMultMatrix							: 42
 }
 
 function RenderContextMethodDesc(method, params)
@@ -303,6 +309,42 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         case eRenderContextMethod.TO_SetVideo:
         {
             desc.params[0].setVideo(desc.params[1]);
+        }
+        break;
+        
+        case eRenderContextMethod.SetMatrixMode:
+        {
+        	this.renderContext.setMatrixMode(desc.params[0]);
+        }
+        break;
+        
+        case eRenderContextMethod.PushMatrix:
+        {
+        	this.renderContext.pushMatrix();
+        }
+        break;
+        
+        case eRenderContextMethod.PopMatrix:
+        {
+        	this.renderContext.popMatrix();
+        }
+        break;
+        
+        case eRenderContextMethod.LoadMatrix:
+        {
+        	this.renderContext.loadMatrix(desc.params[0]);
+        }
+        break;
+        
+        case eRenderContextMethod.LeftMultMatrix:
+        {
+        	this.renderContext.leftMultMatrix(desc.params[0]);
+        }
+        break;
+        
+        case eRenderContextMethod.RightMultMatrix:
+        {
+        	this.renderContext.rightMultMatrix(desc.params[0]);
         }
         break;
     }
