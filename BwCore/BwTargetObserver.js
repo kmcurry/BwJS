@@ -91,8 +91,8 @@ BwTargetObserver.prototype.updateAddObserver = function(observer)
 		{
 			this.resultPosition.addTarget(observer.getAttribute("position"));
 		}
-		this.resultPitch.addTarget(observer.getAttribute("rotation"), 0, 0);   
-		this.resultHeading.addTarget(observer.getAttribute("rotation"), 0, 1);
+		this.resultPitch.addElementTarget(observer.getAttribute("rotation"), 0, 0);   
+		this.resultHeading.addElementTarget(observer.getAttribute("rotation"), 0, 1);
 
 		this.observersVector.push(observer);
 	}

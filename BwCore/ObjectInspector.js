@@ -39,7 +39,7 @@ function ObjectInspector()
 }
 
 ObjectInspector.prototype.applyCameraRelativeRotation = function(selected)
-{return;
+{
     var i;
 	
     // vectors
@@ -88,7 +88,7 @@ ObjectInspector.prototype.applyCameraRelativeRotation = function(selected)
 }
 
 ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
-{return;
+{
     var cam = this.camera;
 
     // get translation delta values
