@@ -35,16 +35,11 @@ function ObjectInspector()
     // set orphan so that evaluator will not be added to scene graph
     this.orphan.setValueDirect(true);   
     
-    this.enabled.addModifiedCB(ObjectInspector_EnableModifiedCB, this)   
-}
-
-function ObjectInspector_EnableModifiedCB(attribute, container)
-{
-    console.debug("ObjectInspector.enable modified: " + container.enabled.getValueDirect().toString())
+    this.enabled.addModifiedCB(ObjectInspector_EnabledModifiedCB, this)   
 }
 
 ObjectInspector.prototype.applyCameraRelativeRotation = function(selected)
-{
+{return;
     var i;
 	
     // vectors
@@ -93,7 +88,7 @@ ObjectInspector.prototype.applyCameraRelativeRotation = function(selected)
 }
 
 ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
-{
+{return;
     var cam = this.camera;
 
     // get translation delta values
@@ -475,5 +470,10 @@ function ObjectInspector_SelectionOccurredCB(attribute, container)
 function ObjectInspector_SelectionClearedCB(attribute, container)
 {
     container.runSelectionCleared();
+}
+
+function ObjectInspector_EnabledModifiedCB(attribute, container)
+{
+    console.debug("ObjectInspector.enable modified: " + container.enabled.getValueDirect().toString())
 }
 

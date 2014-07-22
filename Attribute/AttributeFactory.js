@@ -119,7 +119,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["MapProjectionCalculator"] = newMapProjectionCalculator;
     this.newResourceProcs["ObjectInspector"] = newObjectInspector;
     this.newResourceProcs["SceneInspector"] = newSceneInspector;
-    
+    this.newResourceProcs["TargetObserver"] = newTargetObserver;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -353,6 +353,15 @@ function newSceneInspector(name, factory)
     }
      
     return resource;
+}
+
+function newTargetObserver(name, factory)
+{
+	var resource = new BwTargetObserver();
+    
+    registerEvaluatorAttributes(resource, factory);
+   
+   	return resource;	
 }
 
 function newCommand(name, factory)
