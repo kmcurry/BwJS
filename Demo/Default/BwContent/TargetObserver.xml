@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw?>
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+     <Scene>
+          <Isolator name="Root" isolateTransforms="true">
+               <!--<Selector name="Cameras">-->
+                    <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
+                         <position x="3" y="4.2424" z="-3"/>
+                         <rotation x="45" y="-45" z="0"/>
+                    </PerspectiveCamera>
+                    <!--<OrthographicCamera name="OrthoCam" nearDistance=".25" farDistance="4000" width="6">
+                         <position x="0" y="6" z="0"/>
+                         <rotation x="90" y="0" z="0"/>
+                    </OrthographicCamera>-->
+               <!--</Selector>-->
+               <Group name="Lights">
+                 <GlobalIllumination name="GlobalLight">
+                   <ambient r=".25" g=".25" b=".25" a=".25"/>
+                 </GlobalIllumination>
+                 <!--<PointLight name="theLight" range="100" parent="Camera">
+                   <ambient r="0.25" g="0.25" b="0.25"/>
+                   <diffuse r="1" g="1" b="1"/>
+                   <specular r="1" g="1" b="1"/>
+                   <position x="-40.688" y="47.9691" z="-52.0672"/>
+                 </PointLight>-->
+                 <DirectionalLight name="theLight" enabled="true">
+                   <ambient r="0.25" g="0.25" b="0.25" a="1"/>
+                   <diffuse r="1" g="1" b="1" a="1"/>
+                   <specular r="1" g="1" b="1" a="1"/>
+                   <rotation x="0" y="0" z="0"/>
+                 </DirectionalLight>
+               </Group>
+               <Group name="Effects"/>
+               <Group name="Models">
+                    <Model name="grid" url="/objects/GridG.lwo">
+                         <position x="0" y="0" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo">
+                         <position x="0" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo">
+                         <position x="2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
+                         <position x="-2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereBack" url="/objects/UV_SphereG.lwo">
+                         <position x="0" y=".25" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
+                         <position x="0" y=".25" z="-2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="F16" url="/objects/F16.lwo"/>
+                 <!--<Model name="SquareAVI" url="/objects/SquareMPG.lwo"/>-->
+               </Group>
+            <!--<Label name="UV_BoxG_Label" text="UV_BoxG" parent="UV_BoxG">
+              <anchor x="20" y="2"/>
+              <iconStyle>
+                <url>images/ylw-pushpin.png</url>
+                <scale x="1" y="1" z="1"/>
+              </iconStyle>
+              <description>
+                <![CDATA[<b><font color="red">STATUS: ACTIVATED</font></b><br />
+    <br />
+    <b>Location: </b>Taweelah Power Station, Building 12<br />
+    <br />
+    <b>Sensor Type: </b>
+    <br />
+    <a href="http://www.kiddefiresystems.com/utcfs/Templates/Pages/Template-53/0,8062,pageId%3D939%26siteId%3D383,00.html#"
+        target="_blank">Fire Sensor Type II</a><br />
+    <br />]]>
+              </description>
+            </Label>
+            <Label name="cylinderRight_Label" text="cylinderRight" parent="cylinderRight">
+            </Label>
+            <Label name="cylinderLeft_Label" text="cylinderLeft" parent="cylinderLeft">
+            </Label>
+            <Label name="sphereBack_Label" text="sphereBack" parent="sphereBack">
+            </Label>
+            <Label name="sphereFront_Label" text="sphereFront" parent="sphereFront">
+            </Label>
+            <Label name="F16_Label" text="F16" parent="F16">
+            </Label>-->
+          </Isolator>
+          <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
+       <KeyframeInterpolator name="F16Motion1" url="motions/F16New.mot" target="F16"/>
+     </Scene>
+     <!-- Customize default preferences for this content-->
+	 <!--<ConnectOutputs targetContainer="OrthoCam" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>-->
+     <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+     <Set target="SceneInspector" pivotDistance="3"/>
+  <Set target="Selector" computePivotDistance="false"/>
+   <TargetObserver name="BoxObserver" observer="UV_BoxG" target0="Camera" affectPitch="true"/>
+   <Set target="ObjectInspector" enabled="false"/>
+</Session>
