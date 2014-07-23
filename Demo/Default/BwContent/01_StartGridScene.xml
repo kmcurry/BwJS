@@ -120,7 +120,7 @@
    <BalloonTipLabel name="bar" parent="sphereBack" show="true">
        <balloonTipLabelStyle>
            <htmlLabelStyle>
-               <html>Test</html>
+               <html><![CDATA[<em>Test</em>]]></html>
            </htmlLabelStyle>
        </balloonTipLabelStyle>
    </BalloonTipLabel>
