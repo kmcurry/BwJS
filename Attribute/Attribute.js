@@ -66,7 +66,12 @@ function Attribute()
     Base.call(this);
     this.className = "Attribute";
     this.attrType = eAttrType.Attribute;
-    this.attrElemType = eAttrElemType.eAttrElemType_Attribute;
+    this.attrElemType = eAttrElemType.Attribute;
+    
+    this.native = true;
+    this.transient = false;
+    this.persistent = false;
+    this.deserialized = false;
     
     this.values = [];
     this.modifiedCBs = [];
@@ -399,6 +404,36 @@ Attribute.prototype.setContainer = function(container)
     this.container = container;
 }
 
+Attribute.prototype.setNative = function(native)
+{
+    this.native = native;
+}
+
+Attribute.prototype.isNative = function()
+{
+    return this.native;    
+}
+
+Attribute.prototype.setTransient = function(transient)
+{
+    this.transient = transient;
+}
+
+Attribute.prototype.isTransient = function()
+{
+    return this.transient;    
+}
+
+Attribute.prototype.setPersistent = function(persistent)
+{
+    this.persistent = persistent;
+}
+
+Attribute.prototype.isPersistent = function()
+{
+    return this.persistent;    
+}
+
 Attribute.prototype.getRegistry = function()
 {
     return this.registry;
@@ -417,7 +452,7 @@ Attribute.prototype.flagDeserializedFromXML = function()
         this.attrContainer.flagDeserializedFromXML();
     }
 }
-Attribute.prototype.isFlagDeserializedFromXML = function()
+Attribute.prototype.isDeserializedFromXML = function()
 {
     return this.deserialized;
 }

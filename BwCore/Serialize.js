@@ -8,7 +8,7 @@ function SerializeCommand()
     this.attrType = eAttrType.Serialize;
 
     this.targetAttribute = null;
-    this.target.addModifiedCB(this.SerializeCommand_TargetModifiedCB, this);
+    this.target.addModifiedCB(SerializeCommand_TargetModifiedCB, this);
     this.directive = null;
     this.serialized = "";
 }
@@ -46,8 +46,9 @@ SerializeCommand.prototype.serializeScene = function()
     var attrContainerRegistry = bridgeworks.registry;
     if (attrContainerRegistry)
     {
-        var serializer = new XMLSerializer();
-        var serial  = new Serializer();
+        var factory = this.registry.find("AttributeFactory");
+        var serializer = factory.create("Serializer");
+        var xmlSerializer = new XMLSerializer(); 
         // set minimum flag so that only the minimum required for recreation is serialized
         //var serializeMinimum = serializer.getAttribute("serializeMinimum");
         //serializeMinimum.setValueDirect(true);
@@ -55,95 +56,89 @@ SerializeCommand.prototype.serializeScene = function()
         var count = attrContainerRegistry.getObjectCount();
 
         // serialize device handlers
-        for (i=1; i < count; i++)
+        var i;
+        for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (container)
+            if (!container) continue;
+            if (container.attrType > eAttrType.DeviceHandler && 
+                container.attrType < eAttrType.DeviceHandler_End)
             {
                 context.attribute = container;
                 //context = document.createElement("Scene");
                 //var inside = context.setAttribute("text",container);
-                var buffer = "";
 
                 // serialize
-                //serializer
-                serial.serialize(context.attribute,context.item,context.attributeName,context.container,buffer);
-                xstr = serializer.serializeToString(context.attribute);
-
-                console.log(xstr);
-                this.serialized += buffer;
+                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
             }
         }
-
+return;
         // serialize root nodes (nodes without parents)
-        for (i=0; i < count; i++)
+        for (i = 0; i < count; i++)
         {
-            if (node = attrContainerRegistry.getObject(i) &&
-                !node.getParent(0))
+            container = attrContainerRegistry.getObject(i);
+            if (!container) continue;
+            if (container.attrType > eAttrType.Node && 
+                container.attrType < eAttrType.Node_End &&
+                container.getParentCount() == 0)
             {
-                this.directive.Execute(node);
-                this.serialized += this.directive.getSerialized();
+                this.directive.execute(container);
+                this.serialized += this.directive.serialized;
             }
         }
 
         // serialize non-device handlers, non-nodes, non-commands (commands need to be serialized last so that the objects
         // they affect will be declared first)
-        for (i=0; i < count; i++)
+        for (i = 0; i < count; i++)
         {
-            container = attrContainerRegistry.getObject(i); if (!container) continue;
-            if (!container && !container && !container)
+            container = attrContainerRegistry.getObject(i); 
+            if (!container) continue;
+            if (container.className == "SelectionListener")
             {
-                if(container.toString() == "SelectionListener")
-                //if (!strcmp(container.getTypeString(), "SelectionListener"))
-                {
-                    var computePivotDistance = container.getAttribute("computePivotDistance")
-                        .getValueDirect();
+                var computePivotDistance = container.getAttribute("computePivotDistance").getValueDirect();
 
-                    this.serialized += "<Set target=\"Selector\" computePivotDistance=\"";
-                    this.serialized += (computePivotDistance ? "true" : "false");
-                    this.serialized += "\"/>";
-                }
-                else
-                {
-                    context.attribute = container;
-                    var buffer = "";
+                this.serialized += "<Set target=\"Selector\" computePivotDistance=\"";
+                this.serialized += (computePivotDistance ? "true" : "false");
+                this.serialized += "\"/>";
+            }
+            else
+            {
+                context.attribute = container;
 
-                    // serialize
-                    serializer.Serialize(context, buffer);
-                    this.serialized += buffer;
-                }
+                // serialize
+                serializer.Serialize(context, buffer);
+                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
             }
         }
 
         // serialize any DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
-        for (i=0; i < count; i++)
+        for (i = 0; i < count; i++)
         {
-            container = attrContainerRegistry.getObject(i); if (!container) continue;
-            if(container &&(container.toString()=="DisconnectAttributes"))
-            //if (container && !strcmp(container.getTypeString(), "DisconnectAttributes"))
+            container = attrContainerRegistry.getObject(i); 
+            if (!container) continue;
+            if (container.className == "DisconnectAttributes")
             {
                 context.attribute = container;
-                var buffer = "";
 
                 // serialize
                 serializer.Serialize(context, buffer);
-                this.serialized += buffer;
+                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
             }
         }
 
         // serialize remaining commands (DisconnectAttributes already serialized above)
-        for (i=0; i < count; i++)
+        for (i = 0; i < count; i++)
         {
-            container = attrContainerRegistry.getObject(i); if (!container) continue;
-            if(container && (container.toString() == "DisconnectAttributes"))
-            //if (container && strcmp(container.getTypeString(), "DisconnectAttributes"))
+            container = attrContainerRegistry.getObject(i); 
+            if (!container) continue;
+            if(container.className == "DisconnectAttributes")
             {
                 context.attribute = container;
-                var buffer = "";
 
                 // serialize
                 serializer.Serialize(context, buffer);
-                this.serialized += buffer;
+                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
             }
         }
         /*
@@ -176,7 +171,7 @@ SerializeCommand.prototype.serializeScene = function()
     return;
 }
 
-SerializeCommand.prototype.Undo = function()
+SerializeCommand.prototype.undo = function()
 {
 
 }
@@ -188,14 +183,15 @@ SerializeCommand.prototype.setRegistry = function(registry)
     this.directive = factory.create("SerializeDirective");
 
     // call base-class implementation
-    Command.prototype.setRegistry(registry);
+    Command.prototype.setRegistry.call(this, registry);
 }
+
 SerializeCommand.prototype.getSerialized = function()
 {
     return this.serialized;
-    //return this.serialized.c_str();
 }
-SerializeCommand.prototype.SerializeCommand_TargetModifiedCB = function(container, attribute)
+
+function SerializeCommand_TargetModifiedCB(attribute, container)
 {
     var target = attribute.getValueDirect().join("");
     container.targetAttribute = container.registry.find(target);

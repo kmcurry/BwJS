@@ -5,6 +5,7 @@ function DeviceHandler()
 {
     EventListener.call(this);
     this.className = "DeviceHandler";
+    this.attrType = eAttrType.DeviceHandler;
     
     this.inputMessage = new NumberAttr(0);
     this.inputId = new NumberAttr(0);

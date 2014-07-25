@@ -5,7 +5,7 @@ function SerializeParams()
 {
     DirectiveParams.call(this);
     
-    this.serialized = "";
+    this.serialized = null;
 }
 
 SerializeDirective.prototype = new SGDirective();
@@ -18,6 +18,7 @@ function SerializeDirective()
     this.className = "SerializeDirective";
     this.attrType = eAttrType.SerializeDirective;
 
+    this.serialized = "";
 }
 
 SerializeDirective.prototype.execute = function(root)
@@ -31,36 +32,12 @@ SerializeDirective.prototype.execute = function(root)
     this.serialized = "";
 
     // setup serialize params structure
-    var serializeParams = new SerializeParams();
-    serializeParams.serialized = this.serialized;
-    serializeParams.userData = this.userData.getValueDirect();
+    var params = new SerializeParams();
+    params.serialized = this.serialized;
 
     // apply serialize directive
-    root.apply(eAttrType.DirectiveSerialize, serializeParams, true);
+    root.apply("serialize", params, true);
 
     return;
 }
 
-SerializeDirective.prototype.execute = function(path)
-{
-    if (!path)
-    {
-        return;
-    }
-
-    // clear serialize string
-    this.serialized = "";
-
-    // setup serialize params structure
-    var serializeParams = new SerializeParams();
-    serializeParams.serialized = this.serialized;
-    serializeParams.userData = this.userData.getValueDirect();
-
-	// apply serialize directive
-    if (path.getNodeCount() > 0)
-    {
-	    path[0].apply(eAttrType.DirectiveSerialize, serializeParams, true);
-    }
-
-	return;
-}

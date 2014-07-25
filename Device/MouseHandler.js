@@ -5,6 +5,7 @@ function MouseHandler()
 {
     DeviceHandler.call(this);
     this.className = "MouseHandler";
+    this.attrType = eAttrType.MouseHandler;
     
     this.name.setValueDirect("MouseHandler");
         

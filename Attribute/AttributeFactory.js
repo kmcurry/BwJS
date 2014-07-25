@@ -82,6 +82,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["HTMLLabelStyle"] = newAttribute;
     this.newResourceProcs["BalloonTipLabelStyle"] = newAttribute;
     this.newResourceProcs["RenderableElementStyle"] = newAttribute;
+    this.newResourceProcs["Serializer"] = newAttribute;
 
     // nodes
     this.newResourceProcs["DirectionalLight"] = newSGNode;
@@ -216,6 +217,7 @@ function newAttribute(name, factory)
     case "HTMLLabelStyle":          resource = new HTMLLabelStyleAttr(); break;
     case "BalloonTipLabelStyle":    resource = new BalloonTipLabelStyleAttr(); break;
     case "RenderableElementStyle":  resource = new RenderableElementStyleAttr(); break;
+    case "Serializer":              resource = new Serializer(); break;
     }
     
     return resource;

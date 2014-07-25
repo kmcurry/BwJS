@@ -22,6 +22,8 @@ function Texture()
     this.heightWrap = new NumberAttr(eTextureWrap.None);
     this.mipmappingEnabled = new BooleanAttr(false);
     
+    this.image.setTransient(true); // don't serialize image data
+    
     this.image.getAttribute("width").addModifiedCB(Texture_ImageModifiedCB, this);
     this.image.getAttribute("height").addModifiedCB(Texture_ImageModifiedCB, this);
     this.image.getAttribute("byteAlignment").addModifiedCB(Texture_ImageModifiedCB, this);

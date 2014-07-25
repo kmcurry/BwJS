@@ -172,6 +172,8 @@ function PulseAttr()
     BooleanAttr.call(this);
     this.className = "PulseAttr";
     this.attrType = eAttrType.PulseAttr;
+    
+    this.setTransient(true); // don't serialize because by definition this attribute doesn't hold "true" (it pulses)
 }
 
 PulseAttr.prototype.clone = function()

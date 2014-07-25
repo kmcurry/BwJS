@@ -316,6 +316,33 @@ Node.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
+    switch (directive)
+    {
+        case "serialize":
+        {          
+            var context = new Context();
+            context.attribute = this;
+
+            var factory = this.registry.find("AttributeFactory");
+            var serializer = factory.create("Serializer");
+            var xmlSerializer = new XMLSerializer();
+            
+            // added required format setting - need to revisit to reduce number of required steps
+            serializer.getAttribute("format").setValueDirect("xml");
+            // set minimum flag so that only the minimum required for recreation is serialized
+            serializer.getAttribute("serializeMinimum").setValueDirect(true);
+            // set children flag so that child nodes are serialized
+            serializer.getAttribute("serializeChildren").setValueDirect(true);
+            // serialize
+            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+            params.serialized += xmlSerializer.serializeToString(serializer.DOM);
+
+            // do not visit children, as they were serialized by this
+            visitChildren = false;
+        }
+        break;
+    }
+    
     if (visitChildren)
     {
         if (params.path)

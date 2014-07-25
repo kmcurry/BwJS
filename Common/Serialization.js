@@ -21,6 +21,8 @@ function deserializeAttributeContainer(container, atts)
             deserializeAttribute(attribute, atts[i][1]);
         }
     }
+    
+    container.flagDeserializedFromXML();
 }
 
 function deserializeComplexAttribute(attribute, atts)
@@ -41,6 +43,8 @@ function deserializeComplexAttribute(attribute, atts)
             gAttributeBin.push(new Pair(attribute, values));
         }
     }
+    
+    attribute.flagDeserializedFromXML();
 }
 
 function deserializeAttribute(attribute, value)
@@ -55,6 +59,8 @@ function deserializeAttribute(attribute, value)
     {
         gAttributeBin.push(new Pair(attribute, value));
     }
+    
+    attribute.flagDeserializedFromXML();
 }
 
 function resolveAttributeContainerReference(container, atts, registry)

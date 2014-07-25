@@ -37,104 +37,99 @@ var eAttrType = {
     Vector3DAttr                :28,
     ViewportAttr                :29,
     ViewVolumeAttr              :30,
+    RenderableElementStyleAttr  :31,
     
-    Node                        :31,
+    Node                        :1000,
+       
+    ParentableMotionElement     :1001,
+    Camera                      :1002,
+    PerspectiveCamera           :1003,
+    OrthographicCamera          :1004,
+    Light                       :1005,
+    DirectionalLight            :1006,
+    PointLight                  :1007,
+    SpotLight                   :1008, 
+    GlobalIllumination          :1009,           
+    Material                    :1010,
+    Texture                     :1011, 
+    RenderableElement           :1012,
+    Geometry                    :1013,
+    VertexGeoemtry              :1014,
+    TriList                     :1015, 
+    Group                       :1016,
+    Isolator                    :1017,
+    Dissolve                    :1018,  
+    Transform                   :1019,   
+    QuaternionRotate            :1020,
+    Scale                       :1021,
+    Rotate                      :1022,
+    Translate                   :1023,   
+    Model                       :1024,
+    Surface                     :1025,
+    MediaTexture                :1026,
+    NullObject                  :1027,   
+    Label                       :1028,
+    HTMLLabel                   :1029,
+    BalloonTipLabel             :1030, 
+    PathTrace                   :1031,
     
-    ParentableMotionElement     :32,
-    Camera                      :33,
-    PerspectiveCamera           :34,
-    OrthographicCamera          :35,
-    Light                       :36,
-    DirectionalLight            :37,
-    PointLight                  :38,
-    SpotLight                   :39, 
-    GlobalIllumination          :40,           
+    Directive                   :1100,
+    UpdateDirective             :1101,
+    RenderDirective             :1102,
+    RayPickDirective            :1103,
+    BBoxDirective               :1104,
+    SerializeDirective          :1105,
+    Directive_End               :1199,
     
-    Material                    :41,
-    Texture                     :42,
-    
-    RenderableElement           :43,
-    Geometry                    :44,
-    VertexGeoemtry              :45,
-    TriList                     :46,
-    
-    Group                       :47,
-    Isolator                    :48,
-    
-    Dissolve                    :49,
-    
-    Transform                   :50,
-    
-    QuaternionRotate            :51,
-    Scale                       :52,
-    Rotate                      :53,
-    Translate                   :54,
-    
-    Model                       :55,
-    Surface                     :56,
-    MediaTexture                :57,
-    NullObject                  :58,
-    
-    Label                       :59,
-    HTMLLabel                   :60,
-    BalloonTipLabel             :61,
-    
-    PathTrace                   :62,
-    
-    Directive                   :63,
-    UpdateDirective             :64,
-    RenderDirective             :65,
-    RayPickDirective            :66,
-    BBoxDirective               :67,
-    SerializeDirective          :68,
-    
-    Evaluator                   :1000,
-    SceneInspector              :1001,
-    KeyframeInterpolator        :1002,
-    BBoxLocator                 :1003,
-    ArcballInspector            :1004,
-    MapProjectionCalculator     :1005,
-    ObjectInspector             :1006,
-    MultiTargetObserver			:1007,
-    
-    Evaluator_End               :1999, // all evaluator types must be given a type between Evaluator and Evaluator_End
+    Evaluator                   :1200,
+    SceneInspector              :1201,
+    KeyframeInterpolator        :1202,
+    BBoxLocator                 :1203,
+    ArcballInspector            :1204,
+    MapProjectionCalculator     :1205,
+    ObjectInspector             :1206,
+    MultiTargetObserver			:1207,   
+    Evaluator_End               :1299, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
-    Command                     :2000,
-    CommandSequence             :2001,
-    AppendNode                  :2002,
-    AttributeTrigger            :2003,
-    AutoInterpolate             :2004,
-    Locate                      :2005,
-    Play                        :2006,
-    Remove                      :2007,
-    Serialize                   :2008,
-    Set                         :2009,
-    Stop                        :2010,
-    Command_End                 :2999,
+    Node_End                    :1999,
 
-    UserDefined                 :3000
+    Command                     :4000,
+    CommandSequence             :4001,
+    AppendNode                  :4002,
+    AttributeTrigger            :4003,
+    AutoInterpolate             :4004,
+    Locate                      :4005,
+    Play                        :4006,
+    Remove                      :4007,
+    Serialize                   :4008,
+    Set                         :4009,
+    Stop                        :4010,
+    Command_End                 :4999,
+
+    DeviceHandler               :5000,
+    MouseHandler                :5001,
+    DeviceHandler_End           :5999,
+    
+    UserDefined                 :6000
 };
 
 var eAttrElemType = {
     // unknown
-    eAttrElemType_Unknown               :0,	///
-
-    // standard C-types
-    eAttrElemType_Int                   :1,							///
-    eAttrElemType_UnsignedInt           :2,					///
-    eAttrElemType_Char                  :3,							///
-    eAttrElemType_UnsignedChar          :4,					///
-    eAttrElemType_Float                 :5,						///
-    eAttrElemType_Double                :6,						///
+    Unknown                     :-1,
 
     // attribute
-    eAttrElemType_Attribute             :7,					///
+    Attribute                   :0,
+    
+    // standard C-types
+    Int                         :1,
+    UnsignedInt                 :2,
+    Char                        :3,
+    UnsignedChar                :4,
+    Float                       :5,
+    Double                      :6,
 
     // user-defined
-    eAttrElemType_UserDefined           :0x000000FF,		///
-    
-    // force enumeration to 32-bits
-    eAttrElemType_FORCE_DWORD           :0x7FFFFFFF		///
+    UserDefined                 :100
 };
 
 function enumerateAttributeTypes()

@@ -1,10 +1,6 @@
 function Context()
 {
-    this.container = null;
-    this.attribute = null;
-    this.item = new NumberAttr(0);
-    this.containerName = new StringAttr("");
-    this.attributeName = new StringAttr("");
+    this.clear();
 }
 
 Context.prototype.clear = function()

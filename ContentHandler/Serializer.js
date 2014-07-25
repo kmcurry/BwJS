@@ -1,65 +1,86 @@
-Serializer.prototype = new Command();
+Serializer.prototype = new AttributeContainer();
 Serializer.prototype.constructor = Serializer;
 
 function Serializer()
 {
-    Command.call(this);
+    AttributeContainer.call(this);
     this.className = "Serializer";
 
     this.pbMixed = null;
     this.bMixed = false;
-    this.DOM  = document;
+    this.DOM  = null;
     this.RootElement = null;
+    this.elementStack = new Stack();
+    
+    this.format = new StringAttr("xml");
+    this.serializeMinimum = new BooleanAttr(false);
+    this.serializeChildren = new BooleanAttr(false);
+    
+    this.registerAttribute(this.format, "format");
+    this.registerAttribute(this.serializeMinimum, "serializeMinimum");
+    this.registerAttribute(this.serializeChildren, "serializeChildren");
 }
 
-Serializer.prototype.serialize = function(attribute,item,attributeName,container,SerializedContext)
+Serializer.prototype.serialize = function(attribute, item, attributeName, container)
 {
-    if(this.DOM)
+    this.DOM  = document.implementation.createDocument("", "__InitialRoot", null); 
+    if (this.DOM)
     {
-        if(this.RootElement)
+        if (this.RootElement)
         {
             var oldChild =  null;
-            this.DOM.removeChild(this.RootElement,oldChild);
+            this.DOM.removeChild(this.RootElement, oldChild);
             this.RootElement = null;
 
             this.mixedModifiedCB(attr,data);
         }
-        if(attribute)
+        if (attribute)
         {
-            this.serializeAttribute(attribute,item,attributeName);
+            this.serializeAttribute(attribute, item, attributeName);
         }
         else
         {
-            this.serializeAttribute(container,0,"");
+            this.serializeAttribute(container, 0, "");
         }
     }
 }
 
-Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
+Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
 {
-    if(attribute)
+    if (attribute)
     {
-        if(attribute.getAttribute() == eAttrType.Model)
+        if (attribute.isTransient()) // don't serialize transient attributes
+        {
+            return;
+        }
+        
+        if (this.serializeMinimum.getValueDirect() == true &&
+            !attribute.isDeserializedFromXML()) // if requested, don't serialize defaults
+        {
+            return;
+        }
+        
+        if (attribute.attrType == eAttrType.Model)
         {
             var model = attribute;
             this.serializeModel(model);
         }
-        else if(attribute.getAttribute() == eAttrType.PerspectiveCamera)
+        else if (attribute.attrType == eAttrType.PerspectiveCamera)
         {
             var ctr = attribute;
             this.serializeAttributeContainer(ctr)
         }
-        else if(attribute.getAttribute() == eAttrType.CommandSequence) // NO COMMAND SEQUENCE IN ATTRIBUTE TYPE
+        else if (attribute.attrType == eAttrType.CommandSequence)
         {
             var cmd = attribute;
             this.serializeCommand(cmd);
         }
-        else if(attribute.isContainer())
+        else if (attribute.isContainer())
         {
             var ctr = attribute;
             this.serializeAttributeContainer(ctr);
         }
-        else if(attrName && this.DOM)
+        else if (attrName && this.DOM)
         {
             var aType = attribute.attrType;
             var element = null;
@@ -70,7 +91,7 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
             var vecVal;
             var varVal;
 
-            var len = attribute.length();
+            var len = attribute.getLength();
             if (attrName)
             {
                 // serializer cannot put "(" or ")" in the XML tag name,
@@ -82,31 +103,31 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                 while (true)
                 {
                     /* Locate the substring to replace. */
-                    index = s.indexOf("(");
-                    if (!(s.indexOf("("))) break;
+                    index = attrName.indexOf("(");
+                    if (index == -1) break;
 
                     /* Make the replacement. */
-                    s.replace(index, 1, "_x0028");
+                    attrName.replace(index, 1, "_x0028");
                 }
                 while (true)
                 {
                     /* Locate the substring to replace. */
-                    index = s.indexOf(")");
-                    if (!(s.indexOf("("))) break;
+                    index = attrName.indexOf(")");
+                    if (index == -1) break;
 
                     /* Make the replacement. */
-                    s.replace(index, 1, "_x0029");
+                    attrName.replace(index, 1, "_x0029");
                 }
-                var bstr = s;
+                var bstr = attrName;
                 if (bstr)
                 {
-                    this.DOM.createElement(bstr, element);
+                    element = this.DOM.createElement(bstr);
                     if (element)
                     {
                         var pOldChild = null;
 
                         var strValue;
-                        this.getAttributeStringValue(attribute, item, strValue);
+                        strValue = this.getAttributeStringValue(attribute, item);
 
                         if (item >= 0 || len == 1 || aType == eAttrType.StringAttr)
                         {
@@ -129,18 +150,18 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
 
                                 nStartPos += strCdataStart.length;
 
-                                strValue = strValue.splice(nStartPos, strValue.length()-nStartPos-strCdataEnd.length);
+                                strValue = strValue.substr(nStartPos, strValue.length-nStartPos-strCdataEnd.length);
                                 var cdata = null;
                                 bstr = strValue;
                                 if (bstr)
                                 {
-                                    this.DOM.createCDATASection(bstr, cdata);
+                                    cdata = this.DOM.createCDATASection(bstr);
                                 }
                                 element.appendChild(cdata, pOldChild);
                             }
                             else
                             {
-                                element.put_text(_bstr_t(strValue)); //ASK MICHAEL OR KEVIN
+                                element.textContent = strValue;
                             }
                         }
                         else
@@ -152,27 +173,25 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
                             {
                                 strItemAttr = "item" + i.toString();
 
-                                endNdx = (i == len-1) ? strValue.npos : strValue.indexOf(",", startNdx);
-                                sv = strValue.splice(startNdx, endNdx-startNdx);
+                                endNdx = (i == len-1) ? strValue.length : strValue.indexOf(",", startNdx);
+                                sv = strValue.substr(startNdx, endNdx-startNdx);
 
                                 startNdx = endNdx+1;
 
                                 if (this.bMixed)
                                 {
-                                    this.DOM.createElement(strItemAttr,itemElement);
-                                    itemElement.put_text(_bstr_t(sv));
+                                    itemElement = this.DOM.createElement(strItemAttr);
+                                    itemElement.textContent = sv;
                                     element.appendChild(itemElement,pOldChild);
                                 }
                                 else
                                 {
-                                    element.get_attributes(attrMap);
-                                    if (attrMap)
+                                    if (element.attributes.length > 0)
                                     {
-                                        this.DOM.createAttribute(strItemAttr, itemAttr);
-
+                                        itemAttr = this.DOM.createAttribute(strItemAttr);
                                         if (itemAttr)
                                         {
-                                            itemAttr.put_text(_bstr_t(sv));
+                                            itemAttr.textContent = sv;
                                             attrMap.setNamedItem(itemAttr, pOldChild);
                                         }
                                     }
@@ -188,7 +207,7 @@ Serializer.prototype.serializeAttribute = function (attribute,item,attrName)
         }
     }
 }
-Serializer.prototype.serializeAttributeReference = function(attribute,reference)
+Serializer.prototype.serializeAttributeReference = function(attribute, reference)
 {
     if (attribute && reference && this.DOM)
     {
@@ -204,15 +223,14 @@ Serializer.prototype.serializeAttributeReference = function(attribute,reference)
             var bstr = container.getAttributeName(attribute);
             if (bstr)
             {
-                this.DOM.createElement(bstr, element);
+                element = this.DOM.createElement(bstr);
             }
         }
         if (element)
         {
-            element.get_attributes(attrMap);
-            if (attrMap)
+            if (element.attributes.length > 0)
             {
-                this.DOM.createAttribute("ref", itemAttr);
+                itemAttr = this.DOM.createAttribute("ref");
 
                 if (itemAttr)
                 {
@@ -226,13 +244,13 @@ Serializer.prototype.serializeAttributeReference = function(attribute,reference)
                         if (nameAttr = container.getAttribute("name"))
                         {
                             var s;
-                            tmpName = nameAttr.getValueDirect(s);
+                            tmpName = nameAttr.getValueDirect().join("");
                             tmpName += "/";
                             tmpName += refName;
                             refName = tmpName;
                         }
                     }
-                    itemAttr.put_text(refName);
+                    itemAttr.textContent = refName;
                     attrMap.setNamedItem(itemAttr, pOldChild);
                 }
             }
@@ -243,7 +261,7 @@ Serializer.prototype.serializeAttributeReference = function(attribute,reference)
     }
 }
 
-Serializer.prototype.serializeModel = function (Model)
+Serializer.prototype.serializeModel = function(Model)
 {
     // surround <Model> and <Set> tags so that both will serialize (previously the
     // <Set> was overwriting the <Model> as the root)
@@ -254,7 +272,7 @@ Serializer.prototype.serializeModel = function (Model)
         bstr = "ModelRoot";
         if (bstr)
         {
-            this.DOM.createElement(bstr, element);
+            element = this.DOM.createElement(bstr);
             if (element)
             {
                 this.pushElement(element);
@@ -269,14 +287,14 @@ Serializer.prototype.serializeModel = function (Model)
 
         // add set command for rotation group's quaternion rotation, to retain rotation caused by object inspection
         var RotGroup = null;
-        if (getInspectionGroup(Model,RotGroup))
+        if (RotGroup = getInspectionGroup(Model))
         {
             var container = Model;
             var attr = RotGroup.getChild(2).getAttribute("rotationQuat");
 
             var containerName;
             var containerNameAttr = container.getAttribute("name");
-            containerNameAttr.getValueDirect(containerName);
+            containerName = containerNameAttr.getValueDirect().join("");
 
             var command = null;
             var factory = this.registry.find("AttributeFactory");
@@ -288,7 +306,7 @@ Serializer.prototype.serializeModel = function (Model)
 
                 command.registerTargetAttributes(container, containerName);
 
-                var values;
+                var values = [];
                 attr.getValue(values);
 
                 command.attributeValuePairs.push(new Pair(attr, values));
@@ -317,7 +335,7 @@ Serializer.prototype.serializeCommand = function(command)
         if (bstr)
         {
             //this.DOM.createElement(bstr, element); Can only pass in a string value for this and only has 1 parameter
-            this.DOM.createElement(bstr);
+            element = this.DOM.createElement(bstr);
             if (element) {
                 this.pushElement(element);
 
@@ -328,7 +346,7 @@ Serializer.prototype.serializeCommand = function(command)
                 var pcszName = null;
                 var uiAttrCount = command.getAttributeCount();
                 for (i = 0; i < uiAttrCount; ++i) {
-                    attribute = command.getAttribute(i);
+                    attribute = command.getAttributeAt(i);
                     var attrName = command.getAttributeName(attribute);
                     if (!command.isBorrowed(attrName) && //FIND FUNCTION IN C++
                         (pcszName == "sourceContainer") &&
@@ -358,7 +376,7 @@ Serializer.prototype.serializeCommand = function(command)
                 var targets = [];
                 for (i = 0; i < uiAttrCount; ++i) {
                     //attribute = command.getAttribute(i, pcszName);
-                    var attr = command.getAttribute(i);
+                    var attr = command.getAttributeAt(i);
                     var attrName = command.getAttributeName(attr);
                     if (attrName != "sourceAttribute") {
                         sources.push(attr);
@@ -368,7 +386,7 @@ Serializer.prototype.serializeCommand = function(command)
                                 }
                         }
                         // source/target pairs must be serialized together
-                        for (i = 0; i < sources.size() && i < targets.size(); i++) {
+                        for (i = 0; i < sources.length && i < targets.length; i++) {
                             this.serializeAttribute(sources[i], -1, "sourceAttribute");
                             this.serializeAttribute(targets[i], -1, "targetAttribute");
                         }
@@ -384,7 +402,7 @@ Serializer.prototype.serializeCommand = function(command)
                         var vNewVal;
                         var pRef;
                         for (i = 0; i < uiAttrCount; ++i) {
-                            attribute = command.getAttribute(i);
+                            attribute = command.getAttributeAt(i);
                             var attrName = command.getAttributeName(attribute);
                             if (command.isBorrowedAndValueModified(attrName, vNewVal)) { // FIND FUNCTION IN C++
                                 // have to take the value that is imposed by the Set, not necessarily the current value
@@ -418,7 +436,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
         var bstr = pcszType;
         if (bstr)
         {
-            this.DOM.createElement(bstr, element);
+            element = this.DOM.createElement(bstr);
             if (element)
             {
                 this.pushElement(element);
@@ -430,9 +448,9 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 // 0. serialize any native attributes first
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
-                    attribute = container.getAttribute(i);
+                    attribute = container.getAttributeAt(i);
                     var attrName = container.getAttributeName(attribute);
-                    if (attrName.isNative() == true) //FIND FUNCTION IN C++
+                    //if (attrName.isNative() == true) //FIND FUNCTION IN C++
                     {
                         this.serializeAttribute(attribute, -1, attrName);
                     }
@@ -441,15 +459,15 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 // 1. if serialization of children is requested, serialize children
                 if (this.serializeChildren.getValueDirect())
                 {
-                    this.serializeChildren(container);
+                    this.doSerializeChildren(container);
                 }
 
                 // 2. serialize the non-native attributes
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
-                    attribute = container.getAttribute(i);
+                    attribute = container.getAttributeAt(i);
                     var attrName = container.getAttributeName(attribute);
-                    if (attrName.isNative() == false)
+                    //if (attrName.isNative() == false)
                     {
                         this.serializeAttribute(attribute, -1, attrName);
                     }
@@ -472,7 +490,7 @@ Serializer.prototype.serializeAttributeCollection = function(collection)
         var bstr = pcszType;
         if (bstr)
         {
-            this.DOM.createElement(bstr, element);
+            element = this.DOM.createElement(bstr);
             if (element)
             {
                 this.pushElement(element);
@@ -481,9 +499,9 @@ Serializer.prototype.serializeAttributeCollection = function(collection)
                 var attrVec = collection;
                 {
                     var elementName;
-                    var baseName = attrVec.baseName.getValueDirect();
+                    var baseName = attrVec.baseName.getValueDirect().join("");
 
-                    var size = attrVec.size();
+                    var size = attrVec.length;
                     for (var i=0; i < size; i++)
                     {
                         elementName = baseName[0];
@@ -501,8 +519,14 @@ Serializer.prototype.serializeAttributeCollection = function(collection)
     }
 }
 
-Serializer.prototype.serializeChildren = function(root)
+Serializer.prototype.doSerializeChildren = function(root)
 {
+    if (root.attrType < eAttrType.Node ||
+        root.attrType > eAttrType.Node_End)
+    {
+        return;
+    }
+    
     for (var i=0; i < root.getChildCount(); i++)
     {
         this.serializeAttribute(root.getChild(i), 0, null);
@@ -518,7 +542,7 @@ Serializer.prototype.pushElement = function(element)
     }
     else // !this.RootElement
     {
-        this.DOM.putref_documentElement(element);
+        this.DOM.replaceChild(element, this.DOM.documentElement);
     }
 
     this.RootElement = element;
@@ -528,24 +552,15 @@ Serializer.prototype.popElement = function()
 {
     this.elementStack.pop();
 
-    if (this.elementStack.size() > 0)
+    if (this.elementStack.length > 0)
     {
         this.RootElement = this.elementStack.top();
     }
 }
-Serializer.prototype.MatchesType = function(pcszType)
-{
-    var matches = false;
-    if (pcszType && pcszType.length == 5)
-    {
-        matches = !(pcszType == "msxml") || !(pcszType ==  "msdom");
-    }
-    return matches;
-}
 
-Serializer.prototype.getAttributeStringValue = function(attr,item,strValue)
+Serializer.prototype.getAttributeStringValue = function(attr, item)
 {
-    strValue = 0;
+    strValue = "";
 
     var e = attr.attrType;
 
@@ -567,25 +582,24 @@ Serializer.prototype.getAttributeStringValue = function(attr,item,strValue)
             break;
         case eAttrType.StringAttr:
         {
-            var len = attr.length();
-            var s;
-            var c = attr.getValueDirect(s[0], len);
-            strValue = c;
+            var len = attr.getLength();
+            strValue = attr.getValueDirect().join("");
         }
             break;
         case eAttrType.ColorAttr:
+        case eAttrType.Vector2DAttr:
         case eAttrType.Vector3DAttr:
         case eAttrType.Matrix4x4Attr:
         case eAttrType.QuaternionRotate:
         {
-            var vecVal_F;
+            var vecVal_F = [];
             attr.getValue(vecVal_F);
             if (item == -1)
             {
-                for (var i = 0; i < vecVal_F.size(); ++i)
+                for (var i = 0; i < vecVal_F.length; ++i)
                 {
                     strValue += vecVal_F[i].toString();
-                    if (i < vecVal_F.size() - 1)
+                    if (i < vecVal_F.length - 1)
                     {
                         strValue += ",";
                     }
@@ -600,14 +614,14 @@ Serializer.prototype.getAttributeStringValue = function(attr,item,strValue)
         case eAttrType.NumberArrayAttr:
         case eAttrType.ViewportAttr:
         {
-            var vecVal_I;
+            var vecVal_I = [];
             attr.getValue(vecVal_I);
             if (item == -1)
             {
-                for (var i = 0; i < vecVal_I.size(); ++i)
+                for (var i = 0; i < vecVal_I.length; ++i)
                 {
                     strValue += vecVal_I[i].toString();
-                    if (i < vecVal_I.size() - 1)
+                    if (i < vecVal_I.length - 1)
                     {
                         strValue += ",";
                     }
@@ -624,11 +638,13 @@ Serializer.prototype.getAttributeStringValue = function(attr,item,strValue)
         }
             break;
     }
+    
+    return strValue;
 }
 
 Serializer.prototype.mixedModifiedCB = function(attr,data)
 {
-    var v;
+    var v = [];
     attr.getValue(v);
     var pSerializer = data;
     if (pSerializer != 0xffffffff)
