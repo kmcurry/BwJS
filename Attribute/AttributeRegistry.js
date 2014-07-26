@@ -11,8 +11,32 @@ function AttributeRegistry()
     
     this.typeRegistry = [];
     this.nameRegistry = [];
+    
+    this.uniqueAttributes = [];
 }
 
+AttributeRegistry.prototype.addUnique = function(attribute)
+{
+	for (var i=0; i < this.uniqueAttributes.length; i++)
+	{
+		if (this.uniqueAttributes[i] == attribute) return;
+	}
+	
+	this.uniqueAttributes.push(attribute);
+}
+    
+AttributeRegistry.prototype.removeUnique = function(attribute)
+{
+	for (var i=0; i < this.uniqueAttributes.length; i++)
+	{
+		if (this.uniqueAttributes[i] == attribute)
+		{
+			this.uniqueAttributes.splice(i, 1);
+			return;
+		}
+	}
+}
+    
 AttributeRegistry.prototype.registerByType = function(attribute, type)
 {
     if (this.typeRegistry[type] == undefined)
@@ -21,7 +45,6 @@ AttributeRegistry.prototype.registerByType = function(attribute, type)
     }
     
     this.typeRegistry[type].push(attribute);
-    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.registerByName = function(attribute, name)
@@ -37,14 +60,13 @@ AttributeRegistry.prototype.registerByName = function(attribute, name)
     }
 
     this.nameRegistry[name].push(attribute);
-    this.objectCount += 1;
 }
 
 AttributeRegistry.prototype.register = function(attribute)
 {
     // register using type
     this.registerByType(attribute, attribute.attrType);
-    this.objectCount += 1;
+
     // register using name attribute if container
     if (attribute.isContainer())
     {
@@ -56,6 +78,9 @@ AttributeRegistry.prototype.register = function(attribute)
             name.addModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this); 
         }
     }
+    
+    this.addUnique(attribute);
+    this.objectCount++;
 }
 
 AttributeRegistry.prototype.unregisterByType = function(attribute, type)
@@ -64,12 +89,10 @@ AttributeRegistry.prototype.unregisterByType = function(attribute, type)
     {
         this.typeRegistry[type].splice(this.typeRegistry[type].indexOf(attribute), 1);
     }
-    this.objectCount -= 1;
 }
 
 AttributeRegistry.prototype.unregisterByName = function(attribute, name)
 {
-    this.objectCount -= 1;
     if (name.length == 0)
     {
         name = "unnamed";
@@ -85,7 +108,6 @@ AttributeRegistry.prototype.unregister = function(attribute)
 {
     // register using type
     this.unregisterByType(attribute, attribute.attrType);
-    this.objectCount -= 1;
     
     // register using name attribute if container
     if (attribute.isContainer())
@@ -98,6 +120,9 @@ AttributeRegistry.prototype.unregister = function(attribute)
             name.removeModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this); 
         }
     }
+    
+    this.removeUnique(attribute);
+    this.objectCount--;
 }
 
 AttributeRegistry.prototype.getByType = function(type)
@@ -193,21 +218,14 @@ AttributeRegistry.prototype.clear = function()
 
 AttributeRegistry.prototype.getObjectCount = function ()
 {
-    return this.typeRegistry.length;
+    return this.uniqueAttributes.length;
 }
+
 AttributeRegistry.prototype.getObject = function(num)
 {
-    var count = 0;
-    for (var i in this.typeRegistry)
+    if (num < this.uniqueAttributes.length)
     {
-        for (var j=0; j < this.typeRegistry[i].length; j++, count++)
-        {
-            if (count == num)
-
-            {
-                return this.typeRegistry[i][j];
-            }
-        }
+    	return this.uniqueAttributes[num];
     }
     
     return null;

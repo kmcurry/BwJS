@@ -23,13 +23,13 @@ function Serializer()
 
 Serializer.prototype.serialize = function(attribute, item, attributeName, container)
 {
+	this.RootElement = null;
     this.DOM  = document.implementation.createDocument("", "__InitialRoot", null); 
     if (this.DOM)
     {
         if (this.RootElement)
         {
-            var oldChild =  null;
-            this.DOM.removeChild(this.RootElement, oldChild);
+            this.DOM.removeChild(this.RootElement);
             this.RootElement = null;
 
             this.mixedModifiedCB(attr,data);
@@ -391,7 +391,7 @@ Serializer.prototype.serializeCommand = function(command)
                             this.serializeAttribute(targets[i], -1, "targetAttribute");
                         }
                         // if "targetAttribute" specified, don't serialize "target"
-                        if (targets.empty()) {
+                        if (targets.length == 0) {
                             attribute = command.getAttributeName("target");
                             if (attribute) {
                                 this.serializeAttribute(attribute, -1, "target");
@@ -404,17 +404,24 @@ Serializer.prototype.serializeCommand = function(command)
                         for (i = 0; i < uiAttrCount; ++i) {
                             attribute = command.getAttributeAt(i);
                             var attrName = command.getAttributeName(attribute);
-                            if (command.isBorrowedAndValueModified(attrName, vNewVal)) { // FIND FUNCTION IN C++
-                                // have to take the value that is imposed by the Set, not necessarily the current value
+                            var borrowed = command.isBorrowedAndValueModified(attrName);
+                            if (borrowed.borrowed)
+                            {
                                 var pNewAttribute = newAttribute(attribute.attrType);
-                                if (pNewAttribute) {
-                                    this.setAttributeValue(pNewAttribute, vNewVal);
+                                if (pNewAttribute) 
+                                {
+                                    this.setAttributeValue(pNewAttribute, borrowed.value);
                                     pNewAttribute.flagDeserializedFromXML();
                                     this.serializeAttribute(pNewAttribute, -1, attrName);
                                 }
                             }
-                            else if (command.isBorrowedAndReferenceModified(attribute, pRef)) {
-                                this.serializeAttributeReference(attribute, pRef);
+                            else 
+                            {
+                            	var borrowed = command.isBorrowedAndReferenceModified(attribute);
+                            	if (borrowed.borrowed) 
+                            	{
+                                	this.serializeAttributeReference(attribute, borrowed.reference);
+                                }
                             }
                         }
 

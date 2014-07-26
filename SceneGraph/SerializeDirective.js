@@ -18,7 +18,7 @@ function SerializeDirective()
     this.className = "SerializeDirective";
     this.attrType = eAttrType.SerializeDirective;
 
-    this.serialized = "";
+    this.serialized = null;
 }
 
 SerializeDirective.prototype.execute = function(root)
@@ -29,14 +29,16 @@ SerializeDirective.prototype.execute = function(root)
 	}
 
     // clear serialize string
-    this.serialized = "";
+    this.serialized = null;
 
     // setup serialize params structure
     var params = new SerializeParams();
-    params.serialized = this.serialized;
+    params.serialized = new String();
 
     // apply serialize directive
     root.apply("serialize", params, true);
+
+	this.serialized = params.serialized;
 
     return;
 }

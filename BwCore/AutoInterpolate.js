@@ -7,8 +7,6 @@ function AutoInterpolateCommand()
     this.className = "AutoInterpolateCommand";
     this.attrType = eAttrType.AutoInterpolate;
 
-    this.attributeValuePairs = [];
-    this.attributeReferencePairs = [];
     this.kfi = null;
     this.numValueChannels = 0;
     this.numReferenceChannels = 0;

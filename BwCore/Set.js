@@ -7,8 +7,6 @@ function SetCommand()
     this.className = "SetCommand";
     this.attrType = eAttrType.Set;
     
-    this.attributeValuePairs = [];
-    
     this.target.addModifiedCB(SetCommand_TargetModifiedCB, this);
 }
 

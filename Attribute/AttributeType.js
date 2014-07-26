@@ -73,44 +73,44 @@ var eAttrType = {
     BalloonTipLabel             :1030, 
     PathTrace                   :1031,
     
-    Directive                   :1100,
-    UpdateDirective             :1101,
-    RenderDirective             :1102,
-    RayPickDirective            :1103,
-    BBoxDirective               :1104,
-    SerializeDirective          :1105,
-    Directive_End               :1199,
-    
-    Evaluator                   :1200,
-    SceneInspector              :1201,
-    KeyframeInterpolator        :1202,
-    BBoxLocator                 :1203,
-    ArcballInspector            :1204,
-    MapProjectionCalculator     :1205,
-    ObjectInspector             :1206,
-    MultiTargetObserver			:1207,   
-    Evaluator_End               :1299, // all evaluator types must be given a type between Evaluator and Evaluator_End
+    Evaluator                   :1100,
+    SceneInspector              :1101,
+    KeyframeInterpolator        :1102,
+    BBoxLocator                 :1103,
+    ArcballInspector            :1104,
+    MapProjectionCalculator     :1105,
+    ObjectInspector             :1106,
+    MultiTargetObserver			:1107,   
+    Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
 
-    Command                     :4000,
-    CommandSequence             :4001,
-    AppendNode                  :4002,
-    AttributeTrigger            :4003,
-    AutoInterpolate             :4004,
-    Locate                      :4005,
-    Play                        :4006,
-    Remove                      :4007,
-    Serialize                   :4008,
-    Set                         :4009,
-    Stop                        :4010,
-    Command_End                 :4999,
-
-    DeviceHandler               :5000,
-    MouseHandler                :5001,
-    DeviceHandler_End           :5999,
+	Directive                   :2000,
+    UpdateDirective             :2001,
+    RenderDirective             :2002,
+    RayPickDirective            :2003,
+    BBoxDirective               :2004,
+    SerializeDirective          :2005,
+    Directive_End               :2999,
     
-    UserDefined                 :6000
+    Command                     :3000,
+    CommandSequence             :3001,
+    AppendNode                  :3002,
+    AttributeTrigger            :3003,
+    AutoInterpolate             :3004,
+    Locate                      :3005,
+    Play                        :3006,
+    Remove                      :3007,
+    Serialize                   :3008,
+    Set                         :3009,
+    Stop                        :3010,
+    Command_End                 :3999,
+
+    DeviceHandler               :4000,
+    MouseHandler                :4001,
+    DeviceHandler_End           :4999,
+    
+    UserDefined                 :5000
 };
 
 var eAttrElemType = {
