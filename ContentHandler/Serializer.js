@@ -128,6 +128,7 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
 
                         var strValue;
                         strValue = this.getAttributeStringValue(attribute, item);
+                        if (strValue == "") return;
 
                         if (item >= 0 || len == 1 || aType == eAttrType.StringAttr)
                         {
@@ -181,20 +182,14 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
                                 if (this.bMixed)
                                 {
                                     itemElement = this.DOM.createElement(strItemAttr);
-                                    itemElement.textContent = sv;
-                                    element.appendChild(itemElement,pOldChild);
+                                    itemElement.textValue = sv;
+                                    element.appendChild(itemElement);
                                 }
                                 else
                                 {
-                                    if (element.attributes.length > 0)
-                                    {
-                                        itemAttr = this.DOM.createAttribute(strItemAttr);
-                                        if (itemAttr)
-                                        {
-                                            itemAttr.textContent = sv;
-                                            attrMap.setNamedItem(itemAttr, pOldChild);
-                                        }
-                                    }
+                                    itemAttr = this.DOM.createAttribute(strItemAttr);
+                                    itemAttr.value = sv;
+                                    element.setAttributeNode(itemAttr);
                                 }
                             }
                         }
@@ -439,6 +434,10 @@ Serializer.prototype.serializeAttributeContainer = function(container)
     {
         var element = null;
         var pcszType = container.className;
+        if (pcszType == "BwSceneInspector")
+        {
+        	pcszType = "SceneInspector";
+        }
 
         var bstr = pcszType;
         if (bstr)
@@ -456,6 +455,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     attribute = container.getAttributeAt(i);
+                    if (container.getAttributeModificationCount(attribute) == 0) continue;
                     var attrName = container.getAttributeName(attribute);
                     if (attribute.isNative() == true)
                     {
@@ -473,6 +473,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     attribute = container.getAttributeAt(i);
+                    if (container.getAttributeModificationCount(attribute) == 0) continue;
                     var attrName = container.getAttributeName(attribute);
                     if (attribute.isNative() == false)
                     {
@@ -585,7 +586,14 @@ Serializer.prototype.getAttributeStringValue = function(attr, item)
         case eAttrType.BooleanAttr:
         {
             var b = attr.getValueDirect();
-            strValue = b == true ? "true" : "false";
+            if (b == true)
+            {
+            	strValue = "true";
+            }
+            else
+            {
+            	strValue = "false";
+            }
         }
             break;
         case eAttrType.StringAttr:
