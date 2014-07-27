@@ -209,6 +209,7 @@ AutoInterpolateCommand.prototype.registerTargetAttributes = function(target, tar
         }
 
         this.registerAttribute(attribute, sName);
+        this.borrowedAttributes.push(attribute);
     }
 }
 

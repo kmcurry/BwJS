@@ -457,7 +457,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 {
                     attribute = container.getAttributeAt(i);
                     var attrName = container.getAttributeName(attribute);
-                    //if (attrName.isNative() == true) //FIND FUNCTION IN C++
+                    if (attribute.isNative() == true)
                     {
                         this.serializeAttribute(attribute, -1, attrName);
                     }
@@ -474,7 +474,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 {
                     attribute = container.getAttributeAt(i);
                     var attrName = container.getAttributeName(attribute);
-                    //if (attrName.isNative() == false)
+                    if (attribute.isNative() == false)
                     {
                         this.serializeAttribute(attribute, -1, attrName);
                     }
@@ -542,10 +542,11 @@ Serializer.prototype.doSerializeChildren = function(root)
 
 Serializer.prototype.pushElement = function(element)
 {
+	this.elementStack.push(element);
+	    
     if (this.RootElement)
     {
-        var pOldChild = null;
-        this.RootElement.appendChild(element, pOldChild);
+        this.RootElement.appendChild(element);
     }
     else // !this.RootElement
     {
@@ -559,7 +560,7 @@ Serializer.prototype.popElement = function()
 {
     this.elementStack.pop();
 
-    if (this.elementStack.length > 0)
+    if (this.elementStack.length() > 0)
     {
         this.RootElement = this.elementStack.top();
     }

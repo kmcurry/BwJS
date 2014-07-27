@@ -40,7 +40,7 @@ SerializeCommand.prototype.serializeScene = function()
     var xstr;
 
     // root element open tag
-    this.serialized = "<Session broadcast='false'>";
+    this.serialized = '<?xml version="1.0" encoding="UTF-8"?><?bw onload="initialize"?><Session broadcast="false">';
 
     //var attrContainerRegistry = this.registry.getAttributeContainerRegistry();
     var attrContainerRegistry = bridgeworks.registry;
@@ -67,8 +67,6 @@ SerializeCommand.prototype.serializeScene = function()
                 container.attrType < eAttrType.DeviceHandler_End)
             {
                 context.attribute = container;
-                //context = document.createElement("Scene");
-                //var inside = context.setAttribute("text",container);
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
@@ -84,6 +82,16 @@ SerializeCommand.prototype.serializeScene = function()
                 	this.serialized += this.directive.serialized;
                 }
             }
+            // directives
+            else if (container.attrType > eAttrType.Directive &&
+            		 container.attrType < eAttrType.Directive_End)
+            {
+            	context.attribute = container;
+
+                // serialize
+                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+            }
             // SelectionListener
             else if (container.className == "SelectionListener")
             {
@@ -94,7 +102,7 @@ SerializeCommand.prototype.serializeScene = function()
                 this.serialized += "\"/>";
             }
             // remaining attributes not fitting other criteria and not a command (commands serialized below)
-            else if (container.attrType < eAttrType.Command || 
+            /*else if (container.attrType < eAttrType.Command || 
                 	 container.attrType > eAttrType.Command_End)
             {
                 context.attribute = container;
@@ -102,7 +110,7 @@ SerializeCommand.prototype.serializeScene = function()
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 this.serialized += xmlSerializer.serializeToString(serializer.DOM);
-            }
+            }*/
         }
 
 		// commands

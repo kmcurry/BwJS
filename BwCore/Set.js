@@ -50,6 +50,7 @@ SetCommand.prototype.registerTargetAttributes = function(target, targetName)
 		}
 		
 		this.registerAttribute(attribute, sName);
+		this.borrowedAttributes.push(attribute);
     }    
 }
 
