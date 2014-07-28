@@ -144,6 +144,7 @@ XMLParser.prototype.parseAttributeContainer = function(name, atts)
             this.attributeStack.push(null); // for corresponding pop at closing tag
             return;
         }
+        attribute.flagDeserializedFromXML();
 
         if (!resolveAttributeContainerReference(attribute, atts.m_parser.m_atts, this.registry))
         {

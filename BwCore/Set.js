@@ -4,7 +4,7 @@ SetCommand.prototype.constructor = SetCommand;
 function SetCommand()
 {
     Command.call(this);
-    this.className = "SetCommand";
+    this.className = "Set";
     this.attrType = eAttrType.Set;
     
     this.target.addModifiedCB(SetCommand_TargetModifiedCB, this);

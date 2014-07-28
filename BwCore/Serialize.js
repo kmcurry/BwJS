@@ -50,8 +50,7 @@ SerializeCommand.prototype.serializeScene = function()
         var serializer = factory.create("Serializer");
         var xmlSerializer = new XMLSerializer(); 
         // set minimum flag so that only the minimum required for recreation is serialized
-        //var serializeMinimum = serializer.getAttribute("serializeMinimum");
-        //serializeMinimum.setValueDirect(true);
+        serializer.serializeMinimum.setValueDirect(true);
 
         var count = attrContainerRegistry.getObjectCount();
 

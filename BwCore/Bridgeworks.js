@@ -47,6 +47,8 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.selector.setRegistry(this.registry);
     this.renderAgent.setRegistry(this.registry);
     this.layout.setRegistry(this.registry);
+    this.mapProjectionCalculator.setRegistry(this.registry);
+    this.rasterComponentEventListener.setRegistry(this.registry);
     
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);

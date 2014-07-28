@@ -4,7 +4,7 @@ PlayCommand.prototype.constructor = PlayCommand;
 function PlayCommand()
 {
     Command.call(this);
-    this.className = "PlayCommand";
+    this.className = "Play";
     this.attrType = eAttrType.Play;
 
     this.evaluators = [];

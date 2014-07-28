@@ -4,7 +4,7 @@ StopCommand.prototype.constructor = StopCommand;
 function StopCommand()
 {
     Command.call(this);
-    this.className = "StopCommand";
+    this.className = "Stop";
     this.attrType = eAttrType.Stop;
 
     this.evaluators = [];

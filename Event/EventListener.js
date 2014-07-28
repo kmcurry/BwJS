@@ -24,6 +24,13 @@ function EventListener()
 EventListener.prototype.addEventType = function(type)
 {
     this.events.push(type);
+    
+    // for serialization
+    var name = this.event.getValueDirect().join("");
+    var event = new StringAttr(name);
+    event.flagDeserializedFromXML(); 
+    this.events.push(event);
+    this.registerAttribute(event, "event");
 }
 
 EventListener.prototype.getEventTypes = function()

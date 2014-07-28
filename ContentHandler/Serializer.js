@@ -70,7 +70,8 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
             var ctr = attribute;
             this.serializeAttributeContainer(ctr)
         }
-        else if (attribute.attrType == eAttrType.CommandSequence)
+        else if (attribute.attrType > eAttrType.Command &&
+                 attribute.attrType < eAttrType.Command_End)
         {
             var cmd = attribute;
             this.serializeCommand(cmd);
@@ -124,8 +125,6 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
                     element = this.DOM.createElement(bstr);
                     if (element)
                     {
-                        var pOldChild = null;
-
                         var strValue;
                         strValue = this.getAttributeStringValue(attribute, item);
                         if (strValue == "") return;
@@ -158,7 +157,7 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
                                 {
                                     cdata = this.DOM.createCDATASection(bstr);
                                 }
-                                element.appendChild(cdata, pOldChild);
+                                element.appendChild(cdata);
                             }
                             else
                             {
@@ -342,26 +341,26 @@ Serializer.prototype.serializeCommand = function(command)
                 var uiAttrCount = command.getAttributeCount();
                 for (i = 0; i < uiAttrCount; ++i) {
                     attribute = command.getAttributeAt(i);
-                    var attrName = command.getAttributeName(attribute);
-                    if (!command.isBorrowed(attrName) && //FIND FUNCTION IN C++
-                        (pcszName == "sourceContainer") &&
-                        (pcszName == "sourceEvaluator") &&
-                        (pcszName == "sourceAttribute") &&
-                        (pcszName == "sourceOutput") &&
-                        (pcszName == "source") &&
-                        (pcszName == "targetContainer") &&
-                        (pcszName == "targetAttribute") &&
-                        (pcszName == "target")) {
+                    pcszName = command.getAttributeName(attribute);
+                    if (!command.isBorrowed(attribute) &&
+                        (pcszName != "sourceContainer") &&
+                        (pcszName != "sourceEvaluator") &&
+                        (pcszName != "sourceAttribute") &&
+                        (pcszName != "sourceOutput") &&
+                        (pcszName != "source") &&
+                        (pcszName != "targetContainer") &&
+                        (pcszName != "targetAttribute") &&
+                        (pcszName != "target")) {
                         this.serializeAttribute(attribute, -1, pcszName);
                     }
                 }
 
                 // 3. serialize "sourceContainer", "targetContainer"
-                attribute = command.getAttributeName("sourceContainer");
+                attribute = command.getAttribute("sourceContainer");
                 if (attribute) {
                     this.serializeAttribute(attribute, -1, "sourceContainer");
                 }
-                attribute = command.getAttributeName("targetContainer");
+                attribute = command.getAttribute("targetContainer");
                 if (attribute) {
                     this.serializeAttribute(attribute, -1, "targetContainer");
                 }
@@ -387,7 +386,7 @@ Serializer.prototype.serializeCommand = function(command)
                         }
                         // if "targetAttribute" specified, don't serialize "target"
                         if (targets.length == 0) {
-                            attribute = command.getAttributeName("target");
+                            attribute = command.getAttribute("target");
                             if (attribute) {
                                 this.serializeAttribute(attribute, -1, "target");
                             }
@@ -399,10 +398,10 @@ Serializer.prototype.serializeCommand = function(command)
                         for (i = 0; i < uiAttrCount; ++i) {
                             attribute = command.getAttributeAt(i);
                             var attrName = command.getAttributeName(attribute);
-                            var borrowed = command.isBorrowedAndValueModified(attrName);
+                            var borrowed = command.isBorrowedAndValueModified(attribute);
                             if (borrowed.borrowed)
                             {
-                                var pNewAttribute = newAttribute(attribute.attrType);
+                                var pNewAttribute = newAttribute(attribute.className);
                                 if (pNewAttribute) 
                                 {
                                     this.setAttributeValue(pNewAttribute, borrowed.value);
@@ -455,7 +454,6 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     attribute = container.getAttributeAt(i);
-                    if (container.getAttributeModificationCount(attribute) == 0) continue;
                     var attrName = container.getAttributeName(attribute);
                     if (attribute.isNative() == true)
                     {

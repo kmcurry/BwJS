@@ -543,6 +543,11 @@ function registerEvaluatorAttributes(evaluator, factory)
     var targetConnectionType = new StringAttr("transform");
     targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
     evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
+    
+    // evaluate (replaced by "enabled")
+    var evaluate = new BooleanAttr(true);
+    evaluator.registerAttribute(evaluate, "evaluate");
+    evaluate.addTarget(evaluator.getAttribute("enabled"));
 }
 
 function registerParentableAttributes(pme, factory)

@@ -6,7 +6,7 @@ function CommandMgr()
     AttributeContainer.call(this);
     this.className = "CommandMgr";
     
-    this.sequenceStack = new Stack();
+    this.commandSeqStack = new Stack();
     
     this.name = new StringAttr("CommandMgr");
     
@@ -15,24 +15,24 @@ function CommandMgr()
 
 CommandMgr.prototype.pushCommandSequence = function(sequence)
 {
-    this.sequenceStack.push(sequence);
+    this.commandSeqStack.push(sequence);
 }
 
 CommandMgr.prototype.popCommandSequence = function()
 {
-    this.sequenceStack.pop();
+    this.commandSeqStack.pop();
 }
 
-CommandMgr.prototype.clearCommandSequence = function()
+CommandMgr.prototype.clearCommandSequenceStack = function()
 {
-    this.sequenceStack.clear();
+    this.commandSequenceStack.clear();
 }
 
 CommandMgr.prototype.addCommand = function(command)
 {
-    if (this.sequenceStack.length > 0)
+    if (this.commandSeqStack.length() > 0)
     {
-        this.sequenceStack.top().addCommand(command);
+        this.commandSeqStack.top().addCommand(command);
         return;
     }
     

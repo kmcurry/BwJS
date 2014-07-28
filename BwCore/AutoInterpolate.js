@@ -4,7 +4,7 @@ AutoInterpolateCommand.prototype.constructor = AutoInterpolateCommand;
 function AutoInterpolateCommand()
 {
     Command.call(this);
-    this.className = "AutoInterpolateCommand";
+    this.className = "AutoInterpolate";
     this.attrType = eAttrType.AutoInterpolate;
 
     this.kfi = null;
