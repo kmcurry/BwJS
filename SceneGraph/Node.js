@@ -338,7 +338,11 @@ Node.prototype.apply = function(directive, params, visitChildren)
             serializer.getAttribute("serializeChildren").setValueDirect(true);
             // serialize
             serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-            params.serialized = xmlSerializer.serializeToString(serializer.DOM);
+            var serialized = xmlSerializer.serializeToString(serializer.DOM);
+            if (serialized != "<__InitialRoot/>")
+            {
+            	params.serialized += serialized;
+            }
 
             // do not visit children, as they were serialized by this
             visitChildren = false;

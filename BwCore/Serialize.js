@@ -69,7 +69,9 @@ SerializeCommand.prototype.serializeScene = function()
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized == "<__InitialRoot/>") continue;
+                this.serialized += serialized;
             }
             // root nodes (nodes without parents)
             else if (container.attrType > eAttrType.Node && 
@@ -89,7 +91,9 @@ SerializeCommand.prototype.serializeScene = function()
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized == "<__InitialRoot/>") continue;
+                this.serialized += serialized;
             }
             // SelectionListener
             else if (container.className == "SelectionListener")
@@ -126,7 +130,9 @@ SerializeCommand.prototype.serializeScene = function()
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized == "<__InitialRoot/>") continue;
+                this.serialized += serialized;
             }
         }
         
@@ -144,7 +150,9 @@ SerializeCommand.prototype.serializeScene = function()
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized == "<__InitialRoot/>") continue;
+                this.serialized += serialized;
             }
         }
             		
