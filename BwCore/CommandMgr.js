@@ -30,9 +30,13 @@ CommandMgr.prototype.clearCommandSequenceStack = function()
 
 CommandMgr.prototype.addCommand = function(command)
 {
+    setAttributeBin(null);
+    setAttributePairs(null);
+    
     if (this.commandSeqStack.length() > 0)
     {
         this.commandSeqStack.top().addCommand(command);
+        
         return;
     }
     
@@ -61,8 +65,6 @@ CommandMgr.prototype.addCommand = function(command)
         command.execute();
         this.registry.unregister(command);
     }
-    
-    setAttributeBin(null);
 }
 
 CommandMgr.prototype.createCommandTrigger = function(command, trigger) 

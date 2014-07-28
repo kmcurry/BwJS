@@ -13,6 +13,9 @@
 	<!--
 			DISCONNECT MOUSE
 	-->
+	<Set name="SetCapture_Down_Rot_Scene" event="VK_DOWN.Down" numResponses="-1" undoable="false" target="SceneInspector">
+        <rotationDelta x="-5" y="0" z="0"/>
+    </Set>
 	<DisconnectAttributes name="DisconnectAllMouse" numResponses="-1" undoable="false" sourceContainer="MouseHandler" connectionType="DisconnectAllTargets">
 		<event>MButton1.Up</event>
 		<event>MButton2.Up</event>

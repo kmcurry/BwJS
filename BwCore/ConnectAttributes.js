@@ -4,6 +4,8 @@ function ConnectionDesc()
     this.targetContainer = null;
     this.sourceAttribute = null;
     this.targetAttribute = null;
+    this.sourceAttributeName = "";
+    this.targetAttributeName = "";
     this.sourceIndex = -1;
     this.targetIndex = -1;
 }
@@ -21,9 +23,10 @@ ConnectAttributesCommand.prototype.constructor = ConnectAttributesCommand;
 function ConnectAttributesCommand()
 {
     Command.call(this);
-    this.className = "ConnectAttributesCommand";
+    this.className = "ConnectAttributes";
+    this.attrType = eAttrType.ConnectAttributes;
     
-    this.connections = new Stack(new ConnectionDesc());
+    this.connections = new Stack();
     this.connectionHelper = new Pair(null, null);
     
     this.sourceContainer = new StringAttr("");
@@ -54,6 +57,28 @@ function ConnectAttributesCommand()
 	this.registerAttribute(this.negate, "negate");
 	this.registerAttribute(this.persist, "persist");
 	this.registerAttribute(this.connectionType, "connectionType");
+}
+
+ConnectAttributesCommand.prototype.finalize = function()
+{
+    // for serialization; register each sourceAttribute/targetAttribute pair
+    for (var i=0; i < this.connections.length()-2; i++)
+    {
+        var connection = this.connections.getAt(i);
+        if (connection.sourceAttribute && connection.targetAttribute)
+        {
+            var sourceAttribute = new StringAttr(connection.sourceAttributeName);
+            sourceAttribute.flagDeserializedFromXML();
+            this.registerAttribute(sourceAttribute, "sourceAttribute");
+            
+            var targetAttribute = new StringAttr(connection.targetAttributeName);
+            targetAttribute.flagDeserializedFromXML();
+            this.registerAttribute(targetAttribute, "targetAttribute"); 
+        }    
+    }
+    
+    // call base-class implementation
+    Command.prototype.finalize.call(this);
 }
 
 ConnectAttributesCommand.prototype.eventPerformed = function(event)
@@ -162,12 +187,20 @@ ConnectAttributesCommand.prototype.addOrRemoveTargets = function(add)
 
 function ConnectAttributesCommand_SourceContainerModifiedCB(attribute, container)
 {
+    if (container.connections.length() == 0)
+    {
+        container.connections.push(new ConnectionDesc());
+    }
     var connection = container.connections.top();
     connection.sourceContainer = container.registry.find(attribute.getValueDirect().join(""));       
 }
 
 function ConnectAttributesCommand_TargetContainerModifiedCB(attribute, container)
 {
+    if (container.connections.length() == 0)
+    {
+        container.connections.push(new ConnectionDesc());
+    }
     var connection = container.connections.top();     
     connection.targetContainer = container.registry.find(attribute.getValueDirect().join(""));       
 }
@@ -177,6 +210,11 @@ function ConnectAttributesCommand_SourceAttributeModifiedCB(attribute, container
     var source = null;
     var index = -1;
     
+    if (container.connections.length() == 0)
+    {
+        container.connections.push(new ConnectionDesc());
+    }
+
     var connection = container.connections.top();    
     if (connection.sourceContainer)
     {
@@ -198,6 +236,7 @@ function ConnectAttributesCommand_SourceAttributeModifiedCB(attribute, container
     }
     
     connection.sourceAttribute = source;
+    connection.sourceAttributeName = attribute.getValueDirect().join("");
     connection.sourceIndex = index;
     
     // if source and target attributes have both been set, push another connection desc for the next source/target pair
@@ -213,6 +252,11 @@ function ConnectAttributesCommand_TargetAttributeModifiedCB(attribute, container
 {
     var target = null;
     var index = -1;
+    
+    if (container.connections.length() == 0)
+    {
+        container.connections.push(new ConnectionDesc());
+    }
     
     var connection = container.connections.top();    
     if (connection.targetContainer)
@@ -235,8 +279,9 @@ function ConnectAttributesCommand_TargetAttributeModifiedCB(attribute, container
     }
     
     connection.targetAttribute = target;
+    connection.targetAttributeName = attribute.getValueDirect().join("");
     connection.targetIndex = index;
-    
+        
     // if source and target attributes have both been set, push another connection desc for the next source/target pair
     if (connection.sourceAttribute && connection.targetAttribute)
     {

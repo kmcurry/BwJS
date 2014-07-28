@@ -313,7 +313,10 @@ Node.prototype.apply = function(directive, params, visitChildren)
     var enabled = this.enabled.getValueDirect();
     if (!enabled)
     {
-        return;
+        if (directive != "serialize")
+        {
+            return;
+        }
     }
 
     switch (directive)

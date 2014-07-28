@@ -318,13 +318,26 @@ Serializer.prototype.serializeModel = function(Model)
 
 Serializer.prototype.serializeCommand = function(command)
 {
+    var i;
     // 1. create the start tag.
 
     if (command && this.DOM)
     {
         var element = null;
         var pcszType = command.className;
-
+        
+        // rename if negate is set
+        var negate = command.getAttribute("negate");
+        if (negate && negate.getValueDirect() == true) 
+        {
+            switch (pcszType)
+            {
+                case "Play":                pcszType = "Pause"; break;
+                case "ConnectAttributes":   pcszType = "DisconnectAttributes"; break;
+                default:                    break;
+            }
+        }
+        
         var bstr = pcszType;
         if (bstr)
         {
@@ -368,59 +381,67 @@ Serializer.prototype.serializeCommand = function(command)
                 // 4. serialize "sourceAttribute", "targetAttribute", "target" (may be multiple source/target pairs)
                 var sources = [];
                 var targets = [];
-                for (i = 0; i < uiAttrCount; ++i) {
+                for (i = 0; i < uiAttrCount; ++i) 
+                {
                     //attribute = command.getAttribute(i, pcszName);
                     var attr = command.getAttributeAt(i);
                     var attrName = command.getAttributeName(attr);
-                    if (attrName != "sourceAttribute") {
+                    if (attrName == "sourceAttribute") 
+                    {
                         sources.push(attr);
-                       }
-                        else if (attrName != "targetAttribute") {
-                            targets.push(attr);
-                                }
-                        }
-                        // source/target pairs must be serialized together
-                        for (i = 0; i < sources.length && i < targets.length; i++) {
-                            this.serializeAttribute(sources[i], -1, "sourceAttribute");
-                            this.serializeAttribute(targets[i], -1, "targetAttribute");
-                        }
-                        // if "targetAttribute" specified, don't serialize "target"
-                        if (targets.length == 0) {
-                            attribute = command.getAttribute("target");
-                            if (attribute) {
-                                this.serializeAttribute(attribute, -1, "target");
-                            }
-                        }
-
-                        // 5. serialize the borrowed attributes that were modified by the command
-                        var vNewVal;
-                        var pRef;
-                        for (i = 0; i < uiAttrCount; ++i) {
-                            attribute = command.getAttributeAt(i);
-                            var attrName = command.getAttributeName(attribute);
-                            var borrowed = command.isBorrowedAndValueModified(attribute);
-                            if (borrowed.borrowed)
-                            {
-                                var pNewAttribute = newAttribute(attribute.className);
-                                if (pNewAttribute) 
-                                {
-                                    this.setAttributeValue(pNewAttribute, borrowed.value);
-                                    pNewAttribute.flagDeserializedFromXML();
-                                    this.serializeAttribute(pNewAttribute, -1, attrName);
-                                }
-                            }
-                            else 
-                            {
-                            	var borrowed = command.isBorrowedAndReferenceModified(attribute);
-                            	if (borrowed.borrowed) 
-                            	{
-                                	this.serializeAttributeReference(attribute, borrowed.reference);
-                                }
-                            }
-                        }
-
-                        this.popElement();
                     }
+                    else if (attrName == "targetAttribute") 
+                    {
+                        targets.push(attr);
+                    }
+                }
+                
+                // source/target pairs must be serialized together
+                for (i = 0; i < sources.length && i < targets.length; i++) 
+                {
+                    this.serializeAttribute(sources[i], -1, "sourceAttribute");
+                    this.serializeAttribute(targets[i], -1, "targetAttribute");
+                }
+                // if "targetAttribute" specified, don't serialize "target"
+                if (targets.length == 0) 
+                {
+                    attribute = command.getAttribute("target");
+                    if (attribute) 
+                    {
+                        this.serializeAttribute(attribute, -1, "target");
+                    }
+                }
+
+                // 5. serialize the borrowed attributes that were modified by the command
+                var vNewVal;
+                var pRef;
+                for (i = 0; i < uiAttrCount; ++i) 
+                {
+                    attribute = command.getAttributeAt(i);
+                    var attrName = command.getAttributeName(attribute);
+                    var borrowed = command.isBorrowedAndValueModified(attribute);
+                    if (borrowed.borrowed)
+                    {
+                        var pNewAttribute = newAttribute(attribute.className);
+                        if (pNewAttribute) 
+                        {
+                            setAttributeValue(pNewAttribute, borrowed.value);
+                            pNewAttribute.flagDeserializedFromXML();
+                            this.serializeAttribute(pNewAttribute, -1, attrName);
+                        }
+                    }
+                    else 
+                    {
+                    	var borrowed = command.isBorrowedAndReferenceModified(attribute);
+                    	if (borrowed.borrowed) 
+                    	{
+                        	this.serializeAttributeReference(attribute, borrowed.reference);
+                        }
+                    }
+                }
+
+                this.popElement();
+            }
         }
     }
 }

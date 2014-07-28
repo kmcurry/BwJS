@@ -16,6 +16,10 @@ function Command()
     this.registerAttribute(this.target, "target");
 }
 
+Command.prototype.finalize = function()
+{  
+}
+
 Command.prototype.eventPerformed = function(event)
 {
     if (this.listen.getValueDirect() == true)

@@ -16,10 +16,13 @@ AttributeContainer.prototype.destroy = function()
     // destroy all registered attributes with this as the container
     for (var i in this.attrNameMap)
     {
-        var attr = this.getAttribute(i);
-        if (attr.getContainer() == this)
+        for (var j=0; j < this.attrNameMap[i].length; j++)
         {
-            attr.destroy();
+            var attr = this.attrNameMap[i][j];
+            if (attr.getContainer() == this)
+            {
+                attr.destroy();
+            }
         }
     }
 
@@ -34,7 +37,11 @@ AttributeContainer.prototype.isContainer = function()
 
 AttributeContainer.prototype.registerAttribute = function(attribute, name)
 {
-    this.attrNameMap[name] = attribute;
+    if (this.attrNameMap[name] == undefined)
+    {
+        this.attrNameMap[name] = new Array();
+    }
+    this.attrNameMap[name].push(attribute);
     //this.attrModifiedCountMap[attribute] = 0; // doesn't work
     this.attrModifiedCountMap.push(new Pair(attribute, 0));
 
@@ -52,19 +59,27 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
 {
     for (var i in this.attrNameMap)
     {
-        if (this.attrNameMap[i] == attribute)
+        for (var j=0; j < this.attrNameMap[i].length; j++)
         {
-            attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
-            attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
-            delete this.attrNameMap[i];
-            break;
+            if (this.attrNameMap[i][j] == attribute)
+            {
+                attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+                attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
+                delete this.attrNameMap[i][j];
+                break;
+            }
         }
     }
 }
 
 AttributeContainer.prototype.getAttribute = function(name)
 {
-    return this.attrNameMap[name];
+    if (this.attrNameMap[name] == undefined)
+    {
+        return null;
+    }
+    
+    return this.attrNameMap[name][0];
 }
 
 AttributeContainer.prototype.getAttributeAt = function(index)
@@ -72,11 +87,14 @@ AttributeContainer.prototype.getAttributeAt = function(index)
     var count = 0;
     for (var i in this.attrNameMap)
     {
-        if (count == index)
+        for (var j=0; j < this.attrNameMap[i].length; j++)
         {
-            return this.attrNameMap[i];
+            if (count == index)
+            {
+                return this.attrNameMap[i][j];
+            }
+            count++;
         }
-        count++;
     }
     
     return null;
@@ -87,11 +105,14 @@ AttributeContainer.prototype.getAttributeName = function(attribute)
     var count = 0;
     for (var i in this.attrNameMap)
     {
-        if (this.attrNameMap[i] == attribute)
+        for (var j=0; j < this.attrNameMap[i].length; j++)
         {
-            return this.getAttributeNameAt(count);
+            if (this.attrNameMap[i][j] == attribute)
+            {
+                return i;
+            }
+            count++;
         }
-        count++;
     }
 
     return null;
@@ -102,11 +123,14 @@ AttributeContainer.prototype.getAttributeNameAt = function(index)
     var count = 0;
     for (var i in this.attrNameMap)
     {
-        if (count == index)
+        for (var j=0; j < this.attrNameMap[i].length; j++)
         {
-            return i;
+            if (count == index)
+            {
+                return i;
+            }
+            count++;
         }
-        count++;
     }
     
     return null;
@@ -115,7 +139,7 @@ AttributeContainer.prototype.getAttributeNameAt = function(index)
 AttributeContainer.prototype.getAttributeCount = function()
 {
     var count = 0;
-    for (var i in this.attrNameMap) count++;
+    for (var i in this.attrNameMap) count += this.attrNameMap[i].length;
     return count;
 }
 
@@ -208,18 +232,21 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
 
     for (var i in src.attrNameMap)
     {
-        var attr = this.getAttribute(i);
-        if (!attr)
+        for (var j=0; j < src.attrNameMap.length; j++)
         {
-            attr = src.attrNameMap[i].clone();
-            if (!attr) continue;
-            attr.setContainer(this);
-            this.registerAttribute(attr, i);
-        }
-
-        if (attr && syncValues)
-        {
-            attr.copyValue(src.attrNameMap[i]);
+            var attr = this.attrNameMap[i][j];
+            if (!attr)
+            {
+                attr = src.attrNameMap[i].clone();
+                if (!attr) continue;
+                attr.setContainer(this);
+                this.registerAttribute(attr, i);
+            }
+    
+            if (attr && syncValues)
+            {
+                attr.copyValue(src.attrNameMap[i]);
+            }
         }
     }
 }

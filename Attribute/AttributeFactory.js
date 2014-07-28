@@ -208,16 +208,35 @@ function newAttribute(name, factory)
     
     switch (name)
     {
-    case "Styles":                  resource = new StylesAttr(); break;
-    case "StyleMap":                resource = new StyleMapAttr(); break;
-    case "StylesMap":               resource = new StylesMapAttr(); break;
-    case "LabelStyle":              resource = new LabelStyleAttr(); break;
-    case "IconStyle":               resource = new IconStyleAttr(); break;
-    case "FontStyle":               resource = new FontStyleAttr(); break;
-    case "HTMLLabelStyle":          resource = new HTMLLabelStyleAttr(); break;
-    case "BalloonTipLabelStyle":    resource = new BalloonTipLabelStyleAttr(); break;
-    case "RenderableElementStyle":  resource = new RenderableElementStyleAttr(); break;
-    case "Serializer":              resource = new Serializer(); break;
+    case "BalloonTipLabelStyleAttr":    resource = new BalloonTipLabelStyleAttr(); break;
+    case "BBoxAttr":                    resource = new BBoxAttr(); break;
+    case "BooleanAttr":                 resource = new BooleanAttr(); break;
+    case "ColorAttr":                   resource = new ColorAttr(); break;
+    case "FontStyleAttr":               resource = new FontStyleAttr(); break;
+    case "IconStyleAttr":               resource = new IconStyleAttr(); break;
+    case "ImageAttr":                   resource = new ImageAttr(); break;
+    case "KeyframeAttr":                resource = new KeyframeAttr(); break;
+    case "KeyframesAttr":               resource = new KeyframesAttr(); break;
+    case "LabelStyleAttr":              resource = new LabelStyleAttr(); break;
+    case "HTMLLabelStyleAttr":          resource = new HTMLLabelStyleAttr(); break;
+    case "NumberArrayAttr":             resource = new NumberArrayAttr(); break;
+    case "NumberAttr":                  resource = new NumberAttr(); break;
+    case "Matrix4x4Attr":               resource = new Matrix4x4Attr(); break;
+    case "PlaneAttr":                   resource = new PlaneAttr(); break;
+    case "PulseAttr":                   resource = new PulseAttr(); break;
+    case "RectAttr":                    resource = new RectAttr(); break;
+    case "ReferenceAttr":               resource = new ReferenceAttr(); break;
+    case "StringAttr":                  resource = new StringAttr(); break;
+    case "StyleAttr":                   resource = new StyleAttr(); break;
+    case "StylesAttr":                  resource = new StylesAttr(); break;
+    case "StyleMapAttr":                resource = new StyleMapAttr(); break;
+    case "StylesMapAttr":               resource = new StylesMapAttr(); break;
+    case "Vector2DAttr":                resource = new Vector2DAttr(); break;
+    case "Vector3DAttr":                resource = new Vector3DAttr(); break;
+    case "ViewportAttr":                resource = new ViewportAttr(); break;
+    case "ViewVolumeAttr":              resource = new ViewVolumeAttr(); break;
+    case "RenderableElementStyleAttr":  resource = new RenderableElementStyleAttr(); break;
+    case "Serializer":                  resource = new Serializer(); break;
     }
     
     return resource;
@@ -468,6 +487,8 @@ function finalizeDirective(directive, factory)
 
 function finalizeCommand(command, factory)
 {
+    command.finalize();
+    
     var commandMgr = factory.registry.find("CommandMgr");
     if (commandMgr)
     {

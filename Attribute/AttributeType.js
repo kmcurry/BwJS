@@ -34,10 +34,11 @@ var eAttrType = {
     StylesAttr                  :25,
     StyleMapAttr                :26,
     StylesMapAttr               :27,
-    Vector3DAttr                :28,
-    ViewportAttr                :29,
-    ViewVolumeAttr              :30,
-    RenderableElementStyleAttr  :31,
+    Vector2DAttr                :28,
+    Vector3DAttr                :29,
+    ViewportAttr                :30,
+    ViewVolumeAttr              :31,
+    RenderableElementStyleAttr  :32,
     
     Node                        :1000,
        
@@ -104,6 +105,7 @@ var eAttrType = {
     Serialize                   :3008,
     Set                         :3009,
     Stop                        :3010,
+    ConnectAttributes           :3011,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
