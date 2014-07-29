@@ -125,4 +125,6 @@
        </balloonTipLabelStyle>
    </BalloonTipLabel>-->
    <KeyframeInterpolator target="UV_BoxG" url="./envelopes/Dissolve_Oscillate.env" targetConnectionType="dissolve"/>
+   <TargetObserver name="BoxObserver" observer="UV_BoxG" target0="Camera" affectPitch="true"/>
+   <Set target="ObjectInspector" enabled="false"/>
 </Session>
