@@ -120,9 +120,11 @@
    <BalloonTipLabel name="bar" parent="sphereBack" show="true">
        <balloonTipLabelStyle>
            <htmlLabelStyle>
-               <html>Test</html>
+               <html><![CDATA[<em>Test</em>]]></html>
            </htmlLabelStyle>
        </balloonTipLabelStyle>
    </BalloonTipLabel>-->
    <KeyframeInterpolator target="UV_BoxG" url="./envelopes/Dissolve_Oscillate.env" targetConnectionType="dissolve"/>
+   <TargetObserver name="BoxObserver" observer="UV_BoxG" target0="Camera" affectPitch="true"/>
+   <Set target="ObjectInspector" enabled="false"/>
 </Session>
