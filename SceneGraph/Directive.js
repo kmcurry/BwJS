@@ -1,7 +1,9 @@
 ﻿function DirectiveParams()
 {
     this.directive = null;
-    this.path = new Stack();
+    this.path = null;
+    this.pathIndex = 0;
+    this.currentNodePath = new Stack();
     this.userData = null;
 }
 

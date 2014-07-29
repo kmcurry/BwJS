@@ -9,7 +9,8 @@
     <script type="text/javascript" src="../../Common/xmlsax.js"></script>
     <script type="text/javascript" src="../../Common/Timer.js"></script>  
     <script type="text/javascript" src="../../Common/DomAbsPos.js"></script>   
-    <script type="text/javascript" src="../../Common/Enums.js"></script>     
+    <script type="text/javascript" src="../../Common/Enums.js"></script>
+    <script type="text/javascript" src="../../Common/Context.js"></script>
     <script type="text/javascript" src="../../Math/MathUtil.js"></script>
     <script type="text/javascript" src="../../Math/Vector2D.js"></script>
     <script type="text/javascript" src="../../Math/Vector3D.js"></script>
@@ -43,7 +44,7 @@
     <script type="text/javascript" src="../../RenderContext/Plugins/webgl/shaders.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentHandler.js"></script>
     <script type="text/javascript" src="../../ContentHandler/ContentBuilder.js"></script>
-    <script type="text/javascript" src="../../ContentHandler/BinaryParser.js"></script> 
+    <script type="text/javascript" src="../../ContentHandler/BinaryParser.js"></script>
     <script type="text/javascript" src="../../ContentHandler/TextParser.js"></script>     
     <script type="text/javascript" src="../../ContentHandler/XMLParser.js"></script>
     <script type="text/javascript" src="../../Image/PixelFormat.js"></script>  
@@ -137,6 +138,7 @@
     <script type="text/javascript" src="../../ContentHandler/LWObjectHandler.js"></script>
     <script type="text/javascript" src="../../ContentHandler/LWObjectBuilder.js"></script>
     <script type="text/javascript" src="../../ContentHandler/LWSceneHandler.js"></script>
+      <script type="text/javascript" src="../../ContentHandler/Serializer.js"></script>
     <script type="text/javascript" src="../../ContentHandler/LWSceneBuilder.js"></script>
     <script type="text/javascript" src="../../Attribute/AttributeFactory.js"></script>
     <script type="text/javascript" src="../../BwCore/bridgeworks.js"></script>
@@ -298,15 +300,14 @@
               }
               
           }
-          
+          var serializer = new XMLSerializer();
           function handleKey(e)
           {
               switch(e.keyCode) {
                 case 'C'.charCodeAt(0): {
-                    if (e.metaKey || e.ctrlKey){
-                        e.preventDefault();
-                        copy();
-                    }      // c
+                    var xstr = serializer.serializeToString(document.body);
+
+                    console.log(xstr);
                 }
                 break;
                 case 'V'.charCodeAt(0): {      // v

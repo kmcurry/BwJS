@@ -51,7 +51,7 @@ Label.prototype.setGraphMgr = function(graphMgr)
     RasterComponent.prototype.setGraphMgr.call(this, graphMgr);
     
     // create id
-    this.id = "Label" + this.graphMgr.getNextLabelIndex();
+    this.id = "Label" + this.graphMgr.getNextLabelIndex;
     this.labelId = this.id + "_label";
     this.iconId = this.id + "_icon";
     
@@ -123,6 +123,24 @@ Label.prototype.apply = function(directive, params, visitChildren)
     case "render":
         {
             this.draw(params.viewport);
+        }
+        break;
+        
+    case "rayPick":
+        {
+            if (this.selectable.getValueDirect() == true &&
+                this.show.getValueDirect() == true)
+            {
+                if (this.isSelected(params.clickPoint.x, params.clickPoint.y))
+                {
+                    var intersectRecord = new RayIntersectRecord();
+                    intersectRecord.distance = 0;
+                    
+                    params.currentNodePath.push(this);           
+                    params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));                   
+                    params.currentNodePath.pop();
+                }
+            }    
         }
         break;
     }

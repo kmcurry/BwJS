@@ -124,7 +124,14 @@ var eTextureCoordSrc =
 var RC_REPEAT                      = 0x2901;
 var RC_CLAMP_TO_EDGE               = 0x812F;
 var RC_MIRRORED_REPEAT             = 0x8370;
-  
+
+/*
+ * matrix mode
+ */
+var RC_MODELVIEW				   = 0x001;
+var RC_PROJECTION				   = 0x002;
+var RC_TEXTURE					   = 0x004;
+
 /*
  * render context
  */
@@ -137,8 +144,21 @@ function RenderContext(canvas, background)
     
     this.projectionMatrixStack = new MatrixStack(new Matrix4x4());
     this.modelViewMatrixStack = new MatrixStack(new Matrix4x4());
+    this.matrixMode = RC_MODELVIEW;
     
     this.frontMaterial = new MaterialDesc();
+    
+    this.displayListObj = null;
+    
+    this.getDisplayList = function()
+    {
+        return this.displayListObj;    
+    }
+    
+    this.setDisplayList = function(displayListObj)
+    {
+        this.displayListObj = displayListObj;
+    }
     
     this.getFrontMaterial = function()
     {
@@ -155,6 +175,113 @@ function RenderContext(canvas, background)
             this.background.width = width;
             this.background.height = height;
         }
+    }
+    
+    this.setMatrixMode = function(mode) 
+    { 
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetMatrixMode, [mode]);
+    	
+    	this.matrixMode = mode; 
+    }
+    
+    this.pushMatrix = function()
+    {
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.PushMatrix, null);
+    	
+    	switch (this.matrixMode)
+    	{
+    		case RC_MODELVIEW:
+    		{
+    			this.modelViewMatrixStack.push();
+    		}
+    		break;
+    		
+    		case RC_PROJECTION:
+    		{
+    			this.projectionMatrixStack.push();
+    		}
+    		break;
+    	}	
+    }
+    
+    this.popMatrix = function()
+    {
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.PopMatrix, null);
+    	
+    	switch (this.matrixMode)
+    	{
+    		case RC_MODELVIEW:
+    		{
+    			this.modelViewMatrixStack.pop();
+    		}
+    		break;
+    		
+    		case RC_PROJECTION:
+    		{
+    			this.projectionMatrixStack.pop();
+    		}
+    		break;
+    	}
+    }
+    
+    this.loadMatrix = function(matrix)
+    {
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.LoadMatrix, [matrix]);
+    	
+    	switch (this.matrixMode)
+    	{
+    		case RC_MODELVIEW:
+    		{
+    			this.modelViewMatrixStack.loadMatrix(matrix);
+    		}
+    		break;
+    		
+    		case RC_PROJECTION:
+    		{
+    			this.projectionMatrixStack.loadMatrix(matrix);
+    		}
+    		break;
+    	}	
+    }
+    
+    this.leftMultMatrix = function(matrix)
+    {
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.LeftMultMatrix, [matrix]);
+    	
+    	switch (this.matrixMode)
+    	{
+    		case RC_MODELVIEW:
+    		{
+    			this.modelViewMatrixStack.leftMultiply(matrix);
+    		}
+    		break;
+    		
+    		case RC_PROJECTION:
+    		{
+    			this.projectionMatrixStack.leftMultiply(matrix);
+    		}
+    		break;
+    	}
+    }
+    
+    this.rightMultMatrix = function(matrix)
+    {
+    	if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.RightMultMatrix, [matrix]);
+    	
+    	switch (this.matrixMode)
+    	{
+    		case RC_MODELVIEW:
+    		{
+    			this.modelViewMatrixStack.rightMultiply(matrix);
+    		}
+    		break;
+    		
+    		case RC_PROJECTION:
+    		{
+    			this.projectionMatrixStack.rightMultiply(matrix);
+    		}
+    		break;
+    	}	
     }
 }
 

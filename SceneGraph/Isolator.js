@@ -88,8 +88,10 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     lastWorldMatrix = params.worldMatrix;
                     
                     // TEMP -- move to pushIsolatedStates
-                    this.graphMgr.renderContext.projectionMatrixStack.push();
-                    this.graphMgr.renderContext.modelViewMatrixStack.push();
+                	this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+                	this.graphMgr.renderContext.pushMatrix();
+                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+                	this.graphMgr.renderContext.pushMatrix();
                 }
                 
                 // push textures
@@ -130,7 +132,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 // push transforms
                 if (isolateTransforms)
                 {
-                    // TODO
+                    lastWorldMatrix = params.worldMatrix;
                 }
             }
             break;
@@ -155,10 +157,10 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     params.worldMatrix = lastWorldMatrix;
                     
                     // TEMP -- move to popIsolatedStates
-                    this.graphMgr.renderContext.projectionMatrixStack.pop();
-                    this.graphMgr.renderContext.applyProjectionTransform();
-                    this.graphMgr.renderContext.modelViewMatrixStack.pop();
-                    this.graphMgr.renderContext.applyModelViewTransform();
+                    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+                	this.graphMgr.renderContext.popMatrix();
+                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+                	this.graphMgr.renderContext.popMatrix();
                 }
                     
                 // pop textures
@@ -199,7 +201,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 // pop transforms
                 if (isolateTransforms)
                 {
-                    // TODO
+                    params.worldMatrix = lastWorldMatrix;
                 }
             }
             break;

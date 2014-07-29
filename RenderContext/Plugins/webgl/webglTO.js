@@ -1,7 +1,7 @@
 ﻿webglTO.prototype = new TextureObject();
 webglTO.prototype.constructor = webglTO;
 
-function webglTO(gl, program)
+function webglTO(rc, gl, program)
 {
     //
     // initialization
@@ -9,6 +9,7 @@ function webglTO(gl, program)
     
     TextureObject.call(this);
     
+    var rc = rc;
     var gl = gl;
     var program = program;
     
@@ -20,6 +21,8 @@ function webglTO(gl, program)
 
     this.setImage = function(image, pixelFormat, imageFormat)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.TO_SetImage, [this, image, pixelFormat, imageFormat]);
+
         var intFormat;
         switch (pixelFormat)
         {
@@ -103,6 +106,8 @@ function webglTO(gl, program)
 
     this.setImageData = function(width, height, pixelFormat, imageFormat, pixels)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.TO_SetImageData, [this, width, height, pixelFormat, imageFormat, pixels]);
+
         var intFormat;
         switch (pixelFormat)
         {
@@ -172,6 +177,8 @@ function webglTO(gl, program)
 
     this.setVideo = function(video)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.TO_SetVideo, [this, video]);
+
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
         // different browsers require calls to different versions of texImage2D; possibly because 

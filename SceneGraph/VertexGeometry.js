@@ -18,6 +18,57 @@ function VertexGeometry()
     
     this.registerAttribute(this.vertices, "vertices");
 }
+VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
+{
+    var i;
+    var node;
+
+    // setup uv-coords for cloned vertex geometry
+
+    // find texture nodes affecting this node
+    var textureNodes;
+    for (i=0; i < pathSrc.length(); i++)
+    {
+        node = pathSrc.stack[i];
+        if (node.getAttribute() == eAttrType.Texture)
+        {
+            if (!(textureNodes.push(node))) return;
+        }
+    }
+
+    // find texture nodes affecting the clone
+    var textureNodesClone;
+    for (i=0; i < pathClone.length(); i++)
+    {
+        node = pathClone.stack[i];
+        if (node.getAttribute() == eAttrType.Texture)
+        {
+            if (!(textureNodesClone.push(node))) return;
+        }
+    }
+
+    // for each texture node, setup the uv-coords (textureNodes.size() and
+    // textureNodesClone.size() should be the same, but check anyway)
+   // CFloatArrayAttr* uvCoords = null;
+    var uvCoords = new NumberArrayAttr();
+
+    for (i=0; i < textureNodes.size() && i < textureNodesClone.size(); i++)
+    {
+        //uvCoords = FindUVCoords(dynamic_cast<GcTexture*>(textureNodes[i]));
+        uvCoords = this.findUVCoords(textureNodes[i]);
+
+        if (uvCoords)
+        {
+            var uvCoords2 = new NumberArrayAttr();
+            uvCoords2 = childClone.getUVCoords(textureNodesClone[i]);
+            uvCoords2.copyValue(uvCoords);
+        }
+    }
+
+    // call base-class implementation
+    //GcSGNode::Post_Clone_Child(childClone, pathSrc, pathClone); Not being used right now. Maybe used in the futrue.
+}
+
 
 VertexGeometry.prototype.getUVCoords = function(texture)
 {
@@ -32,6 +83,21 @@ VertexGeometry.prototype.getUVCoords = function(texture)
     this.uvCoords.push(new Pair(texture, uvCoords));
     
     return uvCoords;
+}
+VertexGeometry.prototype.findUVCoords = function(texture)
+{
+    if (!texture)
+    {
+        return null;
+    }
+
+    for (var i=0; i < this.uvCoords.length; i++)
+    {
+        if (this.uvCoords[i].first == texture)
+            return this.uvCoords[i].second;
+    }
+
+    return null;
 }
 
 VertexGeometry.prototype.update = function(params, visitChildren)
@@ -248,7 +314,7 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     }
 
     // TODO
-
+    /*
     // if object doesn't contain any specularity textures,
     // make an additional pass to add specular highlights;
     // skip this step if fog is enabled (causes ultra-white surface artifacts)
@@ -294,7 +360,7 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
             texture0 = null;
         }
     }
-
+    */
     // disable texture stage 0
     this.graphMgr.renderContext.enableTextureStage(0, 0);
     

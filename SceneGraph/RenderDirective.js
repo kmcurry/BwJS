@@ -13,6 +13,9 @@ function RenderParams()
     this.opacity = 1;
     this.distanceSortAgent = null;
     this.drawTextures = true;
+    this.displayListObj = null;
+    this.disableDisplayLists = false;
+    this.resetDisplayLists = false;
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -46,6 +49,7 @@ function RenderDirective()
     this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
        
     this.updateDirective = new UpdateDirective();
+    this.resetDisplayLists = false;
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
@@ -60,17 +64,42 @@ RenderDirective.prototype.execute = function(root)
 {
     root = root || this.rootNode.getValueDirect();
 
-    // update
-    this.updateDirective.execute(root);
+    // update; combined CUpdateParams & GtUpdateParams in this version
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+    params.disableDisplayLists = this.resetDisplayLists;
+     
+    var visited = this.updateDirective.execute(root, params);
 
     // render
     var params = new RenderParams();
+    /*
+    renderParams.path = NULL;//m_path;
+    renderParams.pathIndex = 1;
+    renderParams.viewport = m_currentViewport;
+    renderParams.jitterAmt = m_currentJitterAmt + jitterAmt; // RenderDirective jitter + AA jitter
+    renderParams.distanceSortAgent = m_distanceSortAgent;
+    renderParams.polygonSortAgent = m_polygonSortAgent;
+    renderParams.renderSequenceAgent = m_renderSequenceAgent;
+    renderParams.shadowRenderAgent = m_shadowRenderAgent;
+    renderParams.drawTextures = m_texturesEnabled->GetValueDirect();
+    renderParams.userData = m_userData->GetValueDirect();
+     */
     params.directive = this;
+    params.path = null;
+    params.pathIndex = 1;
     params.viewport.loadViewport(this.viewport.getValueDirect());
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-    root.apply("render", params, true);
+	// if resetting display lists, set the disableDisplayLists renderParams flag this render
+    if (this.resetDisplayLists)
+    {
+    	params.resetDisplayLists = true;
+        this.resetDisplayLists = false;
+    }
+        
+    visited[0].apply("render", params, true);
 
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())
@@ -83,9 +112,9 @@ RenderDirective.prototype.execute = function(root)
 
 function RenderDirective_ViewportModifiedCB(attribute, container)
 {
-    var vp = container.viewport.getValueDirect();
-    var url = container.backgroundImageFilename.getValueDirect().join("");
-    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
+//    var vp = container.viewport.getValueDirect();
+//    var url = container.backgroundImageFilename.getValueDirect().join("");
+//    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
 }
 
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)

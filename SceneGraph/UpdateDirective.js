@@ -1,12 +1,16 @@
 ﻿UpdateParams.prototype = new DirectiveParams();
 UpdateParams.prototype.constructor = UpdateParams();
 
-function UpdateParams()
+function UpdateParams() // combined CUpdateParams & GtUpdateParams in this version
 {
     DirectiveParams.call(this);
     
     this.pass = 0;
+    this.timeIncrement = 0;
+    this.visited = [];
     this.nextPass = [];
+    this.displayListObj = null;
+    this.disableDisplayLists = false;
 }
 
 UpdateDirective.prototype = new SGDirective();
@@ -21,12 +25,9 @@ function UpdateDirective()
     this.name.setValueDirect("UpdateDirective");
 }
 
-UpdateDirective.prototype.execute = function(root)
+UpdateDirective.prototype.execute = function(root, params)
 {
     root = root || this.rootNode.getValueDirect();
-    
-    var params = new UpdateParams();
-    params.directive = this;
     
     // update (perform first pass)
     root.update(params, true);
@@ -49,4 +50,6 @@ UpdateDirective.prototype.execute = function(root)
             nodes[i].update(params, false);
         }
     }
+    
+    return params.visited;
 }

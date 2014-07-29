@@ -12,16 +12,14 @@ function Transform()
     this.className = "Transform";
     this.attrType = eAttrType.Transform;
     
-    this.matrixTransform = null;
-    
     this.matrix = new Matrix4x4Attr
-    (1, 0, 0, 0,
+       (1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1);
-                         
+        
+    this.matrixTransform = this.matrix.getValueDirect();
     this.updateMatrix = true;
-    
 
     this.matrix.addModifiedCB(Transform_MatrixModifiedCB, this);
 
@@ -58,7 +56,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
     
     if (params.worldMatrix)
     {
-        params.worldMatrix = params.worldMatrix.multiply(this.matrixTransform);
+        params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
     }
             
     switch (directive)
@@ -68,7 +66,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
             this.applyTransform();
         }
         break;
-            
+         
         default:
             break;
     }
@@ -80,7 +78,8 @@ Transform.prototype.apply = function(directive, params, visitChildren)
 Transform.prototype.applyTransform = function()
 {
     // set transformation matrix
-    this.graphMgr.renderContext.modelViewMatrixStack.leftMultiply(this.matrixTransform);
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.leftMultMatrix(this.matrixTransform);
     this.graphMgr.renderContext.applyModelViewTransform();
 }
 

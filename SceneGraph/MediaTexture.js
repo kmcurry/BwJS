@@ -136,6 +136,9 @@ MediaTexture.prototype.loadMedia = function()
     {
         // TODO: remove texture
     }
+    
+    // increment modification count
+    this.incrementModificationCount();
 }
 
 MediaTexture.prototype.setImageSize = function()
@@ -245,6 +248,9 @@ MediaTexture.prototype.updateMediaTextureImage = function()
 
         this.forceImageUpdate = false;
     }
+    
+    // increment modification count
+    this.incrementModificationCount();
 }
 
 MediaTexture.prototype.onImageLoad = function()
@@ -255,6 +261,7 @@ MediaTexture.prototype.onImageLoad = function()
     {
         this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8, eImageFormat.RGB);
         this.imageSet = true;
+        this.incrementModificationCount();
         return;
     }
     

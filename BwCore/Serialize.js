@@ -5,6 +5,7 @@ function SerializeCommand()
 {
     Command.call(this);
     this.className = "Serialize";
+    this.attrType = eAttrType.Serialize;
 
     this.targetAttribute = null;
     this.target.addModifiedCB(this.SerializeCommand_TargetModifiedCB, this);
@@ -35,7 +36,7 @@ SerializeCommand.prototype.serializeScene = function()
     var i;
     var container = null;
     var node = null;
-    var context;
+    var context = new Context();
     var xstr;
 
     // root element open tag
@@ -46,6 +47,7 @@ SerializeCommand.prototype.serializeScene = function()
     if (attrContainerRegistry)
     {
         var serializer = new XMLSerializer();
+        var serial  = new Serializer();
         // set minimum flag so that only the minimum required for recreation is serialized
         //var serializeMinimum = serializer.getAttribute("serializeMinimum");
         //serializeMinimum.setValueDirect(true);
@@ -58,13 +60,15 @@ SerializeCommand.prototype.serializeScene = function()
             container = attrContainerRegistry.getObject(i);
             if (container)
             {
-                //context.attribute = container; What exactly is context.attribute??
-                context = container;
+                context.attribute = container;
+                //context = document.createElement("Scene");
+                //var inside = context.setAttribute("text",container);
                 var buffer = "";
 
                 // serialize
-                //serializer.Serialize(context,buffer);
-                xstr = serializer.serializeToString(context);
+                //serializer
+                serial.serialize(context.attribute,context.item,context.attributeName,context.container,buffer);
+                xstr = serializer.serializeToString(context.attribute);
 
                 console.log(xstr);
                 this.serialized += buffer;

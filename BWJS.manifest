@@ -28,11 +28,12 @@ Attribute/StyleAttr.js
 Attribute/ContainerAttrs.js
 Attribute/AttributeUtil.js
 Common/Agent.js 
-Common/Spatial.js    
+Common/Spatial.js
+RenderContext/DisplayList.js
 RenderContext/RenderContext.js 
 RenderContext/RenderState.js 
 RenderContext/VertexBuffer.js 
-RenderContext/TextureObject.js 
+RenderContext/TextureObject.js
 RenderContext/Plugins/webgl/webgl-debug.js 
 RenderContext/Plugins/webgl/webglRC.js 
 RenderContext/Plugins/webgl/webglVB.js 

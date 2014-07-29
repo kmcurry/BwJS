@@ -7,7 +7,7 @@
 webglVB.prototype = new VertexBuffer();
 webglVB.prototype.constructor = webglVB;
 
-function webglVB(gl, program, numVerticesPerPrimitive)
+function webglVB(rc, gl, program, numVerticesPerPrimitive)
 {
     //
     // initialization
@@ -17,6 +17,7 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.numVerticesPerPrimitive = numVerticesPerPrimitive;
     
+    var rc = rc;
     var gl = gl;
     var program = program;
     var vb = gl.createBuffer();
@@ -32,6 +33,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.setPrimitiveType = function(type)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetPrimitiveType, [this, type]);
+        
         switch (type)
         {
         case RC_POINTS:         primitiveType = gl.POINTS; break;
@@ -46,6 +49,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.setVertices = function(vertices)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetVertices, [this, vertices]);
+        
         if (vertices.length)
         {
             gl.bindBuffer(gl.ARRAY_BUFFER, vb);
@@ -63,6 +68,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.setNormals = function(normals)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetNormals, [this, normals]);
+        
         if (normals.length)
         {
             if (nb == null)
@@ -78,6 +85,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
 
     this.setUVCoords = function(texture, coords)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetUVCoords, [this, texture, coords]);
+        
         uvCoords[texture] = new webglVB_uvb(gl.createBuffer(), coords.slice());
 
         // flip y
@@ -89,6 +98,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.setTextureStage = function(stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients)
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetTextureStage, [this, stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients]);
+        
         switch (stage)
         {
         case 0: gl.activeTexture(gl.TEXTURE0); break;       
@@ -110,6 +121,8 @@ function webglVB(gl, program, numVerticesPerPrimitive)
     
     this.draw = function()
     {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_Draw, [this]);
+
         if (this.vertices.length)
         {
             // vertices

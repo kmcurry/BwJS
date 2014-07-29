@@ -114,7 +114,8 @@ Camera.prototype.applyTransform = function()
     matrix.loadMatrix(this.sectorTransformCompound);
     matrix.invert();
 
-    this.graphMgr.renderContext.modelViewMatrixStack.loadMatrix(matrix);
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.loadMatrix(matrix);
     this.graphMgr.renderContext.applyModelViewTransform();
 }
 

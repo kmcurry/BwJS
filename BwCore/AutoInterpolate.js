@@ -5,6 +5,7 @@ function AutoInterpolateCommand()
 {
     Command.call(this);
     this.className = "AutoInterpolateCommand";
+    this.attrType = eAttrType.AutoInterpolate;
 
     this.attributeValuePairs = [];
     this.attributeReferencePairs = [];

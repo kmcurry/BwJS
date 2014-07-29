@@ -5,6 +5,7 @@ function PlayCommand()
 {
     Command.call(this);
     this.className = "PlayCommand";
+    this.attrType = eAttrType.Play;
 
     this.evaluators = [];
     this.negate = new BooleanAttr(false);   // if true, Pause
