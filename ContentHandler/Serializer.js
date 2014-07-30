@@ -325,19 +325,7 @@ Serializer.prototype.serializeCommand = function(command)
     {
         var element = null;
         var pcszType = command.className;
-        
-        // rename if negate is set
-        var negate = command.getAttribute("negate");
-        if (negate && negate.getValueDirect() == true) 
-        {
-            switch (pcszType)
-            {
-                case "Play":                pcszType = "Pause"; break;
-                case "ConnectAttributes":   pcszType = "DisconnectAttributes"; break;
-                default:                    break;
-            }
-        }
-        
+               
         var bstr = pcszType;
         if (bstr)
         {
