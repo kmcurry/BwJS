@@ -31,7 +31,7 @@ function SelectionListener()
     this.rayPick = null;
     this.selections = new Selections();
     this.selected = null;
-    
+
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
     this.pointView = new Vector3DAttr();
