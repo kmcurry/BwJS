@@ -36,7 +36,7 @@ CommandMgr.prototype.addCommand = function(command)
     if (this.commandSeqStack.length() > 0)
     {
         this.commandSeqStack.top().addCommand(command);
-        
+        this.registry.unregister(command); // unregister here so command will not be serialized separately
         return;
     }
     
