@@ -44,7 +44,6 @@ ContentHandler/ContentBuilder.js
 ContentHandler/BinaryParser.js
 ContentHandler/TextParser.js
 ContentHandler/XMLParser.js
-ContentHandler/Serializer.js
 Image/PixelFormat.js
 Image/ImageManip.js
 Image/MediaPlayback.js
