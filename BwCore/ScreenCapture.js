@@ -1,51 +1,29 @@
 ScreenCapture.prototype  = new Command();
-ScreenCapture.prototype.constructor = ScreenCapture ;
+ScreenCapture.prototype.constructor = ScreenCapture;
 
 ScreenCapture.prototype.ScreenCapture = function()
 {
-    var filename = null;
-    var typeString = "ScreenCapture";
-    AddPrototype(this);
+    Command.call(this);
+    this.className = "ScreenCapture";
+    this.attrType = eAttrType.ScreenCapture;
+ 
+    this.filename = new StringAttr();
+    
+    this.registerAttribute(this.filename, "filename");   
 }
 
-ScreenCapture.prototype.ScreenCapture = function(id)
+
+ScreenCapture.prototype.execute = function()
 {
-    var CCommand = id;
-    var filename = null;
-    var typeString = "ScreenCapture";
-
-    if (!(this.filename = New<CStringAttr>())) return;
-
-    this.registerAttribute(this.filename, "filename");
+    this.screenCapture();
 }
 
-
-ScreenCapture.prototype.ClonePrototype = function()
+ScreenCapture.prototype.screenCapture = function()
 {
-    var c = ++s_count;
-    return c;
+    
 }
-
-//ScreenCapture.prototype.Execute = function()
-//{
-//    var err = ScreenCapture();
-//
-//    return err;
-//}
-
-// ScreenCapture.prototype.Undo = function()
-//{
-//    return; //Finish implementing this one.
-//}
-
-ScreenCapture.prototype.MatchesType = function(type)
-    {
-        var matches = 0;
-        matches = !(type == "ScreenCapture"); //stricmp = string compare function
-        return matches;
-}
-
- ScreenCapture.prototype.ScreenCapture = function()
+/*
+ScreenCapture.prototype.ScreenCapture = function()
 {
     // get render context
     var resource = null;
@@ -148,3 +126,4 @@ ScreenCapture.prototype.MatchesType = function(type)
     // deallocate buffer
     pixels = [];
 }
+*/
