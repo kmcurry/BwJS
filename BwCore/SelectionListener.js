@@ -26,11 +26,12 @@ function SelectionListener()
     EventListener.call(this);
     this.className = "SelectionListener";
 
+    this.name.setValueDirect("Selector");
+
     this.rayPick = null;
     this.selections = new Selections();
     this.selected = null;
     
-    this.name = new StringAttr("Selector");   
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
     this.pointView = new Vector3DAttr();
@@ -59,8 +60,6 @@ function SelectionListener()
     this.registerAttribute(this.computePivotDistance, "computePivotDistance");
     this.registerAttribute(this.selectedName, "selectedName");
     this.registerAttribute(this.lastSelectedName, "lastSelectedName");
-
-    this.registerAttribute(this.name, "name");
     
     this.numResponses.setValueDirect(-1);
 }
