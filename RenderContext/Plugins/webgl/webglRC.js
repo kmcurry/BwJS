@@ -584,7 +584,7 @@ function getWebGLContext(canvas, debug)
         }
         else // !debug
         {
-            gl = canvas.getContext("experimental-webgl", {antialias : true});
+            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl"); //Try and make a normal canvas of webgl, if that fails then fall back on the experimental
         }
     }    
     catch (e) 
