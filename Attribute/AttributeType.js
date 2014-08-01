@@ -106,6 +106,7 @@ var eAttrType = {
     Set                         :3009,
     Stop                        :3010,
     ConnectAttributes           :3011,
+    ScreenCapture               :3012,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
