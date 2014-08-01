@@ -405,7 +405,7 @@ function newCommand(name, factory)
     case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
     case "Play":                resource = new PlayCommand(); break;
     case "Remove":              resource = new RemoveCommand(); break;
-    case "ScreenCapture"        resource = new ScreenCapture(); break;
+    case "ScreenCapture":       resource = new ScreenCapture(); break;
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
@@ -571,7 +571,9 @@ function registerEvaluatorAttributes(evaluator, factory)
     // evaluate (replaced by "enabled")
     var evaluate = new BooleanAttr(true);
     evaluator.registerAttribute(evaluate, "evaluate");
-    evaluate.addTarget(evaluator.getAttribute("enabled"));
+    var enabled = evaluator.getAttribute("enabled");
+    evaluate.addTarget(enabled);
+    enabled.addTarget(evaluate);
 }
 
 function registerParentableAttributes(pme, factory)
