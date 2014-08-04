@@ -20,6 +20,11 @@ ScreenCaptureCommand.prototype.execute = function()
 ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
 {
     var canvas = document.getElementById(canvasId);
-    var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    window.location.href = image;
+
+    // open in new window
+    window.open(canvas.toDataURL('image/png'));
+    
+    // download
+    //var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    //window.location.href = image;
 }
