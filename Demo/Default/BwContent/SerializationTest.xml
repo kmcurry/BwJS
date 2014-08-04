@@ -1,5 +1,5 @@
 <Session broadcast="false">
-    <Set target="Selector" computePivotDistance="false"/>
+    <Set target="Selector" computePivotDistance="true"/>
     <MouseHandler/>
     <ObjectInspector>
         <name>ObjectInspector</name>
@@ -123,14 +123,6 @@
         <backgroundImageFilename>http://localhost/bwjs/demo/default/BwContent/images/Sky2.jpg</backgroundImageFilename>
         <root>Root</root>
     </RenderDirective>
-    <Set>
-        <name>SetCapture_Down_Rot_Scene</name>
-        <numResponses>-1</numResponses>
-        <event>VK_DOWN.Down</event>
-        <event>VK_DOWN.Down</event>
-        <target>SceneInspector</target>
-        <rotationDelta item0="-5" item1="0" item2="0"/>
-    </Set>
     <DisconnectAttributes>
         <name>DisconnectAllMouse</name>
         <numResponses>-1</numResponses>
@@ -145,6 +137,14 @@
         <connectionType>DisconnectAllTargets</connectionType>
         <sourceContainer>MouseHandler</sourceContainer>
     </DisconnectAttributes>
+    <Set>
+        <name>SetCapture_Down_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="-5" item1="0" item2="0"/>
+    </Set>
     <ConnectAttributes>
         <name>MButton1.Scene</name>
         <numResponses>-1</numResponses>
@@ -411,6 +411,15 @@
             <evaluate>false</evaluate>
         </Set>
     </CommandSequence>
+    <Pause/>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>true</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
     <CommandSequence>
         <name>Stop</name>
         <numResponses>-1</numResponses>
@@ -427,6 +436,15 @@
             <evaluate>false</evaluate>
         </Set>
     </CommandSequence>
+    <Stop/>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>true</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
     <CommandSequence>
         <name>EnableObjectInspection</name>
         <numResponses>-1</numResponses>
@@ -448,6 +466,20 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>true</evaluate>
+    </Set>
+    <Set>
+        <target>FlightSimulator</target>
+    </Set>
+    <Set>
+        <target>WalkSimulator</target>
+    </Set>
     <CommandSequence>
         <name>EnableSceneInspection</name>
         <numResponses>-1</numResponses>
@@ -469,6 +501,20 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>true</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>FlightSimulator</target>
+    </Set>
+    <Set>
+        <target>WalkSimulator</target>
+    </Set>
     <CommandSequence>
         <name>EnableFlightSimulation</name>
         <numResponses>-1</numResponses>
@@ -490,6 +536,20 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>FlightSimulator</target>
+    </Set>
+    <Set>
+        <target>WalkSimulator</target>
+    </Set>
     <CommandSequence>
         <name>EnableWalkSimulation</name>
         <numResponses>-1</numResponses>
@@ -511,6 +571,20 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
+    <Set>
+        <target>SceneInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>ObjectInspector</target>
+        <evaluate>false</evaluate>
+    </Set>
+    <Set>
+        <target>FlightSimulator</target>
+    </Set>
+    <Set>
+        <target>WalkSimulator</target>
+    </Set>
     <Set>
         <numResponses>-1</numResponses>
         <event>VK_ADD</event>

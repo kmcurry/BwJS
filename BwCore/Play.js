@@ -13,7 +13,7 @@ function PlayCommand()
     this.registerAttribute(this.negate, "negate");
     
     this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
-
+    this.negate.addModifiedCB(PlayCommand_NegateModifiedCB, this);
 }
 
 PlayCommand.prototype.execute = function()
@@ -68,5 +68,20 @@ function PlayCommand_TargetModifiedCB(attribute, container)
         {
             container.evaluators[i] = evaluator;
         }
+    }
+}
+
+function PlayCommand_NegateModifiedCB(attribute, container)
+{
+    var negate = attribute.getValueDirect();
+    if (negate)
+    {
+        container.className = "Pause";
+        container.attrType = eAttrType.Pause;
+    }
+    else // !negate
+    {
+        container.className = "Play";
+        container.attrType = eAttrType.Play;       
     }
 }
