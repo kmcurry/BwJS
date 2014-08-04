@@ -178,18 +178,18 @@
             bridgeworks.updateScene(xml);
         }
         
-        function screenCapture()
+        function screenCapture(canvasId)
         {
-        	var xml = "<ScreenCapture/>"
+        	var xml = "<ScreenCapture canvasId='" + canvasId + "'/>"
         	console.debug(xml);
-        	bridgeworks.updateScene(xml);
+        	bridgeworks.updateScene(xml);        	
         }
     </script>
 
     <img id="BackgroundImage" style="position: absolute; visibility: hidden; z-index: 1;" src="bwcontent/images/Sky.jpg">
     </img>
     <center>
-        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 40%; height: 40%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
+        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
           <canvas id="Canvas" style="position: relative; z-index: 2;"></canvas>
         </div>
         <div id="DVDControls" style="position:relative;">
@@ -200,10 +200,7 @@
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             Object: <input id="objectname"/>
             <button onclick="locate();">Locate</button>
-            <button onclick="screenCapture();">Capture</button>
-        </div>
-        <div id="ScreenCapContainer" style="position: relative; resize: auto; border: 1px solid; width: 40%; height: 40%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
-          <canvas id="ScreenCapCanvas" style="position: relative; z-index: 2;"></canvas>
+            <button onclick="screenCapture('Canvas');">Capture</button>
         </div>
     </center>
 

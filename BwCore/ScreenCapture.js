@@ -7,16 +7,19 @@ function ScreenCaptureCommand()
     this.className = "ScreenCapture";
     this.attrType = eAttrType.ScreenCapture;
 
-    this.filename = new StringAttr();
+    this.canvasId = new StringAttr();
     
-    this.registerAttribute(this.filename, "filename");
+    this.registerAttribute(this.canvasId, "canvasId");
 }
 
 ScreenCaptureCommand.prototype.execute = function()
 {
-    this.screenCapture(this.filename.getValueDirect().join(""));
+    this.screenCapture(this.canvasId.getValueDirect().join(""));
 }
 
-ScreenCaptureCommand.prototype.screenCapture = function(filename)
+ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
 {
+    var canvas = document.getElementById(canvasId);
+    var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    window.location.href = image;
 }

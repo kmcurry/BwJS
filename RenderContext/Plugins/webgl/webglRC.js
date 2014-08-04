@@ -314,6 +314,15 @@ function webglRC(canvas, background)
         return p;
     }
     
+    this.readFrameBuffer = function(x, y, width, height)
+    {
+        var pixels = new Uint8Array(width * height * 4);
+        
+        gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        
+        return pixels;
+    }
+    
     this.setBlendFactor = function(sfactor, dfactor)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendFactor, [sfactor, dfactor]);
@@ -580,11 +589,11 @@ function getWebGLContext(canvas, debug)
     {
         if (debug)
         {
-            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", {antialias : false}));
+            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { antialias : false, preserveDrawingBuffer: true }));
         }
         else // !debug
         {
-            gl = canvas.getContext("experimental-webgl", {antialias : true});
+            gl = canvas.getContext("experimental-webgl", { antialias : true, preserveDrawingBuffer: true });
         }
     }    
     catch (e) 
