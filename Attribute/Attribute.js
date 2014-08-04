@@ -49,13 +49,15 @@ function AttributeSetParams(elementIndex,
                             valueElementIndex,
                             op,
                             updateTargets,
-                            alertModifiedCBs)
+                            alertModifiedCBs,
+                            caller)
 {
     this.elementIndex = elementIndex || -1;
     this.valueElementIndex = valueElementIndex || -1;
     this.op = op || eAttrSetOp.Replace;
     this.updateTargets = updateTargets != undefined ? updateTargets : true;
     this.alertModifiedCBs = alertModifiedCBs != undefined ? alertModifiedCBs : true;
+    this.caller = caller != undefined ? caller : null;
 }
                             
 Attribute.prototype = new Base();
@@ -193,11 +195,13 @@ Attribute.prototype.setValue = function(values, params)
     var updateTargets = (params ? params.updateTargets : true);
     if (updateTargets)
     {
+        var caller = (params ? params.caller : null);
         for (var i = 0; i < this.targets.length; i++)
         {
             var targetDesc = this.targets[i];
+            if (targetDesc.target == caller) continue; // don't set value for circular targeting
             var params = new AttributeSetParams(targetDesc.targetElementIndex, targetDesc.sourceElementIndex,
-                                                targetDesc.op, true, true);
+                                                targetDesc.op, true, true, this);
             targetDesc.target.setValue(this.values, params);
         }
     }

@@ -29,6 +29,7 @@ Attribute/ContainerAttrs.js
 Attribute/AttributeUtil.js
 Common/Agent.js 
 Common/Spatial.js
+Common/Context.js
 RenderContext/DisplayList.js
 RenderContext/RenderContext.js 
 RenderContext/RenderState.js 
@@ -44,6 +45,7 @@ ContentHandler/ContentBuilder.js
 ContentHandler/BinaryParser.js
 ContentHandler/TextParser.js
 ContentHandler/XMLParser.js
+ContentHandler/Serializer.js
 Image/PixelFormat.js
 Image/ImageManip.js
 Image/MediaPlayback.js
