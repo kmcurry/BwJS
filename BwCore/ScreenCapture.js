@@ -20,11 +20,14 @@ ScreenCaptureCommand.prototype.execute = function()
 ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
 {
     var canvas = document.getElementById(canvasId);
-
+    
+    // copy to clipboard
+    // TODO: investigate method described at: https://forums.mozilla.org/addons/viewtopic.php?t=9736&p=21119
+    
     // open in new window
     window.open(canvas.toDataURL('image/png'));
     
     // download
-    //var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    //window.location.href = image;
+    //var imageData = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    //window.location.href = imageData;
 }

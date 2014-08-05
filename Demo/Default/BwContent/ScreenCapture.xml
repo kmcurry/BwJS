@@ -60,5 +60,6 @@
      <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
      <Set target="SceneInspector" pivotDistance="3"/>
   <Set target="Selector" computePivotDistance="false"/>
+  <Label text="F16" parent="F16"/>
   <!--<ScreenCapture filename="ScreenCap.jpg"/>-->
 </Session>

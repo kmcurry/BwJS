@@ -292,7 +292,7 @@ Serializer.prototype.serializeModel = function(Model)
 
             var command = null;
             var factory = this.registry.find("AttributeFactory");
-            command = factory.create("SetCommand");
+            command = factory.create("Set");
             if (command)
             {
                 command.getAttribute("target").setValueDirect(containerName);

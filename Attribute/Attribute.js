@@ -199,7 +199,7 @@ Attribute.prototype.setValue = function(values, params)
         for (var i = 0; i < this.targets.length; i++)
         {
             var targetDesc = this.targets[i];
-            if (targetDesc.target == caller) continue; // don't set value for circular targeting
+            if (params && params.caller == targetDesc.target) continue;
             var params = new AttributeSetParams(targetDesc.targetElementIndex, targetDesc.sourceElementIndex,
                                                 targetDesc.op, true, true, this);
             targetDesc.target.setValue(this.values, params);
