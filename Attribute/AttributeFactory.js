@@ -569,9 +569,11 @@ function registerEvaluatorAttributes(evaluator, factory)
     evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
     
     // evaluate (replaced by "enabled")
+    var enabled = evaluator.getAttribute("enabled");
     var evaluate = new BooleanAttr(true);
     evaluator.registerAttribute(evaluate, "evaluate");
-    evaluate.addTarget(evaluator.getAttribute("enabled"));
+    evaluate.addTarget(enabled);
+    enabled.addTarget(evaluate);
 }
 
 function registerParentableAttributes(pme, factory)

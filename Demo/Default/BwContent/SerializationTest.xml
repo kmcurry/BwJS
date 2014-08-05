@@ -1,5 +1,5 @@
 <Session broadcast="false">
-    <Set target="Selector" computePivotDistance="true"/>
+    <Set target="Selector" computePivotDistance="false"/>
     <MouseHandler/>
     <ObjectInspector>
         <name>ObjectInspector</name>
@@ -56,6 +56,9 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/GridG.lwo</url>
                 </Model>
+                <Set>
+                    <target>grid</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -66,6 +69,9 @@
                     <url>/objects/UV_BoxG.lwo</url>
                     <indexedGeometry>false</indexedGeometry>
                 </Model>
+                <Set>
+                    <target>UV_BoxG</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -75,6 +81,9 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/UV_CylinderG.lwo</url>
                 </Model>
+                <Set>
+                    <target>cylinderRight</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -85,6 +94,9 @@
                     <url>/objects/UV_CylinderG.lwo</url>
                     <enableSharing>false</enableSharing>
                 </Model>
+                <Set>
+                    <target>cylinderLeft</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -94,6 +106,9 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/UV_SphereG.lwo</url>
                 </Model>
+                <Set>
+                    <target>sphereBack</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -104,12 +119,18 @@
                     <url>/objects/UV_SphereG.lwo</url>
                     <enableSharing>false</enableSharing>
                 </Model>
+                <Set>
+                    <target>sphereFront</target>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
                     <name>F16</name>
                     <url>/objects/F16.lwo</url>
                 </Model>
+                <Set>
+                    <target>F16</target>
+                </Set>
             </ModelRoot>
         </Group>
         <KeyframeInterpolator>
