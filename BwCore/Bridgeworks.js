@@ -217,8 +217,12 @@ Bridgeworks.prototype.resize = function(width, height)
 
 Bridgeworks.prototype.render = function()
 {
+    this.eventMgr.processEvent(new Event(eEventType.RenderBegin));
+    
     this.renderContext.clear();
     this.renderAgent.render();
+    
+    this.eventMgr.processEvent(new Event(eEventType.RenderEnd));
 }
 
 Bridgeworks.prototype.setRenderContext = function(rc)
