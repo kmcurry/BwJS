@@ -13,6 +13,10 @@ function Allocator()
 {
 }
 
+var message = "";
+var imgeData = "";
+var cimageData = "";
+
 Allocator.prototype.allocate = function()
 {
     return null;

@@ -4759,12 +4759,14 @@ var eAttrType = {
     AutoInterpolate             :3004,
     Locate                      :3005,
     Play                        :3006,
-    Remove                      :3007,
-    Serialize                   :3008,
-    Set                         :3009,
-    Stop                        :3010,
-    ConnectAttributes           :3011,
-    ScreenCapture               :3012,
+    Pause                       :3007,
+    Remove                      :3008,
+    ScreenCapture               :3009,
+    Serialize                   :3010,
+    Set                         :3011,
+    Stop                        :3012,
+    ConnectAttributes           :3013,
+    DisconnectAttributes        :3014,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
@@ -5013,7 +5015,7 @@ Attribute.prototype.setValue = function(values, params)
         for (var i = 0; i < this.targets.length; i++)
         {
             var targetDesc = this.targets[i];
-            if (targetDesc.target == caller) continue; // don't set value for circular targeting
+            if (params && params.caller == targetDesc.target) continue;
             var params = new AttributeSetParams(targetDesc.targetElementIndex, targetDesc.sourceElementIndex,
                                                 targetDesc.op, true, true, this);
             targetDesc.target.setValue(this.values, params);
@@ -5342,6 +5344,7 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
                 delete this.attrNameMap[i][j];
+                this.attrNameMap[i].splice(j,1);
                 break;
             }
         }
@@ -9369,6 +9372,15 @@ function webglRC(canvas, background)
         return p;
     }
     
+    this.readFrameBuffer = function(x, y, width, height)
+    {
+        var pixels = new Uint8Array(width * height * 4);
+        
+        gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        
+        return pixels;
+    }
+    
     this.setBlendFactor = function(sfactor, dfactor)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendFactor, [sfactor, dfactor]);
@@ -9635,11 +9647,11 @@ function getWebGLContext(canvas, debug)
     {
         if (debug)
         {
-            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", {antialias : false}));
+            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { antialias : false, preserveDrawingBuffer: true }));
         }
         else // !debug
         {
-            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl"); //Try and make a normal canvas of webgl, if that fails then fall back on the experimental
+            gl = canvas.getContext("experimental-webgl", { antialias : true, preserveDrawingBuffer: true });
         }
     }    
     catch (e) 
@@ -11531,7 +11543,7 @@ Serializer.prototype.serializeModel = function(Model)
 
             var command = null;
             var factory = this.registry.find("AttributeFactory");
-            command = factory.create("SetCommand");
+            command = factory.create("Set");
             if (command)
             {
                 command.getAttribute("target").setValueDirect(containerName);
@@ -11564,19 +11576,7 @@ Serializer.prototype.serializeCommand = function(command)
     {
         var element = null;
         var pcszType = command.className;
-        
-        // rename if negate is set
-        var negate = command.getAttribute("negate");
-        if (negate && negate.getValueDirect() == true) 
-        {
-            switch (pcszType)
-            {
-                case "Play":                pcszType = "Pause"; break;
-                case "ConnectAttributes":   pcszType = "DisconnectAttributes"; break;
-                default:                    break;
-            }
-        }
-        
+               
         var bstr = pcszType;
         if (bstr)
         {
@@ -19418,7 +19418,7 @@ Label.prototype.setGraphMgr = function(graphMgr)
     RasterComponent.prototype.setGraphMgr.call(this, graphMgr);
     
     // create id
-    this.id = "Label" + this.graphMgr.getNextLabelIndex;
+    this.id = "Label" + this.graphMgr.getNextLabelIndex();
     this.labelId = this.id + "_label";
     this.iconId = this.id + "_icon";
     
@@ -21219,6 +21219,11 @@ SerializeDirective.prototype.execute = function(root)
 var eEventType = {
     Unknown                     :-1,
     
+    Render_First                :0,
+    RenderBegin                 :1,
+    RenderEnd                   :2,
+    Render_End                  :9,
+    
     Mouse_First                 :100,
     MouseMove                   :101,
     MouseDown                   :102,
@@ -21641,7 +21646,8 @@ EventMgr.prototype.processEvent = function(event)
             this.listeners[type][i].eventPerformed(event);
             
             // if listener has finished responding, add to expired list
-            if (this.listeners[type][i].getAttribute("numResponses").getValueDirect() == 0)
+            var numResponses = this.listeners[type][i].getAttribute("numResponses");
+            if (numResponses && numResponses.getValueDirect() == 0)
             {
                 expired.push(this.listeners[type][i]);
             }
@@ -21991,6 +21997,7 @@ function ConnectAttributesCommand()
     this.sourceAttribute.addModifiedCB(ConnectAttributesCommand_SourceAttributeModifiedCB, this);
     this.targetAttribute.addModifiedCB(ConnectAttributesCommand_TargetAttributeModifiedCB, this);
     this.connectionType.addModifiedCB(ConnectAttributesCommand_ConnectionTypeModifiedCB, this);
+    this.negate.addModifiedCB(ConnectAttributesCommand_NegateModifiedCB, this);
     
     this.registerAttribute(this.sourceContainer, "sourceContainer");
 	this.registerAttribute(this.sourceContainer, "sourceEvaluator");
@@ -22243,6 +22250,21 @@ function ConnectAttributesCommand_ConnectionTypeModifiedCB(attribute, container)
     {
         container.connectionHelper.first = helpers.first;
         container.connectionHelper.second = helpers.second;
+    }
+}
+
+function ConnectAttributesCommand_NegateModifiedCB(attribute, container)
+{
+    var negate = attribute.getValueDirect();
+    if (negate)
+    {
+        container.className = "DisconnectAttributes";
+        container.attrType = eAttrType.DisconnectAttributes;
+    }
+    else // !negate
+    {
+        container.className = "ConnectAttributes";
+        container.attrType = eAttrType.ConnectAttributes;       
     }
 }
 AutoInterpolateCommand.prototype = new Command();
@@ -22911,7 +22933,7 @@ function PlayCommand()
     this.registerAttribute(this.negate, "negate");
     
     this.target.addModifiedCB(PlayCommand_TargetModifiedCB, this);
-
+    this.negate.addModifiedCB(PlayCommand_NegateModifiedCB, this);
 }
 
 PlayCommand.prototype.execute = function()
@@ -22966,6 +22988,21 @@ function PlayCommand_TargetModifiedCB(attribute, container)
         {
             container.evaluators[i] = evaluator;
         }
+    }
+}
+
+function PlayCommand_NegateModifiedCB(attribute, container)
+{
+    var negate = attribute.getValueDirect();
+    if (negate)
+    {
+        container.className = "Pause";
+        container.attrType = eAttrType.Pause;
+    }
+    else // !negate
+    {
+        container.className = "Play";
+        container.attrType = eAttrType.Play;       
     }
 }
 RemoveCommand.prototype = new Command();
@@ -25193,7 +25230,7 @@ function SelectionListener()
     this.rayPick = null;
     this.selections = new Selections();
     this.selected = null;
-
+    
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
     this.pointView = new Vector3DAttr();
@@ -26389,6 +26426,58 @@ function SerializeCommand_TargetModifiedCB(attribute, container)
     var target = attribute.getValueDirect().join("");
     container.targetAttribute = container.registry.find(target);
 }
+ScreenCaptureCommand.prototype = new Command();
+ScreenCaptureCommand.prototype.constructor = ScreenCaptureCommand;
+
+function ScreenCaptureCommand()
+{
+    Command.call(this);
+    this.className = "ScreenCapture";
+    this.attrType = eAttrType.ScreenCapture;
+
+    this.canvasId = new StringAttr();
+    
+    this.registerAttribute(this.canvasId, "canvasId");
+    
+    this.numResponses.setValueDirect(0);
+}
+
+ScreenCaptureCommand.prototype.execute = function()
+{
+    var bworks = this.registry.find("Bridgeworks");
+    bworks.eventMgr.addListener(eEventType.RenderEnd, this);
+}
+
+ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
+{
+    var canvas = document.getElementById(canvasId);  
+    var imageData = canvas.toDataURL('image/png');
+    
+    // copy to clipboard
+    // TODO: investigate method described at: https://forums.mozilla.org/addons/viewtopic.php?t=9736&p=21119
+    
+    // open in new window
+    window.open(imageData);
+    
+    // download
+    //var imageDataStream = imageData.replace("image/png", "image/octet-stream");
+    //window.location.href = imageDataStream;
+}
+
+ScreenCaptureCommand.prototype.eventPerformed = function(event)
+{
+    // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
+    switch (event.type)
+    {
+        case eEventType.RenderEnd:
+        {
+            this.screenCapture(this.canvasId.getValueDirect().join(""));
+            return;        
+        }
+        break;
+    }
+}
+
 // TODO
 var eLWObjectTokens = 
 {
@@ -28924,7 +29013,7 @@ function newCommand(name, factory)
     case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
     case "Play":                resource = new PlayCommand(); break;
     case "Remove":              resource = new RemoveCommand(); break;
-    case "ScreenCapture":       resource = new ScreenCapture(); break;
+    case "ScreenCapture":       resource = new ScreenCaptureCommand(); break;
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
@@ -29088,9 +29177,9 @@ function registerEvaluatorAttributes(evaluator, factory)
     evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
     
     // evaluate (replaced by "enabled")
+    var enabled = evaluator.getAttribute("enabled");
     var evaluate = new BooleanAttr(true);
     evaluator.registerAttribute(evaluate, "evaluate");
-    var enabled = evaluator.getAttribute("enabled");
     evaluate.addTarget(enabled);
     enabled.addTarget(evaluate);
 }
@@ -29405,8 +29494,12 @@ Bridgeworks.prototype.resize = function(width, height)
 
 Bridgeworks.prototype.render = function()
 {
+    this.eventMgr.processEvent(new Event(eEventType.RenderBegin));
+    
     this.renderContext.clear();
     this.renderAgent.render();
+    
+    this.eventMgr.processEvent(new Event(eEventType.RenderEnd));
 }
 
 Bridgeworks.prototype.setRenderContext = function(rc)

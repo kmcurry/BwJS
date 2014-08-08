@@ -135,6 +135,7 @@ BwCore/ViewportMgr.js
 BwCore/RasterComponentEventListener.js
 BwCore/ParentableMotionUtil.js
 BwCore/Serialize.js
+BwCore/ScreenCapture.js
 ContentHandler/LWObjectHandler.js 
 ContentHandler/LWObjectBuilder.js
 ContentHandler/LWSceneHandler.js 
