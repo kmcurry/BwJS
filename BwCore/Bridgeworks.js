@@ -162,7 +162,7 @@ Bridgeworks.prototype.onLoadModified = function()
     this.selector.stop();
     this.rasterComponentEventListener.stop();
 
-    this.commandMgr.clearCommandSequence();
+    this.commandMgr.clearCommandSequenceStack();
     this.eventMgr.clearEvents();
     $('#RasterComponents').empty();
     //this.resouceMgr.clear(); There is no resourceMgr in javascript version
