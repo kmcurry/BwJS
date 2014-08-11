@@ -306,6 +306,12 @@ Serializer.prototype.serializeModel = function(Model)
                 command.attributeValuePairs.push(new Pair(attr, values));
                 
                 this.serializeCommand(command);
+                
+                // setting the target on the SetCommand sets the attribute bin, which is normally
+                // cleared by adding the command to the CommandMgr, but this doesn't occur here, because
+                // it is only being serialized, not executed
+                setAttributeBin(null);
+                setAttributePairs(null);
             }
         }
     }
