@@ -213,6 +213,8 @@ AttributeRegistry.prototype.clear = function()
     } 
     this.nameRegistry = [];
 
+    this.uniqueAttributes = [];
+    
     this.objectCount = 0;
 }
 
