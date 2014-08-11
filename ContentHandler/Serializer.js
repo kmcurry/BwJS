@@ -298,8 +298,6 @@ Serializer.prototype.serializeModel = function(Model)
                 command.getAttribute("target").setValueDirect(containerName);
                 command.getAttribute("target").flagDeserializedFromXML();
 
-                command.registerTargetAttributes(container, containerName);
-
                 var values = [];
                 attr.getValue(values);
 
@@ -619,7 +617,7 @@ Serializer.prototype.getAttributeStringValue = function(attr, item)
         case eAttrType.Vector2DAttr:
         case eAttrType.Vector3DAttr:
         case eAttrType.Matrix4x4Attr:
-        case eAttrType.QuaternionRotate:
+        case eAttrType.QuaternionAttr:
         {
             var vecVal_F = [];
             attr.getValue(vecVal_F);

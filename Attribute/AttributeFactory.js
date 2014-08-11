@@ -226,6 +226,7 @@ function newAttribute(name, factory)
     case "Matrix4x4Attr":               resource = new Matrix4x4Attr(); break;
     case "PlaneAttr":                   resource = new PlaneAttr(); break;
     case "PulseAttr":                   resource = new PulseAttr(); break;
+    case "QuaternionAttr":              resource = new QuaternionAttr(); break;
     case "RectAttr":                    resource = new RectAttr(); break;
     case "ReferenceAttr":               resource = new ReferenceAttr(); break;
     case "StringAttr":                  resource = new StringAttr(); break;

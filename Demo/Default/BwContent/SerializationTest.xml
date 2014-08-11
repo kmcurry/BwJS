@@ -58,6 +58,7 @@
                 </Model>
                 <Set>
                     <target>grid</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -71,6 +72,7 @@
                 </Model>
                 <Set>
                     <target>UV_BoxG</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -83,6 +85,7 @@
                 </Model>
                 <Set>
                     <target>cylinderRight</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -96,6 +99,7 @@
                 </Model>
                 <Set>
                     <target>cylinderLeft</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -108,6 +112,7 @@
                 </Model>
                 <Set>
                     <target>sphereBack</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -121,6 +126,7 @@
                 </Model>
                 <Set>
                     <target>sphereFront</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
@@ -130,6 +136,7 @@
                 </Model>
                 <Set>
                     <target>F16</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
                 </Set>
             </ModelRoot>
         </Group>
@@ -432,15 +439,6 @@
             <evaluate>false</evaluate>
         </Set>
     </CommandSequence>
-    <Pause/>
-    <Set>
-        <target>SceneInspector</target>
-        <evaluate>true</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
     <CommandSequence>
         <name>Stop</name>
         <numResponses>-1</numResponses>
@@ -457,15 +455,6 @@
             <evaluate>false</evaluate>
         </Set>
     </CommandSequence>
-    <Stop/>
-    <Set>
-        <target>SceneInspector</target>
-        <evaluate>true</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
     <CommandSequence>
         <name>EnableObjectInspection</name>
         <numResponses>-1</numResponses>
@@ -487,20 +476,6 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
-    <Set>
-        <target>SceneInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>true</evaluate>
-    </Set>
-    <Set>
-        <target>FlightSimulator</target>
-    </Set>
-    <Set>
-        <target>WalkSimulator</target>
-    </Set>
     <CommandSequence>
         <name>EnableSceneInspection</name>
         <numResponses>-1</numResponses>
@@ -522,20 +497,6 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
-    <Set>
-        <target>SceneInspector</target>
-        <evaluate>true</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>FlightSimulator</target>
-    </Set>
-    <Set>
-        <target>WalkSimulator</target>
-    </Set>
     <CommandSequence>
         <name>EnableFlightSimulation</name>
         <numResponses>-1</numResponses>
@@ -557,20 +518,6 @@
             <target>WalkSimulator</target>
         </Set>
     </CommandSequence>
-    <Set>
-        <target>SceneInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>FlightSimulator</target>
-    </Set>
-    <Set>
-        <target>WalkSimulator</target>
-    </Set>
     <CommandSequence>
         <name>EnableWalkSimulation</name>
         <numResponses>-1</numResponses>
@@ -593,20 +540,6 @@
         </Set>
     </CommandSequence>
     <Set>
-        <target>SceneInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>ObjectInspector</target>
-        <evaluate>false</evaluate>
-    </Set>
-    <Set>
-        <target>FlightSimulator</target>
-    </Set>
-    <Set>
-        <target>WalkSimulator</target>
-    </Set>
-    <Set>
         <numResponses>-1</numResponses>
         <event>VK_ADD</event>
         <event>VK_ADD</event>
@@ -623,4 +556,4 @@
     <Serialize>
         <target>Root</target>
     </Serialize>
-</Session> 
+</Session>
