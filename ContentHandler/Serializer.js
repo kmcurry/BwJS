@@ -330,6 +330,9 @@ Serializer.prototype.serializeCommand = function(command)
         var element = null;
         var pcszType = command.className;
                
+        // don't serialize SerializeCommand
+        if (pcszType == "Serialize") return;
+        
         var bstr = pcszType;
         if (bstr)
         {
