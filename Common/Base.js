@@ -16,6 +16,7 @@ function Allocator()
 var message = "";
 var imgeData = "";
 var cimageData = "";
+var serializedScene = "";
 
 Allocator.prototype.allocate = function()
 {
