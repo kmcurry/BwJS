@@ -32,6 +32,7 @@ function ParentableMotionElement()
     this.inheritsRotation = true;
     this.inheritsScale = true;
     this.inheritsPivot = true;
+    this.nonZeroVelocity = false;
     this.motionParent = null;
     
     this.position = new Vector3DAttr(0, 0, 0);
@@ -48,6 +49,10 @@ function ParentableMotionElement()
     this.sectorPosition = new Vector3DAttr(0, 0, 0);
     this.sectorWorldCenter = new Vector3DAttr(0, 0, 0);
     this.sectorWorldPosition = new Vector3DAttr(0, 0, 0);
+    this.panVelocity = new Vector3DAttr(0, 0, 0);          // linear velocity along direction vectors in world-units/second
+    this.linearVelocity = new Vector3DAttr(0, 0, 0);       // linear velocity in world-units/second
+    this.angularVelocity = new Vector3DAttr(0, 0, 0);      // angular velocity in degrees/second
+    this.scalarVelocity = new Vector3DAttr(0, 0, 0);       // scalar velocity in world-units/second
     this.worldTransform = new Matrix4x4Attr(1, 0, 0, 0,
                                             0, 1, 0, 0,
                                             0, 0, 1, 0,
@@ -89,6 +94,10 @@ function ParentableMotionElement()
     this.inheritPivot_X.addModifiedCB(ParentableMotionElement_InheritanceModifiedCB, this);
     this.inheritPivot_Y.addModifiedCB(ParentableMotionElement_InheritanceModifiedCB, this);
     this.inheritPivot_Z.addModifiedCB(ParentableMotionElement_InheritanceModifiedCB, this);
+    this.panVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
+    this.linearVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
+    this.angularVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
+    this.scalarVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
     
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
@@ -106,6 +115,10 @@ function ParentableMotionElement()
     this.registerAttribute(this.sectorWorldPosition, "sectorWorldPosition");
     this.registerAttribute(this.worldTransform, "worldTransform");
     this.registerAttribute(this.sectorWorldTransform, "sectorWorldTransform");
+    this.registerAttribute(this.panVelocity, "panVelocity");
+    this.registerAttribute(this.linearVelocity, "linearVelocity");
+    this.registerAttribute(this.angularVelocity, "angularVelocity");
+    this.registerAttribute(this.scalarVelocity, "scalarVelocity");
     this.registerAttribute(this.parent, "parent");
     this.registerAttribute(this.inheritPosition_X, "inheritPosition_X");
     this.registerAttribute(this.inheritPosition_Y, "inheritPosition_Y");
@@ -137,6 +150,12 @@ ParentableMotionElement.prototype.getSectorTransform = function()
 
 ParentableMotionElement.prototype.update = function(params, visitChildren)
 {
+	// update this element's position/rotation as affected by velocity
+	if (this.nonZeroVelocity)
+	{
+    	this.updateVelocityMotion(params.timeIncrement);
+    }
+        
     if (this.updateInheritance)
     {
         this.updateInheritance = false;
@@ -159,7 +178,11 @@ ParentableMotionElement.prototype.update = function(params, visitChildren)
     }
     
     // update this element's transformations (translation/rotation/scale/pivot)
-    this.updateSimpleTransform();
+    var modified = this.updateSimpleTransform();
+    if (modified)
+    {
+    	this.incrementModificationCount();
+    }
     if (this.motionParent)
     {
         this.motionParent.update(params, false);
@@ -198,10 +221,10 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
 
 ParentableMotionElement.prototype.updateChildDisplayLists = function()
 {
-    for (var i=0; i < this.motionChildren.length; i++)
+    /*for (var i=0; i < this.motionChildren.length; i++)
     {
         this.motionChildren[i].updateDisplayList.pulse();
-    }
+    }*/
 }
 
 ParentableMotionElement.prototype.applyTransform = function()
@@ -214,7 +237,69 @@ ParentableMotionElement.prototype.applyTransform = function()
     this.graphMgr.renderContext.leftMultMatrix(this.sectorTransformCompound);
     this.graphMgr.renderContext.applyModelViewTransform();
     
-// TODO: if invsere scale was applied, re-apply scale
+	// TODO: if invsere scale was applied, re-apply scale
+}
+
+ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
+{
+    // pan, linear velocity
+    var panVelocity = this.panVelocity.getValueDirect();
+    var linearVelocity = this.linearVelocity.getValueDirect();
+    if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
+        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+    {
+        // position
+        var position = this.position.getValueDirect();
+
+        // get direction vectors for pan
+        var directionVectors = this.getDirectionVectors();
+
+        // update position
+        position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
+        						  (directionVectors.up.x 	  * panVelocity.x * timeIncrement) +
+        						  (directionVectors.forward.x * panVelocity.x * timeIncrement) + 
+        						  (linearVelocity.x * timeIncrement);
+        position.y = position.y + (directionVectors.right.y   * panVelocity.y * timeIncrement) +
+        						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
+        						  (directionVectors.forward.y * panVelocity.y * timeIncrement) + 
+        						  (linearVelocity.y * timeIncrement);
+        position.z = position.z + (directionVectors.right.z   * panVelocity.z * timeIncrement) +
+        						  (directionVectors.up.z 	  * panVelocity.z * timeIncrement) +
+        						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 
+        						  (linearVelocity.z * timeIncrement);						  
+
+        this.position.setValueDirect(position.x, position.y, position.z);
+    }
+
+    // angular velocity
+    var angularVelocity = this.angularVelocity.getValueDirect();
+    if (angularVelocity.x != 0 || angularVelocity.y != 0 || angularVelocity.z != 0)
+    {
+        // rotation
+        var rotation = this.rotation.getValueDirect();
+
+        // update rotation
+        rotation.x = rotation.x + (angularVelocity.x * timeIncrement);
+        rotation.y = rotation.y + (angularVelocity.y * timeIncrement);
+        rotation.z = rotation.z + (angularVelocity.z * timeIncrement);
+        
+        this.rotation.setValueDirect(rotation.x, rotation.y, rotation.z);
+    }
+
+    // scalar velocity
+    var scalarVelocity = this.scalarVelocity.getValueDirect();
+    if (scalarVelocity.x != 0 || scalarVelocity.y != 0 || scalarVelocity.z != 0)
+    {
+        // rotation
+        var scale = this.scale.getValueDirect();
+
+        // update rotation
+        scale.x = scale.x + (scalarVelocity.x * timeIncrement);
+        scale.y = scale.y + (scalarVelocity.y * timeIncrement);
+        scale.z = scale.z + (scalarVelocity.z * timeIncrement);
+        
+        this.scale.setValueDirect(scale.x, scale.y, scale.z);
+    }   
 }
 
 ParentableMotionElement.prototype.updateSimpleTransform = function()
@@ -289,6 +374,8 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateChildDisplayLists();
         }
     }
+    
+    return modified;
 }
 
 ParentableMotionElement.prototype.updateCompoundTransform = function()
@@ -446,9 +533,19 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     this.synchronizeSectorPosition();       
 }
 
-ParentableMotionElement.prototype.updateChildDisplayLists = function()
+ParentableMotionElement.prototype.velocityModified = function()
 {
-    
+	if (this.panVelocity.isZero() &&
+		this.linearVelocity.isZero() &&
+		this.angularVelocity.isZero() &&
+		this.scalarVelocity.isZero())
+	{
+		this.nonZeroVelocity = false;
+	}
+	else
+	{
+		this.nonZeroVelocity = true;
+	}
 }
 
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
@@ -492,6 +589,12 @@ function ParentableMotionElement_SectorPositionModifiedCB(attribute, container)
 function ParentableMotionElement_ParentModifiedCB(attribute, container)
 {
     container.setMotionParent(container.registry.find(attribute.getValueDirect().join("")));
+}
+
+function ParentableMotionElement_VelocityModifiedCB(attribute, container)
+{
+	container.velocityModified();
+	container.incrementModificationCount();
 }
 
 function ParentableMotionElement_InheritanceModifiedCB(attribute, container)

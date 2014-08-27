@@ -124,14 +124,17 @@ SelectionListener.prototype.clearSelections = function()
     this.selections.clear();
    
     this.selectedElement.setValueDirect(-1);
-    if (this.selected && this.selected.getAttribute("selectedElement"))
+    if (this.selected)
     {
-        this.selected.unregisterAttribute(this.selectedElement);
+    	if (this.selected.getAttribute("selectedElement"))
+    	{
+        	this.selected.unregisterAttribute(this.selectedElement);
+        }
+        
+        this.selectedName.setValueDirect("");
+    	this.unregisterAttribute(this.selected);
+    	this.selected = null;
     }
-
-    this.selectedName.setValueDirect("");
-    this.unregisterAttribute(this.selected);
-    this.selected = null;
     
     this.selectionCleared.pulse();
 }

@@ -40,6 +40,7 @@ RenderAgent.prototype.render = function()
     this.timer.stop();
     var increment = this.timer.getTime();
     this.timer.start();
+    this.timeIncrement.setValueDirect(increment);
     
     var elapsedTime = this.elapsedTimeInSecs.getValueDirect() + increment;
     this.elapsedTimeInSecs.setValueDirect(elapsedTime);
@@ -97,6 +98,7 @@ RenderAgent.prototype.executeRenderDirectives = function()
         this.bridgeworks.viewportMgr.layoutDirectives(directives);
         for (var i=0; i < directives.length; i++)
         {
+        	directives[i].getAttribute("timeIncrement").setValueDirect(this.timeIncrement.getValueDirect());
             directives[i].execute();    
         }
     }   

@@ -409,7 +409,7 @@ Node.prototype.setChildModified = function(modified, recurse)
         parent = this.parents[i];
         if (parent)
         {
-            parent.childrenModified[this] = modified;
+            parent.childrenModified[this.name.getValueDirect().join("")] = modified;
             parent.childModified = modified ? true : parent.isChildModified();
             if (recurse) parent.setChildModified(modified, recurse);
         }

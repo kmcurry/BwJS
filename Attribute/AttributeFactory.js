@@ -121,6 +121,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["ObjectInspector"] = newObjectInspector;
     this.newResourceProcs["SceneInspector"] = newSceneInspector;
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
+    this.newResourceProcs["AnimalMover"] = newAnimalMover;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -385,6 +386,15 @@ function newTargetObserver(name, factory)
    	return resource;	
 }
 
+function newAnimalMover(name, factory)
+{
+	var resource = new AnimalMover();
+	
+	registerEvaluatorAttributes(resource, factory);
+	
+	return resource;	
+}
+
 function newCommand(name, factory)
 {
     var resource = null;
@@ -549,52 +559,82 @@ function finalizeEvaluator(evaluator, factory)
 function registerEvaluatorAttributes(evaluator, factory)
 {
     // url
-    var url = new StringAttr("");
-    evaluator.registerAttribute(url, "url");
-
+    if (!evaluator.getAttribute("url"))
+    {
+    	var url = new StringAttr("");
+    	evaluator.registerAttribute(url, "url");
+	}
+	
     // target
-    var target = new StringAttr("");
-    evaluator.registerAttribute(target, "target");
-
+    if (!evaluator.getAttribute("target"))
+    {
+    	var target = new StringAttr("");
+    	evaluator.registerAttribute(target, "target");
+	}
+	
     // renderAndRelease
-    var renderAndRelease = new BooleanAttr(false);
-    evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+    if (!evaluator.getAttribute("renderAndRelease"))
+    {
+    	var renderAndRelease = new BooleanAttr(false);
+    	evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+	}
 	
     // targetConnectionType
-    var targetConnectionType = new StringAttr("transform");
-    targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
-    evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
+    if (!evaluator.getAttribute("targetConnectionType"))
+    {
+    	var targetConnectionType = new StringAttr("transform");
+    	targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
+    	evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
+    }
     
     // evaluate (replaced by "enabled")
-    var evaluate = new BooleanAttr(true);
-    evaluator.registerAttribute(evaluate, "evaluate");
-    evaluate.addTarget(evaluator.getAttribute("enabled"));
+    if (!evaluator.getAttribute("evaluate"))
+    {
+    	var evaluate = new BooleanAttr(true);
+    	evaluator.registerAttribute(evaluate, "evaluate");
+    	evaluate.addTarget(evaluator.getAttribute("enabled"));
+	}
 }
 
 function registerParentableAttributes(pme, factory)
 {
     // label
-	var label = new StringAttr("");
-	pme.registerAttribute(label, "label");
-	label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
+    if (!pme.getAttribute("label"))
+    {
+		var label = new StringAttr("");
+		pme.registerAttribute(label, "label");
+		label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
+	}
 	
 	// geoPosition
-	var geoPosition = new Vector3DAttr();
-	pme.registerAttribute(geoPosition, "geoPosition");
-	geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
+	if (!pme.getAttribute("geoPosition"))
+	{
+		var geoPosition = new Vector3DAttr();
+		pme.registerAttribute(geoPosition, "geoPosition");
+		geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
+	}
 
 	// altitude
-	var altitude = new NumberAttr();
-	pme.registerAttribute(altitude, "altitude");
-
+	if (!pme.getAttribute("altitude"))
+	{
+		var altitude = new NumberAttr();
+		pme.registerAttribute(altitude, "altitude");
+	}
+	
 	// latitude
-	var latitude = new NumberAttr();
-	pme.registerAttribute(latitude, "latitude");
-
+	if (!pme.getAttribute("latitude"))
+	{
+		var latitude = new NumberAttr();
+		pme.registerAttribute(latitude, "latitude");
+	}
+	
 	// longitude
-	var longitude = new NumberAttr();
-	pme.registerAttribute(longitude, "longitude");
-
+	if (!pme.getAttribute("longitude"))
+	{
+		var longitude = new NumberAttr();
+		pme.registerAttribute(longitude, "longitude");
+	}
+	
 	// misc modified callbacks
 	pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
 }

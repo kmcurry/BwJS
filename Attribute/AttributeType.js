@@ -81,7 +81,9 @@ var eAttrType = {
     ArcballInspector            :1104,
     MapProjectionCalculator     :1105,
     ObjectInspector             :1106,
-    MultiTargetObserver			:1107,   
+    MultiTargetObserver			:1107,
+    ObjectMover	 				:1108,
+    AnimalMover					:1109,   
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,

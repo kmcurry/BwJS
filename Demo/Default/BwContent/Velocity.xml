@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onload="initialize"?>
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+     <Scene>
+          <Isolator name="Root" isolateTransforms="true">
+                <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
+                     <position x="3" y="4.2424" z="-3"/>
+                     <rotation x="45" y="-45" z="0"/>
+                </PerspectiveCamera>
+               <Group name="Lights">
+                 <GlobalIllumination name="GlobalLight">
+                   <ambient r=".25" g=".25" b=".25" a=".25"/>
+                 </GlobalIllumination>
+                 <DirectionalLight name="theLight" enabled="true">
+                   <ambient r="0.25" g="0.25" b="0.25" a="1"/>
+                   <diffuse r="1" g="1" b="1" a="1"/>
+                   <specular r="1" g="1" b="1" a="1"/>
+                   <rotation x="0" y="0" z="0"/>
+                 </DirectionalLight>
+               </Group>
+               <Group name="Effects"/>
+               <Group name="Models">
+                    <Model name="grid" url="/objects/GridG.lwo">
+                         <position x="0" y="0" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="Cow" indexedGeometry="false" url="/objects/Cow.lwo">
+                         <position x="0" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                         <!--<panVelocity x="0.9" y="0" z="0.9"/>
+                         <angularVelocity x="0" y="10" z="0"/>-->
+                    </Model>
+                    <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo">
+                         <position x="2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
+                         <position x="-2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereBack" url="/objects/UV_SphereG.lwo">
+                         <position x="0" y=".25" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
+                         <position x="0" y=".25" z="-2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="F16" url="/objects/F16.lwo"/>-->
+               </Group>
+          </Isolator>
+          <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
+       	  <!--<KeyframeInterpolator name="F16Motion1" url="motions/F16New.mot" target="F16"/>-->
+       	  <AnimalMover name="CowMover" target="Cow"/>
+     </Scene>
+     <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+     <Set target="SceneInspector" pivotDistance="3"/>
+  <Set target="Selector" computePivotDistance="false"/>
+</Session>

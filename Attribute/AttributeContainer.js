@@ -37,6 +37,8 @@ AttributeContainer.prototype.isContainer = function()
 
 AttributeContainer.prototype.registerAttribute = function(attribute, name)
 {
+	if (!attribute) return;
+	
     if (this.attrNameMap[name] == undefined)
     {
         this.attrNameMap[name] = new Array();
@@ -57,6 +59,8 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
 {
+	if (!attribute) return;
+	
     for (var i in this.attrNameMap)
     {
         for (var j=0; j < this.attrNameMap[i].length; j++)

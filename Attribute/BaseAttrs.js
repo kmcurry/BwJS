@@ -375,6 +375,13 @@ Vector3DAttr.prototype.setValueDirect = function(x, y, z, params)
     this.setValue(values, params);
 }
 
+Vector3DAttr.prototype.isZero = function()
+{
+	var values = [];
+    this.getValue(values);
+    return (values[0] == 0 && values[1] == 0 && values[2] == 0) ? true : false;
+}
+
 ViewportAttr.prototype = new Attribute();
 ViewportAttr.prototype.constructor = ViewportAttr;
 

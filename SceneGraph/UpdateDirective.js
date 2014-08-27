@@ -23,11 +23,17 @@ function UpdateDirective()
     this.attrType = eAttrType.UpdateDirective;
     
     this.name.setValueDirect("UpdateDirective");
+    
+    this.timeIncrement = new NumberAttr(0);
+    
+    this.registerAttribute(this.timeIncrement, "timeIncrement");
 }
 
 UpdateDirective.prototype.execute = function(root, params)
 {
     root = root || this.rootNode.getValueDirect();
+    
+    params.timeIncrement = this.timeIncrement.getValueDirect();
     
     // update (perform first pass)
     root.update(params, true);

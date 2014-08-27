@@ -37,6 +37,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
+    this.timeIncrement = new NumberAttr(0);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
@@ -47,8 +48,10 @@ function RenderDirective()
     this.registerAttribute(this.foregroundAlphaFilename, "foregroundAlphaFilename");   
     this.registerAttribute(this.foregroundFadeEnabled, "foregroundFadeEnabled");   
     this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
-       
+    this.registerAttribute(this.timeIncrement, "timeIncrement");
+    
     this.updateDirective = new UpdateDirective();
+    this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
 }
 
