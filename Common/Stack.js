@@ -1,6 +1,7 @@
 ﻿function Stack(element)
 {
     this.stack = new Array();
+    this.maxLength = 0;
     
     if (element)
     {
@@ -10,6 +11,11 @@
 
 Stack.prototype.push = function(element)
 {
+	if (this.maxLength > 0 && this.stack.length >= this.maxLength)
+	{
+		this.pop();
+	}
+	
     this.stack.push(element);
 }
 

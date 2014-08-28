@@ -51,16 +51,16 @@ RenderAgent.prototype.render = function()
     this.executeRenderDirectives();
 }
 
-RenderAgent.prototype.animateEvaluators = function(time)
+RenderAgent.prototype.animateEvaluators = function(timeIncrement)
 {
     var evaluators = this.registry.getByType(eAttrType.Evaluator);
     for (var i=0; i < evaluators.length; i++)
     {
-        this.animateEvaluator(evaluators[i], time);
+        this.animateEvaluator(evaluators[i], timeIncrement);
     }
 }
 
-RenderAgent.prototype.animateEvaluator = function(evaluator, time)
+RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
 {
     var enabled = evaluator.getAttribute("enabled").getValueDirect();
     var expired = evaluator.getAttribute("expired").getValueDirect();
@@ -74,9 +74,15 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, time)
             case "KeyframeInterpolator":
             {
                 var params = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
-                evaluator.getAttribute("time").setValue(time, params);
+                evaluator.getAttribute("time").setValue(timeIncrement, params);
             }
             break;
+            
+            case "ObjectMover":
+            case "AnimalMover":
+            {
+            	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
+            }
         }
 
         // don't evaluate scene/object inspection here, or any other evaluator not in the scene graph

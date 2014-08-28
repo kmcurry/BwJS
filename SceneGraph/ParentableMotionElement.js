@@ -256,15 +256,15 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // update position
         position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.x 	  * panVelocity.x * timeIncrement) +
-        						  (directionVectors.forward.x * panVelocity.x * timeIncrement) + 
+        						  (directionVectors.up.x 	  * panVelocity.y * timeIncrement) +
+        						  (directionVectors.forward.x * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.x * timeIncrement);
-        position.y = position.y + (directionVectors.right.y   * panVelocity.y * timeIncrement) +
+        position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.y * panVelocity.y * timeIncrement) + 
+        						  (directionVectors.forward.y * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.y * timeIncrement);
-        position.z = position.z + (directionVectors.right.z   * panVelocity.z * timeIncrement) +
-        						  (directionVectors.up.z 	  * panVelocity.z * timeIncrement) +
+        position.z = position.z + (directionVectors.right.z   * panVelocity.x * timeIncrement) +
+        						  (directionVectors.up.z 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.z * timeIncrement);						  
 
