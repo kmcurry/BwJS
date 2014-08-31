@@ -43,6 +43,22 @@ function Sphere()
     this.center = new Vector3D();
     this.radius = 0;
     this.xcenter = new Vector3D(); // transformed center
+    this.xradius = 0;              // transformed (scaled) radius
+}
+
+Sphere.prototype.intersects = function(sphere)
+{
+    // compare squared distances to keep from calling sqrt
+    return (((this.xcenter.x - sphere.xcenter.x) * (this.xcenter.x - sphere.xcenter.x) + 
+             (this.xcenter.y - sphere.xcenter.y) * (this.xcenter.y - sphere.xcenter.y) +
+             (this.xcenter.z - sphere.xcenter.z) * (this.xcenter.z - sphere.xcenter.z)) < ((this.xradius + sphere.xradius) * (this.xradius + sphere.xradius)) ? true : false);
+    /*
+    var distanceBetweenCenters = distanceBetween(this.xcenter, sphere.xcenter);
+    var combinedRadii = this.xradius + sphere.xradius;
+    
+    if (distanceBetweenCenters < combinedRadii) return true;
+    
+    return false;*/
 }
 
 function Region(minX, minY, minZ, maxX, maxY, maxZ)
@@ -276,8 +292,14 @@ SphereTreeNode.prototype.addChild = function(child)
     child.parent = this;
 }
 
+SphereTreeNode.prototype.intersects = function(sphereTreeNode)
+{
+    return (this.sphere.intersects(sphereTreeNode.sphere));    
+}
+
 function BoundingTree()
 {
+    this.root = null;
     this.min = new Vector3D();
     this.max = new Vector3D();
     this.tris = [];
@@ -291,14 +313,38 @@ BoundingTree.prototype.setTriangles = function(tris, min, max)
     this.max.copy(max);
 }
 
+BoundingTree.prototype.setTransform = function(matrix)
+{
+}
+
 SphereTree.prototype = new BoundingTree();
 SphereTree.prototype.constructor = SphereTree;
 
 function SphereTree()
 {
     BoundingTree.call(this);
+}
+
+SphereTree.prototype.setTransform = function(matrix)
+{
+    if (this.root) this.transformNode(matrix, this.root);
+}
+
+SphereTree.prototype.transformNode = function(matrix, node)
+{
+    var result = matrix.transform(node.sphere.center.x, node.sphere.center.y, node.sphere.center.z, 1);
+    node.sphere.xcenter.x = result.x;
+    node.sphere.xcenter.y = result.y;
+    node.sphere.xcenter.z = result.z;
     
-    this.root = null;
+    var scale = matrix.getScalingFactors();
+    node.sphere.xradius = node.sphere.radius * max3(scale.x, scale.y, scale.z);
+    
+    // recurse on node children
+    for (var i = 0; i < node.children.length; i++)
+    {
+        this.transformNode(matrix, node.children[i]);
+    }
 }
 
 SphereTree.prototype.rayIntersectsTree = function(params)
@@ -363,7 +409,7 @@ SphereTree.prototype.rayIntersectsSphere = function(node, params)
     var center = params.worldViewMatrix.transform(node.sphere.center.x, node.sphere.center.y, node.sphere.center.z, 1);
 
     // adjust sphere radius by scale factor
-    var radius = node.sphere.radius * params.scale;
+    var radius = node.sphere.radius * max3(params.scale.x, params.scale.y, params.scale.z);
 
     // test for ray-sphere intersection
     var roots = raySphereIntersection(params.rayOrigin, params.rayDir, center, radius);
@@ -478,10 +524,12 @@ Octree.prototype.buildTree = function(levels)
     
     // sphere center is the midpoint of min/max extents
     root.sphere.center.copy(midpoint(this.min, this.max));
+    root.sphere.xcenter.copy(root.sphere.center);
 
     // sphere radius is the distance between the midpoint of min/max extents and min/max extent
     root.sphere.radius = distanceBetween(root.sphere.center, this.max);
-
+    root.sphere.xradius = root.sphere.radius;
+    
     // set triIndices
     root.triIndices.length = this.tris.length;
     for (var i=0; i < this.tris.length; i++)
@@ -537,10 +585,12 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
 
             // set center
             node.sphere.center.copy(midpoint(regions[i].min, regions[i].max));
+            node.sphere.xcenter.copy(node.sphere.center);
 
             // set radius
             node.sphere.radius = distanceBetween(node.sphere.center, regions[i].max);
-
+            node.sphere.xradius = node.sphere.radius;
+            
             // set triIndices
             node.triIndices = triIndicesContainedByRegion.slice();
 
@@ -551,6 +601,17 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
             this.buildTreeLevels(levels, regions[i].min, regions[i].max, node, node.triIndices);
         }
     }
+}
+
+Octree.prototype.collides = function(octree)
+{
+    return (this.nodesCollide(this.root, octree.root));
+    // TODO: recurse on children
+}
+
+Octree.prototype.nodesCollide = function(node1, node2)
+{
+    return (node1.intersects(node2));    
 }
 
 function rayPick(tree,

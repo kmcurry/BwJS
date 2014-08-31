@@ -390,6 +390,7 @@ function newAnimalMover(name, factory)
 {
 	var resource = new AnimalMover();
 	
+	resource.setGraphMgr(factory.graphMgr);
 	registerEvaluatorAttributes(resource, factory);
 	
 	return resource;	

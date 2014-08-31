@@ -18,6 +18,7 @@ function GraphMgr()
     this.labelIndex = 1;
     this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
+    this.collisions = new Array();
     
     this.name = new StringAttr("GraphMgr");
     
@@ -85,6 +86,16 @@ GraphMgr.prototype.getNextBalloonTipLabelIndex = function()
     return this.balloonTipLabelIndex++;    
 }
 
+GraphMgr.prototype.setCollisions = function(collisions)
+{
+    this.collisions = collisions;
+}
+
+GraphMgr.prototype.getCollisions = function()
+{
+    return this.collisions;    
+}
+
 GraphMgr.prototype.reset = function ()
 {
     this.lightIndex = 0;
@@ -94,6 +105,7 @@ GraphMgr.prototype.reset = function ()
     this.setCurrentMaterial(null);
     this.setCurrentBalloonTipLabel(null);
     this.setDrawTextures(true);
+    this.collisions = new Array;
 
     for (var i=0; i < gl_MaxLights; i++)
     {

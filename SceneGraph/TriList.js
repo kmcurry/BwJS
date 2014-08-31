@@ -11,7 +11,7 @@ function TriList()
     
     this.normals = new NumberArrayAttr();
     
-    this.vertices.addModifiedCB(TriList_NormalsModifiedCB, this);
+    this.normals.addModifiedCB(TriList_NormalsModifiedCB, this);
     
     this.registerAttribute(this.normals, "normals");
 }
@@ -49,7 +49,7 @@ TriList.prototype.draw = function(dissolve)
     this.drawTextured(dissolve);
 }
 
-TriList.prototype.buildBoundingTree = function()
+TriList.prototype.getTriangles = function()
 {
     var vertices = this.vertices.getValueDirect();
     
@@ -69,11 +69,7 @@ TriList.prototype.buildBoundingTree = function()
                                vertices[vertex+8]));
     }
     
-    var min = this.bbox.getAttribute("min").getValueDirect();
-    var max = this.bbox.getAttribute("max").getValueDirect();
-    
-    this.boundingTree.setTriangles(tris, min, max);
-    this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
+    return tris;
 }
 
 function TriList_NormalsModifiedCB(attribute, container)

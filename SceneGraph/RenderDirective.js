@@ -16,6 +16,7 @@ function RenderParams()
     this.displayListObj = null;
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
+    this.detectCollisions = new Array();
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -104,6 +105,8 @@ RenderDirective.prototype.execute = function(root)
         
     visited[0].apply("render", params, true);
 
+    this.graphMgr.setCollisions(this.detectCollisions(params.detectCollisions));
+    
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())
     {
@@ -111,6 +114,41 @@ RenderDirective.prototype.execute = function(root)
         this.distanceSortAgent.draw();
         this.distanceSortAgent.clear();
     }
+}
+
+RenderDirective.prototype.detectCollisions = function(boundingTrees)
+{
+    var names = [];
+    var trees = [];
+    var collisions = [];
+    var tested = [];
+    
+    for (var i in boundingTrees)
+    {
+        names.push(i);
+        trees.push(boundingTrees[i]);
+        tested.push(false);
+    }
+    
+    for (var i = 0; i < trees.length; i++)
+    {
+        if (tested[i]) continue;
+        
+        for (var j = i+1; j < trees.length; j++)
+        {
+            if (tested[j]) continue;
+            
+            if (trees[i].collides(trees[j]))
+            {
+                collisions.push(names[i]);
+                collisions.push(names[j]);
+                tested[i] = tested[j] = true;
+                break;
+            }
+        }
+    }
+    
+    return collisions;
 }
 
 function RenderDirective_ViewportModifiedCB(attribute, container)

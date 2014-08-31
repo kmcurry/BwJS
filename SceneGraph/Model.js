@@ -7,23 +7,23 @@ function Model()
     this.className = "Model";
     this.attrType = eAttrType.Model;
     
+    this.geometry = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
     this.surfaceAttrConnections = [];
-
+    this.boundingTree = new Octree();
+    this.updateBoundingTree = false;
+    
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);
     this.selectable = new BooleanAttr(true);
     this.moveable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
     this.show = new BooleanAttr(true);
-    this.approximationLevels = new NumberAttr(1);
+    this.approximationLevels = new NumberAttr(2);
     this.showApproximationLevel = new NumberAttr(-1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
-    this.intersector = new BooleanAttr(true);
-    this.intersectee = new BooleanAttr(true);
-    this.stationary = new BooleanAttr(false);
     this.shadowCaster = new BooleanAttr(false);
     this.shadowTarget = new BooleanAttr(true);
     this.indexedGeometry = new BooleanAttr(true);
@@ -47,20 +47,18 @@ function Model()
     this.pivotAboutGeometricCenter = new BooleanAttr(true);
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
+    this.detectCollisions = new BooleanAttr(false);
 
     this.show.addTarget(this.enabled);
     
     this.selectable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.cullable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.show.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    this.approximationLevels.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    this.showApproximationLevel.addModifiedCB(Model_GeometryAttrModifiedCB, this);
+    //this.approximationLevels.addModifiedCB(Model_AproximationLevelsModifiedCB, this);
+    //this.showApproximationLevel.addModifiedCB(Model_ShowApproximationLevelModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_SortPolygonsModifiedCB, this);
     this.flipPolygons.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    this.intersector.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    this.intersectee.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    this.stationary.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.shadowCaster.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.shadowTarget.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.renderSequenceSlot.addModifiedCB(Model_GeometryAttrModifiedCB, this);
@@ -81,6 +79,7 @@ function Model()
     this.textureOpacity.addModifiedCB(Model_TextureOpacityModifiedCB, this);
     this.doubleSided.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
     this.texturesEnabled.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
+    this.detectCollisions.addModifiedCB(Model_DetectCollisionsModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -92,9 +91,6 @@ function Model()
     this.registerAttribute(this.showApproximationLevel, "showApproximationLevel");
     this.registerAttribute(this.sortPolygons, "sortPolygons");
     this.registerAttribute(this.flipPolygons, "flipPolygons");
-    this.registerAttribute(this.intersector, "intersector");
-    this.registerAttribute(this.intersectee, "intersectee");
-    this.registerAttribute(this.stationary, "stationary");
     this.registerAttribute(this.shadowCaster, "shadowCaster");
     this.registerAttribute(this.shadowTarget, "shadowTarget");
     this.registerAttribute(this.indexedGeometry, "indexedGeometry");
@@ -118,7 +114,8 @@ function Model()
     this.registerAttribute(this.pivotAboutGeometricCenter, "pivotAboutGeometricCenter");
     this.registerAttribute(this.screenScaleEnabled, "screenScaleEnabled");
     this.registerAttribute(this.screenScalePixels, "screenScalePixels");
-    
+    this.registerAttribute(this.detectCollisions, "detectCollisions");
+        
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
     this.isolatorNode.getAttribute("isolateDissolves").setValueDirect(true);
@@ -379,6 +376,13 @@ Model.prototype.setGraphMgr = function(graphMgr)
 
 Model.prototype.update = function(params, visitChildren)
 {
+    if (this.updateBoundingTree)
+    {
+        this.updateBoundingTree = false;
+
+        this.buildBoundingTree();
+    }
+    
     // call base-class implementation
     ParentableMotionElement.prototype.update.call(this, params, visitChildren);
 }
@@ -409,6 +413,12 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
                 this.applyTransform();
 
+                if (this.detectCollisions.getValueDirect()) 
+                {
+                    this.boundingTree.setTransform(this.graphMgr.renderContext.modelViewMatrixStack.top());
+                    params.detectCollisions[this.name.getValueDirect().join("")] = this.boundingTree;
+                }
+                
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
@@ -418,18 +428,39 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
         case "rayPick":
             {
-                var lastWorldMatrix = new Matrix4x4();
-                lastWorldMatrix.loadMatrix(params.worldMatrix);
-                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
+                if (this.selectable.getValueDirect() == true &&
+                    params.opacity > 0 &&
+                    params.dissolve < 1)
+                {
+                    var lastWorldMatrix = new Matrix4x4();
+                    lastWorldMatrix.loadMatrix(params.worldMatrix);
+                    var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
+    
+                    params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                    params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
+    
+                    // call base-class implementation
+                    //ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+                    {
+                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
+                    var scale = worldViewMatrix.getScalingFactors();
 
-                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
-
-                // call base-class implementation
-                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-
-                params.worldMatrix.loadMatrix(lastWorldMatrix);
-                params.sectorOrigin.copy(lastSectorOrigin);
+                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
+                                                  params.nearDistance, params.farDistance,
+                                                  params.worldMatrix, params.viewMatrix,
+                                                  max3(scale.x, scale.y, scale.z),
+                                                  params.doubleSided, params.clipPlanes);
+                    if (intersectRecord)
+                    {
+                        params.currentNodePath.push(this);
+                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
+                        params.currentNodePath.pop();
+                    }
+                    }
+    
+                    params.worldMatrix.loadMatrix(lastWorldMatrix);
+                    params.sectorOrigin.copy(lastSectorOrigin);
+                }
             }
             break;
 
@@ -484,6 +515,9 @@ Model.prototype.addGeometry = function(geometry, surface)
     
     this.connectGeometryAttributes(geometry);
     this.addGeometryBBox(geometry);
+    this.geometry.push(geometry);
+        
+    this.updateBoundingTree = true;
 }
 
 Model.prototype.addIndexedGeometry = function(geometry, indices, surface)
@@ -519,16 +553,12 @@ Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
+	this.connectGeometryAttribute(geometry,	this.name, "name");
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
-    this.connectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
-    this.connectGeometryAttribute(geometry, this.showApproximationLevel, "showApproximationLevel");
     this.connectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
     this.connectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
-    this.connectGeometryAttribute(geometry, this.intersector, "intersector");
-    this.connectGeometryAttribute(geometry, this.intersectee, "intersectee");
-    this.connectGeometryAttribute(geometry, this.stationary, "stationary");
     this.connectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
     this.connectGeometryAttribute(geometry, this.shadowTarget, "shadowTarget");
     this.connectGeometryAttribute(geometry, this.renderSequenceSlot, "renderSequenceSlot");
@@ -604,6 +634,20 @@ Model.prototype.updateBBox = function()
                               (min.z + max.z) / 2.0);
                               
     this.center.setValueDirect(center.x, center.y, center.z);
+    
+    this.updateBoundingTree = true;
+}
+
+Model.prototype.buildBoundingTree = function()
+{
+    var tris = [];
+    for (var i = 0; i < this.geometry.length; i++)
+    {
+        tris = tris.concat(this.geometry[i].getTriangles());
+    }
+    
+    this.boundingTree.setTriangles(tris, this.bbox.min.getValueDirect(), this.bbox.max.getValueDirect());
+    this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
 Model.prototype.autoDisplayListModified = function()
@@ -690,3 +734,16 @@ function Model_GeometryAttrModifiedCB(attribute, container)
 {
     //container.incremementModificationCount();
 }
+
+function Model_DetectCollisionsModifiedCB(attribute, container)
+{
+	var detectCollisions = attribute.getValueDirect();
+    
+    // if detecting collisions, cannot use display lists
+    if (detectCollisions)
+    {
+        container.autoDisplayList.setValueDirect(false);
+        container.enableDisplayList.setValueDirect(false);
+    }
+}
+

@@ -21,8 +21,7 @@ function ParentableMotionElement()
     this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any) for the current sector
-                                                
+                                                        // parent's transformations (if any) for the current sector                                                
     this.updatePosition = false;
     this.updateScale = false;
     this.updatePivot = false;
@@ -74,6 +73,7 @@ function ParentableMotionElement()
     this.inheritPivot_X = new BooleanAttr(true);
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
+    this.transformModified = new PulseAttr();               // pulsed when transform has been modified
     
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
@@ -132,6 +132,7 @@ function ParentableMotionElement()
     this.registerAttribute(this.inheritPivot_X, "inheritPivot_X");
     this.registerAttribute(this.inheritPivot_X, "inheritPivot_Y");
     this.registerAttribute(this.inheritPivot_X, "inheritPivot_Z");
+    this.registerAttribute(this.transformModified, "transformModified");
 }
 
 ParentableMotionElement.prototype.getTransform = function()
@@ -363,6 +364,8 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
         
         if (modified)
         {
+            this.transformModified.pulse();
+            
             // pre-multiply pivot/scale/rotation since this is applied to both regular and sector transforms
             var psr = new Matrix4x4();
             psr.loadMatrix(this.pivotMatrix.multiply(this.scaleMatrix.multiply(this.rotationMatrix)));

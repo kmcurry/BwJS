@@ -1,9 +1,9 @@
-﻿Evaluator.prototype = new Node();
+﻿Evaluator.prototype = new SGNode();
 Evaluator.prototype.constructor = Evaluator;
 
 function Evaluator()
 {
-    Node.call(this);
+    SGNode.call(this);
     this.className = "Evaluator";
     this.attrType = eAttrType.Evaluator;
     
@@ -27,5 +27,5 @@ Evaluator.prototype.update = function(params, visitChildren)
     }
     
     // call base-class implementation
-    Node.prototype.update.call(this, params, visitChildren);
+    SGNode.prototype.update.call(this, params, visitChildren);
 }
