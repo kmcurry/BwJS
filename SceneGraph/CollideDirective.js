@@ -1,7 +1,7 @@
-CollisionDetectParams.prototype = new DirectiveParams();
-CollisionDetectParams.prototype.constructor = CollisionDetectParams();
+CollideParams.prototype = new DirectiveParams();
+CollideParams.prototype.constructor = CollideParams();
 
-function CollisionDetectParams()
+function CollideParams()
 {
     DirectiveParams.call(this);
 
@@ -11,32 +11,32 @@ function CollisionDetectParams()
     this.detectCollisions = new Array();
 }
 
-CollisionDetectDirective.prototype = new SGDirective();
-CollisionDetectDirective.prototype.constructor = CollisionDetectDirective;
+CollideDirective.prototype = new SGDirective();
+CollideDirective.prototype.constructor = CollideDirective;
 
-function CollisionDetectDirective()
+function CollideDirective()
 {
     SGDirective.call(this);
-    this.className = "CollisionDetectDirective";
-    this.attrType = eAttrType.CollisionDetectDirective;
+    this.className = "CollideDirective";
+    this.attrType = eAttrType.CollideDirective;
 
-    this.name.setValueDirect("CollisionDetectDirective");
+    this.name.setValueDirect("CollideDirective");
 }
 
-CollisionDetectDirective.prototype.execute = function(root)
+CollideDirective.prototype.execute = function(root)
 {
     root = root || this.rootNode.getValueDirect();
 
     // setup collision Detect params structure
-    var params = new CollisionDetectParams();
+    var params = new CollideParams();
 
     // calculate bounding box
-    root.apply("collisionDetect", params, true);
+    root.apply("collide", params, true);
     
     this.graphMgr.setCollisions(this.detectCollisions(params.detectCollisions));
 }
 
-CollisionDetectDirective.prototype.detectCollisions = function(boundingTrees)
+CollideDirective.prototype.detectCollisions = function(boundingTrees)
 {
     var names = [];
     var trees = [];

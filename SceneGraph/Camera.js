@@ -103,7 +103,7 @@ Camera.prototype.apply = function(directive, params, visitChildren)
             }
             break;
             
-        case "collisionDetect":
+        case "collide":
             {
                 // caller wants bbox in view space; set view matrix so that geometry nodes 
                 // can multiply world matrix by view matrix to get worldView matrix

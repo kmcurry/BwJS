@@ -137,7 +137,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
             }
             break;
             
-        case "collisionDetect":
+        case "collide":
             {
                 // push transforms
                 if (isolateTransforms)
@@ -216,7 +216,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
             }
             break;
             
-        case "collisionDetect":
+        case "collide":
             {
                 // pop transforms
                 if (isolateTransforms)

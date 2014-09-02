@@ -113,7 +113,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["RenderDirective"] = newSGDirective;
     this.newResourceProcs["SerializeDirective"] = newSGDirective;
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
-    this.newResourceProcs["CollisionDetectDirective"] = newSGDirective;
+    this.newResourceProcs["CollideDirective"] = newSGDirective;
 
     // evaluators
     this.newResourceProcs["BBoxLocator"] = newBBoxLocator;
@@ -156,7 +156,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["RenderDirective"] = configureDirective;
     this.configureProcs["SerializeDirective"] = configureDirective;
     this.configureProcs["UpdateDirective"] = configureDirective;
-    this.configureProcs["CollisionDetectDirective"] = configureDirective; 
+    this.configureProcs["CollideDirective"] = configureDirective; 
 }
 
 AttributeFactory.prototype.initializeFinalizeMap = function()
@@ -170,7 +170,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["RenderDirective"] = finalizeDirective;
     this.finalizeProcs["SerializeDirective"] = finalizeDirective;
     this.finalizeProcs["UpdateDirective"] = finalizeDirective;
-    this.finalizeProcs["CollisionDetectDirective"] = finalizeDirective;
+    this.finalizeProcs["CollideDirective"] = finalizeDirective;
 
     // evaluators 
     this.finalizeProcs["KeyframeInterpolator"] = finalizeEvaluator;
@@ -294,7 +294,7 @@ function newSGDirective(name, factory)
     case "RenderDirective":             resource = new RenderDirective(); break;  
     case "SerializeDirective":          resource = new SerializeDirective(); break;
     case "UpdateDirective":             resource = new UpdateDirective(); break;
-    case "CollisionDetectDirective":    resource = new CollisionDetectDirective(); break;
+    case "CollideDirective":            resource = new CollideDirective(); break;
     }
     
     if (resource)

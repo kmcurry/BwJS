@@ -54,14 +54,14 @@ function RenderDirective()
     this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
     
-    this.collisionDetectDirective = new CollisionDetectDirective();
+    this.collideDirective = new CollideDirective();
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
 {
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
-    this.collisionDetectDirective.setGraphMgr(graphMgr);
+    this.collideDirective.setGraphMgr(graphMgr);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -79,9 +79,9 @@ RenderDirective.prototype.execute = function(root)
     var visited = this.updateDirective.execute(root, params);
 
     // detect collisions
-    var params = new CollisionDetectParams();
-    params.directive = this.collisionDetectDirective;
-    this.collisionDetectDirective.execute(root, params);
+    var params = new CollideParams();
+    params.directive = this.collideDirective;
+    this.collideDirective.execute(root, params);
     
     // render
     var params = new RenderParams();

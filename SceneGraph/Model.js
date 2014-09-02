@@ -474,7 +474,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
             }
             break;
 
-        case "collisionDetect":
+        case "collide":
             {
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);
