@@ -48,7 +48,7 @@ function Model()
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
     this.detectCollision = new BooleanAttr(false);
-    this.collisionDetected = new BooleanAttr(false);
+    this.collisionDetected = new PulseAttr();
     
     this.show.addTarget(this.enabled);
     
@@ -483,7 +483,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 if (this.detectCollision.getValueDirect()) 
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
-                    params.detectCollisions[this.name.getValueDirect().join("")] = this.boundingTree;
+                    params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree);
                 }
                 
                 // call base-class implementation
@@ -765,4 +765,5 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
+    
 }

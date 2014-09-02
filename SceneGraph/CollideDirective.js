@@ -11,6 +11,12 @@ function CollideParams()
     this.detectCollisions = new Array();
 }
 
+function CollideRec(model, tree)
+{
+    this.model = model;
+    this.tree = tree;    
+}
+
 CollideDirective.prototype = new SGDirective();
 CollideDirective.prototype.constructor = CollideDirective;
 
@@ -30,23 +36,28 @@ CollideDirective.prototype.execute = function(root)
     // setup collision Detect params structure
     var params = new CollideParams();
 
-    // calculate bounding box
+    // get list of models for collision detection
     root.apply("collide", params, true);
     
-    this.graphMgr.setCollisions(this.detectCollisions(params.detectCollisions));
+    // detect collisions
+    var collisions = this.detectCollisions(params.detectCollisions);   
+    for (var i = 0; i < collisions.length; i++)
+    {
+        collisions[i].getAttribute("collisionDetected").pulse();
+    }
 }
 
-CollideDirective.prototype.detectCollisions = function(boundingTrees)
+CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
-    var names = [];
+    var models = [];
     var trees = [];
     var collisions = [];
     var tested = [];
     
-    for (var i in boundingTrees)
+    for (var i in collideRecs)
     {
-        names.push(i);
-        trees.push(boundingTrees[i]);
+        models.push(collideRecs[i].model);
+        trees.push(collideRecs[i].tree);
         tested.push(false);
     }
     
@@ -60,8 +71,8 @@ CollideDirective.prototype.detectCollisions = function(boundingTrees)
             
             if (trees[i].collides(trees[j]))
             {
-                collisions.push(names[i]);
-                collisions.push(names[j]);
+                collisions.push(models[i]);
+                collisions.push(models[j]);
                 tested[i] = tested[j] = true;
                 break;
             }

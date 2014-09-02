@@ -18,7 +18,6 @@ function GraphMgr()
     this.labelIndex = 1;
     this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
-    this.collisions = new Array();
     
     this.name = new StringAttr("GraphMgr");
     
@@ -84,16 +83,6 @@ GraphMgr.prototype.getNextLabelIndex = function()
 GraphMgr.prototype.getNextBalloonTipLabelIndex = function()
 {
     return this.balloonTipLabelIndex++;    
-}
-
-GraphMgr.prototype.setCollisions = function(collisions)
-{
-    this.collisions = collisions;
-}
-
-GraphMgr.prototype.getCollisions = function()
-{
-    return this.collisions;    
 }
 
 GraphMgr.prototype.reset = function ()
