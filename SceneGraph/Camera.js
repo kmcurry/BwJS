@@ -96,7 +96,16 @@ Camera.prototype.apply = function(directive, params, visitChildren)
 
         case "bbox":
             {
-                // user wants bbox in view space; set view matrix so that geometry nodes 
+                // caller wants bbox in view space; set view matrix so that geometry nodes 
+                // can multiply world matrix by view matrix to get worldView matrix
+                params.viewMatrix.loadMatrix(this.sectorTransformCompound);
+                params.viewMatrix.invert(); // put in view-space
+            }
+            break;
+            
+        case "collisionDetect":
+            {
+                // caller wants bbox in view space; set view matrix so that geometry nodes 
                 // can multiply world matrix by view matrix to get worldView matrix
                 params.viewMatrix.loadMatrix(this.sectorTransformCompound);
                 params.viewMatrix.invert(); // put in view-space

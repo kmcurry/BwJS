@@ -26,42 +26,42 @@
                          <rotation x="0" y="0" z="0"/>
                          <scale x="100" y="100" z="100"/>
                     </Model>
-                    <Model name="Cow1" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow1" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="-14" y="0" z="34"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow2" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow2" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0.25" y="0" z="0"/>
                          <rotation x="0" y="45" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow3" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow3" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y="0" z="0"/>
                          <rotation x="0" y="85" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow4" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow4" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="-14" y="0" z="34"/>
                          <rotation x="0" y="80" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <!--<Model name="Cow5" url="/objects/Cow.lwo" detectCollisions="true">
+                    <!--<Model name="Cow5" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y=".25" z="-4"/>
                          <rotation x="0" y="40" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow6" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow6" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="8" y=".26" z="0"/>
                          <rotation x="0" y="200" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow7" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow7" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="-8" y=".26" z="0"/>
                          <rotation x="0" y="110" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow8" url="/objects/Cow.lwo" detectCollisions="true">
+                    <Model name="Cow8" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y=".25" z="8"/>
                          <rotation x="0" y="-80" z="0"/>
                          <scale x="1" y="1" z="1"/>

@@ -16,7 +16,6 @@ function RenderParams()
     this.displayListObj = null;
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
-    this.detectCollisions = new Array();
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -54,11 +53,15 @@ function RenderDirective()
     this.updateDirective = new UpdateDirective();
     this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
+    
+    this.collisionDetectDirective = new CollisionDetectDirective();
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
 {
     this.distanceSortAgent.setGraphMgr(graphMgr);
+    this.updateDirective.setGraphMgr(graphMgr);
+    this.collisionDetectDirective.setGraphMgr(graphMgr);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -75,6 +78,11 @@ RenderDirective.prototype.execute = function(root)
      
     var visited = this.updateDirective.execute(root, params);
 
+    // detect collisions
+    var params = new CollisionDetectParams();
+    params.directive = this.collisionDetectDirective;
+    this.collisionDetectDirective.execute(root, params);
+    
     // render
     var params = new RenderParams();
     /*
@@ -104,8 +112,6 @@ RenderDirective.prototype.execute = function(root)
     }
         
     visited[0].apply("render", params, true);
-
-    this.graphMgr.setCollisions(this.detectCollisions(params.detectCollisions));
     
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())
@@ -114,41 +120,6 @@ RenderDirective.prototype.execute = function(root)
         this.distanceSortAgent.draw();
         this.distanceSortAgent.clear();
     }
-}
-
-RenderDirective.prototype.detectCollisions = function(boundingTrees)
-{
-    var names = [];
-    var trees = [];
-    var collisions = [];
-    var tested = [];
-    
-    for (var i in boundingTrees)
-    {
-        names.push(i);
-        trees.push(boundingTrees[i]);
-        tested.push(false);
-    }
-    
-    for (var i = 0; i < trees.length; i++)
-    {
-        if (tested[i]) continue;
-        
-        for (var j = i+1; j < trees.length; j++)
-        {
-            if (tested[j]) continue;
-            
-            if (trees[i].collides(trees[j]))
-            {
-                collisions.push(names[i]);
-                collisions.push(names[j]);
-                tested[i] = tested[j] = true;
-                break;
-            }
-        }
-    }
-    
-    return collisions;
 }
 
 function RenderDirective_ViewportModifiedCB(attribute, container)

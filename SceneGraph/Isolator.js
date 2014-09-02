@@ -136,6 +136,16 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
+            
+        case "collisionDetect":
+            {
+                // push transforms
+                if (isolateTransforms)
+                {
+                    lastWorldMatrix = params.worldMatrix;
+                }
+            }
+            break;
     }
 
     // call base-class implementation
@@ -197,6 +207,16 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
             break;
 
         case "bbox":
+            {
+                // pop transforms
+                if (isolateTransforms)
+                {
+                    params.worldMatrix = lastWorldMatrix;
+                }
+            }
+            break;
+            
+        case "collisionDetect":
             {
                 // pop transforms
                 if (isolateTransforms)

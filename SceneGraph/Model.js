@@ -47,8 +47,9 @@ function Model()
     this.pivotAboutGeometricCenter = new BooleanAttr(true);
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
-    this.detectCollisions = new BooleanAttr(false);
-
+    this.detectCollision = new BooleanAttr(false);
+    this.collisionDetected = new BooleanAttr(false);
+    
     this.show.addTarget(this.enabled);
     
     this.selectable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
@@ -79,7 +80,8 @@ function Model()
     this.textureOpacity.addModifiedCB(Model_TextureOpacityModifiedCB, this);
     this.doubleSided.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
     this.texturesEnabled.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
-    this.detectCollisions.addModifiedCB(Model_DetectCollisionsModifiedCB, this);
+    this.detectCollision.addModifiedCB(Model_DetectCollisionModifiedCB, this);
+    this.collisionDetected.addModifiedCB(Model_CollisionDetectedModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -114,7 +116,8 @@ function Model()
     this.registerAttribute(this.pivotAboutGeometricCenter, "pivotAboutGeometricCenter");
     this.registerAttribute(this.screenScaleEnabled, "screenScaleEnabled");
     this.registerAttribute(this.screenScalePixels, "screenScalePixels");
-    this.registerAttribute(this.detectCollisions, "detectCollisions");
+    this.registerAttribute(this.detectCollision, "detectCollision");
+    this.registerAttribute(this.collisionDetected, "collisionDetected");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -412,12 +415,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 this.pushMatrix();
 
                 this.applyTransform();
-
-                if (this.detectCollisions.getValueDirect()) 
-                {
-                    this.boundingTree.setTransform(this.graphMgr.renderContext.modelViewMatrixStack.top());
-                    params.detectCollisions[this.name.getValueDirect().join("")] = this.boundingTree;
-                }
                 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
@@ -477,6 +474,25 @@ Model.prototype.apply = function(directive, params, visitChildren)
             }
             break;
 
+        case "collisionDetect":
+            {
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);
+                params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
+
+                if (this.detectCollision.getValueDirect()) 
+                {
+                    this.boundingTree.setTransform(params.worldMatrix);
+                    params.detectCollisions[this.name.getValueDirect().join("")] = this.boundingTree;
+                }
+                
+                // call base-class implementation
+                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
+            }
+            break;
+            
         default:
             {
                 // call base-class implementation
@@ -735,15 +751,18 @@ function Model_GeometryAttrModifiedCB(attribute, container)
     //container.incremementModificationCount();
 }
 
-function Model_DetectCollisionsModifiedCB(attribute, container)
+function Model_DetectCollisionModifiedCB(attribute, container)
 {
-	var detectCollisions = attribute.getValueDirect();
+	var detectCollision = attribute.getValueDirect();
     
     // if detecting collisions, cannot use display lists
-    if (detectCollisions)
+    if (detectCollision)
     {
         container.autoDisplayList.setValueDirect(false);
         container.enableDisplayList.setValueDirect(false);
     }
 }
 
+function Model_CollisionDetectedModifiedCB(attribute, container)
+{
+}

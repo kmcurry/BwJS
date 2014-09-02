@@ -74,6 +74,7 @@ function Attribute()
     this.deserialized = false;
     
     this.values = [];
+    this.lastValues = [];
     this.modifiedCBs = [];
     this.modifiedCBsData = [];
     this.targets = [];
@@ -129,6 +130,8 @@ Attribute.prototype.getValue = function(values, params)
 
 Attribute.prototype.setValue = function(values, params)
 {
+    this.lastValues = this.values;
+    
     var elementIndex = (params ? params.elementIndex : -1);
     var op = (params ? params.op : eAttrSetOp.Replace);
 
@@ -201,6 +204,11 @@ Attribute.prototype.setValue = function(values, params)
             targetDesc.target.setValue(this.values, params);
         }
     }
+}
+
+Attribute.prototype.revertValues = function()
+{
+    this.setValue(this.lastValues, null);
 }
 
 Attribute.prototype.getElement = function(index)
