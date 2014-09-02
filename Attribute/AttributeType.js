@@ -94,6 +94,7 @@ var eAttrType = {
     RayPickDirective            :2003,
     BBoxDirective               :2004,
     SerializeDirective          :2005,
+    CollisionDetectDirective    :2006,
     Directive_End               :2999,
     
     Command                     :3000,

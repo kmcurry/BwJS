@@ -113,6 +113,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["RenderDirective"] = newSGDirective;
     this.newResourceProcs["SerializeDirective"] = newSGDirective;
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
+    this.newResourceProcs["CollisionDetectDirective"] = newSGDirective;
 
     // evaluators
     this.newResourceProcs["BBoxLocator"] = newBBoxLocator;
@@ -154,7 +155,8 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["RayPickDirective"] = configureDirective;
     this.configureProcs["RenderDirective"] = configureDirective;
     this.configureProcs["SerializeDirective"] = configureDirective;
-    this.configureProcs["UpdateDirective"] = configureDirective;    
+    this.configureProcs["UpdateDirective"] = configureDirective;
+    this.configureProcs["CollisionDetectDirective"] = configureDirective; 
 }
 
 AttributeFactory.prototype.initializeFinalizeMap = function()
@@ -168,6 +170,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["RenderDirective"] = finalizeDirective;
     this.finalizeProcs["SerializeDirective"] = finalizeDirective;
     this.finalizeProcs["UpdateDirective"] = finalizeDirective;
+    this.finalizeProcs["CollisionDetectDirective"] = finalizeDirective;
 
     // evaluators 
     this.finalizeProcs["KeyframeInterpolator"] = finalizeEvaluator;
@@ -286,11 +289,12 @@ function newSGDirective(name, factory)
     
     switch (name)
     {
-    case "BBoxDirective":       resource = new BBoxDirective(); break;
-    case "RayPickDirective":    resource = new RayPickDirective(); break;
-    case "RenderDirective":     resource = new RenderDirective(); break;  
-    case "SerializeDirective":  resource = new SerializeDirective(); break;
-    case "UpdateDirective":     resource = new UpdateDirective(); break;
+    case "BBoxDirective":               resource = new BBoxDirective(); break;
+    case "RayPickDirective":            resource = new RayPickDirective(); break;
+    case "RenderDirective":             resource = new RenderDirective(); break;  
+    case "SerializeDirective":          resource = new SerializeDirective(); break;
+    case "UpdateDirective":             resource = new UpdateDirective(); break;
+    case "CollisionDetectDirective":    resource = new CollisionDetectDirective(); break;
     }
     
     if (resource)
