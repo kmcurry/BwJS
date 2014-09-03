@@ -1,7 +1,8 @@
 Common/Base.js
 Common/Util.js
 Common/BaseTypes.js 
-Common/Stack.js 
+Common/Stack.js
+Common/Queue.js
 Common/Serialization.js 
 Common/xmlsax.js
 Common/Timer.js
@@ -103,6 +104,9 @@ SceneGraph/Scale.js
 SceneGraph/Translate.js
 SceneGraph/MultiTargetObserver.js
 SceneGraph/SerializeDirective.js
+SceneGraph/CollideDirective.js
+SceneGraph/ObjectMover.js
+SceneGraph/AnimalMover.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
