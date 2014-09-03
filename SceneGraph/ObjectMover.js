@@ -107,6 +107,13 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
 	}
+	
+	target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+}
+
+ObjectMover.prototype.collisionDetected = function()
+{
+    
 }
 
 function ObjectMover_TargetModifiedCB(attribute, container)
@@ -116,5 +123,14 @@ function ObjectMover_TargetModifiedCB(attribute, container)
     if (resource)
     {
     	container.connectTarget(resource);
+    }
+}
+
+function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
+{
+    var collisionDetected = attribute.getValueDirect();
+    if (collisionDetected)
+    {
+        container.collisionDetected();
     }
 }

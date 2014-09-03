@@ -48,3 +48,19 @@ AnimalMover.prototype.evaluate = function()
 	// call base-class implementation
 	ObjectMover.prototype.evaluate.call(this);
 }
+
+AnimalMover.prototype.collisionDetected = function()
+{
+    this.motionQueue.clear();
+    this.activeMotion = null;
+    
+    var motion = new ObjectMotionDesc();
+    motion.duration = 0.5;
+    motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
+    this.motionQueue.push(motion);
+    
+    motion = new ObjectMotionDesc();
+    motion.duration = 90 / this.angularSpeed.getValueDirect();
+    motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+    this.motionQueue.push(motion);
+}

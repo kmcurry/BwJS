@@ -49,7 +49,7 @@ function Model()
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
     this.detectCollision = new BooleanAttr(false);
-    this.collisionDetected = new PulseAttr();
+    this.collisionDetected = new BooleanAttr(false);
     
     this.show.addTarget(this.enabled);
     
@@ -422,7 +422,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 else // this.useLastTransform
                 {
                     this.applyLastTransform();
-                    this.useLastTransform = false;
                 }
                 
                 // call base-class implementation
@@ -493,6 +492,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
                     params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree);
+                    this.collisionDetected.setValueDirect(false);
                 }
                 
                 // call base-class implementation
@@ -775,12 +775,20 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
-    container.panVelocity.setValueDirect(0, 0, 0);
-    container.linearVelocity.setValueDirect(0, 0, 0);
-    container.angularVelocity.setValueDirect(0, 0, 0);
-    container.scalarVelocity.setValueDirect(0, 0, 0);
-    container.position.revertValues();
-    container.rotation.revertValues();
-    container.scale.revertValues();
-    container.useLastTransform = true;
+    var collisionDetected = attribute.getValueDirect();
+    if (collisionDetected)
+    {
+        //container.panVelocity.setValueDirect(0, 0, 0, 0);
+        //container.linearVelocity.setValueDirect(0, 0, 0);
+        //container.angularVelocity.setValueDirect(0, 0, 0);
+        //container.scalarVelocity.setValueDirect(0, 0, 0);
+        //container.position.revertValues();
+        //container.rotation.revertValues();
+        //container.scale.revertValues();
+        //container.useLastTransform = true;
+    }
+    else
+    {
+        //container.useLastTransform = false;
+    }
 }

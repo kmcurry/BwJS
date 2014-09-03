@@ -43,7 +43,7 @@ CollideDirective.prototype.execute = function(root)
     var collisions = this.detectCollisions(params.detectCollisions);   
     for (var i = 0; i < collisions.length; i++)
     {
-        collisions[i].getAttribute("collisionDetected").pulse();
+        collisions[i].getAttribute("collisionDetected").setValueDirect(true);
     }
 }
 

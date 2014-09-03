@@ -27,18 +27,16 @@
                          <scale x="100" y="100" z="100"/>
                     </Model>
                     <Model name="Cow1" url="/objects/Cow.lwo" detectCollision="true">
-                    	 <panVelocity x="0" y="0" z="1"/>
-                         <position x="0" y="0" z="-4"/>
+                         <position x="4" y="0" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
                     <Model name="Cow2" url="/objects/Cow.lwo" detectCollision="true">
-                    	 <panVelocity x="0" y="0" z="1"/>
-                         <position x="0" y="0" z="4"/>
-                         <rotation x="0" y="180" z="0"/>
+                         <position x="-4" y="0" z="0"/>
+                         <rotation x="0" y="45" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <!--<Model name="Cow3" url="/objects/Cow.lwo" detectCollision="true">
+                    <Model name="Cow3" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y="0" z="4"/>
                          <rotation x="0" y="85" z="0"/>
                          <scale x="1" y="1" z="1"/>
@@ -59,7 +57,7 @@
                          <scale x="1" y="1" z="1"/>
                     </Model>
                     <Model name="Cow7" url="/objects/Cow.lwo" detectCollision="true">
-                         <position x="-8" y="0" z="0"/>
+                         <position x="0" y="0" z="-8"/>
                          <rotation x="0" y="110" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
@@ -69,15 +67,15 @@
                          <scale x="1" y="1" z="1"/>
                     </Model>
                     <Model name="Cow9" url="/objects/Cow.lwo" detectCollision="true">
-                         <position x="0" y="0" z="-8"/>
+                         <position x="0" y="0" z="0"/>
                          <rotation x="0" y="40" z="0"/>
                          <scale x="1" y="1" z="1"/>
-                    </Model>-->
+                    </Model>
                </Group>
           </Isolator>
           <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
        	  <!--<KeyframeInterpolator name="F16Motion1" url="motions/F16New.mot" target="F16"/>-->
-       	  <!--<AnimalMover name="CowMover1" target="Cow1" linearSpeed="0.5" angularSpeed="25"/>
+       	  <AnimalMover name="CowMover1" target="Cow1" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover2" target="Cow2" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover3" target="Cow3" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover4" target="Cow4" linearSpeed="0.5" angularSpeed="25"/>
@@ -85,7 +83,7 @@
        	  <AnimalMover name="CowMover6" target="Cow6" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover7" target="Cow7" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover8" target="Cow8" linearSpeed="0.5" angularSpeed="25"/>
-       	  <AnimalMover name="CowMover9" target="Cow9" linearSpeed="0.5" angularSpeed="25"/>-->
+       	  <AnimalMover name="CowMover9" target="Cow9" linearSpeed="0.5" angularSpeed="25"/>
      </Scene>
      <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
      <Set target="SceneInspector" pivotDistance="3"/>

@@ -54,7 +54,6 @@ Sphere.prototype.intersects = function(sphere)
              (this.xcenter.z - sphere.xcenter.z) * (this.xcenter.z - sphere.xcenter.z)) < ((this.xradius + sphere.xradius) * (this.xradius + sphere.xradius)) ? true : false);
     */
     var distanceBetweenCenters = distanceBetween(this.xcenter, sphere.xcenter);
-    console.debug(distanceBetweenCenters);
     var combinedRadii = this.xradius + sphere.xradius;
     
     if (distanceBetweenCenters < combinedRadii) return true;
