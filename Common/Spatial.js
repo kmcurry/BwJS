@@ -49,16 +49,17 @@ function Sphere()
 Sphere.prototype.intersects = function(sphere)
 {
     // compare squared distances to keep from calling sqrt
-    return (((this.xcenter.x - sphere.xcenter.x) * (this.xcenter.x - sphere.xcenter.x) + 
+    /*return (((this.xcenter.x - sphere.xcenter.x) * (this.xcenter.x - sphere.xcenter.x) + 
              (this.xcenter.y - sphere.xcenter.y) * (this.xcenter.y - sphere.xcenter.y) +
              (this.xcenter.z - sphere.xcenter.z) * (this.xcenter.z - sphere.xcenter.z)) < ((this.xradius + sphere.xradius) * (this.xradius + sphere.xradius)) ? true : false);
-    /*
+    */
     var distanceBetweenCenters = distanceBetween(this.xcenter, sphere.xcenter);
+    console.debug(distanceBetweenCenters);
     var combinedRadii = this.xradius + sphere.xradius;
     
     if (distanceBetweenCenters < combinedRadii) return true;
     
-    return false;*/
+    return false;
 }
 
 function Region(minX, minY, minZ, maxX, maxY, maxZ)

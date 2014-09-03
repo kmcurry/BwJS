@@ -21,7 +21,8 @@ function ParentableMotionElement()
     this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-                                                        // parent's transformations (if any) for the current sector                                                
+                                                        // parent's transformations (if any) for the current sector
+    this.lastSectorTransformCompound = new Matrix4x4(); // previous sector transform compound (before lastest update)                                            
     this.updatePosition = false;
     this.updateScale = false;
     this.updatePivot = false;
@@ -241,6 +242,19 @@ ParentableMotionElement.prototype.applyTransform = function()
 	// TODO: if invsere scale was applied, re-apply scale
 }
 
+ParentableMotionElement.prototype.applyLastTransform = function()
+{
+    // TODO: if scaling factors are not 1, apply inverse scale before this transformation is
+    // applied to avoid translation caused by scaling  
+    
+    // set transformation matrix
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.leftMultMatrix(this.lastSectorTransformCompound);
+    this.graphMgr.renderContext.applyModelViewTransform();
+    
+    // TODO: if invsere scale was applied, re-apply scale
+}
+
 ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 {
     // pan, linear velocity
@@ -384,6 +398,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 ParentableMotionElement.prototype.updateCompoundTransform = function()
 {
     this.transformCompound.loadMatrix(this.transformSimple);
+    this.lastSectorTransformCompound.loadMatrix(this.sectorTransformCompound);
     this.sectorTransformCompound.loadMatrix(this.sectorTransformSimple);
     
     if (this.motionParent)

@@ -13,6 +13,7 @@ function Model()
     this.surfaceAttrConnections = [];
     this.boundingTree = new Octree();
     this.updateBoundingTree = false;
+    this.useLastTransform = false;
     
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);
@@ -414,7 +415,15 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
                 this.pushMatrix();
 
-                this.applyTransform();
+                if (!this.useLastTransform)
+                {
+                    this.applyTransform();
+                }
+                else // this.useLastTransform
+                {
+                    this.applyLastTransform();
+                    this.useLastTransform = false;
+                }
                 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
@@ -607,7 +616,7 @@ Model.prototype.updateGeometryBBox = function(geometry)
     var min = geometry.bbox.min.getValueDirect();
     var max = geometry.bbox.max.getValueDirect();
     
-    this.geometryBBoxesMap[geometry] = new Pair(min, max);
+    this.geometryBBoxesMap.push(new Pair(min, max));
     
     this.updateBBox();
 }
@@ -662,6 +671,7 @@ Model.prototype.buildBoundingTree = function()
         tris = tris.concat(this.geometry[i].getTriangles());
     }
     
+    this.boundingTree = new Octree();
     this.boundingTree.setTriangles(tris, this.bbox.min.getValueDirect(), this.bbox.max.getValueDirect());
     this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
@@ -765,5 +775,12 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
-    
+    container.panVelocity.setValueDirect(0, 0, 0);
+    container.linearVelocity.setValueDirect(0, 0, 0);
+    container.angularVelocity.setValueDirect(0, 0, 0);
+    container.scalarVelocity.setValueDirect(0, 0, 0);
+    container.position.revertValues();
+    container.rotation.revertValues();
+    container.scale.revertValues();
+    container.useLastTransform = true;
 }

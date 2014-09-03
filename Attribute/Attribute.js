@@ -130,7 +130,7 @@ Attribute.prototype.getValue = function(values, params)
 
 Attribute.prototype.setValue = function(values, params)
 {
-    this.lastValues = this.values;
+    this.lastValues = this.values.slice();
     
     var elementIndex = (params ? params.elementIndex : -1);
     var op = (params ? params.op : eAttrSetOp.Replace);
