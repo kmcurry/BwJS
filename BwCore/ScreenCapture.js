@@ -1,150 +1,58 @@
-ScreenCapture.prototype  = new Command();
-ScreenCapture.prototype.constructor = ScreenCapture ;
+ScreenCaptureCommand.prototype = new Command();
+ScreenCaptureCommand.prototype.constructor = ScreenCaptureCommand;
 
-ScreenCapture.prototype.ScreenCapture = function()
+function ScreenCaptureCommand()
 {
-    var filename = null;
-    var typeString = "ScreenCapture";
-    AddPrototype(this);
+    Command.call(this);
+    this.className = "ScreenCapture";
+    this.attrType = eAttrType.ScreenCapture;
+
+    this.canvasId = new StringAttr();
+    
+    this.registerAttribute(this.canvasId, "canvasId");
+    
+    this.numResponses.setValueDirect(0);
 }
 
-ScreenCapture.prototype.ScreenCapture = function(id)
+ScreenCaptureCommand.prototype.execute = function()
 {
-    var CCommand = id;
-    var filename = null;
-    var typeString = "ScreenCapture";
-
-    if (!(this.filename = New<CStringAttr>())) return;
-
-    this.registerAttribute(this.filename, "filename");
+    var bworks = this.registry.find("Bridgeworks");
+    bworks.eventMgr.addListener(eEventType.RenderEnd, this);
 }
 
-
-ScreenCapture.prototype.ClonePrototype = function()
+ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
 {
-    var c = ++s_count;
-    return c;
+    var canvas = document.getElementById(canvasId);
+    cimageData = canvas.toDataURL('image/png');
+    var imageData = cimageData;
+
+//    window.open(imageData);
+
+    //Decode the base64 data into 8bit array. Used Specifically for 3Scape
+    var cnt = imageData.lastIndexOf(',') + 1;
+    imageData = imageData.substr(cnt);
+    imgeData = Base64Binary.decode(imageData);
+    
+    // copy to clipboard
+    // TODO: investigate method described at: https://forums.mozilla.org/addons/viewtopic.php?t=9736&p=21119
+    
+    // open in new window
+
+    // download
+    //var imageDataStream = imageData.replace("image/png", "image/octet-stream");
+    //window.location.href = imageDataStream;
 }
 
-//ScreenCapture.prototype.Execute = function()
-//{
-//    var err = ScreenCapture();
-//
-//    return err;
-//}
-
-// ScreenCapture.prototype.Undo = function()
-//{
-//    return; //Finish implementing this one.
-//}
-
-ScreenCapture.prototype.MatchesType = function(type)
+ScreenCaptureCommand.prototype.eventPerformed = function(event)
+{
+    // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
+    switch (event.type)
     {
-        var matches = 0;
-        matches = !(type == "ScreenCapture"); //stricmp = string compare function
-        return matches;
-}
-
- ScreenCapture.prototype.ScreenCapture = function()
-{
-    // get render context
-    var resource = null;
-    var renderAgent = null;
-    var renderContext = null;
-    var registry = this.registry;
-    if (registry) {
-        if (registry.find("RenderAgent", resource)) {
-            var renderAgent = resource;
-            if (renderAgent) {
-                renderContext = renderAgent.getRenderContext();
-            }
-        }
-    }
-    if (!renderContext) {
-        console.log("Failed at finding render context");
-        return;
-    }
-
-    // get render engine
-    var renderEngine = renderContext.getRenderEngine();
-    if (!renderEngine) {
-        console.log("Failed at getting render engine");
-        return;
-    }
-
-    // get window handle
-    var windowHandle = renderContext.getWindowHandle();
-    if (!windowHandle) {
-        console.log("Failed to get window handle");
-        return;
-    }
-
-    var clientWidth, clientHeight;
-    windowHandle.getClientDimensions(clientWidth, clientHeight);
-
-    // allocate buffer
-    var pixels = [clientWidth * clientHeight * 3];
-    if (!pixels) {
-        console.log("Error: Out of Memory");
-        return;
-    }
-
-    renderContext.SetCurrentThread(CURRENTTHREAD_MAIN_BIT);
-
-    // read frame buffer
-    renderEngine.ReadFrameBuffer(0, 0, clientWidth, clientHeight, PixelFormat_B8G8R8, 1, pixels);
-
-    // get frame buffer origin
-    var bufferOrigin = renderEngine.getFrameBufferOrigin();
-
-    //renderContext.clearCurrentThread(CURRENTTHREAD_MAIN_BIT);
-
-    // if frame buffer origin is upper-left, invert image
-    switch (bufferOrigin) {
-        case ReBufferOrigin_UpperLeft:
+        case eEventType.RenderEnd:
         {
-            // invert image
-            var invertedPixels = [clientWidth * clientHeight * 3];
-            if (!invertedPixels) {
-                console.log("Error: Out of Memory");
-                delete pixels[];
-                return;
-            }
-
-            var pixelPos = 0;
-            var invPixelPos = 0;
-            for (var i = clientHeight - 1; i >= 0; i--) {
-                for (var j = 0, k = 0; j < clientWidth; j++, k += 3) {
-                    pixelPos = i * clientWidth * 3;
-
-                    invertedPixels[invPixelPos++] = pixels[pixelPos + k  ];
-                    invertedPixels[invPixelPos++] = pixels[pixelPos + k + 1];
-                    invertedPixels[invPixelPos++] = pixels[pixelPos + k + 2];
-                }
-            }
-
-            pixels = [];
-
-            pixels = invertedPixels;
+            this.screenCapture(this.canvasId.getValueDirect().join(""));
+            return;        
         }
-            break;
+        break;
     }
-
-    // get filename
-    var filename[256];
-    this.filename.getValueDirect(filename, sizeof(filename));
-
-    // capture
-    var result;
-    if (this.filename.getLength() == 0 || !(filename == "")) // capture to clipboard
-    {
-        result = copyToClipboard(clientWidth, clientHeight, clientWidth * 3, PixelFormat_B8G8R8, pixels);
-    }
-    else // capture to file
-    {
-        result = CMediaDepot.prototype.Instance().Save(filename, clientWidth, clientHeight, clientWidth * 3, PixelFormat_B8G8R8, pixels);
-    }
-
-    // deallocate buffer
-    pixels = [];
 }

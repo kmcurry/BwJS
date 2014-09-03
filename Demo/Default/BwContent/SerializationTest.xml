@@ -56,6 +56,10 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/GridG.lwo</url>
                 </Model>
+                <Set>
+                    <target>grid</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -66,6 +70,10 @@
                     <url>/objects/UV_BoxG.lwo</url>
                     <indexedGeometry>false</indexedGeometry>
                 </Model>
+                <Set>
+                    <target>UV_BoxG</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -75,6 +83,10 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/UV_CylinderG.lwo</url>
                 </Model>
+                <Set>
+                    <target>cylinderRight</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -85,6 +97,10 @@
                     <url>/objects/UV_CylinderG.lwo</url>
                     <enableSharing>false</enableSharing>
                 </Model>
+                <Set>
+                    <target>cylinderLeft</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -94,6 +110,10 @@
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/UV_SphereG.lwo</url>
                 </Model>
+                <Set>
+                    <target>sphereBack</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
@@ -104,12 +124,20 @@
                     <url>/objects/UV_SphereG.lwo</url>
                     <enableSharing>false</enableSharing>
                 </Model>
+                <Set>
+                    <target>sphereFront</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
                     <name>F16</name>
                     <url>/objects/F16.lwo</url>
                 </Model>
+                <Set>
+                    <target>F16</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                </Set>
             </ModelRoot>
         </Group>
         <KeyframeInterpolator>
@@ -123,14 +151,6 @@
         <backgroundImageFilename>http://localhost/bwjs/demo/default/BwContent/images/Sky2.jpg</backgroundImageFilename>
         <root>Root</root>
     </RenderDirective>
-    <Set>
-        <name>SetCapture_Down_Rot_Scene</name>
-        <numResponses>-1</numResponses>
-        <event>VK_DOWN.Down</event>
-        <event>VK_DOWN.Down</event>
-        <target>SceneInspector</target>
-        <rotationDelta item0="-5" item1="0" item2="0"/>
-    </Set>
     <DisconnectAttributes>
         <name>DisconnectAllMouse</name>
         <numResponses>-1</numResponses>
@@ -145,6 +165,14 @@
         <connectionType>DisconnectAllTargets</connectionType>
         <sourceContainer>MouseHandler</sourceContainer>
     </DisconnectAttributes>
+    <Set>
+        <name>SetCapture_Down_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="-5" item1="0" item2="0"/>
+    </Set>
     <ConnectAttributes>
         <name>MButton1.Scene</name>
         <numResponses>-1</numResponses>
@@ -528,4 +556,4 @@
     <Serialize>
         <target>Root</target>
     </Serialize>
-</Session> 
+</Session>

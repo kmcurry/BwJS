@@ -48,7 +48,8 @@ EventMgr.prototype.processEvent = function(event)
             this.listeners[type][i].eventPerformed(event);
             
             // if listener has finished responding, add to expired list
-            if (this.listeners[type][i].getAttribute("numResponses").getValueDirect() == 0)
+            var numResponses = this.listeners[type][i].getAttribute("numResponses");
+            if (numResponses && numResponses.getValueDirect() == 0)
             {
                 expired.push(this.listeners[type][i]);
             }

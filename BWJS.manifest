@@ -30,6 +30,7 @@ Attribute/ContainerAttrs.js
 Attribute/AttributeUtil.js
 Common/Agent.js 
 Common/Spatial.js
+Common/Context.js
 RenderContext/DisplayList.js
 RenderContext/RenderContext.js 
 RenderContext/RenderState.js 
@@ -45,6 +46,7 @@ ContentHandler/ContentBuilder.js
 ContentHandler/BinaryParser.js
 ContentHandler/TextParser.js
 ContentHandler/XMLParser.js
+ContentHandler/Serializer.js
 Image/PixelFormat.js
 Image/ImageManip.js
 Image/MediaPlayback.js
@@ -87,6 +89,7 @@ SceneGraph/BBoxLocator.js
 SceneGraph/SceneGraphUtil.js 
 SceneGraph/RasterComponent.js    
 SceneGraph/Label.js
+SceneGraph/BalloonTipLabel.js
 SceneGraph/LineList.js
 SceneGraph/PointList.js
 SceneGraph/Interpolate.js
@@ -99,6 +102,7 @@ SceneGraph/QuaternionRotate.js
 SceneGraph/Rotate.js
 SceneGraph/Scale.js
 SceneGraph/Translate.js
+SceneGraph/MultiTargetObserver.js
 SceneGraph/SerializeDirective.js
 SceneGraph/CollideDirective.js
 SceneGraph/ObjectMover.js
@@ -137,6 +141,7 @@ BwCore/ViewportMgr.js
 BwCore/RasterComponentEventListener.js
 BwCore/ParentableMotionUtil.js
 BwCore/Serialize.js
+BwCore/ScreenCapture.js
 ContentHandler/LWObjectHandler.js 
 ContentHandler/LWObjectBuilder.js
 ContentHandler/LWSceneHandler.js 
