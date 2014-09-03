@@ -46,6 +46,7 @@ function ConnectAttributesCommand()
     this.sourceAttribute.addModifiedCB(ConnectAttributesCommand_SourceAttributeModifiedCB, this);
     this.targetAttribute.addModifiedCB(ConnectAttributesCommand_TargetAttributeModifiedCB, this);
     this.connectionType.addModifiedCB(ConnectAttributesCommand_ConnectionTypeModifiedCB, this);
+    this.negate.addModifiedCB(ConnectAttributesCommand_NegateModifiedCB, this);
     
     this.registerAttribute(this.sourceContainer, "sourceContainer");
 	this.registerAttribute(this.sourceContainer, "sourceEvaluator");
@@ -298,5 +299,20 @@ function ConnectAttributesCommand_ConnectionTypeModifiedCB(attribute, container)
     {
         container.connectionHelper.first = helpers.first;
         container.connectionHelper.second = helpers.second;
+    }
+}
+
+function ConnectAttributesCommand_NegateModifiedCB(attribute, container)
+{
+    var negate = attribute.getValueDirect();
+    if (negate)
+    {
+        container.className = "DisconnectAttributes";
+        container.attrType = eAttrType.DisconnectAttributes;
+    }
+    else // !negate
+    {
+        container.className = "ConnectAttributes";
+        container.attrType = eAttrType.ConnectAttributes;       
     }
 }

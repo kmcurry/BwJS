@@ -25,7 +25,7 @@ CommandMgr.prototype.popCommandSequence = function()
 
 CommandMgr.prototype.clearCommandSequenceStack = function()
 {
-    this.commandSequenceStack.clear();
+    this.commandSeqStack.clear();
 }
 
 CommandMgr.prototype.addCommand = function(command)

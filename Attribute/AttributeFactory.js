@@ -137,6 +137,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Pause"] = newCommand;
     this.newResourceProcs["Play"] = newCommand;
     this.newResourceProcs["Remove"] = newCommand;
+    this.newResourceProcs["ScreenCapture"] = newCommand;
     this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
@@ -188,6 +189,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Pause"] = finalizeCommand;
     this.finalizeProcs["Play"] = finalizeCommand;
     this.finalizeProcs["Remove"] = finalizeCommand;
+    this.finalizeProcs["ScreenCapture"] = finalizeCommand;
     this.finalizeProcs["Serialize"] = finalizeCommand;
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
@@ -228,6 +230,7 @@ function newAttribute(name, factory)
     case "Matrix4x4Attr":               resource = new Matrix4x4Attr(); break;
     case "PlaneAttr":                   resource = new PlaneAttr(); break;
     case "PulseAttr":                   resource = new PulseAttr(); break;
+    case "QuaternionAttr":              resource = new QuaternionAttr(); break;
     case "RectAttr":                    resource = new RectAttr(); break;
     case "ReferenceAttr":               resource = new ReferenceAttr(); break;
     case "StringAttr":                  resource = new StringAttr(); break;
@@ -418,6 +421,7 @@ function newCommand(name, factory)
     case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
     case "Play":                resource = new PlayCommand(); break;
     case "Remove":              resource = new RemoveCommand(); break;
+    case "ScreenCapture":       resource = new ScreenCaptureCommand(); break;
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
@@ -599,6 +603,7 @@ function registerEvaluatorAttributes(evaluator, factory)
     	evaluator.registerAttribute(evaluate, "evaluate");
     	evaluate.addTarget(evaluator.getAttribute("enabled"));
 	}
+
 }
 
 function registerParentableAttributes(pme, factory)

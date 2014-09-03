@@ -292,13 +292,11 @@ Serializer.prototype.serializeModel = function(Model)
 
             var command = null;
             var factory = this.registry.find("AttributeFactory");
-            command = factory.create("SetCommand");
+            command = factory.create("Set");
             if (command)
             {
                 command.getAttribute("target").setValueDirect(containerName);
                 command.getAttribute("target").flagDeserializedFromXML();
-
-                command.registerTargetAttributes(container, containerName);
 
                 var values = [];
                 attr.getValue(values);
@@ -306,6 +304,12 @@ Serializer.prototype.serializeModel = function(Model)
                 command.attributeValuePairs.push(new Pair(attr, values));
                 
                 this.serializeCommand(command);
+                
+                // setting the target on the SetCommand sets the attribute bin, which is normally
+                // cleared by adding the command to the CommandMgr, but this doesn't occur here, because
+                // it is only being serialized, not executed
+                setAttributeBin(null);
+                setAttributePairs(null);
             }
         }
     }
@@ -325,18 +329,9 @@ Serializer.prototype.serializeCommand = function(command)
     {
         var element = null;
         var pcszType = command.className;
-        
-        // rename if negate is set
-        var negate = command.getAttribute("negate");
-        if (negate && negate.getValueDirect() == true) 
-        {
-            switch (pcszType)
-            {
-                case "Play":                pcszType = "Pause"; break;
-                case "ConnectAttributes":   pcszType = "DisconnectAttributes"; break;
-                default:                    break;
-            }
-        }
+               
+        // don't serialize SerializeCommand
+        if (pcszType == "Serialize") return;
         
         var bstr = pcszType;
         if (bstr)
@@ -625,7 +620,7 @@ Serializer.prototype.getAttributeStringValue = function(attr, item)
         case eAttrType.Vector2DAttr:
         case eAttrType.Vector3DAttr:
         case eAttrType.Matrix4x4Attr:
-        case eAttrType.QuaternionRotate:
+        case eAttrType.QuaternionAttr:
         {
             var vecVal_F = [];
             attr.getValue(vecVal_F);

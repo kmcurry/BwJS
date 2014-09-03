@@ -1,6 +1,11 @@
 ﻿var eEventType = {
     Unknown                     :-1,
     
+    Render_First                :0,
+    RenderBegin                 :1,
+    RenderEnd                   :2,
+    Render_End                  :9,
+    
     Mouse_First                 :100,
     MouseMove                   :101,
     MouseDown                   :102,

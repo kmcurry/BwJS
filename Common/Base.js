@@ -12,6 +12,11 @@ Base.prototype.destroy = function()
 function Allocator()
 {
 }
+//These are created in global scope that way 3Scape can access them
+var message = "";
+var imgeData = "";
+var cimageData = "";
+var serializedScene = "";
 
 Allocator.prototype.allocate = function()
 {
