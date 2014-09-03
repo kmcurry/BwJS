@@ -13,7 +13,6 @@ function Model()
     this.surfaceAttrConnections = [];
     this.boundingTree = new Octree();
     this.updateBoundingTree = false;
-    this.useLastTransform = false;
     
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);
@@ -415,15 +414,8 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
                 this.pushMatrix();
 
-                if (!this.useLastTransform)
-                {
-                    this.applyTransform();
-                }
-                else // this.useLastTransform
-                {
-                    this.applyLastTransform();
-                }
-                
+                this.applyTransform();
+
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
@@ -775,20 +767,4 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
-    var collisionDetected = attribute.getValueDirect();
-    if (collisionDetected)
-    {
-        //container.panVelocity.setValueDirect(0, 0, 0, 0);
-        //container.linearVelocity.setValueDirect(0, 0, 0);
-        //container.angularVelocity.setValueDirect(0, 0, 0);
-        //container.scalarVelocity.setValueDirect(0, 0, 0);
-        //container.position.revertValues();
-        //container.rotation.revertValues();
-        //container.scale.revertValues();
-        //container.useLastTransform = true;
-    }
-    else
-    {
-        //container.useLastTransform = false;
-    }
 }
