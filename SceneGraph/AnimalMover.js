@@ -83,7 +83,7 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
     // add motions attempting to move away from colliding object
     if (this.motionQueue.length() < 1)
     {
-        var angle = 90;
+        /*var angle = 90;
         // calculate angle turning away from colliding object
         if (collisionList.Size() > 0)
         {
@@ -100,18 +100,22 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
             var cosAngle = cosineAngleBetween(targetFwd, targetDir);
             var radians = Math.acos(cosAngle);
             angle = toDegrees(radians);
-        }
+        }*/
         
         motion = new ObjectMotionDesc();
-        motion.duration = angle / this.angularSpeed.getValueDirect();
+        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
+        motion.duration = 0;//angle / this.angularSpeed.getValueDirect();
         motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
         motion.stopOnCollision = false;
         this.motionQueue.push(motion);
+        
+        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
     }
 
     if (this.motionQueue.length() < 2)
     {
         var motion = new ObjectMotionDesc();
+        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
         motion.duration = 0;
         motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
         motion.stopOnCollision = false;
