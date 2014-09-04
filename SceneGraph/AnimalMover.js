@@ -49,18 +49,54 @@ AnimalMover.prototype.evaluate = function()
 	ObjectMover.prototype.evaluate.call(this);
 }
 
-AnimalMover.prototype.collisionDetected = function()
+AnimalMover.prototype.collisionDetected = function(collisionList)
 {
+    // stop if colliding with more than one object
+    if (collisionList.Size() > 1)
+    {
+        this.activeMotion = null;
+        this.motionQueue.clear();
+        var motion = new ObjectMotionDesc();
+        this.motionQueue.push(motion);
+        return;
+    }
+    
+    // clear motions set to stopOnCollision
+    if (this.activeMotion && this.activeMotion.stopOnCollision)
+    {
+        this.activeMotion = null;
+    }   
+    var motions = [];
+    for (var i = 0; i < ANIMALMOVER_MAX_QUEUE_LENGTH; i++)
+    {
+        motions.push(this.motionQueue.getAt(i));
+    }
     this.motionQueue.clear();
-    this.activeMotion = null;
+    for (var i = 0; i < ANIMALMOVER_MAX_QUEUE_LENGTH; i++)
+    {
+        if (motions[i] && motions[i].stopOnCollision == false)
+        {
+            this.motionQueue.push(motions[i]);
+        }
+    }
     
-    var motion = new ObjectMotionDesc();
-    motion.duration = 0.5;
-    motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-    this.motionQueue.push(motion);
-    
-    motion = new ObjectMotionDesc();
-    motion.duration = 90 / this.angularSpeed.getValueDirect();
-    motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-    this.motionQueue.push(motion);
+    // add motions attempting to move away from colliding object
+    if (this.motionQueue.length() < 1)
+    {
+        motion = new ObjectMotionDesc();
+        motion.duration = 90 / this.angularSpeed.getValueDirect();
+        motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        motion.stopOnCollision = false;
+        this.motionQueue.push(motion);
+    }
+
+    if (this.motionQueue.length() < 2)
+    {
+        var motion = new ObjectMotionDesc();
+        motion.duration = 0.5;
+        motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
+        motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        motion.stopOnCollision = false;
+        this.motionQueue.push(motion);
+    }
 }

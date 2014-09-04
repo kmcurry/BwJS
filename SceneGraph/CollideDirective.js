@@ -40,11 +40,7 @@ CollideDirective.prototype.execute = function(root)
     root.apply("collide", params, true);
     
     // detect collisions
-    var collisions = this.detectCollisions(params.detectCollisions);   
-    for (var i = 0; i < collisions.length; i++)
-    {
-        collisions[i].getAttribute("collisionDetected").setValueDirect(true);
-    }
+    this.detectCollisions(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
@@ -52,32 +48,28 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     var models = [];
     var trees = [];
     var collisions = [];
-    var tested = [];
     
     for (var i in collideRecs)
     {
         models.push(collideRecs[i].model);
         trees.push(collideRecs[i].tree);
-        tested.push(false);
+        
+        collideRecs[i].model.getAttribute("collisionDetected").setValueDirect(false);
+        collideRecs[i].model.getAttribute("collisionList").clear();
     }
     
     for (var i = 0; i < trees.length; i++)
     {
-        if (tested[i]) continue;
-        
         for (var j = i+1; j < trees.length; j++)
         {
-            if (tested[j]) continue;
-            
             if (trees[i].collides(trees[j]))
             {
-                collisions.push(models[i]);
-                collisions.push(models[j]);
-                tested[i] = tested[j] = true;
-                break;
+                models[i].getAttribute("collisionList").push_back(models[j]);
+                models[i].getAttribute("collisionDetected").setValueDirect(true);
+                
+                models[j].getAttribute("collisionList").push_back(models[i]);
+                models[j].getAttribute("collisionDetected").setValueDirect(true);
             }
         }
     }
-    
-    return collisions;
 }

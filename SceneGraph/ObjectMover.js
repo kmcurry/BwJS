@@ -131,6 +131,6 @@ function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
     var collisionDetected = attribute.getValueDirect();
     if (collisionDetected)
     {
-        container.collisionDetected();
+        container.collisionDetected(attribute.getContainer().getAttribute("collisionList"));
     }
 }

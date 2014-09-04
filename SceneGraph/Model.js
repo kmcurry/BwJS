@@ -49,6 +49,7 @@ function Model()
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
+    this.collisionList = new AttributeVector();
     
     this.show.addTarget(this.enabled);
     
@@ -118,6 +119,7 @@ function Model()
     this.registerAttribute(this.screenScalePixels, "screenScalePixels");
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
+    this.registerAttribute(this.collisionList, "collisionList");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
