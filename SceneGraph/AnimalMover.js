@@ -83,8 +83,27 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
     // add motions attempting to move away from colliding object
     if (this.motionQueue.length() < 1)
     {
+        var angle = 90;
+        // calculate angle turning away from colliding object
+        if (collisionList.Size() > 0)
+        {
+            var collider = collisionList.getAt(0);
+            var colliderPos = collider.getAttribute("sectorPosition").getValueDirect();
+            
+            var targetPos = this.targetObject.getAttribute("sectorPosition").getValueDirect();
+            var targetFwd = this.targetObject.getDirectionVectors().forward;
+            
+            var targetDir = new Vector3D(targetPos.x - colliderPos.x,
+                                         targetPos.y - colliderPos.y,
+                                         targetPos.z - colliderPos.z);
+            
+            var cosAngle = cosineAngleBetween(targetFwd, targetDir);
+            var radians = Math.acos(cosAngle);
+            angle = toDegrees(radians);
+        }
+        
         motion = new ObjectMotionDesc();
-        motion.duration = 90 / this.angularSpeed.getValueDirect();
+        motion.duration = angle / this.angularSpeed.getValueDirect();
         motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
         motion.stopOnCollision = false;
         this.motionQueue.push(motion);
@@ -93,9 +112,8 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
     if (this.motionQueue.length() < 2)
     {
         var motion = new ObjectMotionDesc();
-        motion.duration = 0.5;
-        motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-        motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        motion.duration = 0;
+        motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
         motion.stopOnCollision = false;
         this.motionQueue.push(motion);
     }

@@ -24,6 +24,7 @@ function ObjectMover()
     this.className = "ObjectMover";
     this.attrType = eAttrType.ObjectMover;
     
+    this.targetObject = null;
     this.motionQueue = new Queue();
     this.activeDuration = 0;
     
@@ -106,14 +107,14 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
+		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
 	}
 	
-	target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+	this.targetObject = target;
 }
 
 ObjectMover.prototype.collisionDetected = function()
 {
-    
 }
 
 function ObjectMover_TargetModifiedCB(attribute, container)
