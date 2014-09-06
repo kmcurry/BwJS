@@ -70,10 +70,14 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
         this.activeMotion = null;
         this.motionQueue.clear();
         
-        // stop
-        var stop = new ObjectMotionDesc();
-        stop.duration = 0;
-        this.motionQueue.push(stop);
+        // stop (50% of the time)
+        var rand = Math.random();
+        if (rand < 0.5)
+        {
+            var stop = new ObjectMotionDesc();
+            stop.duration = 0.5;
+            this.motionQueue.push(stop);
+        }
         
         // turn 45 degrees
         var turn45 = new ObjectMotionDesc();
