@@ -16059,13 +16059,26 @@ function Geometry()
     this.className = "Geometry";
     this.attrType = eAttrType.Geometry;
 
+    this.boundingTree = new Octree();
+    this.updateBoundingTree = false;
+
+    this.selectable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
+    this.show = new BooleanAttr(true);
+    this.approximationLevels = new NumberAttr(1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
     this.shadowCaster = new BooleanAttr(false);
     this.shadowTarget = new BooleanAttr(true);
 
+    this.selectable.addModifiedCB(Geometry_SelectableModifiedCB, this);
+    this.show.addModifiedCB(Geometry_ShowModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Geometry_ApproximationLevelsModifiedCB, this);
+
+    this.registerAttribute(this.selectable, "selectable");
     this.registerAttribute(this.cullable, "cullable");
+    this.registerAttribute(this.show, "show");
+    this.registerAttribute(this.approximationLevels, "approximationLevels");
     this.registerAttribute(this.sortPolygons, "sortPolygons");
     this.registerAttribute(this.flipPolygons, "flipPolygons");
     this.registerAttribute(this.shadowCaster, "shadowCaster");
@@ -16074,6 +16087,13 @@ function Geometry()
 
 Geometry.prototype.update = function(params, visitChildren)
 {
+    if (this.updateBoundingTree)
+    {
+        this.updateBoundingTree = false;
+
+        this.buildBoundingTree();
+    }
+    
     // call base-class implementation
     RenderableElement.prototype.update.call(this, params, visitChildren);
 }
@@ -16119,6 +16139,30 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;       
+
+        case "rayPick":
+            {
+                if (this.selectable.getValueDirect() == true &&
+                    params.opacity > 0 &&
+                    params.dissolve < 1)
+                {
+                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
+                    var scale = worldViewMatrix.getScalingFactors();
+
+                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
+                                                  params.nearDistance, params.farDistance,
+                                                  params.worldMatrix, params.viewMatrix,
+                                                  max3(scale.x, scale.y, scale.z),
+                                                  params.doubleSided, params.clipPlanes);
+                    if (intersectRecord)
+                    {
+                        params.currentNodePath.push(this);
+                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
+                        params.currentNodePath.pop();
+                    }
+                }
+            }
+            break;
 
         case "bbox":
             {
@@ -16181,6 +16225,20 @@ Geometry.prototype.getTriangles = function()
     return new Array();
 }
 
+function Geometry_SelectableModifiedCB(attribute, container)
+{
+}
+
+function Geometry_ShowModifiedCB(attribute, container)
+{
+    container.incrementModificationCount();
+}
+
+function Geometry_ApproximationLevelsModifiedCB(attribute, container)
+{
+    container.updateBoundingTree = true;
+    container.incrementModificationCount();
+}
 VertexGeometry.prototype = new Geometry();
 VertexGeometry.prototype.constructor = VertexGeometry;
 
@@ -16741,6 +16799,7 @@ function TriList()
     
     this.normals = new NumberArrayAttr();
     
+    this.vertices.addModifiedCB(TriList_NormalsModifiedCB, this);
     this.normals.addModifiedCB(TriList_NormalsModifiedCB, this);
     
     this.registerAttribute(this.normals, "normals");
@@ -16777,6 +16836,15 @@ TriList.prototype.draw = function(dissolve)
     
     // draw with textures
     this.drawTextured(dissolve);
+}
+
+TriList.prototype.buildBoundingTree = function()
+{
+    var min = this.bbox.getAttribute("min").getValueDirect();
+    var max = this.bbox.getAttribute("max").getValueDirect();
+    
+    this.boundingTree.setTriangles(this.getTriangles(), min, max);
+    this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
 TriList.prototype.getTriangles = function()
@@ -17306,7 +17374,7 @@ function Model()
     this.selectable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.cullable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.show.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    //this.approximationLevels.addModifiedCB(Model_AproximationLevelsModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     //this.showApproximationLevel.addModifiedCB(Model_ShowApproximationLevelModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_SortPolygonsModifiedCB, this);
@@ -17677,39 +17745,18 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
         case "rayPick":
             {
-                if (this.selectable.getValueDirect() == true &&
-                    params.opacity > 0 &&
-                    params.dissolve < 1)
-                {
-                    var lastWorldMatrix = new Matrix4x4();
-                    lastWorldMatrix.loadMatrix(params.worldMatrix);
-                    var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
-    
-                    params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                    params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
-    
-                    // call base-class implementation
-                    //ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-                    {
-                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
-                    var scale = worldViewMatrix.getScalingFactors();
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);
+                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
 
-                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
-                                                  params.nearDistance, params.farDistance,
-                                                  params.worldMatrix, params.viewMatrix,
-                                                  max3(scale.x, scale.y, scale.z),
-                                                  params.doubleSided, params.clipPlanes);
-                    if (intersectRecord)
-                    {
-                        params.currentNodePath.push(this);
-                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
-                        params.currentNodePath.pop();
-                    }
-                    }
-    
-                    params.worldMatrix.loadMatrix(lastWorldMatrix);
-                    params.sectorOrigin.copy(lastSectorOrigin);
-                }
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
+
+                // call base-class implementation
+                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -17826,6 +17873,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
+    this.connectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
     this.connectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
     this.connectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
     this.connectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
