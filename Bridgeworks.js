@@ -22394,7 +22394,7 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
         walkBack.stopOnCollision = true;
         walkBack.reverseOnCollision = true;
         walkBack.duration = 0;
-        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect() / 10);
+        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
         this.motionQueue.push(walkBack); 
     }
 }
