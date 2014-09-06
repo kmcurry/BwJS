@@ -69,7 +69,11 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
         // clear current motions
         this.activeMotion = null;
         this.motionQueue.clear();
-        this.setMotion(new ObjectMotionDesc()); // stops motion
+        
+        // stop
+        var stop = new ObjectMotionDesc();
+        stop.duration = 0;
+        this.motionQueue.push(stop);
         
         // turn 45 degrees
         var turn45 = new ObjectMotionDesc();
