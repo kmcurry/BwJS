@@ -13,6 +13,7 @@ function ObjectMotionDesc()
 	this.scalarVelocity = new Vector3D(0, 0, 0);
 	this.duration = 0; // seconds
 	this.stopOnCollision = true;
+	this.reverseOnCollision = false;
 }
 
 ObjectMover.prototype = new Evaluator();
@@ -24,6 +25,7 @@ function ObjectMover()
     this.className = "ObjectMover";
     this.attrType = eAttrType.ObjectMover;
     
+    this.targetObject = null;
     this.motionQueue = new Queue();
     this.activeDuration = 0;
     
@@ -51,32 +53,37 @@ ObjectMover.prototype.evaluate = function()
     
     this.updateActiveMotion(timeIncrement);
 
-	if (this.activeMotion.validMembersMask & OBJECTMOTION_PAN_BIT)
-	{
-	    this.panVelocity.setValueDirect(this.activeMotion.panVelocity.x, 
-	   	   							    this.activeMotion.panVelocity.y, 
-	    								this.activeMotion.panVelocity.z);
+    this.setMotion(this.activeMotion);
+}
+
+ObjectMover.prototype.setMotion = function(motion)
+{
+    if (motion.validMembersMask & OBJECTMOTION_PAN_BIT)
+    {
+        this.panVelocity.setValueDirect(motion.panVelocity.x, 
+                                        motion.panVelocity.y, 
+                                        motion.panVelocity.z);
     }
     
-    if (this.activeMotion.validMembersMask & OBJECTMOTION_LINEAR_BIT)
-    {						
-	    this.linearVelocity.setValueDirect(this.activeMotion.linearVelocity.x, 
-	   								       this.activeMotion.linearVelocity.y, 
-	   								       this.activeMotion.linearVelocity.z);
-   	}
-   		
-   	if (this.activeMotion.validMembersMask & OBJECTMOTION_ANGULAR_BIT)
-   	{						       
-	    this.angularVelocity.setValueDirect(this.activeMotion.angularVelocity.x, 
-	   								        this.activeMotion.angularVelocity.y, 
-	   								        this.activeMotion.angularVelocity.z);
-   	}
-   		
-   	if (this.activeMotion.validMembersMask & OBJECTMOTION_SCALAR_BIT)
-   	{						        
-	    this.scalarVelocity.setValueDirect(this.activeMotion.scalarVelocity.x, 
-	   								       this.activeMotion.scalarVelocity.y, 
-	   								       this.activeMotion.scalarVelocity.z);
+    if (motion.validMembersMask & OBJECTMOTION_LINEAR_BIT)
+    {                       
+        this.linearVelocity.setValueDirect(motion.linearVelocity.x, 
+                                           motion.linearVelocity.y, 
+                                           motion.linearVelocity.z);
+    }
+        
+    if (motion.validMembersMask & OBJECTMOTION_ANGULAR_BIT)
+    {                              
+        this.angularVelocity.setValueDirect(motion.angularVelocity.x, 
+                                            motion.angularVelocity.y, 
+                                            motion.angularVelocity.z);
+    }
+        
+    if (motion.validMembersMask & OBJECTMOTION_SCALAR_BIT)
+    {                               
+        this.scalarVelocity.setValueDirect(motion.scalarVelocity.x, 
+                                           motion.scalarVelocity.y, 
+                                           motion.scalarVelocity.z);
     }
 }
 
@@ -106,14 +113,14 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
+		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
 	}
 	
-	target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+	this.targetObject = target;
 }
 
 ObjectMover.prototype.collisionDetected = function()
 {
-    
 }
 
 function ObjectMover_TargetModifiedCB(attribute, container)
@@ -131,6 +138,6 @@ function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
     var collisionDetected = attribute.getValueDirect();
     if (collisionDetected)
     {
-        container.collisionDetected();
+        container.collisionDetected(attribute.getContainer().getAttribute("collisionList"));
     }
 }
