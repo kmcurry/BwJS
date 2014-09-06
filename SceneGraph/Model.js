@@ -49,13 +49,14 @@ function Model()
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
+    this.collisionList = new AttributeVector();
     
     this.show.addTarget(this.enabled);
     
     this.selectable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.cullable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.show.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    //this.approximationLevels.addModifiedCB(Model_AproximationLevelsModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     //this.showApproximationLevel.addModifiedCB(Model_ShowApproximationLevelModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_SortPolygonsModifiedCB, this);
@@ -118,6 +119,7 @@ function Model()
     this.registerAttribute(this.screenScalePixels, "screenScalePixels");
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
+    this.registerAttribute(this.collisionList, "collisionList");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -425,39 +427,18 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
         case "rayPick":
             {
-                if (this.selectable.getValueDirect() == true &&
-                    params.opacity > 0 &&
-                    params.dissolve < 1)
-                {
-                    var lastWorldMatrix = new Matrix4x4();
-                    lastWorldMatrix.loadMatrix(params.worldMatrix);
-                    var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
-    
-                    params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                    params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
-    
-                    // call base-class implementation
-                    //ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-                    {
-                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
-                    var scale = worldViewMatrix.getScalingFactors();
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);
+                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
 
-                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
-                                                  params.nearDistance, params.farDistance,
-                                                  params.worldMatrix, params.viewMatrix,
-                                                  max3(scale.x, scale.y, scale.z),
-                                                  params.doubleSided, params.clipPlanes);
-                    if (intersectRecord)
-                    {
-                        params.currentNodePath.push(this);
-                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
-                        params.currentNodePath.pop();
-                    }
-                    }
-    
-                    params.worldMatrix.loadMatrix(lastWorldMatrix);
-                    params.sectorOrigin.copy(lastSectorOrigin);
-                }
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
+
+                // call base-class implementation
+                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -574,6 +555,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
+    this.connectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
     this.connectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
     this.connectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
     this.connectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");

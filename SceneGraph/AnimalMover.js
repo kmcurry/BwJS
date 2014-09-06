@@ -49,18 +49,42 @@ AnimalMover.prototype.evaluate = function()
 	ObjectMover.prototype.evaluate.call(this);
 }
 
-AnimalMover.prototype.collisionDetected = function()
-{
-    this.motionQueue.clear();
-    this.activeMotion = null;
-    
-    var motion = new ObjectMotionDesc();
-    motion.duration = 0.5;
-    motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-    this.motionQueue.push(motion);
-    
-    motion = new ObjectMotionDesc();
-    motion.duration = 90 / this.angularSpeed.getValueDirect();
-    motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-    this.motionQueue.push(motion);
+AnimalMover.prototype.collisionDetected = function(collisionList)
+{   
+    if (this.activeMotion.stopOnCollision == false)
+    {
+        return;
+    }
+    else if (this.activeMotion.reverseOnCollision == true)
+    {
+        var reverse = this.activeMotion;
+        reverse.angularVelocity.multiplyScalar(-1);
+        reverse.linearVelocity.multiplyScalar(-1);
+        reverse.panVelocity.multiplyScalar(-1);
+        reverse.scalarVelocity.multiplyScalar(-1);
+        this.motionQueue.push(reverse);
+    }
+    else
+    {
+        // clear current motions
+        this.activeMotion = null;
+        this.motionQueue.clear();
+        this.setMotion(new ObjectMotionDesc()); // stops motion
+        
+        // turn 45 degrees
+        var turn45 = new ObjectMotionDesc();
+        turn45.stopOnCollision = false;
+        turn45.reverseOnCollision = false;
+        turn45.duration = (this.angularSpeed.getValueDirect() / 10) / this.angularSpeed.getValueDirect();
+        turn45.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        this.motionQueue.push(turn45);
+        
+        // walk back
+        var walkBack = new ObjectMotionDesc();
+        walkBack.stopOnCollision = true;
+        walkBack.reverseOnCollision = true;
+        walkBack.duration = 0;
+        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
+        this.motionQueue.push(walkBack); 
+    }
 }
