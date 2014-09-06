@@ -53,9 +53,9 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     {
         models.push(collideRecs[i].model);
         trees.push(collideRecs[i].tree);
-        
-        collideRecs[i].model.getAttribute("collisionDetected").setValueDirect(false);
-        collideRecs[i].model.getAttribute("collisionList").clear();
+        collisions.push(false);
+
+        collideRecs[i].model.getAttribute("collisionList").clear();        
     }
     
     for (var i = 0; i < trees.length; i++)
@@ -64,12 +64,15 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         {
             if (trees[i].collides(trees[j]))
             {
-                models[i].getAttribute("collisionList").push_back(models[j]);
-                models[i].getAttribute("collisionDetected").setValueDirect(true);
-                
+                models[i].getAttribute("collisionList").push_back(models[j]);                
                 models[j].getAttribute("collisionList").push_back(models[i]);
-                models[j].getAttribute("collisionDetected").setValueDirect(true);
+                collisions[i] = collisions[j] = true;
             }
         }
+    }
+    
+    for (var i = 0; i < collisions.length; i++)
+    {
+        models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
     }
 }

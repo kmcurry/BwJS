@@ -50,75 +50,41 @@ AnimalMover.prototype.evaluate = function()
 }
 
 AnimalMover.prototype.collisionDetected = function(collisionList)
-{
-    // stop if colliding with more than one object
-    if (collisionList.Size() > 1)
+{   
+    if (this.activeMotion.stopOnCollision == false)
     {
-        this.activeMotion = null;
-        this.motionQueue.clear();
-        var motion = new ObjectMotionDesc();
-        this.motionQueue.push(motion);
         return;
     }
-    
-    // clear motions set to stopOnCollision
-    if (this.activeMotion && this.activeMotion.stopOnCollision)
+    else if (this.activeMotion.reverseOnCollision == true)
     {
+        var reverse = this.activeMotion;
+        reverse.angularVelocity.multiplyScalar(-1);
+        reverse.linearVelocity.multiplyScalar(-1);
+        reverse.panVelocity.multiplyScalar(-1);
+        reverse.scalarVelocity.multiplyScalar(-1);
+        this.motionQueue.push(reverse);
+    }
+    else
+    {
+        // clear current motions
         this.activeMotion = null;
-    }   
-    var motions = [];
-    for (var i = 0; i < ANIMALMOVER_MAX_QUEUE_LENGTH; i++)
-    {
-        motions.push(this.motionQueue.getAt(i));
-    }
-    this.motionQueue.clear();
-    for (var i = 0; i < ANIMALMOVER_MAX_QUEUE_LENGTH; i++)
-    {
-        if (motions[i] && motions[i].stopOnCollision == false)
-        {
-            this.motionQueue.push(motions[i]);
-        }
-    }
-    
-    // add motions attempting to move away from colliding object
-    if (this.motionQueue.length() < 1)
-    {
-        /*var angle = 90;
-        // calculate angle turning away from colliding object
-        if (collisionList.Size() > 0)
-        {
-            var collider = collisionList.getAt(0);
-            var colliderPos = collider.getAttribute("sectorPosition").getValueDirect();
-            
-            var targetPos = this.targetObject.getAttribute("sectorPosition").getValueDirect();
-            var targetFwd = this.targetObject.getDirectionVectors().forward;
-            
-            var targetDir = new Vector3D(targetPos.x - colliderPos.x,
-                                         targetPos.y - colliderPos.y,
-                                         targetPos.z - colliderPos.z);
-            
-            var cosAngle = cosineAngleBetween(targetFwd, targetDir);
-            var radians = Math.acos(cosAngle);
-            angle = toDegrees(radians);
-        }*/
+        this.motionQueue.clear();
+        this.setMotion(new ObjectMotionDesc()); // stops motion
         
-        motion = new ObjectMotionDesc();
-        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
-        motion.duration = 0;//angle / this.angularSpeed.getValueDirect();
-        motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-        motion.stopOnCollision = false;
-        this.motionQueue.push(motion);
+        // turn 45 degrees
+        var turn45 = new ObjectMotionDesc();
+        turn45.stopOnCollision = false;
+        turn45.reverseOnCollision = false;
+        turn45.duration = (this.angularSpeed.getValueDirect() / 10) / this.angularSpeed.getValueDirect();
+        turn45.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        this.motionQueue.push(turn45);
         
-        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
-    }
-
-    if (this.motionQueue.length() < 2)
-    {
-        var motion = new ObjectMotionDesc();
-        // note: setting the duration to zero allows for a small movement which seems to be effective in moving away from collisions
-        motion.duration = 0;
-        motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
-        motion.stopOnCollision = false;
-        this.motionQueue.push(motion);
+        // walk back
+        var walkBack = new ObjectMotionDesc();
+        walkBack.stopOnCollision = true;
+        walkBack.reverseOnCollision = true;
+        walkBack.duration = 0;
+        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect() / 10);
+        this.motionQueue.push(walkBack); 
     }
 }
