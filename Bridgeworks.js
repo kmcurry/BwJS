@@ -16059,13 +16059,26 @@ function Geometry()
     this.className = "Geometry";
     this.attrType = eAttrType.Geometry;
 
+    this.boundingTree = new Octree();
+    this.updateBoundingTree = false;
+
+    this.selectable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
+    this.show = new BooleanAttr(true);
+    this.approximationLevels = new NumberAttr(1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
     this.shadowCaster = new BooleanAttr(false);
     this.shadowTarget = new BooleanAttr(true);
 
+    this.selectable.addModifiedCB(Geometry_SelectableModifiedCB, this);
+    this.show.addModifiedCB(Geometry_ShowModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Geometry_ApproximationLevelsModifiedCB, this);
+
+    this.registerAttribute(this.selectable, "selectable");
     this.registerAttribute(this.cullable, "cullable");
+    this.registerAttribute(this.show, "show");
+    this.registerAttribute(this.approximationLevels, "approximationLevels");
     this.registerAttribute(this.sortPolygons, "sortPolygons");
     this.registerAttribute(this.flipPolygons, "flipPolygons");
     this.registerAttribute(this.shadowCaster, "shadowCaster");
@@ -16074,6 +16087,13 @@ function Geometry()
 
 Geometry.prototype.update = function(params, visitChildren)
 {
+    if (this.updateBoundingTree)
+    {
+        this.updateBoundingTree = false;
+
+        this.buildBoundingTree();
+    }
+    
     // call base-class implementation
     RenderableElement.prototype.update.call(this, params, visitChildren);
 }
@@ -16119,6 +16139,30 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;       
+
+        case "rayPick":
+            {
+                if (this.selectable.getValueDirect() == true &&
+                    params.opacity > 0 &&
+                    params.dissolve < 1)
+                {
+                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
+                    var scale = worldViewMatrix.getScalingFactors();
+
+                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
+                                                  params.nearDistance, params.farDistance,
+                                                  params.worldMatrix, params.viewMatrix,
+                                                  max3(scale.x, scale.y, scale.z),
+                                                  params.doubleSided, params.clipPlanes);
+                    if (intersectRecord)
+                    {
+                        params.currentNodePath.push(this);
+                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
+                        params.currentNodePath.pop();
+                    }
+                }
+            }
+            break;
 
         case "bbox":
             {
@@ -16181,6 +16225,20 @@ Geometry.prototype.getTriangles = function()
     return new Array();
 }
 
+function Geometry_SelectableModifiedCB(attribute, container)
+{
+}
+
+function Geometry_ShowModifiedCB(attribute, container)
+{
+    container.incrementModificationCount();
+}
+
+function Geometry_ApproximationLevelsModifiedCB(attribute, container)
+{
+    container.updateBoundingTree = true;
+    container.incrementModificationCount();
+}
 VertexGeometry.prototype = new Geometry();
 VertexGeometry.prototype.constructor = VertexGeometry;
 
@@ -16741,6 +16799,7 @@ function TriList()
     
     this.normals = new NumberArrayAttr();
     
+    this.vertices.addModifiedCB(TriList_NormalsModifiedCB, this);
     this.normals.addModifiedCB(TriList_NormalsModifiedCB, this);
     
     this.registerAttribute(this.normals, "normals");
@@ -16777,6 +16836,15 @@ TriList.prototype.draw = function(dissolve)
     
     // draw with textures
     this.drawTextured(dissolve);
+}
+
+TriList.prototype.buildBoundingTree = function()
+{
+    var min = this.bbox.getAttribute("min").getValueDirect();
+    var max = this.bbox.getAttribute("max").getValueDirect();
+    
+    this.boundingTree.setTriangles(this.getTriangles(), min, max);
+    this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
 TriList.prototype.getTriangles = function()
@@ -17299,13 +17367,14 @@ function Model()
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
+    this.collisionList = new AttributeVector();
     
     this.show.addTarget(this.enabled);
     
     this.selectable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.cullable.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.show.addModifiedCB(Model_GeometryAttrModifiedCB, this);
-    //this.approximationLevels.addModifiedCB(Model_AproximationLevelsModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     //this.showApproximationLevel.addModifiedCB(Model_ShowApproximationLevelModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_GeometryAttrModifiedCB, this);
     this.sortPolygons.addModifiedCB(Model_SortPolygonsModifiedCB, this);
@@ -17368,6 +17437,7 @@ function Model()
     this.registerAttribute(this.screenScalePixels, "screenScalePixels");
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
+    this.registerAttribute(this.collisionList, "collisionList");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -17675,39 +17745,18 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
         case "rayPick":
             {
-                if (this.selectable.getValueDirect() == true &&
-                    params.opacity > 0 &&
-                    params.dissolve < 1)
-                {
-                    var lastWorldMatrix = new Matrix4x4();
-                    lastWorldMatrix.loadMatrix(params.worldMatrix);
-                    var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
-    
-                    params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                    params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
-    
-                    // call base-class implementation
-                    //ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-                    {
-                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
-                    var scale = worldViewMatrix.getScalingFactors();
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);
+                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
 
-                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
-                                                  params.nearDistance, params.farDistance,
-                                                  params.worldMatrix, params.viewMatrix,
-                                                  max3(scale.x, scale.y, scale.z),
-                                                  params.doubleSided, params.clipPlanes);
-                    if (intersectRecord)
-                    {
-                        params.currentNodePath.push(this);
-                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
-                        params.currentNodePath.pop();
-                    }
-                    }
-    
-                    params.worldMatrix.loadMatrix(lastWorldMatrix);
-                    params.sectorOrigin.copy(lastSectorOrigin);
-                }
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
+
+                // call base-class implementation
+                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -17824,6 +17873,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
+    this.connectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
     this.connectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
     this.connectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
     this.connectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
@@ -22078,11 +22128,7 @@ CollideDirective.prototype.execute = function(root)
     root.apply("collide", params, true);
     
     // detect collisions
-    var collisions = this.detectCollisions(params.detectCollisions);   
-    for (var i = 0; i < collisions.length; i++)
-    {
-        collisions[i].getAttribute("collisionDetected").setValueDirect(true);
-    }
+    this.detectCollisions(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
@@ -22090,34 +22136,33 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     var models = [];
     var trees = [];
     var collisions = [];
-    var tested = [];
     
     for (var i in collideRecs)
     {
         models.push(collideRecs[i].model);
         trees.push(collideRecs[i].tree);
-        tested.push(false);
+        collisions.push(false);
+
+        collideRecs[i].model.getAttribute("collisionList").clear();        
     }
     
     for (var i = 0; i < trees.length; i++)
     {
-        if (tested[i]) continue;
-        
         for (var j = i+1; j < trees.length; j++)
         {
-            if (tested[j]) continue;
-            
             if (trees[i].collides(trees[j]))
             {
-                collisions.push(models[i]);
-                collisions.push(models[j]);
-                tested[i] = tested[j] = true;
-                break;
+                models[i].getAttribute("collisionList").push_back(models[j]);                
+                models[j].getAttribute("collisionList").push_back(models[i]);
+                collisions[i] = collisions[j] = true;
             }
         }
     }
     
-    return collisions;
+    for (var i = 0; i < collisions.length; i++)
+    {
+        models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
+    }
 }
 var OBJECTMOTION_PAN_BIT		= 0x001;
 var OBJECTMOTION_LINEAR_BIT     = 0x002;
@@ -22134,6 +22179,7 @@ function ObjectMotionDesc()
 	this.scalarVelocity = new Vector3D(0, 0, 0);
 	this.duration = 0; // seconds
 	this.stopOnCollision = true;
+	this.reverseOnCollision = false;
 }
 
 ObjectMover.prototype = new Evaluator();
@@ -22145,6 +22191,7 @@ function ObjectMover()
     this.className = "ObjectMover";
     this.attrType = eAttrType.ObjectMover;
     
+    this.targetObject = null;
     this.motionQueue = new Queue();
     this.activeDuration = 0;
     
@@ -22172,32 +22219,37 @@ ObjectMover.prototype.evaluate = function()
     
     this.updateActiveMotion(timeIncrement);
 
-	if (this.activeMotion.validMembersMask & OBJECTMOTION_PAN_BIT)
-	{
-	    this.panVelocity.setValueDirect(this.activeMotion.panVelocity.x, 
-	   	   							    this.activeMotion.panVelocity.y, 
-	    								this.activeMotion.panVelocity.z);
+    this.setMotion(this.activeMotion);
+}
+
+ObjectMover.prototype.setMotion = function(motion)
+{
+    if (motion.validMembersMask & OBJECTMOTION_PAN_BIT)
+    {
+        this.panVelocity.setValueDirect(motion.panVelocity.x, 
+                                        motion.panVelocity.y, 
+                                        motion.panVelocity.z);
     }
     
-    if (this.activeMotion.validMembersMask & OBJECTMOTION_LINEAR_BIT)
-    {						
-	    this.linearVelocity.setValueDirect(this.activeMotion.linearVelocity.x, 
-	   								       this.activeMotion.linearVelocity.y, 
-	   								       this.activeMotion.linearVelocity.z);
-   	}
-   		
-   	if (this.activeMotion.validMembersMask & OBJECTMOTION_ANGULAR_BIT)
-   	{						       
-	    this.angularVelocity.setValueDirect(this.activeMotion.angularVelocity.x, 
-	   								        this.activeMotion.angularVelocity.y, 
-	   								        this.activeMotion.angularVelocity.z);
-   	}
-   		
-   	if (this.activeMotion.validMembersMask & OBJECTMOTION_SCALAR_BIT)
-   	{						        
-	    this.scalarVelocity.setValueDirect(this.activeMotion.scalarVelocity.x, 
-	   								       this.activeMotion.scalarVelocity.y, 
-	   								       this.activeMotion.scalarVelocity.z);
+    if (motion.validMembersMask & OBJECTMOTION_LINEAR_BIT)
+    {                       
+        this.linearVelocity.setValueDirect(motion.linearVelocity.x, 
+                                           motion.linearVelocity.y, 
+                                           motion.linearVelocity.z);
+    }
+        
+    if (motion.validMembersMask & OBJECTMOTION_ANGULAR_BIT)
+    {                              
+        this.angularVelocity.setValueDirect(motion.angularVelocity.x, 
+                                            motion.angularVelocity.y, 
+                                            motion.angularVelocity.z);
+    }
+        
+    if (motion.validMembersMask & OBJECTMOTION_SCALAR_BIT)
+    {                               
+        this.scalarVelocity.setValueDirect(motion.scalarVelocity.x, 
+                                           motion.scalarVelocity.y, 
+                                           motion.scalarVelocity.z);
     }
 }
 
@@ -22227,14 +22279,14 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
+		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
 	}
 	
-	target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+	this.targetObject = target;
 }
 
 ObjectMover.prototype.collisionDetected = function()
 {
-    
 }
 
 function ObjectMover_TargetModifiedCB(attribute, container)
@@ -22252,7 +22304,7 @@ function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
     var collisionDetected = attribute.getValueDirect();
     if (collisionDetected)
     {
-        container.collisionDetected();
+        container.collisionDetected(attribute.getContainer().getAttribute("collisionList"));
     }
 }
 
@@ -22307,20 +22359,52 @@ AnimalMover.prototype.evaluate = function()
 	ObjectMover.prototype.evaluate.call(this);
 }
 
-AnimalMover.prototype.collisionDetected = function()
-{
-    this.motionQueue.clear();
-    this.activeMotion = null;
-    
-    var motion = new ObjectMotionDesc();
-    motion.duration = 0.5;
-    motion.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-    this.motionQueue.push(motion);
-    
-    motion = new ObjectMotionDesc();
-    motion.duration = 90 / this.angularSpeed.getValueDirect();
-    motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-    this.motionQueue.push(motion);
+AnimalMover.prototype.collisionDetected = function(collisionList)
+{   
+    if (this.activeMotion.stopOnCollision == false)
+    {
+        return;
+    }
+    else if (this.activeMotion.reverseOnCollision == true)
+    {
+        var reverse = this.activeMotion;
+        reverse.angularVelocity.multiplyScalar(-1);
+        reverse.linearVelocity.multiplyScalar(-1);
+        reverse.panVelocity.multiplyScalar(-1);
+        reverse.scalarVelocity.multiplyScalar(-1);
+        this.motionQueue.push(reverse);
+    }
+    else
+    {
+        // clear current motions
+        this.activeMotion = null;
+        this.motionQueue.clear();
+        
+        // stop (50% of the time)
+        var rand = Math.random();
+        if (rand < 0.5)
+        {
+            var stop = new ObjectMotionDesc();
+            stop.duration = 0.5;
+            this.motionQueue.push(stop);
+        }
+        
+        // turn 45 degrees
+        var turn45 = new ObjectMotionDesc();
+        turn45.stopOnCollision = false;
+        turn45.reverseOnCollision = false;
+        turn45.duration = (this.angularSpeed.getValueDirect() / 10) / this.angularSpeed.getValueDirect();
+        turn45.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
+        this.motionQueue.push(turn45);
+        
+        // walk back
+        var walkBack = new ObjectMotionDesc();
+        walkBack.stopOnCollision = true;
+        walkBack.reverseOnCollision = true;
+        walkBack.duration = 0;
+        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
+        this.motionQueue.push(walkBack); 
+    }
 }
 
 var eEventType = {
