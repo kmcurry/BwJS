@@ -22385,7 +22385,8 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
         if (rand < 0.5)
         {
             var stop = new ObjectMotionDesc();
-            stop.duration = 0.5;
+            stop.stopOnCollision = false;
+            stop.duration = 0;
             this.motionQueue.push(stop);
         }
         
