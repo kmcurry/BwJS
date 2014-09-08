@@ -11,6 +11,7 @@ function TriList()
     
     this.normals = new NumberArrayAttr();
     
+    this.vertices.addModifiedCB(TriList_NormalsModifiedCB, this);
     this.normals.addModifiedCB(TriList_NormalsModifiedCB, this);
     
     this.registerAttribute(this.normals, "normals");
@@ -47,6 +48,15 @@ TriList.prototype.draw = function(dissolve)
     
     // draw with textures
     this.drawTextured(dissolve);
+}
+
+TriList.prototype.buildBoundingTree = function()
+{
+    var min = this.bbox.getAttribute("min").getValueDirect();
+    var max = this.bbox.getAttribute("max").getValueDirect();
+    
+    this.boundingTree.setTriangles(this.getTriangles(), min, max);
+    this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
 TriList.prototype.getTriangles = function()

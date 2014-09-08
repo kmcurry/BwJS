@@ -7,13 +7,26 @@ function Geometry()
     this.className = "Geometry";
     this.attrType = eAttrType.Geometry;
 
+    this.boundingTree = new Octree();
+    this.updateBoundingTree = false;
+
+    this.selectable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
+    this.show = new BooleanAttr(true);
+    this.approximationLevels = new NumberAttr(1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
     this.shadowCaster = new BooleanAttr(false);
     this.shadowTarget = new BooleanAttr(true);
 
+    this.selectable.addModifiedCB(Geometry_SelectableModifiedCB, this);
+    this.show.addModifiedCB(Geometry_ShowModifiedCB, this);
+    this.approximationLevels.addModifiedCB(Geometry_ApproximationLevelsModifiedCB, this);
+
+    this.registerAttribute(this.selectable, "selectable");
     this.registerAttribute(this.cullable, "cullable");
+    this.registerAttribute(this.show, "show");
+    this.registerAttribute(this.approximationLevels, "approximationLevels");
     this.registerAttribute(this.sortPolygons, "sortPolygons");
     this.registerAttribute(this.flipPolygons, "flipPolygons");
     this.registerAttribute(this.shadowCaster, "shadowCaster");
@@ -22,6 +35,13 @@ function Geometry()
 
 Geometry.prototype.update = function(params, visitChildren)
 {
+    if (this.updateBoundingTree)
+    {
+        this.updateBoundingTree = false;
+
+        this.buildBoundingTree();
+    }
+    
     // call base-class implementation
     RenderableElement.prototype.update.call(this, params, visitChildren);
 }
@@ -67,6 +87,30 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;       
+
+        case "rayPick":
+            {
+                if (this.selectable.getValueDirect() == true &&
+                    params.opacity > 0 &&
+                    params.dissolve < 1)
+                {
+                    var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
+                    var scale = worldViewMatrix.getScalingFactors();
+
+                    var intersectRecord = rayPick(this.boundingTree, params.rayOrigin, params.rayDir,
+                                                  params.nearDistance, params.farDistance,
+                                                  params.worldMatrix, params.viewMatrix,
+                                                  max3(scale.x, scale.y, scale.z),
+                                                  params.doubleSided, params.clipPlanes);
+                    if (intersectRecord)
+                    {
+                        params.currentNodePath.push(this);
+                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
+                        params.currentNodePath.pop();
+                    }
+                }
+            }
+            break;
 
         case "bbox":
             {
@@ -127,4 +171,19 @@ Geometry.prototype.getBBox = function()
 Geometry.prototype.getTriangles = function()
 {
     return new Array();
+}
+
+function Geometry_SelectableModifiedCB(attribute, container)
+{
+}
+
+function Geometry_ShowModifiedCB(attribute, container)
+{
+    container.incrementModificationCount();
+}
+
+function Geometry_ApproximationLevelsModifiedCB(attribute, container)
+{
+    container.updateBoundingTree = true;
+    container.incrementModificationCount();
 }
