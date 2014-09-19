@@ -18,6 +18,7 @@ function VertexGeometry()
     
     this.registerAttribute(this.vertices, "vertices");
 }
+
 VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
 {
     var i;

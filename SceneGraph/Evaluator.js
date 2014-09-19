@@ -10,6 +10,7 @@ function Evaluator()
     this.expired = new BooleanAttr(false);
     
     this.registerAttribute(this.expired, "expired");
+    this.registerAttribute(this.enabled, "evaluate");
 }
 
 Evaluator.prototype.evaluate = function()

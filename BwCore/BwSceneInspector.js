@@ -56,6 +56,8 @@ function BwSceneInspector()
     
     // set orphan so that evaluator will not be added to scene graph
 	this.orphan.setValueDirect(true);
+	
+	this.enabled.addModifiedCB(BwSceneInspector_EnabledModifiedCB, this);
 }
 
 BwSceneInspector.prototype.evaluate = function()
@@ -547,4 +549,8 @@ function BwSceneInspector_SelectionOccurredCB(attribute, container)
     }
 }
 
+function BwSceneInspector_EnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+}
 
