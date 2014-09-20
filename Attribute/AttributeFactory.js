@@ -358,6 +358,9 @@ function newObjectInspector(name, factory)
             
         selector.getAttribute("selectionCleared").addTarget(
             resource.getAttribute("selectionCleared"), eAttrSetOp.Replace, null, false);
+            
+        selector.getAttribute("pointView").addTarget(
+            resource.getAttribute("pointView"), eAttrSetOp.Replace, null, false);
     }
     
     return resource;
