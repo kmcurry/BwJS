@@ -174,7 +174,7 @@
         <script type="text/javascript">
             var bridgeworks = null;
             var xml = "";
-            var gol = nil;
+            var gol = null;
 
             function locate()
             {
@@ -210,7 +210,9 @@
         document.onreadystatechange = function() {
             if (document.readyState == "complete") {
                 bridgeworks = init("ConwayGoL.xml", document.getElementById("BwContainer"));
-                gol = new GameOfLife("UV_BoxG", 10, 10, 10, 1000);
+                gol = new GameOfLife(bridgeworks, "Models");
+                gol.init("/objects/UV_BoxG.lwo", 1, 1, 1, 2, 2, 2);
+                gol.start(1000);
             }
         }
     </script>

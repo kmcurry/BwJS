@@ -31,12 +31,12 @@
                       <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
                     </PerspectiveProjector>
                     <Model name="grid" url="/objects/GridG.lwo">
-                         <position x="0" y="0" z="0"/>
+                         <position x="0" y="-0.26" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="100" y="100" z="100"/>
                     </Model>
-                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo">
-                         <position x="0" y=".26" z="0"/>
+                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" show="false">
+                         <position x="0" y="0" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
