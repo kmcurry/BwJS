@@ -106,6 +106,8 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Translate"] = newSGNode;
     this.newResourceProcs["TriList"] = newSGNode;
     this.newResourceProcs["NullObject"] = newSGNode;
+    this.newResourceProcs["Material"] = newSGNode;
+    this.newResourceProcs["Cube"] = newSGNode;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -275,7 +277,9 @@ function newSGNode(name, factory)
     case "Transform":           resource = new Transform(); break;
     case "Translate":           resource = new Translate(); break;
     case "TriList":             resource = new TriList(); break;
-    case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break; 
+    case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
+    case "Cube":                resource = new Cube(); break;
+    case "Material":            resource = new Material(); break;
     }
     
     if (resource)

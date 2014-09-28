@@ -236,7 +236,8 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
 
             triList.getAttribute("vertices").setValue(vertices);
             triList.getAttribute("normals").setValue(normals);
-
+console.log(vertices);
+console.log(normals);
             triLists[surfIndex] = triList;
             triVertices[surfIndex] = vertices;
         }

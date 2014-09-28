@@ -1,4 +1,4 @@
-﻿TriList.prototype = new VertexGeometry();
+TriList.prototype = new VertexGeometry();
 TriList.prototype.constructor = TriList;
 
 function TriList()

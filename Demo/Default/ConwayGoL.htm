@@ -109,6 +109,7 @@
         <script type="text/javascript" src="../../SceneGraph/CollideDirective.js"></script>
         <script type="text/javascript" src="../../SceneGraph/ObjectMover.js"></script>
         <script type="text/javascript" src="../../SceneGraph/AnimalMover.js"></script>
+        <script type="text/javascript" src="../../SceneGraph/Cube.js"></script>
         <script type="text/javascript" src="../../Event/EventType.js"></script>
         <script type="text/javascript" src="../../Event/Event.js"></script> 
         <script type="text/javascript" src="../../Event/InputEvent.js"></script>
@@ -193,12 +194,16 @@
         </div>
         <div id="DVDControls" style="position:relative;">
             <!--<button onclick="bridgeworks.renderController.rewind();">RW</button>-->
-            <button onclick="bridgeworks.renderController.pause();">Pause</button>
-            <button onclick="bridgeworks.renderController.play();">Play</button>
-            <button onclick="bridgeworks.renderController.stop();">Stop</button>
+            <button onclick="gol.start(750);">Start</button>
+            <button onclick="gol.stop();">Stop</button>
+            <button onclick="gol.tick();">Tick</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
-            Object: <input id="objectname"/>
-            <button onclick="locate();">Locate</button>
+            Width: <input id="width" value="6" style="width:20px"/>
+            Height: <input id="height" value="6" style="width:20px" />
+            Depth: <input id="depth" value="6" style="width:20px" />
+            <button onclick="gol.uninit();gol.init(parseInt(document.getElementById('width').value),
+                                                   parseInt(document.getElementById('height').value),
+                                                   parseInt(document.getElementById('depth').value));">Reset</button>
         </div>
     </center>
 
@@ -211,8 +216,9 @@
             if (document.readyState == "complete") {
                 bridgeworks = init("ConwayGoL.xml", document.getElementById("BwContainer"));
                 gol = new GameOfLife(bridgeworks, "Models");
-                gol.init("/objects/UV_BoxG.lwo", 1, 1, 1, 2, 2, 2);
-                gol.start(1000);
+                gol.init(parseInt(document.getElementById("width").value),
+                         parseInt(document.getElementById("height").value),
+                         parseInt(document.getElementById("depth").value));
             }
         }
     </script>
