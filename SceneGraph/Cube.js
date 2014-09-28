@@ -7,10 +7,13 @@ function Cube()
     this.className = "Cube";
     this.attrType = eAttrType.Cube;
     
+    this.updateTriList = true; // update once
+    
     this.transform = new Matrix4x4();
     this.updateTransform = false;
     
     this.materialNode = new Material();
+    this.updateMaterial = false;
     
     this.color = new ColorAttr(1, 1, 1, 1);
     this.opacity = new NumberAttr(1);
@@ -18,6 +21,8 @@ function Cube()
     this.rotation = new Vector3DAttr(0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
     
+    this.color.addModifiedCB(Cube_MaterialModifiedCB, this);
+    this.opacity.addModifiedCB(Cube_MaterialModifiedCB, this);
     this.position.addModifiedCB(Cube_PositionModifiedCB, this);
     this.rotation.addModifiedCB(Cube_RotationModifiedCB, this);
     this.scale.addModifiedCB(Cube_ScaleModifiedCB, this);
@@ -84,9 +89,17 @@ Cube.prototype.update = function(params, visitChildren)
         this.transform.loadMatrix(scaleMatrix.multiply(rotationMatrix.multiply(translationMatrix)));
     }
     
-    this.materialNode.update(params, visitChildren);
-    
-    TriList.prototype.update.call(this, params, visitChildren);
+    if (this.updateMaterial)
+    {
+        this.updateMaterial = false;       
+        this.materialNode.update(params, visitChildren);
+    }
+
+    if (this.updateTriList)
+    {
+        this.updateTriList = false;
+        TriList.prototype.update.call(this, params, visitChildren);
+    }
 }
 
 Cube.prototype.apply = function(directive, params, visitChildren)
@@ -117,14 +130,8 @@ Cube.prototype.draw = function(dissolve)
     this.graphMgr.renderContext.leftMultMatrix(this.transform);
     this.graphMgr.renderContext.applyModelViewTransform();
     
-    // push current material
-    //this.graphMgr.renderState.push(RENDERSTATE_MATERIAL_BIT);
-    
     // draw primitives
     this.vertexBuffer.draw();
-
-    // pop current material
-    //this.graphMgr.renderState.pop(RENDERSTATE_MATERIAL_BIT);
     
     this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
     this.graphMgr.renderContext.popMatrix();
@@ -144,4 +151,9 @@ function Cube_RotationModifiedCB(attribute, container)
 function Cube_ScaleModifiedCB(attribute, container)
 {
     container.updateTransform = true;
+}
+
+function Cube_MaterialModifiedCB(attribute, container)
+{
+    container.updateMaterial = true;
 }

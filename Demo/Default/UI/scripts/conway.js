@@ -164,16 +164,7 @@ GameOfLife.prototype.tick = function()
     
     this.bridgeworks.updateScene(xml);
     
-    for (var i=0; i < this.objCountX; i++)
-    {     
-        for (var j=0; j < this.objCountY; j++)
-        {         
-            for (var k=0; k < this.objCountZ; k++)
-            {
-                this.currGen[i][j][k] = this.nextGen[i][j][k];
-            }
-        }
-    }
+    this.currGen = this.nextGen;
 }
 
 GameOfLife.prototype.getLiveNeighborCount = function(i, j, k)
