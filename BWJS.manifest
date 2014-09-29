@@ -107,6 +107,7 @@ SceneGraph/SerializeDirective.js
 SceneGraph/CollideDirective.js
 SceneGraph/ObjectMover.js
 SceneGraph/AnimalMover.js
+SceneGraph/Cube.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 

@@ -486,7 +486,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
 Model.prototype.pushMatrix = function()
 {
-	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
     this.graphMgr.renderContext.pushMatrix();
 }
 

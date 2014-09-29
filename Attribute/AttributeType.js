@@ -73,6 +73,7 @@ var eAttrType = {
     HTMLLabel                   :1029,
     BalloonTipLabel             :1030, 
     PathTrace                   :1031,
+    Cube                        :1032,
     
     Evaluator                   :1100,
     SceneInspector              :1101,
