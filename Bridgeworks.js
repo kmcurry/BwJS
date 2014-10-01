@@ -5361,6 +5361,17 @@ Attribute.prototype.setRegistry = function(registry)
 {
     this.registry = registry;
 }
+
+Attribute.prototype.onRegister = function(registry)
+{
+    
+}
+
+Attribute.prototype.onUnregister = function(registry)
+{
+    
+}
+
 Attribute.prototype.flagDeserializedFromXML = function()
 {
     this.deserialized = true;
@@ -5727,6 +5738,8 @@ AttributeRegistry.prototype.register = function(attribute)
     
     this.addUnique(attribute);
     this.objectCount++;
+    
+    attribute.onRegister(this);
 }
 
 AttributeRegistry.prototype.unregisterByType = function(attribute, type)
@@ -5769,6 +5782,8 @@ AttributeRegistry.prototype.unregister = function(attribute)
     
     this.removeUnique(attribute);
     this.objectCount--;
+    
+    attribute.onUnregister(this);
 }
 
 AttributeRegistry.prototype.getByType = function(type)
@@ -22193,11 +22208,11 @@ function ObjectMover()
     Evaluator.call(this);
     this.className = "ObjectMover";
     this.attrType = eAttrType.ObjectMover;
-    
+
     this.targetObject = null;
     this.motionQueue = new Queue();
     this.activeDuration = 0;
-    
+
     this.target = new StringAttr("");
     this.timeIncrement = new NumberAttr(0);
     this.linearSpeed = new NumberAttr(0); // meters/sec
@@ -22206,13 +22221,23 @@ function ObjectMover()
     this.linearVelocity = new Vector3DAttr();
     this.angularVelocity = new Vector3DAttr();
     this.scalarVelocity = new Vector3DAttr();
-        
+
+    this.enabled.addModifiedCB(ObjectMover_EnabledModifiedCB, this);
     this.target.addModifiedCB(ObjectMover_TargetModifiedCB, this);
-    
+
     this.registerAttribute(this.target, "target");
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.linearSpeed, "linearSpeed");
     this.registerAttribute(this.angularSpeed, "angularSpeed");
+}
+
+ObjectMover.prototype.onUnregister = function()
+{
+    this.motionQueue.clear();
+    this.panVelocity.setValueDirect(0, 0, 0);
+    this.linearVelocity.setValueDirect(0, 0, 0);
+    this.angularVelocity.setValueDirect(0, 0, 0);
+    this.scalarVelocity.setValueDirect(0, 0, 0);
 }
 
 ObjectMover.prototype.evaluate = function()
@@ -22290,6 +22315,19 @@ ObjectMover.prototype.connectTarget = function(target)
 
 ObjectMover.prototype.collisionDetected = function()
 {
+}
+
+function ObjectMover_EnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+    if (!enabled)
+    {
+        container.motionQueue.clear();
+        container.panVelocity.setValueDirect(0, 0, 0);
+        container.linearVelocity.setValueDirect(0, 0, 0);
+        container.angularVelocity.setValueDirect(0, 0, 0);
+        container.scalarVelocity.setValueDirect(0, 0, 0);
+    }
 }
 
 function ObjectMover_TargetModifiedCB(attribute, container)

@@ -455,6 +455,17 @@ Attribute.prototype.setRegistry = function(registry)
 {
     this.registry = registry;
 }
+
+Attribute.prototype.onRegister = function(registry)
+{
+    
+}
+
+Attribute.prototype.onUnregister = function(registry)
+{
+    
+}
+
 Attribute.prototype.flagDeserializedFromXML = function()
 {
     this.deserialized = true;

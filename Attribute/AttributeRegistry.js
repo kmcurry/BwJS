@@ -81,6 +81,8 @@ AttributeRegistry.prototype.register = function(attribute)
     
     this.addUnique(attribute);
     this.objectCount++;
+    
+    attribute.onRegister(this);
 }
 
 AttributeRegistry.prototype.unregisterByType = function(attribute, type)
@@ -123,6 +125,8 @@ AttributeRegistry.prototype.unregister = function(attribute)
     
     this.removeUnique(attribute);
     this.objectCount--;
+    
+    attribute.onUnregister(this);
 }
 
 AttributeRegistry.prototype.getByType = function(type)
