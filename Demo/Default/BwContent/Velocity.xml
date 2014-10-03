@@ -27,11 +27,11 @@
                          <scale x="100" y="100" z="100"/>
                     </Model>
                     <Model name="Cow1" url="/objects/Cow.lwo" detectCollision="true">
-                         <position x="4" y="0" z="0"/>
+                         <position x="0" y="0" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow2" url="/objects/Cow.lwo" detectCollision="true">
+                    <!--<Model name="Cow2" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="-4" y="0" z="0"/>
                          <rotation x="0" y="45" z="0"/>
                          <scale x="1" y="1" z="1"/>
@@ -70,20 +70,142 @@
                          <position x="0" y="0" z="0"/>
                          <rotation x="0" y="40" z="0"/>
                          <scale x="1" y="1" z="1"/>
+                    </Model>-->
+                    <Model name="grid1" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid2" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="1"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid3" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid4" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid5" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="4"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid6" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="5"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid7" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="6"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid8" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="7"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    
+                    <Model name="grid9" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-3" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid10" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-2" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid11" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="-1" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid12" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="0" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid13" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="1" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid14" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="2" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid15" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="3" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid16" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="4" y="0.5" z="8"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    
+                    <Model name="grid17" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="3" y="0.5" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid18" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="3" y="0.5" z="1"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid19" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="3" y="0.5" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid20" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="3" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid21" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="4" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid22" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="5" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid23" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="6" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
+                    </Model>
+                    <Model name="grid24" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                         <position x="7" y="0.5" z="3"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="2" y="2" z="2"/>
                     </Model>
                </Group>
           </Isolator>
           <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
        	  <!--<KeyframeInterpolator name="F16Motion1" url="motions/F16New.mot" target="F16"/>-->
        	  <AnimalMover name="CowMover1" target="Cow1" linearSpeed="0.5" angularSpeed="25"/>
-       	  <AnimalMover name="CowMover2" target="Cow2" linearSpeed="0.5" angularSpeed="-25"/>
+       	  <!--<AnimalMover name="CowMover2" target="Cow2" linearSpeed="0.5" angularSpeed="-25"/>
        	  <AnimalMover name="CowMover3" target="Cow3" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover4" target="Cow4" linearSpeed="0.5" angularSpeed="-25"/>
        	  <AnimalMover name="CowMover5" target="Cow5" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover6" target="Cow6" linearSpeed="0.5" angularSpeed="-25"/>
        	  <AnimalMover name="CowMover7" target="Cow7" linearSpeed="0.5" angularSpeed="25"/>
        	  <AnimalMover name="CowMover8" target="Cow8" linearSpeed="0.5" angularSpeed="-25"/>
-       	  <AnimalMover name="CowMover9" target="Cow9" linearSpeed="0.5" angularSpeed="25"/>
+       	  <AnimalMover name="CowMover9" target="Cow9" linearSpeed="0.5" angularSpeed="25"/>-->
      </Scene>
      <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
      <Set target="SceneInspector" pivotDistance="3"/>

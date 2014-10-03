@@ -286,6 +286,11 @@ function SphereTreeNode()
     this.triIndices = [];    
 }
 
+SphereTreeNode.prototype.isLeaf = function()
+{
+    return this.children.length == 0 ? true : false;    
+}
+
 SphereTreeNode.prototype.addChild = function(child)
 {
     this.children.push(child);
@@ -296,6 +301,12 @@ SphereTreeNode.prototype.intersects = function(sphereTreeNode)
 {
     return (this.sphere.intersects(sphereTreeNode.sphere));    
 }
+
+function SphereHitRec()
+{
+    this.target = null;
+    this.testList = [];
+};
 
 function BoundingTree()
 {
@@ -345,6 +356,94 @@ SphereTree.prototype.transformNode = function(matrix, node)
     {
         this.transformNode(matrix, node.children[i]);
     }
+}
+
+SphereTree.prototype.collides = function(tree)
+{
+    if (!this.root || !tree.root) // must be non-NULL
+    {
+        return false;
+    }
+
+    // check root nodes for collision
+    if (this.nodesCollide(this.root, tree.root))
+    {
+        // if both root nodes are leaves, return true
+        if (this.root.isLeaf() && tree.root.isLeaf())
+        {
+            return true;
+        }
+
+        // recursively check child nodes
+        var sphereHit = new SphereHitRec();
+        var sphereHits = [];
+        if (tree.root.isLeaf())
+        {
+            sphereHit.target = tree.root;
+            sphereHit.testList = this.root.children;
+        }
+        else
+        {
+            sphereHit.target = this.root;
+            sphereHit.testList = tree.root.children;
+        }       
+        sphereHits.push(sphereHit);
+
+        return this.testSphereHits(sphereHits);
+    }
+    
+    // root nodes do not collide
+    return false;
+}
+
+SphereTree.prototype.nodesCollide = function(node1, node2)
+{
+    return (node1.intersects(node2));    
+}
+
+SphereTree.prototype.testSphereHits = function(sphereHits)
+{
+    while (sphereHits.length > 0)
+    {
+        if (this.testSphereHit(sphereHits[0], sphereHits))
+        {
+            return true;
+        }
+        
+        sphereHits.splice(0, 1);
+    }
+
+    return false;
+}
+
+SphereTree.prototype.testSphereHit = function(sphereHit, sphereHits)
+{
+    for (var i = 0; i < sphereHit.testList.length; i++)
+    {
+        if (this.nodesCollide(sphereHit.target, sphereHit.testList[i]))
+        {
+            var nextSphereHit = new SphereHitRec();
+            nextSphereHit.target = sphereHit.testList[i];
+            if (sphereHit.target.isLeaf())
+            {
+                nextSphereHit.testList.push(sphereHit.target);
+            }
+            else
+            {
+                nextSphereHit.testList = sphereHit.target.children;
+            }
+            sphereHits.push(nextSphereHit);
+
+            // check for leaf collision
+            if (sphereHit.target.isLeaf() && sphereHit.testList[i].isLeaf())
+            {
+                return true;
+            }
+        }
+    }
+
+    // no leaf collisions
+    return false;
 }
 
 SphereTree.prototype.rayIntersectsTree = function(params)
@@ -601,17 +700,6 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
             this.buildTreeLevels(levels, regions[i].min, regions[i].max, node, node.triIndices);
         }
     }
-}
-
-Octree.prototype.collides = function(octree)
-{
-    return (this.nodesCollide(this.root, octree.root));
-    // TODO: recurse on children
-}
-
-Octree.prototype.nodesCollide = function(node1, node2)
-{
-    return (node1.intersects(node2));    
 }
 
 function rayPick(tree,

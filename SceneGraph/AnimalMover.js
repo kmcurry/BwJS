@@ -15,32 +15,8 @@ AnimalMover.prototype.evaluate = function()
 	if (this.motionQueue.length() < ANIMALMOVER_MAX_QUEUE_LENGTH)
 	{
 		var motion = new ObjectMotionDesc();
-		motion.duration = Math.random() * 5;
-		
-		var rand = Math.random();
-		if (rand < 0.25)
-		{
-			motion.validMembersMask = OBJECTMOTION_ANGULAR_BIT;
-			
-			var leftOrRight = Math.random();
-			if (leftOrRight < 0.5) // turn left
-			{
-				motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-			}
-			else // (leftOrRight >= 0.5) // turn right
-			{
-				motion.angularVelocity = new Vector3D(0, -this.angularSpeed.getValueDirect(), 0);
-			}
-		}
-		else if (rand < 0.75)
-		{
-			motion.validMembersMask = OBJECTMOTION_PAN_BIT;
-			motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
-		}
-		else // (rand >= 0.8) // rest
-		{
-			motion.validMembersMask = OBJECTMOTION_ALL_BITS;
-		}
+		motion.duration = FLT_MAX;
+		motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
 		
 		this.motionQueue.push(motion);
 	}
@@ -51,49 +27,18 @@ AnimalMover.prototype.evaluate = function()
 
 AnimalMover.prototype.collisionDetected = function(collisionList)
 {   
-    if (this.activeMotion.stopOnCollision == false)
-    {
-        return;
-    }
-    else if (this.activeMotion.reverseOnCollision == true)
-    {
-        var reverse = this.activeMotion;
-        reverse.angularVelocity.multiplyScalar(-1);
-        reverse.linearVelocity.multiplyScalar(-1);
-        reverse.panVelocity.multiplyScalar(-1);
-        reverse.scalarVelocity.multiplyScalar(-1);
-        this.motionQueue.push(reverse);
-    }
-    else
-    {
-        // clear current motions
-        this.activeMotion = null;
-        this.motionQueue.clear();
+    this.activeMotion = null;
+    this.motionQueue.clear();
+    
+    var turn = new ObjectMotionDesc();
+    turn.duration = 1 / this.angularSpeed.getValueDirect();
+    turn.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
         
-        // stop (50% of the time)
-        var rand = Math.random();
-        if (rand < 0.5)
-        {
-            var stop = new ObjectMotionDesc();
-            stop.stopOnCollision = false;
-            stop.duration = 0;
-            this.motionQueue.push(stop);
-        }
+    this.motionQueue.push(turn);
+      
+    var walk = new ObjectMotionDesc();
+    walk.duration = 1 / this.linearSpeed.getValueDirect();
+    walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
         
-        // turn 45 degrees
-        var turn45 = new ObjectMotionDesc();
-        turn45.stopOnCollision = false;
-        turn45.reverseOnCollision = false;
-        turn45.duration = (this.angularSpeed.getValueDirect() / 10) / this.angularSpeed.getValueDirect();
-        turn45.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-        this.motionQueue.push(turn45);
-        
-        // walk back
-        var walkBack = new ObjectMotionDesc();
-        walkBack.stopOnCollision = true;
-        walkBack.reverseOnCollision = true;
-        walkBack.duration = 0;
-        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-        this.motionQueue.push(walkBack); 
-    }
+    this.motionQueue.push(walk);
 }
