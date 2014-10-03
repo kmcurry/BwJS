@@ -5108,7 +5108,7 @@ Attribute.prototype.setValue = function(values, params)
         for (var i = 0; i < this.targets.length; i++)
         {
             var targetDesc = this.targets[i];
-            if (params && params.caller == targetDesc.target) continue;
+            if (caller == targetDesc.target) continue;
             var params = new AttributeSetParams(targetDesc.targetElementIndex, targetDesc.sourceElementIndex,
                                                 targetDesc.op, true, true, this);
             targetDesc.target.setValue(this.values, params);
@@ -7725,6 +7725,11 @@ function SphereTreeNode()
     this.triIndices = [];    
 }
 
+SphereTreeNode.prototype.isLeaf = function()
+{
+    return this.children.length == 0 ? true : false;    
+}
+
 SphereTreeNode.prototype.addChild = function(child)
 {
     this.children.push(child);
@@ -7735,6 +7740,12 @@ SphereTreeNode.prototype.intersects = function(sphereTreeNode)
 {
     return (this.sphere.intersects(sphereTreeNode.sphere));    
 }
+
+function SphereHitRec()
+{
+    this.target = null;
+    this.testList = [];
+};
 
 function BoundingTree()
 {
@@ -7784,6 +7795,94 @@ SphereTree.prototype.transformNode = function(matrix, node)
     {
         this.transformNode(matrix, node.children[i]);
     }
+}
+
+SphereTree.prototype.collides = function(tree)
+{
+    if (!this.root || !tree.root) // must be non-NULL
+    {
+        return false;
+    }
+
+    // check root nodes for collision
+    if (this.nodesCollide(this.root, tree.root))
+    {
+        // if both root nodes are leaves, return true
+        if (this.root.isLeaf() && tree.root.isLeaf())
+        {
+            return true;
+        }
+
+        // recursively check child nodes
+        var sphereHit = new SphereHitRec();
+        var sphereHits = [];
+        if (tree.root.isLeaf())
+        {
+            sphereHit.target = tree.root;
+            sphereHit.testList = this.root.children;
+        }
+        else
+        {
+            sphereHit.target = this.root;
+            sphereHit.testList = tree.root.children;
+        }       
+        sphereHits.push(sphereHit);
+
+        return this.testSphereHits(sphereHits);
+    }
+    
+    // root nodes do not collide
+    return false;
+}
+
+SphereTree.prototype.nodesCollide = function(node1, node2)
+{
+    return (node1.intersects(node2));    
+}
+
+SphereTree.prototype.testSphereHits = function(sphereHits)
+{
+    while (sphereHits.length > 0)
+    {
+        if (this.testSphereHit(sphereHits[0], sphereHits))
+        {
+            return true;
+        }
+        
+        sphereHits.splice(0, 1);
+    }
+
+    return false;
+}
+
+SphereTree.prototype.testSphereHit = function(sphereHit, sphereHits)
+{
+    for (var i = 0; i < sphereHit.testList.length; i++)
+    {
+        if (this.nodesCollide(sphereHit.target, sphereHit.testList[i]))
+        {
+            var nextSphereHit = new SphereHitRec();
+            nextSphereHit.target = sphereHit.testList[i];
+            if (sphereHit.target.isLeaf())
+            {
+                nextSphereHit.testList.push(sphereHit.target);
+            }
+            else
+            {
+                nextSphereHit.testList = sphereHit.target.children;
+            }
+            sphereHits.push(nextSphereHit);
+
+            // check for leaf collision
+            if (sphereHit.target.isLeaf() && sphereHit.testList[i].isLeaf())
+            {
+                return true;
+            }
+        }
+    }
+
+    // no leaf collisions
+    return false;
 }
 
 SphereTree.prototype.rayIntersectsTree = function(params)
@@ -8040,17 +8139,6 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
             this.buildTreeLevels(levels, regions[i].min, regions[i].max, node, node.triIndices);
         }
     }
-}
-
-Octree.prototype.collides = function(octree)
-{
-    return (this.nodesCollide(this.root, octree.root));
-    // TODO: recurse on children
-}
-
-Octree.prototype.nodesCollide = function(node1, node2)
-{
-    return (node1.intersects(node2));    
 }
 
 function rayPick(tree,
@@ -22366,32 +22454,8 @@ AnimalMover.prototype.evaluate = function()
 	if (this.motionQueue.length() < ANIMALMOVER_MAX_QUEUE_LENGTH)
 	{
 		var motion = new ObjectMotionDesc();
-		motion.duration = Math.random() * 5;
-		
-		var rand = Math.random();
-		if (rand < 0.25)
-		{
-			motion.validMembersMask = OBJECTMOTION_ANGULAR_BIT;
-			
-			var leftOrRight = Math.random();
-			if (leftOrRight < 0.5) // turn left
-			{
-				motion.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-			}
-			else // (leftOrRight >= 0.5) // turn right
-			{
-				motion.angularVelocity = new Vector3D(0, -this.angularSpeed.getValueDirect(), 0);
-			}
-		}
-		else if (rand < 0.75)
-		{
-			motion.validMembersMask = OBJECTMOTION_PAN_BIT;
-			motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
-		}
-		else // (rand >= 0.8) // rest
-		{
-			motion.validMembersMask = OBJECTMOTION_ALL_BITS;
-		}
+		motion.duration = FLT_MAX;
+		motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
 		
 		this.motionQueue.push(motion);
 	}
@@ -22402,51 +22466,20 @@ AnimalMover.prototype.evaluate = function()
 
 AnimalMover.prototype.collisionDetected = function(collisionList)
 {   
-    if (this.activeMotion.stopOnCollision == false)
-    {
-        return;
-    }
-    else if (this.activeMotion.reverseOnCollision == true)
-    {
-        var reverse = this.activeMotion;
-        reverse.angularVelocity.multiplyScalar(-1);
-        reverse.linearVelocity.multiplyScalar(-1);
-        reverse.panVelocity.multiplyScalar(-1);
-        reverse.scalarVelocity.multiplyScalar(-1);
-        this.motionQueue.push(reverse);
-    }
-    else
-    {
-        // clear current motions
-        this.activeMotion = null;
-        this.motionQueue.clear();
+    this.activeMotion = null;
+    this.motionQueue.clear();
+    
+    var turn = new ObjectMotionDesc();
+    turn.duration = 1 / this.angularSpeed.getValueDirect();
+    turn.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
         
-        // stop (50% of the time)
-        var rand = Math.random();
-        if (rand < 0.5)
-        {
-            var stop = new ObjectMotionDesc();
-            stop.stopOnCollision = false;
-            stop.duration = 0;
-            this.motionQueue.push(stop);
-        }
+    this.motionQueue.push(turn);
+      
+    var walk = new ObjectMotionDesc();
+    walk.duration = 1 / this.linearSpeed.getValueDirect();
+    walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
         
-        // turn 45 degrees
-        var turn45 = new ObjectMotionDesc();
-        turn45.stopOnCollision = false;
-        turn45.reverseOnCollision = false;
-        turn45.duration = (this.angularSpeed.getValueDirect() / 10) / this.angularSpeed.getValueDirect();
-        turn45.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-        this.motionQueue.push(turn45);
-        
-        // walk back
-        var walkBack = new ObjectMotionDesc();
-        walkBack.stopOnCollision = true;
-        walkBack.reverseOnCollision = true;
-        walkBack.duration = 0;
-        walkBack.panVelocity = new Vector3D(0, 0, -this.linearSpeed.getValueDirect());
-        this.motionQueue.push(walkBack); 
-    }
+    this.motionQueue.push(walk);
 }
 
 Cube.prototype = new TriList();
