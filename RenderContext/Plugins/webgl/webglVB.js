@@ -147,7 +147,7 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
                     gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
                 gl.vertexAttribPointer(program.textureCoordAttribute[i], 2, gl.FLOAT, false, 0, 0);
             }
-  
+            
             gl.drawArrays(primitiveType, 0, this.vertexCount);
         }
     }
