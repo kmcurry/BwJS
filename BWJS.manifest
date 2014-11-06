@@ -153,3 +153,5 @@ Libs/jquery/jquery-1.3.2.min.js
 Libs/jquery/jquery.hoverIntent.minified.js 
 Libs/jquery/jquery.bgiframe.min.js 
 Libs/jquery/bt/jquery.bt.min.js
+Libs/three.js/three.js
+Libs/JSModeler/build/jsmodeler.js
