@@ -219,7 +219,7 @@ function distanceBetweenPlanes(plane1, plane2)
         var intersection = lineIntersectsPlane(new Line(plane1.point, plane1.normal), plane2);
         if (intersection.result)
         {
-            return distanceBetween(plane1.point, point);
+            return distanceBetween(plane1.point, plane2.point);
         }
         else
         {

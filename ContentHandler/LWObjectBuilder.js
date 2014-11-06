@@ -70,7 +70,6 @@ LWObjectBuilder.prototype.allocateModel = function(data)
 
 LWObjectBuilder.prototype.describeModel = function(data, layer, model)
 {
-    
     var factory = this.registry.find("AttributeFactory");
     
     // set pivot if not already set by scene
@@ -85,11 +84,13 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     var triPolys = new Array(numSurfaces);
     var linePolys = new Array(numSurfaces);
     var pointPolys = new Array(numSurfaces);
+    var NPolys = new Array(numSurfaces);
     for (var i = 0; i < numSurfaces; i++)
     {
         triPolys[i] = [];
         linePolys[i] = [];
         pointPolys[i] = [];
+        NPolys[i] = [];
     }
 
     var polyIndex, surfIndex;
@@ -104,6 +105,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             case 3: triPolys[surfIndex].push(polyIndex); break;
             case 2: linePolys[surfIndex].push(polyIndex); break;
             case 1: pointPolys[surfIndex].push(polyIndex); break;
+            default: NPolys[surfIndex].push(polyIndex); break;
         }
     }
 
@@ -136,7 +138,9 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     var triLists = [];
     var triVertices = [];
     var triPolyNormals = [];
-
+    var leg1 = new Vector3D();
+    var leg2 = new Vector3D();
+        
     vertexPolyNormals.length = layer.pnts.length;
     for (var i = 0; i < vertexPolyNormals.length; i++)
     {
@@ -161,11 +165,38 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         polyOrder[surfIndex] = [];
         triPolyNormals[surfIndex] = [];
 
-        // tris   
-        var polys = triPolys[surfIndex];
+        // N-polys (triangulate then add to tris list)
+        var polys = NPolys[surfIndex];
         var numPolys = polys.length;
-        var leg1 = new Vector3D();
-        var leg2 = new Vector3D();
+        for (var polyIndex = 0; polyIndex < numPolys; polyIndex++)
+        {
+            var jsmPolygon = new JSM.Polygon();
+            var poly = layer.pols[polys[polyIndex]];
+            for (var vertex = 0; vertex < poly.length; vertex++)
+            {
+                var point = layer.pnts[poly[vertex]];
+                vertices.push([point.x, point.y, point.z]);
+
+                jsmPolygon.AddVertex(point.x, point.y, point.z);
+            }
+           
+            var triangles = JSM.PolygonTriangulate(jsmPolygon);
+            for (var i=0; i < triangles.length; i++)
+            {
+                var triPoly = [];
+                triPoly.push(poly[triangles[i][0]]);
+                triPoly.push(poly[triangles[i][1]]);
+                triPoly.push(poly[triangles[i][2]]);
+                
+                layer.pols.push(triPoly);
+                triPolys[surfIndex].push(layer.pols.length-1);
+            }
+        }
+
+        // tris   
+        vertices = [];
+        polys = triPolys[surfIndex];
+        numPolys = polys.length;
         for (var polyIndex = 0; polyIndex < numPolys; polyIndex++)
         {
             var poly = layer.pols[polys[polyIndex]];
@@ -236,8 +267,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
 
             triList.getAttribute("vertices").setValue(vertices);
             triList.getAttribute("normals").setValue(normals);
-console.log(vertices);
-console.log(normals);
+
             triLists[surfIndex] = triList;
             triVertices[surfIndex] = vertices;
         }

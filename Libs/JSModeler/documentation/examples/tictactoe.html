@@ -1,0 +1,339 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	 "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+<head>
+
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="tictactoe.css">
+	<script type="text/javascript" src="../../build/three.min.js"></script>
+	<script type="text/javascript" src="../../build/jsmodeler.js"></script>
+	<script type="text/javascript" src="tictactoe.js"></script>
+	<title>3D Tic-Tac-Toe</title>
+	
+	<script type="text/javascript">
+		var viewer = null;
+		var mouseMoved = null;
+		var touchMoved = null;
+		var ticTacToe = null;
+		var hasWinner = null;
+		var error = null;
+
+		function Step (player, index)
+		{
+			function GetItemModel (ticTacToe, i, j, k)
+			{
+				var model = new JSM.Model ();
+				
+				var materials = new JSM.Materials ();
+				materials.AddMaterial (new JSM.Material ({ambient : 0x008ab8, diffuse : 0x008ab8}));
+				materials.AddMaterial (new JSM.Material ({ambient : 0xcc3333, diffuse : 0xcc3333}));
+				
+				var offset = ticTacToe.shapeSize * 1.5;
+
+				var body = JSM.GenerateSphere (ticTacToe.shapeSize / 2.0, 20, true);
+				var player = ticTacToe.table[i][j][k];
+				if (player == 1) {
+					body.SetPolygonsMaterialIndex (0);
+				} else {
+					body.SetPolygonsMaterialIndex (1);
+				}
+				
+				transformation = JSM.TranslationTransformation (new JSM.Vector (offset * i, offset * j, offset * k));
+				body.Transform (transformation);
+
+				model.AddBody (body);
+				
+				return [model, materials];			
+			}
+
+			var mesh = null;
+			
+			viewer.scene.traverse (function (current) {
+				if (current instanceof THREE.Mesh) {
+					if (current.ticTacToeId == index) {
+						mesh = current;
+						return;
+					}
+				}
+			});
+			
+			viewer.RemoveMesh (mesh);
+			var ijk = ticTacToe.IndexToDimensions (index);
+
+			ticTacToe.StepWithDimensions (player, ijk[0], ijk[1], ijk[2]);
+			var model = GetItemModel (ticTacToe, ijk[0], ijk[1], ijk[2]);
+			var conversionData = {
+				textureLoadedCallback : null,
+				hasConvexPolygons : true
+			};
+			var meshes = JSM.ConvertModelToThreeMeshes (model[0], model[1], conversionData);
+			for (var i = 0; i < meshes.length; i++) {
+				viewer.AddMesh (meshes[i]);
+			}
+		}
+		
+		function OpenWinnerDialog (winner)
+		{
+			var floating = document.getElementById ('floating');
+			var floatingtext = document.getElementById ('floatingtext');
+			switch (winner) {
+				case 0:
+					floatingtext.innerHTML = "Drawn!"
+					break;
+				case 1:
+					floatingtext.innerHTML = "You Win!"
+					break;
+				case 2:
+					floatingtext.innerHTML = "Computer Win!"
+					break;
+			}
+			floating.style.display = 'block';
+		}
+		
+		function CloseWinnerDialog ()
+		{
+			var floating = document.getElementById ('floating');
+			floating.style.display = 'none';
+		}
+
+		function UserStep (index)
+		{
+			var i, step;
+			for (i = 1; i <= 2; i++) {
+				if (i == 1) {
+					step = index;
+				} else if (i == 2) {
+					step = ticTacToe.CalculateComputerStep ();
+				}
+				Step (i, step);
+				winner = ticTacToe.GetWinner ()
+				if (winner != -1) {
+					OpenWinnerDialog (winner);
+					hasWinner = true;
+					break;
+				}
+			}
+		}
+		
+		function UserClicked (isTouch)
+		{
+			if (hasWinner) {
+				return;
+			}
+		
+			var objects = [];
+			if (isTouch) {
+				objects = viewer.GetObjectsUnderTouch ();
+			} else {
+				objects = viewer.GetObjectsUnderMouse ();
+			}
+
+			var i;
+			var index = -1;
+			for (i = 0; i < objects.length; i++) {
+				if (objects[i].object instanceof THREE.Mesh) {
+					if (objects[i].object.ticTacToeId !== undefined) {
+						index = objects[i].object.ticTacToeId;
+						break;
+					}
+				}
+			}
+			
+			var winner;
+			if (index != -1) {
+				UserStep (index);
+			}
+		}
+		
+		function SetDifficultyButton (difficulty)
+		{
+			var controls = document.getElementById ('controls');
+			var buttons = document.getElementsByTagName ('a');
+			var i;
+			for (i = 1; i < 4; i++) {
+				buttons[i].className = 'notactive';
+				if (i == 1 + difficulty) {
+					buttons[i].className = 'active';
+				}
+			}
+		}
+
+		function Reset (difficulty)
+		{
+			function GetEmptyTableModel (ticTacToe)
+			{
+				var model = new JSM.Model ();
+				var materials = new JSM.Materials ();
+				materials.AddMaterial (new JSM.Material ({ambient : 0x000000, diffuse : 0x000000, specular : 0x000000, shininess : 0.0, opacity : 0.1}));
+				
+				var offset = ticTacToe.shapeSize * 1.5;
+
+				var i, j, k;
+				var body, transformation;
+				for (k = ticTacToe.zSize - 1; k >= 0; k--) {
+					for (j = 0; j < ticTacToe.ySize; j++) {
+						for (i = 0; i < ticTacToe.xSize; i++) {
+							body = JSM.GenerateCircle (ticTacToe.shapeSize / 2.0, 20);
+							body.SetPolygonsMaterialIndex (0);
+							
+							transformation = JSM.TranslationTransformation (new JSM.Vector (offset * i, offset * j, offset * k));
+							body.Transform (transformation);
+							
+							body.ticTacToeId = ticTacToe.DimensionsToIndex ([i, j, k]);
+							model.AddBody (body);
+						}
+					}
+				}
+				
+				return [model, materials];
+			}
+
+			if (error) {
+				return;
+			}
+			
+			if (difficulty == -1) {
+				difficulty = 1;
+				if (ticTacToe !== null) {
+					difficulty = ticTacToe.GetDifficulty ();
+				}
+			}
+			SetDifficultyButton (difficulty);
+			ticTacToe.Initialize (4, difficulty);
+			
+			viewer.RemoveMeshes ();
+			CloseWinnerDialog ();
+		
+			var model = GetEmptyTableModel (ticTacToe);
+			var conversionData = {
+				textureLoadedCallback : null,
+				hasConvexPolygons : true
+			};
+			var meshes = JSM.ConvertModelToThreeMeshes (model[0], model[1], conversionData);
+			for (var i = 0; i < meshes.length; i++) {
+				meshes[i].ticTacToeId = model[0].GetBody (i).ticTacToeId;
+				viewer.AddMesh (meshes[i]);
+			}
+			
+			hasWinner = false;
+		}
+
+		function OnMouseDown (event)
+		{
+			mouseMoved = false;
+		}
+		
+		function OnMouseMove (event)
+		{
+			mouseMoved = true;
+		}
+
+		function OnMouseUp (event)
+		{
+			if (!mouseMoved) {
+				UserClicked (false);
+			}
+			
+			mouseMoved = false;
+		}
+		
+		function OnTouchStart (event)
+		{
+			touchMoved = false;
+		}
+		
+		function OnTouchMove (event)
+		{
+			touchMoved = true;
+		}
+
+		function OnTouchEnd (event)
+		{
+			if (!touchMoved) {
+				UserClicked (true);
+			}
+			
+			touchMoved = false;
+		}
+		
+		function Resize ()
+		{
+			var margin = 20;
+			var canvas = document.getElementById ('example');
+			var controls = document.getElementById ('controls');
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight - controls.clientHeight - margin;
+		}
+
+		function Load ()
+		{
+			window.onresize = Resize;
+			Resize ();
+			
+			ticTacToe = new TicTacToe ();
+
+			var viewerSettings = {
+				cameraEyePosition : [14.0, -14.0, 16.0],
+				cameraCenterPosition : [4.5, 4.5, 4.5],
+				cameraUpVector : [0.0, 0.0, 1.0]
+			};
+
+			var canvas = document.getElementById ('example');
+			if (canvas.addEventListener) {
+				canvas.addEventListener ('mousedown', function (event) {OnMouseDown (event);}, false);
+				canvas.addEventListener ('mousemove', function (event) {OnMouseMove (event);}, false);
+				canvas.addEventListener ('mouseup', function (event) {OnMouseUp (event);}, false);
+				canvas.addEventListener ('touchstart', function (event) {OnTouchStart (event);}, false);
+				canvas.addEventListener ('touchmove', function (event) {OnTouchMove (event);}, false);
+				canvas.addEventListener ('touchend', function (event) {OnTouchEnd (event);}, false);
+			}
+			
+			error = false;
+			viewer = new JSM.ThreeViewer ();
+			if (!viewer.Start ('example', viewerSettings)) {
+				document.body.innerHTML = '';
+				alert ('Your browser does not support WebGL.');
+				error = true;
+				return;
+			}
+			viewer.navigation.EnableZoom (false);
+			viewer.navigation.EnablePan (false);
+			
+			Reset (1);
+		}
+
+	    window.onload = function ()
+		{
+			Load ();
+		}
+	</script>
+
+</head>
+
+<body>
+	<div id="controls">
+		<div class="left">
+			<a class="" href="javascript:Reset (-1);">start new game</a>
+		</div>
+		<div class="center">
+			the traditional game now changed to 3D
+		</div>
+		<div class="right">
+			<a href="javascript:Reset (0);">easy</a>
+			<a href="javascript:Reset (1);">medium</a>
+			<a href="javascript:Reset (2);">hard</a>
+		</div>
+	</div>
+	<div class="clearer"></div>
+	<canvas id="example" width="900" height="700"></canvas>
+	<div id="floating">
+		<div id="floatingtext"></div>
+		<div id="floatingbutton">
+			<a href="javascript:CloseWinnerDialog ();">close</a>
+		</div>
+	</div>
+</body>
+
+</html>
