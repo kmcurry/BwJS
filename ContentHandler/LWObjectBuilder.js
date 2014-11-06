@@ -165,15 +165,11 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         polyOrder[surfIndex] = [];
         triPolyNormals[surfIndex] = [];
 
-        // N-polys
-        vertices = [];
+        // N-polys (triangulate then add to tris list)
         var polys = NPolys[surfIndex];
         var numPolys = polys.length;
-        var nvertices = [];
-        var nnormals = [];
         for (var polyIndex = 0; polyIndex < numPolys; polyIndex++)
         {
-            vertices = [];
             var jsmPolygon = new JSM.Polygon();
             var poly = layer.pols[polys[polyIndex]];
             for (var vertex = 0; vertex < poly.length; vertex++)
@@ -182,73 +178,20 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
                 vertices.push([point.x, point.y, point.z]);
 
                 jsmPolygon.AddVertex(point.x, point.y, point.z);
-                //vertexOrder[surfIndex].push(poly[vertex]);
-                //vertexMinMax[surfIndex].first = Math.min(poly[vertex], vertexMinMax[surfIndex].first);
-                //vertexMinMax[surfIndex].second = Math.min(poly[vertex], vertexMinMax[surfIndex].second);
-                //polyOrder[surfIndex].push(polys[polyIndex]);
             }
-            /*
-            // get vertex indices
-            var vertIndex0 = poly[0];
-            var vertIndex1 = poly[1];
-            var vertIndex2 = poly[2];
-
-            // calculate polygon normal
-            var point0 = layer.pnts[vertIndex0];
-            var point1 = layer.pnts[vertIndex1];
-            var point2 = layer.pnts[vertIndex2];*/
            
-            //var triangles = THREE.Shape.Utils.triangulateShape(vertices, false);
             var triangles = JSM.PolygonTriangulate(jsmPolygon);
             for (var i=0; i < triangles.length; i++)
             {
-                for (var j=0; j < 3; j++)
-                {
-                    nvertices.push(layer.pnts[poly[triangles[i][j]]].x);
-                    nvertices.push(layer.pnts[poly[triangles[i][j]]].y);
-                    nvertices.push(layer.pnts[poly[triangles[i][j]]].z);                 
-                }
+                var triPoly = [];
+                triPoly.push(poly[triangles[i][0]]);
+                triPoly.push(poly[triangles[i][1]]);
+                triPoly.push(poly[triangles[i][2]]);
                 
-                // calculate polygon normal
-                var point0 = new Vector3D(layer.pnts[poly[triangles[i][0]]].x, layer.pnts[poly[triangles[i][0]]].y, layer.pnts[poly[triangles[i][0]]].z);
-                var point1 = new Vector3D(layer.pnts[poly[triangles[i][1]]].x, layer.pnts[poly[triangles[i][1]]].y, layer.pnts[poly[triangles[i][1]]].z);
-                var point2 = new Vector3D(layer.pnts[poly[triangles[i][2]]].x, layer.pnts[poly[triangles[i][2]]].y, layer.pnts[poly[triangles[i][2]]].z);
-    
-                leg1.load(point1.x - point0.x,
-                          point1.y - point0.y,
-                          point1.z - point0.z);
-    
-                leg2.load(point2.x - point0.x,
-                          point2.y - point0.y,
-                          point2.z - point0.z);
-    
-                var cross = crossProduct(leg1, leg2);
-                cross.normalize();
-    
-                nnormals.push(cross.x)
-                nnormals.push(cross.y);
-                nnormals.push(cross.z);
-    
-                nnormals.push(cross.x)
-                nnormals.push(cross.y);
-                nnormals.push(cross.z);
-    
-                nnormals.push(cross.x)
-                nnormals.push(cross.y);
-                nnormals.push(cross.z);
+                layer.pols.push(triPoly);
+                triPolys[surfIndex].push(layer.pols.length-1);
             }
         }
-        if (nvertices.length)
-            {
-                var triList = factory.create("TriList");
-
-                model.addGeometry(triList, surfaces[surfIndex]); // TODO: call method that accepts indices
-
-                triList.getAttribute("vertices").setValue(nvertices);
-                triList.getAttribute("normals").setValue(nnormals);
-
-                nvertices = [];
-            }
 
         // tris   
         vertices = [];
