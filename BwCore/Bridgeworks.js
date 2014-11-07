@@ -5,7 +5,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
 {
     AttributeContainer.call(this);
     this.className = "Bridgeworks";
-    
+
     this.renderContext =  newRenderContext("webgl", canvas, bgImage);
     if (!this.renderContext) return;
 
@@ -13,12 +13,12 @@ function Bridgeworks(canvas, bgImage, contentDir)
 
     this.canvas = canvas;
     this.contentDir = contentDir;
-    
+
     // allocate objects
     //this.renderContext = null;
     this.graphMgr = new GraphMgr();
     this.graphMgr.setRenderContext(this.renderContext)
-    
+
     this.styleMgr = new StyleMgr();
     this.registry = new BwRegistry();
     this.factory = new AttributeFactory();
@@ -35,7 +35,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout = new GridLayout();
     this.mapProjectionCalculator = new MapProjectionCalculator();
     this.rasterComponentEventListener = new RasterComponentEventListener();
-     
+
     // set registry to allocated objects
     this.graphMgr.setRegistry(this.registry);
     this.factory.setRegistry(this.registry);
@@ -49,33 +49,37 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout.setRegistry(this.registry);
     this.mapProjectionCalculator.setRegistry(this.registry);
     this.rasterComponentEventListener.setRegistry(this.registry);
-    
+
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);
     this.selector.setRayPick(this.rayPick);
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
-    
+
     this.name = new StringAttr("Bridgeworks");
     this.onLoad = new StringAttr();
-    
+
     this.onLoad.addModifiedCB(Bridgeworks_OnLoadModifiedCB, this);
-    
+
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.onLoad, "onLoad");
-    
+
     this.viewportMgr.getAttribute("width").setValueDirect(this.canvas.width);
-    this.viewportMgr.getAttribute("height").setValueDirect(this.canvas.height);    
+    this.viewportMgr.getAttribute("height").setValueDirect(this.canvas.height);
     this.viewportMgr.getAttribute("layout").setValueDirect(this.layout);
-    
+
     enumerateAttributeTypes();
     enumerateAttributeElementTypes();
-    
+
     // TODO: remove the following when onLoadModified is defined
     console.debug("TODO: " + arguments.callee.name);
     this.initRegistry();
     this.initEventListeners();
     this.viewportMgr.initLayout();
+}
+
+Bridgeworks.prototype.get = function(name) {
+  return this.registry.find(name);
 }
 
 Bridgeworks.prototype.handleEvent = function(event)
@@ -86,7 +90,7 @@ Bridgeworks.prototype.handleEvent = function(event)
     {
         case "MouseEvent":
             {
-                var absPos = getElementAbsolutePos(this.canvas);            
+                var absPos = getElementAbsolutePos(this.canvas);
                 event.canvasX = event.clientX - absPos.x;
                 event.canvasY = event.clientY - absPos.y;
                 bwEvent = this.eventAdapter.createMouseEvent(event);
@@ -152,7 +156,7 @@ Bridgeworks.prototype.initEventListeners = function()
     this.eventMgr.addListener(eEventType.MouseWheelUp, this.rasterComponentEventListener);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.rasterComponentEventListener);
     this.eventMgr.addListener(eEventType.MouseHover, this.rasterComponentEventListener);
-    this.eventMgr.addListener(eEventType.MouseMove, this.rasterComponentEventListener);    
+    this.eventMgr.addListener(eEventType.MouseMove, this.rasterComponentEventListener);
 }
 
 Bridgeworks.prototype.onLoadModified = function()
@@ -218,10 +222,10 @@ Bridgeworks.prototype.resize = function(width, height)
 Bridgeworks.prototype.render = function()
 {
     this.eventMgr.processEvent(new Event(eEventType.RenderBegin));
-    
+
     this.renderContext.clear();
     this.renderAgent.render();
-    
+
     this.eventMgr.processEvent(new Event(eEventType.RenderEnd));
 }
 
