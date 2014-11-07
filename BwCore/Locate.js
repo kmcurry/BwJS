@@ -11,7 +11,7 @@ function LocateCommand()
     this.directive = new BBoxDirective();
     this.locator = new BBoxLocator();
     this.inspector = null;
-    
+
 	this.duration = new NumberAttr(1);
 	this.transition = new BooleanAttr(true);
 	this.updateClipPlanes = new BooleanAttr(false);
@@ -21,9 +21,9 @@ function LocateCommand()
 	this.resultPosition = new Vector3DAttr();
 	this.resultFarDistance = new NumberAttr();
 	this.resultWidth = new NumberAttr();
-    
+
     this.target.addModifiedCB(LocateCommand_TargetModifiedCB, this);
-    
+
 	this.registerAttribute(this.duration, "duration");
 	this.registerAttribute(this.transition, "transition");
 	this.registerAttribute(this.updateClipPlanes, "updateClipPlanes");
@@ -129,7 +129,7 @@ LocateCommand.prototype.locate = function()
 
         locatorResultPosition.removeTarget(cameraPosition);
 
-        // removing null or non-targets is harmless, 
+        // removing null or non-targets is harmless,
         // so no need to check, just call remove
         locatorResultWidth.removeTarget(cameraWidth);
         locatorResultFarDistance.removeTarget(cameraFar);
@@ -148,7 +148,7 @@ LocateCommand.prototype.locate = function()
 
         locatorResultPosition.removeTarget(this.resultPosition);
 
-        // removing null or non-targets is harmless, 
+        // removing null or non-targets is harmless,
         // so no need to check, just call remove
         locatorResultWidth.removeTarget(this.resultWidth);
         locatorResultFarDistance.removeTarget(this.resultFarDistance);
@@ -188,15 +188,15 @@ LocateCommand.prototype.locate = function()
                     var factory = this.registry.find("AttributeFactory");
                     var autoInterpolate = factory.create("AutoInterpolate");
 
-                    autoInterpolate.attributeReferencePairs.push(new Pair(this.resultPosition, cameraPosition));
+                    autoInterpolate.attributeRefPairs.push(new Pair(this.resultPosition, cameraPosition));
                 }
                 break;
         }
 
         if (updateClipPlanes)
         {
-            if (cameraWidth) autoInterpolate.attributeReferencePairs.push(new Pair(this.resultWidth, cameraWidth));
-            if (cameraFar) autoInterpolate.attributeReferencePairs.push(new Pair(this.resultFarDistance, cameraFar));
+            if (cameraWidth) autoInterpolate.attributeRefPairs.push(new Pair(this.resultWidth, cameraWidth));
+            if (cameraFar) autoInterpolate.attributeRefPairs.push(new Pair(this.resultFarDistance, cameraFar));
         }
 
         autoInterpolate.target = camera;
@@ -218,7 +218,7 @@ function LocateCommand_TargetModifiedCB(attribute, container)
     if (resource)
     {
         container.targetNode = resource;
-        
+
         // try and locate a scene inspector for updating pivotDistance
         container.inspector = container.registry.find("SceneInspector");
     }

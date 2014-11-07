@@ -11,7 +11,7 @@ function AutoInterpolateCommand()
     this.numValueChannels = 0;
     this.numReferenceChannels = 0;
     this.numChannels = 0;
-    
+
     this.shape = new NumberAttr(eKeyframeShape.Linear);
     this.duration = new NumberAttr(1);
     this.preBehavior = new NumberAttr(eEndBehavior.Constant);
@@ -49,16 +49,16 @@ AutoInterpolateCommand.prototype.buildMotion = function()
     }
     this.kfi.getAttribute("enabled").setValueDirect(false);
     this.kfi.getAttribute("renderAndRelease").copyValue(this.renderAndRelease);
-    
+
     // TODO: name the interpolator based on the target
 
     for (var i = 0; i < this.attributeValuePairs.length; i++)
     {
         this.numValueChannels += this.attributeValuePairs[i].first.getLength();
     }
-    for (var i = 0; i < this.attributeReferencePairs.length; i++)
+    for (var i = 0; i < this.attributeRefPairs.length; i++)
     {
-        this.numReferenceChannels += this.attributeReferencePairs[i].first.getLength();
+        this.numReferenceChannels += this.attributeRefPairs[i].first.getLength();
     }
     this.numChannels = this.numValueChannels + this.numReferenceChannels;
     this.kfi.setNumChannels(this.numChannels);
@@ -107,7 +107,7 @@ AutoInterpolateCommand.prototype.applyAttributeValues = function()
             var startVal = parseFloat(attr.getElement(j));
             var endVal = parseFloat(attr.getLength() > 1 ? value[j] : value);
 
-            // if the attribute is rotational (determined by "rotation" or "angle" as the attribute name), 
+            // if the attribute is rotational (determined by "rotation" or "angle" as the attribute name),
             // ensure motion will be the shortest path (eliminate the spin caused by 360's)
             if (this.isAttributeRotational(attr))
             {
@@ -136,10 +136,10 @@ AutoInterpolateCommand.prototype.applyAttributeRefs = function()
     // j = element of an Attribute, always 0 for primitive Attrs or 0-length-1 for complex
     // k = index in attribute values map
     var i, j, k;
-    for (i = 0, k = 0; k < this.attributeReferencePairs.length; k++)
+    for (i = 0, k = 0; k < this.attributeRefPairs.length; k++)
     {
-        var ref = this.attributeReferencePairs[k].first;
-        var attr = this.attributeReferencePairs[k].second;
+        var ref = this.attributeRefPairs[k].first;
+        var attr = this.attributeRefPairs[k].second;
 
         // for each channel:
         // 1. create a starting keyframe from target's current value for each attribute
@@ -161,7 +161,7 @@ AutoInterpolateCommand.prototype.applyAttributeRefs = function()
             var startVal = parseFloat(attr.getElement(j));
             var endVal = parseFloat(ref.getElement(j));
 
-            // if the attribute is rotational (determined by "rotation" or "angle" as the attribute name), 
+            // if the attribute is rotational (determined by "rotation" or "angle" as the attribute name),
             // ensure motion will be the shortest path (eliminate the spin caused by 360's)
             if (this.isAttributeRotational(attr))
             {
@@ -242,7 +242,7 @@ AutoInterpolateCommand.prototype.shortestPath = function(start, end)
 
     // calculate direct path
     var directPath = nend - nstart;
-    if (directPath <= 180 && directPath >= -180) 
+    if (directPath <= 180 && directPath >= -180)
     {
         return { start: start, end: end }; // direct path is shortest path, no changes necessary
     }
@@ -261,14 +261,14 @@ AutoInterpolateCommand.prototype.shortestPath = function(start, end)
     // update start/end so that shortest path is traversed
     start = nstart;
     if (nend > nstart)
-    {       
+    {
         end = nstart - shortestPath;
     }
     else
     {
         end = nstart + shortestPath;
     }
-    
+
     return { start: start, end: end };
 }
 
@@ -288,5 +288,5 @@ function AutoInterpolateCommand_TargetModifiedCB(attribute, container)
     }
 
     setAttributeBin(container.attributeValuePairs);
-    setAttributePairs(container.attributeReferencePairs);
+    setAttributePairs(container.attributeRefPairs);
 }
