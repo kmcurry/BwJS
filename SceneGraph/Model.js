@@ -50,6 +50,9 @@ function Model()
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
+    this.highlight = new BooleanAttr(false);
+    this.highlightColor = new ColorAttr(1, 1, 0, 1);
+    this.highlightWidth = new NumberAttr(5);
     
     this.show.addTarget(this.enabled);
     
@@ -120,6 +123,9 @@ function Model()
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
+    this.registerAttribute(this.highlight, "highlight");
+    this.registerAttribute(this.highlightColor, "highlightColor");
+    this.registerAttribute(this.highlightWidth, "highlightWidth");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -474,7 +480,32 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
             break;
-            
+           
+        case "highlight":
+            {
+                if (this.highlight.getValueDirect())
+                {
+                    var target = new HighlightTarget();
+                    target.projMatrix = params.projMatrix;
+                    target.viewMatrix = params.viewMatrix;
+                    target.worldMatrix = this.sectorTransformCompound.multiply(params.worldMatrix);
+                    target.camera = params.camera;
+                    target.viewport = params.viewport;
+                    target.center = this.center.getValueDirect();
+                    var highlightColor = this.highlightColor.getValueDirect();
+                    target.highlightColor_r = highlightColor.r;
+                    target.highlightColor_g = highlightColor.g;
+                    target.highlightColor_b = highlightColor.b;
+                    target.highlightColor_a = highlightColor.a;
+                    target.highlightWidth = this.highlightWidth.getValueDirect();
+                    params.targets.push(target);
+
+                    // call base-class implementation
+                    ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+                }
+            }
+            break;  
+         
         default:
             {
                 // call base-class implementation
@@ -561,6 +592,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
     this.connectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
     this.connectGeometryAttribute(geometry, this.shadowTarget, "shadowTarget");
     this.connectGeometryAttribute(geometry, this.renderSequenceSlot, "renderSequenceSlot");
+    this.connectGeometryAttribute(geometry, this.highlight, "highlight");
 }
 
 Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)

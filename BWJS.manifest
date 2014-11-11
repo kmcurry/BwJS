@@ -105,6 +105,7 @@ SceneGraph/Translate.js
 SceneGraph/MultiTargetObserver.js
 SceneGraph/SerializeDirective.js
 SceneGraph/CollideDirective.js
+SceneGraph/HighlightDirective.js
 SceneGraph/ObjectMover.js
 SceneGraph/AnimalMover.js
 SceneGraph/Cube.js

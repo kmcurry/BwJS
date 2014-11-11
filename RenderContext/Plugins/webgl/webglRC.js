@@ -42,8 +42,10 @@ function webglRC(canvas, background)
 
     gl.clearColor(0, 0, 0, background ? 0 : 1);
     gl.clearDepth(1);
+    gl.clearStencil(0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+    gl.disable(gl.STENCIL_TEST);
     gl.frontFace(gl.CW);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
@@ -89,11 +91,15 @@ function webglRC(canvas, background)
         gl.uniformMatrix4fv(program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
     }
     
-    this.clear = function()
+    this.clear = function(mask)
     {
-        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, null);
+        mask = mask || (RC_COLOR_BUFFER_BIT | RC_DEPTH_BUFFER_BIT);
         
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);// | gl.STENCIL_BUFFER_BIT);
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, [mask]);
+        
+        gl.clear((mask & RC_COLOR_BUFFER_BIT   ? gl.COLOR_BUFFER_BIT   : 0) |
+                 (mask & RC_DEPTH_BUFFER_BIT   ? gl.DEPTH_BUFFER_BIT   : 0) |
+                 (mask & RC_STENCIL_BUFFER_BIT ? gl.STENCIL_BUFFER_BIT : 0));
     }
 
     this.clearColor = function(r, g, b, a)
@@ -101,6 +107,20 @@ function webglRC(canvas, background)
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearColor, [r, g, b, a]);
         
         gl.clearColor(r, g, b, a);
+    }
+    
+    this.clearDepth = function(d)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearDepth, [d]);
+        
+        gl.clearDepth(d);
+    }
+    
+    this.clearStencil = function(s)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearStencil, [s]);
+        
+        gl.clearStencil(s);  
     }
     
     this.createVertexBuffer = function(numVerticesPerPrimitive)
@@ -142,6 +162,10 @@ function webglRC(canvas, background)
             case eRenderMode.Lighting:
                 gl.uniform1i(program.lightingEnabled, false); 
                 break;
+                
+            case eRenderMode.StencilTest:
+                gl.disable(gl.STENCIL_TEST);
+                break;
         }
     }
 
@@ -169,6 +193,10 @@ function webglRC(canvas, background)
 
             case eRenderMode.Lighting:
                 gl.uniform1i(program.lightingEnabled, true);
+                break;
+                
+            case eRenderMode.StencilTest:
+                gl.enable(gl.STENCIL_TEST);
                 break;
         }
     }
@@ -199,6 +227,10 @@ function webglRC(canvas, background)
 
             case eRenderMode.Lighting:
                 e = gl.getUniform(program, program.lightingEnabled);
+                break;
+                
+            case eRenderMode.StencilTest:
+                e = gl.getParameter(gl.STENCIL_TEST);
                 break;
         }
 
@@ -360,6 +392,27 @@ function webglRC(canvas, background)
         gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
     }
 
+    this.setDepthFunc = function(func)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetDepthFunc, [func]);
+        
+        var gl_DepthFunc;
+        switch (func)
+        {
+        case eDepthFunc.Never:          gl_DepthFunc = gl.NEVER; break;
+        case eDepthFunc.Less:           gl_DepthFunc = gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_DepthFunc = gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_DepthFunc = gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_DepthFunc = gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_DepthFunc = gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_DepthFunc = gl.GREATER; break;
+        case eDepthFunc.Always:         gl_DepthFunc = gl.ALWAYS; break;
+        }
+        
+        gl.depthFunc(gl_DepthFunc);
+           
+    }
+    
     this.setEnabledLights = function(indices)
     {
         if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledLights, [indices]);
@@ -558,6 +611,78 @@ function webglRC(canvas, background)
         vLightMatrices[index] = modelViewMatrix;
     }
 
+    this.setShadeModel = function(model)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetShadeModel, [model]);
+        
+        // TODO
+    }
+    
+    this.setStencilFunc = function(func, ref, mask)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilFunc, [func, ref, mask]);
+        
+        var gl_StencilFunc;
+        switch (func)
+        {
+        case eDepthFunc.Never:          gl_StencilFunc = gl.NEVER; break;
+        case eDepthFunc.Less:           gl_StencilFunc = gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_StencilFunc = gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_StencilFunc = gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_StencilFunc = gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_StencilFunc = gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_StencilFunc = gl.GREATER; break;
+        case eDepthFunc.Always:         gl_StencilFunc = gl.ALWAYS; break;
+        }
+        
+        gl.stencilFunc(gl_StencilFunc, ref, mask);
+    }
+            
+    this.setStencilMask = function(mask)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilMask, [mask]);
+        
+        gl.stencilMask(mask);
+    } 
+    
+    this.setStencilOp = function(fail, zFail, zPass)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilOp, [fail, zFail, zPass]);
+       
+        var gl_Fail;
+        switch (fail)
+        {
+        case eStencilOp.Keep:           gl_Fail = gl.KEEP; break;
+        case eStencilOp.Replace:        gl_Fail = gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_Fail = gl.INCR; break;
+        case eStencilOp.Decrement:      gl_Fail = gl.DECR; break;
+        case eStencilOp.Invert:         gl_Fail = gl.INVERT; break;
+        case eStencilOp.Zero:           gl_Fail = gl.ZERO; break;
+        }
+        
+        switch (zFail)
+        {
+        case eStencilOp.Keep:           gl_ZFail = gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZFail = gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZFail = gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZFail = gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZFail = gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZFail = gl.ZERO; break;
+        }
+        
+        switch (zPass)
+        {
+        case eStencilOp.Keep:           gl_ZPass = gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZPass = gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZPass = gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZPass = gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZPass = gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZPass = gl.ZERO; break;
+        }
+        
+        gl.stencilOp(gl_Fail, gl_ZFail, gl_ZPass);
+    }
+    
     this.setTextureBlendFactor = function(factor)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureBlendFactor, [factor]);
@@ -589,11 +714,12 @@ function getWebGLContext(canvas, debug)
     {
         if (debug)
         {
-            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { antialias : false, preserveDrawingBuffer: true }));
+            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { stencil: true, antialias: false, preserveDrawingBuffer: true }));
         }
         else // !debug
         {
-            gl = (canvas.getContext("webgl", { antialias : true, preserveDrawingBuffer: true }) || canvas.getContext("experimental-webgl", { antialias : true, preserveDrawingBuffer: true }));
+            gl = (canvas.getContext("webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }) || 
+                  canvas.getContext("experimental-webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }));
         }
     }    
     catch (e) 
@@ -632,6 +758,8 @@ function getProgram(gl, vShader, fShader)
     gl.enableVertexAttribArray(program.vertexPositionAttribute);
     program.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
     gl.enableVertexAttribArray(program.vertexNormalAttribute);
+    program.vertexColorAttribute = gl.getAttribLocation(program, "aVertexColor");
+    gl.enableVertexAttribArray(program.vertexColorAttribute);
     program.textureCoordAttribute = new Array(gl_MaxTextureStages);
     for (var i=0; i < gl_MaxTextureStages; i++)
     {

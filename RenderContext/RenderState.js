@@ -83,8 +83,8 @@ function RenderState(rc)
 
         if (mask & RENDERSTATE_ZBUFFER_BIT)
         {
-            rec.zBufferEnabled = this.renderContext.enabled(eRenderMode.depthTest);
-            rec.zBufferWriteEnabled = this.renderContext.enabled(eRenderMode.depthBufferWrite);
+            rec.zBufferEnabled = this.renderContext.enabled(eRenderMode.DepthTest);
+            rec.zBufferWriteEnabled = this.renderContext.enabled(eRenderMode.DepthBufferWrite);
         }
 
         return rec;
@@ -141,7 +141,7 @@ function RenderState(rc)
         {
             if (rec.zBufferEnabled)
             {
-                this.renderContext.enable(eRenderMode.depthTest);
+                this.renderContext.enable(eRenderMode.DepthTest);
             }
             else
             {
@@ -150,11 +150,11 @@ function RenderState(rc)
 
             if (rec.zBufferWriteEnabled)
             {
-                this.renderContext.enable(eRenderMode.depthBufferWrite);
+                this.renderContext.enable(eRenderMode.DepthBufferWrite);
             }
             else
             {
-                this.renderContext.disable(eRenderMode.depthBufferWrite);
+                this.renderContext.disable(eRenderMode.DepthBufferWrite);
             }
         }
     }

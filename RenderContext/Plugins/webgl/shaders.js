@@ -24,6 +24,7 @@ function getShaders(gl, type)
                     "",
                     "attribute vec3 aVertexPosition;",
                     "attribute vec3 aVertexNormal;",
+                    "attribute vec4 aVertexColor;",
                     "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
                     "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
                     "", 
@@ -132,9 +133,10 @@ function getShaders(gl, type)
                     "   vec4 viewPosition;",
                     "   vec4 viewDirection;",
                     "",
+                    "   vertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
+                    "",
                     "   if (uLightingEnabled != 0)",
-                    "   {",
-                    "       vertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
+                    "   {",                    
                     "       transformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
                     "       viewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
                     "       viewDirection = normalize(-viewPosition);",
@@ -175,9 +177,8 @@ function getShaders(gl, type)
                     "                           uFrontMaterial_specular.a / 3.0;",
                     "   }",
                     "   else", // uLightingEnabled == 0
-                    "   {",
-                    "",     // TODO: use vertex color
-                    "       vLightingFactor = vec4(1, 1, 1, 1);",
+                    "   {",  
+                    "       vLightingFactor = aVertexColor;",
                     "   }",
                     "",
                     "   vTextureCoord[0] = aTextureCoord0;",
@@ -219,8 +220,7 @@ function getShaders(gl, type)
                     "       }",
                     "       else",
                     "       {",
-                    "           fragmentColor = vec4(1, 1, 1, 1);",
-                    "           gl_FragColor = fragmentColor * vLightingFactor;",
+                    "           gl_FragColor = vLightingFactor;",
                     "       }",
                     "   }",
                     "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
@@ -239,14 +239,12 @@ function getShaders(gl, type)
                     "       }",
                     "       else",
                     "       {",
-                    "           fragmentColor = vec4(1, 1, 1, 1);",
-                    "           gl_FragColor = fragmentColor * vLightingFactor;",
+                    "           gl_FragColor = vLightingFactor;",
                     "       }",
                     "   }",
-                    "   else", // uTexturesEnabled == 0
+                    "   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 0)
                     "   {",
-                    "       fragmentColor = vec4(1, 1, 1, 1);",
-                    "       gl_FragColor = fragmentColor * vLightingFactor;",
+                    "       gl_FragColor = vLightingFactor;",
                     "   }",
                     "}"
                     ].join("\n");
@@ -258,6 +256,7 @@ function getShaders(gl, type)
                 source_vs = [
                     "attribute vec3 aVertexPosition;",
                     "attribute vec3 aVertexNormal;",
+                    "attribute vec4 aVertexColor;",
                     "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
                     "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
                     "", 
@@ -267,6 +266,7 @@ function getShaders(gl, type)
                     "",
                     "varying vec4 vVertexPosition;",
                     "varying vec4 vTransformedNormal;",
+                    "varying vec4 vVertexColor;",
                     "varying vec4 vViewPosition;",
                     "varying vec4 vViewDirection;",
                     "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
@@ -275,6 +275,7 @@ function getShaders(gl, type)
                     "{",
                     "   vVertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
                     "   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+                    "   vVertexColor = aVertexColor;",
                     "   vViewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
                     "   vViewDirection = normalize(-vViewPosition);",
                     "   vTextureCoord[0] = aTextureCoord0;",
@@ -354,6 +355,7 @@ function getShaders(gl, type)
                     "",
                     "varying vec4 vVertexPosition;",
                     "varying vec4 vTransformedNormal;",
+                    "varying vec4 vVertexColor;",
                     "varying vec4 vViewPosition;",
                     "varying vec4 vViewDirection;",
                     "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
@@ -467,8 +469,7 @@ function getShaders(gl, type)
                     "   }",
                     "   else", // uLightingEnabled == 0
                     "   {",
-                    "",     // TODO: use vertex color
-                    "       lightingFactor = vec4(1, 1, 1, 1);",
+                    "       lightingFactor = vVertexColor;",
                     "   }",
                     "",
                     "   vec4 fragmentColor;",
@@ -488,8 +489,7 @@ function getShaders(gl, type)
                     "       }",
                     "       else",
                     "       {",
-                    "           fragmentColor = vec4(1, 1, 1, 1);",
-                    "           gl_FragColor = fragmentColor * lightingFactor;",
+                    "           gl_FragColor = lightingFactor;",
                     "       }",
                     "   }",
                     "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
@@ -508,14 +508,12 @@ function getShaders(gl, type)
                     "       }",
                     "       else",
                     "       {",
-                    "           fragmentColor = vec4(1, 1, 1, 1);",
-                    "           gl_FragColor = fragmentColor * lightingFactor;",
+                    "           gl_FragColor = lightingFactor;",
                     "       }",
                     "   }",
-                    "   else", // uTexturesEnabled == 0
+                    "   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 1)
                     "   {",
-                    "       fragmentColor = vec4(1, 1, 1, 1);",
-                    "       gl_FragColor = fragmentColor * lightingFactor;",
+                    "       gl_FragColor = lightingFactor;",
                     "   }",
                     "}"
                     ].join("\n");
