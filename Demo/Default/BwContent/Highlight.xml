@@ -24,13 +24,36 @@
                </Group>
                <Group name="Effects"/>
                <Group name="Models">
-                    
-                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" show="true" highlight="true">
+                    <Model name="grid" url="/objects/GridG.lwo">
                          <position x="0" y="0" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-
+                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" highlight="true">
+                         <position x="0" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo">
+                         <position x="2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
+                         <position x="-2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereBack" url="/objects/UV_SphereG.lwo" highlight="true">
+                         <position x="0" y=".25" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
+                         <position x="0" y=".25" z="-2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
                </Group>
           </Isolator>
           <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg" highlightType="2"/>
