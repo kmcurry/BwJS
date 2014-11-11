@@ -93,7 +93,7 @@ function HTMLLabel()
             if (renderParams)
             {
 				var worldViewMatrix;
-				this.renderEngine.getMatrix(ReMatrixMode_WorldView, worldViewMatrix);
+				this.renderContext.getMatrix(ReMatrixMode_WorldView, worldViewMatrix);
 
 				if (this.cullable.getValueDirect() == true &&
 					OutsideViewVolume(renderParams.viewVolume, 1.0, renderParams.viewMatrix))//worldViewMatrix))
@@ -513,7 +513,7 @@ HTMLLabel.prototype.capture = function(x, y, width, height)
 	var a;
 	labelStyle.bgColor().getValueDirect(r, g, b, a);
 	
-    var result = this.wb.capture(this.label, x, y, width, height, TPixel(r, g, b, a), this.renderEngine.getFrameBufferOrigin());
+    var result = this.wb.capture(this.label, x, y, width, height, TPixel(r, g, b, a), this.graphMgr.renderContext.getFrameBufferOrigin());
     if (result)
     {
         //this.updateLabelHTML = true;
@@ -530,8 +530,8 @@ HTMLLabel.prototype.draw = function()
 	}
 
 	// get render engine
-    var renderEngine = this.graphMgr.getRenderEngine();
-    if (!renderEngine)
+    var renderContext = this.graphMgr.getRenderContext();
+    if (!renderContext)
     {
         return;
     }
@@ -544,13 +544,13 @@ HTMLLabel.prototype.draw = function()
 	// get current viewport
     var x, y;
     var width, height;
-    renderEngine.getViewport(x, y, width, height);
+    renderContext.getViewport(x, y, width, height);
 
 	// draw portion of label/icon within rendering area
 	var srcX, srcY, dstX, dstY;
 
-	renderEngine.enableRenderMode(Re_AlphaBlend, true);
-	renderEngine.setBlendFactor(Re_SrcAlpha, Re_OneMinusSrcAlpha);
+	renderContext.enableRenderMode(Re_AlphaBlend, true);
+	renderContext.setBlendFactor(Re_SrcAlpha, Re_OneMinusSrcAlpha);
 
 	// draw label
 	if (this.label.pixels)
@@ -607,14 +607,14 @@ HTMLLabel.prototype.draw = function()
 			labelHeight = y + height - dstY;
 		}
 
-		if (renderEngine.getFrameBufferOrigin() == ReBufferOrigin_LowerLeft)
+		if (renderContext.getFrameBufferOrigin() == ReBufferOrigin_LowerLeft)
 		{
 			srcY = this.label.height - labelHeight - srcY;
 		}
 
 		if (drawLabel)
 		{
-			renderEngine.writeFrameBuffer(srcX, srcY, dstX, dstY, labelWidth, labelHeight, this.label.pitch, this.label.pixelFormat,
+			renderContext.writeFrameBuffer(srcX, srcY, dstX, dstY, labelWidth, labelHeight, this.label.pitch, this.label.pixelFormat,
 				this.label.byteAlignment, this.label.pixels);
 
 			this.labelRect.left   = dstX;
@@ -635,7 +635,7 @@ HTMLLabel.prototype.draw = function()
 		this.screenRect.setValueDirect(this.labelRect.left, this.labelRect.top, this.labelRect.right, this.labelRect.bottom);
 	}
 
-	renderEngine.enableRenderMode(Re_AlphaBlend, false);
+	renderContext.enableRenderMode(Re_AlphaBlend, false);
 }
 
 
@@ -659,13 +659,13 @@ HTMLLabel.prototype.draw = function()
         rasterOrigin.getValueDirect(rasterOrigin);
 
         // get render engine
-        var renderEngine = this.graphMgr.getRenderEngine();
-        if (renderEngine)
+        var renderContext = this.graphMgr.getRenderContext();
+        if (renderContext)
         {
             // get current viewport
             var x, y;
             var width, height;
-            renderEngine.getViewport(x, y, width, height);
+            renderContext.getViewport(x, y, width, height);
 
             if ("bottomLeft" != rasterOrigin)//(!strcmp("bottomLeft", rasterOrigin.c_str()))
 	        {

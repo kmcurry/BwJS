@@ -60,10 +60,20 @@ Transform.prototype.apply = function(directive, params, visitChildren)
     {
         case "render":
         {
+            params.worldMatrix = this.matrixTransform.multiply(params.worldMatrix);
             this.applyTransform();
         }
         break;
          
+        case "rayPick":
+        case "bbox":
+        case "collide":
+        case "highlight":
+        {
+            params.worldMatrix = this.matrixTransform.multiply(params.worldMatrix);
+        }
+        break;
+        
         default:
             break;
     }

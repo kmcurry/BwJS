@@ -67,3 +67,13 @@ var eTextureWrap =
     // number of texture wraps
     EnumCount: 4
 };
+
+var eHighlightType =
+{
+    // disable highlights
+    None: 0,
+    // 4-pass
+    FourPass: 1,
+    // 8-pass
+    EightPass: 2  
+};

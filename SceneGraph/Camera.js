@@ -111,6 +111,16 @@ Camera.prototype.apply = function(directive, params, visitChildren)
                 params.viewMatrix.invert(); // put in view-space
             }
             break;
+            
+        case "highlight":
+            {
+                params.projMatrix.loadMatrix(this.projectionMatrix); // TODO: using jittered allows for antialiasing
+                params.viewMatrix.loadMatrix(this.transformCompound);
+                params.viewMatrix.invert(); // put in view-space
+                params.camera = this;
+                params.viewport = this.viewport;
+            }
+            break;
     }
 
     // call base-class implementation

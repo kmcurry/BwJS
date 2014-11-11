@@ -96,6 +96,7 @@ var eAttrType = {
     BBoxDirective               :2004,
     SerializeDirective          :2005,
     CollideDirective            :2006,
+    HighlightDirective          :2007,
     Directive_End               :2999,
     
     Command                     :3000,

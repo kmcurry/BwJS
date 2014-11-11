@@ -362,8 +362,9 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
         }
     }
     */
-    // disable texture stage 0
+    // disable texture stage 0, 1
     this.graphMgr.renderContext.enableTextureStage(0, 0);
+    this.graphMgr.renderContext.enableTextureStage(1, 0);
     
     // disable blending
     this.graphMgr.renderContext.disable(eRenderMode.AlphaBlend);
@@ -372,8 +373,13 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     this.graphMgr.renderState.pop(RENDERSTATE_MATERIAL_BIT);
 }
 
+VertexGeometry.prototype.drawPrimitives = function()
+{
+    this.vertexBuffer.draw();
+}
+
 VertexGeometry.prototype.setTextureStage = function(stage, type, texture, textureTransform, 
-textureCoordSrc, planeCoefficients)
+                                                    textureCoordSrc, planeCoefficients)
 {
     // get optional parameters
     textureTransform = textureTransform || new Matrix4x4();

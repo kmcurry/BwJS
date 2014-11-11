@@ -16,6 +16,58 @@ var eRenderMode =
     PolygonOffset_Point     : 11
 }
  
+/*
+ * depth func
+ */
+var eDepthFunc =
+{
+    Never                   : 1,
+    Less                    : 2,
+    LessEqual               : 3,
+    Equal                   : 4,
+    NotEqual                : 5,
+    GreaterEqual            : 6,
+    Greater                 : 7,
+    Always                  : 8 
+}
+
+/*
+ * stencil func
+ */
+var eStencilFunc =
+{
+    Never                   : 1,
+    Less                    : 2,
+    LessEqual               : 3,
+    Equal                   : 4,
+    NotEqual                : 5,
+    GreaterEqual            : 6,
+    Greater                 : 7,
+    Always                  : 8 
+}
+
+/*
+ * stencil op
+ */
+var eStencilOp = 
+{
+    Keep                    : 0,
+    Replace                 : 1,
+    Increment               : 2,
+    Decrement               : 3,
+    Invert                  : 4,
+    Zero                    : 5    
+}
+
+/*
+ * shade model
+ */
+var eShadeModel =
+{
+    Flat                    : 1,
+    Gouraud                 : 2
+}
+
 var RC_BLEND            = 0x0001;
 var RC_CULL_FACE        = 0x0B44;
 
@@ -85,6 +137,13 @@ function MaterialDesc()
         }
     }
 }
+
+/*
+ * clear mask
+ */
+var RC_COLOR_BUFFER_BIT             = 0x001;
+var RC_DEPTH_BUFFER_BIT             = 0x002;
+var RC_STENCIL_BUFFER_BIT           = 0x004;
 
 /*
  * blend factor
@@ -282,6 +341,18 @@ function RenderContext(canvas, background)
     		}
     		break;
     	}	
+    }
+    
+    this.setEnabled = function(cap, enabled)
+    {
+        if (enabled)
+        {
+            this.enable(cap);    
+        }
+        else
+        {
+            this.disable(cap);
+        }
     }
 }
 

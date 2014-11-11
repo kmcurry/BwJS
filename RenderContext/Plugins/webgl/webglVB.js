@@ -22,6 +22,8 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
     var program = program;
     var vb = gl.createBuffer();
     var nb = null;
+    var cb = null;
+    var cEmpty = gl.createBuffer(); // for VBs with no color coordinates (see below)
     var uvb = new Array(gl_MaxTextureStages);
     var uvEmpty = gl.createBuffer(); // for VBs with no texture coordinates (see below)
     var uvCoords = []; // indexed by texture
@@ -58,6 +60,10 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
             
             this.vertexCount = vertices.length / this.numVerticesPerPrimitive;
             
+            // create empty color array for vb's with no colors specified (see below)
+            gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexCount * 4), gl.STATIC_DRAW);
+            
             // create empty texture coordinate arrays for vb's with no textures (see below)
             gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(new Array(this.vertexCount * 2)), gl.STATIC_DRAW);           
@@ -83,6 +89,23 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
         this.normals = normals;
     }
 
+    this.setColors = function(colors)
+    {
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetColors, [this, colors]);
+        
+        if (colors.length)
+        {
+            if (cb == null)
+            {
+                cb = gl.createBuffer();
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, cb);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        }
+        
+        this.colors = colors;
+    }
+    
     this.setUVCoords = function(texture, coords)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetUVCoords, [this, texture, coords]);
@@ -130,11 +153,18 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
             gl.vertexAttribPointer(program.vertexPositionAttribute, this.numVerticesPerPrimitive, gl.FLOAT, false, 0, 0);
 
             // normals
-            if (nb != null)
+            if (nb)
             {
                 gl.bindBuffer(gl.ARRAY_BUFFER, nb);
                 gl.vertexAttribPointer(program.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
             }
+            
+            // colors
+            if (cb)
+                gl.bindBuffer(gl.ARRAY_BUFFER, cb);    
+            else
+                gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
+            gl.vertexAttribPointer(program.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
             
             // texture coords
             // NOTE: vertex shader silently fails if nothing is specified for a given program attribute, so if 

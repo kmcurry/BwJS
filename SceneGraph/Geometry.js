@@ -18,6 +18,7 @@ function Geometry()
     this.flipPolygons = new BooleanAttr(false);
     this.shadowCaster = new BooleanAttr(false);
     this.shadowTarget = new BooleanAttr(true);
+    this.highlight = new BooleanAttr(false);
 
     this.selectable.addModifiedCB(Geometry_SelectableModifiedCB, this);
     this.show.addModifiedCB(Geometry_ShowModifiedCB, this);
@@ -31,6 +32,7 @@ function Geometry()
     this.registerAttribute(this.flipPolygons, "flipPolygons");
     this.registerAttribute(this.shadowCaster, "shadowCaster");
     this.registerAttribute(this.shadowTarget, "shadowTarget");
+    this.registerAttribute(this.highlight, "highlight");
 }
 
 Geometry.prototype.update = function(params, visitChildren)
@@ -153,6 +155,18 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
+            
+        case "highlight":
+            {
+                if (this.highlight.getValueDirect())
+                {
+                    if (params.targets.length > 0)
+                    {
+                        params.targets[params.targets.length-1].geometries.push(this);
+                    }
+                }
+            }
+            break;
     }
 
     // call base-class implementation
@@ -160,6 +174,10 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
 }
 
 Geometry.prototype.draw = function(dissolve)
+{
+}
+
+Geometry.prototype.drawPrimitives = function()
 {
 }
 

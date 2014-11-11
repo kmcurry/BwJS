@@ -10,6 +10,7 @@ function VertexBuffer()
 {
     this.vertices = new Array();
     this.normals = new Array();
+    this.colors = new Array();
     this.vertexCount = 0;
     this.numVerticesPerPrimitive = 0;
 }

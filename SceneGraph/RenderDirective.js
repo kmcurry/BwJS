@@ -38,6 +38,7 @@ function RenderDirective()
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
+    this.highlightType = new NumberAttr(eHighlightType.None);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
@@ -49,12 +50,16 @@ function RenderDirective()
     this.registerAttribute(this.foregroundFadeEnabled, "foregroundFadeEnabled");   
     this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
     this.registerAttribute(this.timeIncrement, "timeIncrement");
+    this.registerAttribute(this.highlightType, "highlightType");
     
     this.updateDirective = new UpdateDirective();
     this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
     
     this.collideDirective = new CollideDirective();
+    
+    this.highlightDirective = new HighlightDirective();
+    this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
@@ -62,6 +67,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
     this.collideDirective.setGraphMgr(graphMgr);
+    this.highlightDirective.setGraphMgr(graphMgr);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -120,6 +126,25 @@ RenderDirective.prototype.execute = function(root)
         this.distanceSortAgent.draw();
         this.distanceSortAgent.clear();
     }
+    
+    // draw highlights
+    this.drawHighlights(root);
+}
+
+RenderDirective.prototype.drawHighlights = function(root)
+{
+    // apply highlight directive if specified
+    switch (this.highlightType.getValueDirect())
+    {
+    case eHighlightType.FourPass:
+    case eHighlightType.EightPass:
+        this.highlightDirective.execute(root);
+        break;
+
+    case eHighlightType.None:
+    default:
+        break;
+    }   
 }
 
 function RenderDirective_ViewportModifiedCB(attribute, container)
