@@ -16203,6 +16203,7 @@ function RenderDirective()
     this.distanceSortAgent = new DistanceSortAgent();
     
     this.viewport = new ViewportAttr();
+    this.backgroundColor = new ColorAttr(1, 1, 1, 1);
     this.backgroundImageFilename = new StringAttr("");
     this.foregroundImageFilename = new StringAttr("");
     this.foregroundAlphaFilename = new StringAttr("");
@@ -16212,9 +16213,11 @@ function RenderDirective()
     this.highlightType = new NumberAttr(eHighlightType.None);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
+    this.backgroundColor.addModifiedCB(RenderDirective_BackgroundColorModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
     
-    this.registerAttribute(this.viewport, "viewport"); 
+    this.registerAttribute(this.viewport, "viewport");
+    this.registerAttribute(this.backgroundColor, "backgroundColor");
     this.registerAttribute(this.backgroundImageFilename, "backgroundImageFilename");
     this.registerAttribute(this.foregroundImageFilename, "foregroundImageFilename");
     this.registerAttribute(this.foregroundAlphaFilename, "foregroundAlphaFilename");   
@@ -16318,11 +16321,22 @@ RenderDirective.prototype.drawHighlights = function(root)
     }   
 }
 
+RenderDirective.prototype.backgroundColorModified = function()
+{
+    var color = this.backgroundColor.getValueDirect();
+    this.graphMgr.renderContext.clearColor(color.r, color.g, color.b, color.a);    
+}
+
 function RenderDirective_ViewportModifiedCB(attribute, container)
 {
     var vp = container.viewport.getValueDirect();
     var url = container.backgroundImageFilename.getValueDirect().join("");
     container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
+}
+
+function RenderDirective_BackgroundColorModifiedCB(attribute, container)
+{
+    container.backgroundColorModified();
 }
 
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
