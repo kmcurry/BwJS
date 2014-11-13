@@ -149,9 +149,9 @@ RenderDirective.prototype.drawHighlights = function(root)
 
 function RenderDirective_ViewportModifiedCB(attribute, container)
 {
-//    var vp = container.viewport.getValueDirect();
-//    var url = container.backgroundImageFilename.getValueDirect().join("");
-//    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
+    var vp = container.viewport.getValueDirect();
+    var url = container.backgroundImageFilename.getValueDirect().join("");
+    container.graphMgr.renderContext.setBackgroundImage(url, vp.width, vp.height);
 }
 
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
