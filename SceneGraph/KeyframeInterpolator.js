@@ -185,9 +185,10 @@ KeyframeInterpolator.prototype.updateEndState = function()
         }
         
         // set first/last keys to evaluate
-        this.endState.startKeyIts[i] = keyframes.getAt(0);
+        this.endState.startKeyIts[i] = keyframes.getAt(0); 
         this.endState.endKeyIts[i] = keyframes.getAt(keyframes.vector.length - 1);
-
+        if (!this.endState.startKeyIts[i] || !this.endState.endKeyIts[i]) continue;
+        
         if (startKey >= 0 && startKey < keyframes.vector.length)
         {
             this.endState.startKeyIts[i] = keyframes.getAt(startKey);
@@ -198,14 +199,14 @@ KeyframeInterpolator.prototype.updateEndState = function()
             this.endState.endKeyIts[i] = keyframes.getAt(endKey);
         }
 
-	fStartTime = this.endState.startKeyIts[i].getTime();
+	    fStartTime = this.endState.startKeyIts[i].getTime();
         fEndTime = this.endState.endKeyIts[i].getTime();
 
-	// save the smallest start time for all channels
-	fShortest = fStartTime < fShortest ? fStartTime : fShortest;
+	    // save the smallest start time for all channels
+	    fShortest = fStartTime < fShortest ? fStartTime : fShortest;
 
-	// save the longest end time for all channels
-	fLongest = fEndTime >= fLongest ? fEndTime : fLongest;
+	    // save the longest end time for all channels
+	    fLongest = fEndTime >= fLongest ? fEndTime : fLongest;
     }
     
     this.endState.startTime = fShortest;

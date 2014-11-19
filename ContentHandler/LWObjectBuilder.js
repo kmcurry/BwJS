@@ -72,6 +72,18 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
 {
     var factory = this.registry.find("AttributeFactory");
     
+    // set name if not already set by scene
+    var name = model.getAttribute("name");
+    if (model.getAttributeModificationCount(name) == 0)
+    {
+        var layerName = data.name;
+        if (data.layers.length > 1)
+        {
+            layerName += ":Layer" + this.layer;
+        }
+        name.setValueDirect(layerName);
+    }
+    
     // set pivot if not already set by scene
     var pivot = model.getAttribute("pivot");
     if (model.getAttributeModificationCount(pivot) == 0)

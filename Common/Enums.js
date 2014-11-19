@@ -29,7 +29,8 @@ var eKeyframeShape =
     Stepped: 1,
     TCB: 2,
     Bezier1D: 3,
-    Bezier2D: 4
+    Bezier2D: 4,
+    Hermite: 5
 };
 
 var eTextureType =

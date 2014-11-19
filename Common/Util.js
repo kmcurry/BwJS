@@ -256,3 +256,62 @@ function OutputDebugMsg(msg)
     innerHTML += "&gt; " + msg + "<br>";
     document.getElementById("DebugOutput").innerHTML = innerHTML;
 }
+
+function addSlashAfterDriveSpecifier(filename)
+{
+    var index = filename.indexOf(":");
+    if (index == -1) return filename;
+    
+    filename = filename.slice(0, index+1) + "\\" + filename.slice(index+1);
+    return filename;
+}
+
+function hexStrToULong(string)
+{
+    // find end of string
+    var i = string.length - 1;
+
+    var value = 0;
+    var digit = 0;
+    var position = 0;
+    for ( ; i >= 0; i--, position++)
+    {
+        switch (string.charAt(i))
+        {
+        case '0': digit = 0;  break;
+        case '1': digit = 1;  break;
+        case '2': digit = 2;  break;
+        case '3': digit = 3;  break;
+        case '4': digit = 4;  break;
+        case '5': digit = 5;  break;
+        case '6': digit = 6;  break;
+        case '7': digit = 7;  break;
+        case '8': digit = 8;  break;
+        case '9': digit = 9;  break;
+
+        case 'a':
+        case 'A': digit = 10; break;
+
+        case 'b':
+        case 'B': digit = 11; break;
+
+        case 'c':
+        case 'C': digit = 12; break;
+
+        case 'd':
+        case 'D': digit = 13; break;
+
+        case 'e':
+        case 'E': digit = 14; break;
+
+        case 'f':
+        case 'F': digit = 15; break;
+
+        default:  digit = 0;  break;
+        }
+
+        value += (digit * Math.pow(16, position));
+    }
+
+    return value;
+}

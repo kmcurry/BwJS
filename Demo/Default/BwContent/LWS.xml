@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwinclude url="scenes/EFP.lws"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+  <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+  <Set target="Selector" computePivotDistance="true"/>
+</Scene>
+

@@ -345,7 +345,9 @@ LWObjectHandler.prototype.parseFileStream = function(url)
     data.contentDir = this.contentDirectory.getValueDirect().join("");
 
     // set the model name (filename w/o extension)
-    // TODO
+    var lastSlash = url.lastIndexOf("/");
+    var extension = url.lastIndexOf(".");
+    data.name = url.substring(lastSlash+1, extension);
 
     // read file chunks into LWOData
     while (fileSize > 0)

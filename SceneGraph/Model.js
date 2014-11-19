@@ -53,6 +53,7 @@ function Model()
     this.highlight = new BooleanAttr(false);
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
+    this.disableOnDissolve = new BooleanAttr(true);
     
     this.show.addTarget(this.enabled);
     

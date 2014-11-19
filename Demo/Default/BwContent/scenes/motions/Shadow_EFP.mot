@@ -1,0 +1,58 @@
+LWMO
+3
+
+NumChannels 9
+Channel 0
+{ Envelope
+  1
+  Key 0.19233696 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 1
+{ Envelope
+  1
+  Key -0.04995586 0 0 0 0 0 0 -0.02199791 0
+  Behaviors 1 1
+}
+Channel 2
+{ Envelope
+  1
+  Key -0.027177915 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 3
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 4
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 5
+{ Envelope
+  1
+  Key 0 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 6
+{ Envelope
+  1
+  Key 0.63199973 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 7
+{ Envelope
+  1
+  Key 0.59599996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}
+Channel 8
+{ Envelope
+  1
+  Key 0.59599996 0 0 0 0 0 0 0 0
+  Behaviors 1 1
+}

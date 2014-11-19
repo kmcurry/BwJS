@@ -30,10 +30,23 @@ LWSceneHandler.prototype.parseFileStream = function(url)
     var tokens;
     while (tokens = parser.readLineTokens())
     {
+        // check for string
+        if (tokens[0].indexOf("\"") != -1)
+        {
+            tokens.push(tokens[0].substring(1, tokens[0].length-1));
+            tokens[0] = "String";    
+        }
+        
         // pass tokens to consumer(s)
         for (var i=0; i < this.tokenHandlers.length; i++)
         {
             this.tokenHandlers[i](tokens, this.tokenHandlersData[i]);    
         }    
     }
+    
+    // pass EOF to consumer(s)
+    for (var i=0; i < this.tokenHandlers.length; i++)
+    {
+        this.tokenHandlers[i](new Array("EOF"), this.tokenHandlersData[i]);    
+    }   
 }
