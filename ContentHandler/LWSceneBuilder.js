@@ -48,7 +48,6 @@ function LWSceneBuilder()
     this.parsingFgAlphaImage = false;
     this.imagePath = "";
     this.currElement = null;
-    this.currKFI = null;
     this.currChannel = 0;   // motions
     this.sceneData = new TLWSCSceneData();
     this.ambientLightDesc = new TLWSCv3LightDesc();
@@ -184,29 +183,30 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         
         case "ObjectMotion":
         {
-            var kfi = this.factory.create("KeyframeInterpolator");
-            this.currKFI = kfi;
-            
+            var kfi = this.factory.create("KeyframeInterpolator");        
             kfi.name.setValueDirect("Motion");
             
             this.evaluators.push(kfi);
+            this.evaluatorsGroup.addChild(kfi);
         }
         break;
         
         case "NumChannels":
-        {
-            if (this.currKFI)
+        {            
+            if (this.evaluators.length > 0)
             {
+                var kfi = this.evaluators[this.evaluators.length-1];                
                 var numChannels = parseInt(params[0]);
                 
-                this.initializeKeyframeInterpolator(this.currKFI, numChannels);
+                this.initializeKeyframeInterpolator(kfi, numChannels);
                 
-                if (this.currElement)
+                var element = this.currElement || this.registry.find(kfi.getAttribute("target").getValueDirect().join(""));
+                if (element)
                 {
                     switch (numChannels)
                     {
-                        case 1:  this.attachDissolveInterpolator(this.currKFI, this.currElement); break;
-                        default: this.attachKeyframeInterpolator(this.currKFI, this.currElement); break;
+                        case 1:  this.attachDissolveInterpolator(kfi, element); break;
+                        default: this.attachKeyframeInterpolator(kfi, element); break;
                     }
                 }
             }
@@ -221,9 +221,10 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         
         case "Key":
         {
-            if (this.currKFI)
+            if (this.evaluators.length > 0)
             {
-                var keyframes = this.currKFI.channels.getAt(this.currChannel);
+                var kfi = this.evaluators[this.evaluators.length-1];
+                var keyframes = kfi.channels.getAt(this.currChannel);
                 var keyframe = new KeyframeAttr();
                 
                 for (var i=0; i < params.length; i++)
@@ -287,10 +288,12 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         
         case "Behaviors":
         {
-            if (this.currKFI)
+            if (this.evaluators.length > 0)
             {
-                this.currKFI.preBehaviors.getAt(this.currChannel).setValueDirect(parseInt(params[0]));
-                this.currKFI.postBehaviors.getAt(this.currChannel).setValueDirect(parseInt(params[1]));
+                var kfi = this.evaluators[this.evaluators.length-1];
+                
+                kfi.preBehaviors.getAt(this.currChannel).setValueDirect(parseInt(params[0]));
+                kfi.postBehaviors.getAt(this.currChannel).setValueDirect(parseInt(params[1]));
             }       
         }
         break;
@@ -300,13 +303,12 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
             if (params[0] == "(envelope)")
             {
                 var kfi = this.factory.create("KeyframeInterpolator");
-                this.currKFI = kfi;
-               
                 kfi.name.setValueDirect("Dissolve");
                 
                 this.initializeKeyframeInterpolator(kfi, 1);
                 
                 this.evaluators.push(kfi);
+                this.evaluatorsGroup.addChild(kfi);
             }
             else // non-envelope dissolve
             {
@@ -342,11 +344,10 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         case "CameraMotion":
         {
             var kfi = this.factory.create("KeyframeInterpolator");
-            this.currKFI = kfi;
-            
             kfi.name.setValueDirect("Motion");
             
             this.evaluators.push(kfi);
+            this.evaluatorsGroup.addChild(kfi);
         }
         break;
         
@@ -415,8 +416,6 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         case "LightMotion":
         {
             var kfi = this.factory.create("KeyframeInterpolator");
-            this.currKFI = kfi;
-            
             kfi.name.setValueDirect("Motion");
             
             // add to last light record
@@ -426,6 +425,7 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
             }
                 
             this.evaluators.push(kfi);
+            this.evaluatorsGroup.addChild(kfi);
         }
         break;
         
@@ -706,7 +706,6 @@ LWSceneBuilder.prototype.finalize = function()
     // are set to their targets (e.g., models that depend upon KFI's for position)
     for (var i=0; i < this.evaluators.length; i++)
     {
-        this.evaluatorsGroup.addChild(this.evaluators[i]);
         this.evaluators[i].evaluate();
     }
 }
