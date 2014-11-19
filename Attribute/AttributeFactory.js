@@ -102,6 +102,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["QuaternionRotate"] = newSGNode;
     this.newResourceProcs["Rotate"] = newSGNode;
     this.newResourceProcs["Scale"] = newSGNode;
+    this.newResourceProcs["Selector"] = newSGNode;
     this.newResourceProcs["Surface"] = newSGNode;
     this.newResourceProcs["Translate"] = newSGNode;
     this.newResourceProcs["TriList"] = newSGNode;
@@ -276,6 +277,7 @@ function newSGNode(name, factory)
     case "QuaternionRotate":    resource = new QuaternionRotate(); break;
     case "Rotate":              resource = new Rotate(); break;
     case "Scale":               resource = new Scale(); break;
+    case "Selector":            resource = new Selector(); break;
     case "Surface":             resource = new Surface(); break;
     case "Transform":           resource = new Transform(); break;
     case "Translate":           resource = new Translate(); break;

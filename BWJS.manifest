@@ -68,7 +68,8 @@ SceneGraph/DirectionalLight.js
 SceneGraph/PointLight.js 
 SceneGraph/GlobalIllumination.js 
 SceneGraph/Group.js 
-SceneGraph/Isolator.js 
+SceneGraph/Isolator.js
+SceneGraph/Selector.js
 SceneGraph/Dissolve.js 
 SceneGraph/RenderDirective.js 
 SceneGraph/RayPickDirective.js

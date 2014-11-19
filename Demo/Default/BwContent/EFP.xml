@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwplugin url="BBD3D8Engine" action="load"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera (1)" zoom="3.2" nearDistance="0.02" farDistance="200">
+                <position x="0.918209" y="0.556799" z="-0.67779"/>
+                <rotation x="27.2" y="-43.8" z="0"/>
+            </PerspectiveCamera>
+            <PerspectiveCamera name="Camera (2)" zoom="3.2" nearDistance="0.02" farDistance="200">
+                <position x="0.161209" y="1.2628" z="0.000209629"/>
+                <rotation x="90" y="-90" z="0"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.15" g="0.15" b="0.15"/>
+            </GlobalIllumination>
+            <PointLight name="Light (1)" range="3.40282e+038">
+                <position x="2.98696" y="0.631007" z="-2.1535"/>
+                <rotation x="8.89999" y="-56.7001" z="-0.900008"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="0.5" g="0.5" b="0.5"/>
+                <specular r="0.5" g="0.5" b="0.5"/>
+            </PointLight>
+            <PointLight name="Light (2)" range="3.40282e+038">
+                <position x="-0.987135" y="15.571" z="-8.11774"/>
+                <rotation x="47.7999" y="-10.8001" z="-0.900008"/>
+                <ambient r="0.05" g="0.05" b="0.05"/>
+                <diffuse r="0.9" g="0.9" b="0.9"/>
+                <specular r="0.9" g="0.9" b="0.9"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="9VBattery" url="objects/9VBattery.lwo">
+                <position x="0.431349" y="0.0281816" z="0.00241413"/>
+                <pivot x="0.431349" y="0.0281816" z="0.00241413"/>
+            </Model>
+            <Model name="BatteryClip" url="objects/BatteryClip.lwo">
+                <position x="0.431574" y="0.0208902" z="0.00291286"/>
+                <pivot x="0.431574" y="0.0208902" z="0.00291286"/>
+            </Model>
+            <Model name="BlastingCap" url="objects/BlastingCap.lwo"/>
+            <Model name="EFP" url="objects/EFP.lwo"/>
+            <Model name="Tape" url="objects/Tape.lwo"/>
+            <Model name="TerminalBlock" url="objects/TerminalBlock.lwo">
+                <position x="0.41967" y="0.0225006" z="0.089433"/>
+                <pivot x="0.41967" y="0.0225006" z="0.089433"/>
+            </Model>
+            <Model name="Trigger" url="objects/Trigger.lwo">
+                <position x="0.393299" y="0.0298958" z="0.150779"/>
+                <pivot x="0.393299" y="0.0298958" z="0.150779"/>
+            </Model>
+            <Model name="Wood" url="objects/Wood.lwo"/>
+            <Model name="Wires" url="objects/Wires.lwo"/>
+            <Model name="TripWire" url="objects/TripWire.lwo">
+                <position x="0.278119" y="0.0539777" z="0.19432"/>
+                <pivot x="0.278119" y="0.0539777" z="0.19432"/>
+            </Model>
+            <Model name="Shadow_EFP" url="objects/Shadow_EFP.lwo" dissolve="0">
+                <position x="0.192337" y="-0.0499559" z="-0.0271779"/>
+                <scale x="0.632" y="0.596" z="0.596"/>
+                <pivot x="0.502492" y="0" z="0.486485"/>
+            </Model>
+            <Model name="Jumper" url="objects/Jumper.lwo">
+                <position x="0.413108" y="0.050938" z="0.089387"/>
+                <pivot x="0.413108" y="0.050938" z="0.089387"/>
+            </Model>
+            <Model name="Line (1)" url="objects/Line.lwo" parent="BatteryClip" dissolve="1">
+                <position x="0.417601" y="0.0234096" z="0.0317221"/>
+                <scale x="1" y="1" z="0.478001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="BatteryClipNO" url="objects/BatteryClipNO.lwo" parent="BatteryClip" dissolve="1">
+                <position x="1.82304" y="0.343718" z="-1e+006"/>
+                <pivot x="0" y="0" z="0.00490203"/>
+            </Model>
+            <Model name="Line (2)" url="objects/Line.lwo" parent="EFP" dissolve="1">
+                <position x="0" y="0.184227" z="-0.198845"/>
+                <scale x="1" y="1" z="0.31"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (3)" url="objects/Line.lwo" parent="BlastingCap" dissolve="1">
+                <position x="-0.00017542" y="0.0394257" z="-0.190343"/>
+                <scale x="1" y="1" z="0.478001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (4)" url="objects/Line.lwo" parent="TerminalBlock" dissolve="1">
+                <position x="0.417601" y="0.0215511" z="-0.000990205"/>
+                <scale x="1" y="1" z="0.162001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (5)" url="objects/Line.lwo" parent="9VBattery" dissolve="1">
+                <position x="0.417601" y="0.0289592" z="0.0317221"/>
+                <scale x="1" y="1" z="0.478001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (6)" url="objects/Line.lwo" parent="Trigger" dissolve="1">
+                <position x="0.377701" y="0.0319649" z="0.155513"/>
+                <scale x="1" y="1" z="0.478001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (7)" url="objects/Line.lwo" parent="Wires" dissolve="1">
+                <position x="0.181549" y="-0.0475119" z="-0.178986"/>
+                <rotation x="0" y="-20.4" z="0"/>
+                <scale x="1" y="1" z="0.478001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="Line (8)" url="objects/Line.lwo" parent="Wires" dissolve="1">
+                <position x="0.181549" y="-0.0475119" z="-0.178986"/>
+                <rotation x="0" y="9.2" z="0"/>
+                <scale x="1.054" y="1" z="0.572"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="9VBatteryNO" url="objects/9VBatteryNO.lwo" parent="9VBattery" dissolve="1">
+                <position x="1.66157" y="0.447957" z="-1e+006"/>
+                <pivot x="0" y="0" z="0.00459608"/>
+            </Model>
+            <Model name="BlastingCapNO" url="objects/BlastingCapNO.lwo" parent="BlastingCap" dissolve="1">
+                <position x="2.13388" y="0.0865382" z="-1e+006"/>
+                <pivot x="0" y="0" z="-0.00512422"/>
+            </Model>
+            <Model name="EFPNO" url="objects/EFPNO.lwo" parent="EFP" dissolve="1">
+                <position x="2.29371" y="0.387096" z="-1e+006"/>
+                <pivot x="0" y="0" z="-0.00522888"/>
+            </Model>
+            <Model name="TerminalBlockNO" url="objects/TerminalBlockNO.lwo" parent="TerminalBlock" dissolve="1">
+                <position x="2.34024" y="0.210905" z="-1e+006"/>
+                <pivot x="0" y="0" z="-0.00519601"/>
+            </Model>
+            <Model name="TriggerNO" url="objects/TriggerNO.lwo" parent="Trigger" dissolve="1">
+                <position x="1.96681" y="0.0320098" z="-1e+006"/>
+                <pivot x="0" y="0" z="0.00496181"/>
+            </Model>
+            <Model name="WiresNO" url="objects/WiresNO.lwo" parent="Wires" dissolve="1">
+                <position x="2.20161" y="-0.0477499" z="-1e+006"/>
+                <pivot x="0" y="0" z="-0.00506367"/>
+            </Model>
+            <Model name="Line (9)" url="objects/Line.lwo" parent="TripWire" dissolve="1">
+                <position x="0.278711" y="0.0378251" z="0.219709"/>
+                <scale x="1" y="1" z="0.334001"/>
+                <pivot x="0" y="0" z="-0.197253"/>
+            </Model>
+            <Model name="TripWireNO" url="objects/TripWireNO.lwo" parent="TripWire" dissolve="1">
+                <position x="1.89151" y="0.0377237" z="-1e+006"/>
+                <scale x="0" y="0" z="0"/>
+                <pivot x="0" y="0" z="0.00503656"/>
+            </Model>
+            <Model name="JumperNO" url="objects/JumperNO.lwo" parent="Jumper" dissolve="1">
+                <position x="1.8915" y="0.0384784" z="-1e+006"/>
+                <pivot x="0" y="0" z="-0.00506384"/>
+            </Model>
+            <Model name="Line (10)" url="objects/Line.lwo" parent="Jumper" dissolve="1">
+                <position x="0.412603" y="0.0385969" z="0.0767649"/>
+                <scale x="1" y="1" z="0.214001"/>
+                <pivot x="0" y="0" z="0.197707"/>
+            </Model>
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective" backgroundImageFilename="images/Background.jpg"/>
+    <Animations>
+        <KeyframeInterpolator name="Light (1)Motion" url="motions/Light (1).mot" target="Light (1)"/>
+        <KeyframeInterpolator name="Light (2)Motion" url="motions/Light (2).mot" target="Light (2)"/>
+        <KeyframeInterpolator name="Camera (1)Motion" url="motions/Camera (1).mot" target="Camera (1)"/>
+        <KeyframeInterpolator name="Camera (2)Motion" url="motions/Camera (2).mot" target="Camera (2)"/>
+        <KeyframeInterpolator name="9VBatteryMotion" url="motions/9VBattery.mot" target="9VBattery"/>
+        <KeyframeInterpolator name="BatteryClipMotion" url="motions/BatteryClip.mot" target="BatteryClip"/>
+        <KeyframeInterpolator name="BlastingCapMotion" url="motions/BlastingCap.mot" target="BlastingCap"/>
+        <KeyframeInterpolator name="EFPMotion" url="motions/EFP.mot" target="EFP"/>
+        <KeyframeInterpolator name="TapeMotion" url="motions/Tape.mot" target="Tape"/>
+        <KeyframeInterpolator name="TapeDissolve" url="envelopes/Tape.env" target="Tape" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="TerminalBlockMotion" url="motions/TerminalBlock.mot" target="TerminalBlock"/>
+        <KeyframeInterpolator name="TriggerMotion" url="motions/Trigger.mot" target="Trigger"/>
+        <KeyframeInterpolator name="WoodMotion" url="motions/Wood.mot" target="Wood"/>
+        <KeyframeInterpolator name="WiresMotion" url="motions/Wires.mot" target="Wires"/>
+        <KeyframeInterpolator name="TripWireMotion" url="motions/TripWire.mot" target="TripWire"/>
+        <KeyframeInterpolator name="Shadow_EFPMotion" url="motions/Shadow_EFP.mot" target="Shadow_EFP"/>
+        <KeyframeInterpolator name="Shadow_EFPDissolve" url="envelopes/Shadow_EFP.env" target="Shadow_EFP" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="JumperMotion" url="motions/Jumper.mot" target="Jumper"/>
+        <KeyframeInterpolator name="Line (1)Motion" url="motions/Line (1).mot" target="Line (1)"/>
+        <KeyframeInterpolator name="Line (1)Dissolve" url="envelopes/Line (1).env" target="Line (1)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="BatteryClipNOMotion" url="motions/BatteryClipNO.mot" target="BatteryClipNO"/>
+        <KeyframeInterpolator name="Line (2)Motion" url="motions/Line (2).mot" target="Line (2)"/>
+        <KeyframeInterpolator name="Line (2)Dissolve" url="envelopes/Line (2).env" target="Line (2)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (3)Motion" url="motions/Line (3).mot" target="Line (3)"/>
+        <KeyframeInterpolator name="Line (3)Dissolve" url="envelopes/Line (3).env" target="Line (3)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (4)Motion" url="motions/Line (4).mot" target="Line (4)"/>
+        <KeyframeInterpolator name="Line (4)Dissolve" url="envelopes/Line (4).env" target="Line (4)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (5)Motion" url="motions/Line (5).mot" target="Line (5)"/>
+        <KeyframeInterpolator name="Line (5)Dissolve" url="envelopes/Line (5).env" target="Line (5)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (6)Motion" url="motions/Line (6).mot" target="Line (6)"/>
+        <KeyframeInterpolator name="Line (6)Dissolve" url="envelopes/Line (6).env" target="Line (6)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (7)Motion" url="motions/Line (7).mot" target="Line (7)"/>
+        <KeyframeInterpolator name="Line (7)Dissolve" url="envelopes/Line (7).env" target="Line (7)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="Line (8)Motion" url="motions/Line (8).mot" target="Line (8)"/>
+        <KeyframeInterpolator name="Line (8)Dissolve" url="envelopes/Line (8).env" target="Line (8)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="9VBatteryNOMotion" url="motions/9VBatteryNO.mot" target="9VBatteryNO"/>
+        <KeyframeInterpolator name="BlastingCapNOMotion" url="motions/BlastingCapNO.mot" target="BlastingCapNO"/>
+        <KeyframeInterpolator name="EFPNOMotion" url="motions/EFPNO.mot" target="EFPNO"/>
+        <KeyframeInterpolator name="TerminalBlockNOMotion" url="motions/TerminalBlockNO.mot" target="TerminalBlockNO"/>
+        <KeyframeInterpolator name="TriggerNOMotion" url="motions/TriggerNO.mot" target="TriggerNO"/>
+        <KeyframeInterpolator name="WiresNOMotion" url="motions/WiresNO.mot" target="WiresNO"/>
+        <KeyframeInterpolator name="Line (9)Motion" url="motions/Line (9).mot" target="Line (9)"/>
+        <KeyframeInterpolator name="Line (9)Dissolve" url="envelopes/Line (9).env" target="Line (9)" targetConnectionType="dissolve"/>
+        <KeyframeInterpolator name="TripWireNOMotion" url="motions/TripWireNO.mot" target="TripWireNO"/>
+        <KeyframeInterpolator name="JumperNOMotion" url="motions/JumperNO.mot" target="JumperNO"/>
+        <KeyframeInterpolator name="Line (10)Motion" url="motions/Line (10).mot" target="Line (10)"/>
+        <KeyframeInterpolator name="Line (10)Dissolve" url="envelopes/Line (10).env" target="Line (10)" targetConnectionType="dissolve"/>
+    </Animations>
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+</Scene>

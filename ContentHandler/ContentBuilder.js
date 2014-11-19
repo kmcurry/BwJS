@@ -6,6 +6,10 @@ function ContentBuilder()
     AttributeContainer.call(this);
     this.className = "ContentBuilder";
     
+    this.factory = null;
+    
+    this.cameras = [];
+    this.lights = [];
     this.models = [];
     this.evaluators = [];
     
@@ -13,6 +17,13 @@ function ContentBuilder()
     this.invertAlpha = new BooleanAttr(false);
     
     this.registerAttribute(this.invertAlpha, "invertAlpha");
+}
+
+ContentBuilder.prototype.setRegistry = function(registry)
+{
+    AttributeContainer.prototype.setRegistry.call(this, registry); 
+    
+    this.factory = this.registry.find("AttributeFactory");   
 }
 
 ContentBuilder.prototype.visitHandler = function(handler)

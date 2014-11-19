@@ -74,6 +74,8 @@ var eAttrType = {
     BalloonTipLabel             :1030, 
     PathTrace                   :1031,
     Cube                        :1032,
+    Bone                        :1033,
+    Selector                    :1034,
     
     Evaluator                   :1100,
     SceneInspector              :1101,
