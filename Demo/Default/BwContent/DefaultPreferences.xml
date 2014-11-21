@@ -30,7 +30,6 @@
 		<sourceAttribute>deltaY</sourceAttribute>
 		<targetAttribute>invertedRotationDelta:0</targetAttribute>
 		<sourceAttribute>deltaX</sourceAttribute>
-		<targetAttribute>invertedRotationDelta:1</targetAttribute>
 	</ConnectAttributes>
 	<!--MOUSE VIEW RELATIVE PAN-->
 	<ConnectAttributes name="MButtonBoth.Scene" event="MButton1+MButton3.Down" numResponses="-1" undoable="false" sourceContainer="MouseHandler" targetContainer="SceneInspector">

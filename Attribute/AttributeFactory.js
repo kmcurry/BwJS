@@ -127,6 +127,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["SceneInspector"] = newSceneInspector;
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
+    this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -414,6 +415,16 @@ function newAnimalMover(name, factory)
 	registerEvaluatorAttributes(resource, factory);
 	
 	return resource;	
+}
+
+function newWalkSimulator(name, factory)
+{
+    var resource = new WalkSimulator();
+    
+    resource.setGraphMgr(factory.graphMgr);
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
 }
 
 function newCommand(name, factory)

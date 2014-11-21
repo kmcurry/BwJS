@@ -86,7 +86,8 @@ var eAttrType = {
     ObjectInspector             :1106,
     MultiTargetObserver			:1107,
     ObjectMover	 				:1108,
-    AnimalMover					:1109,   
+    AnimalMover					:1109, 
+    WalkSimulator               :1110,  
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
