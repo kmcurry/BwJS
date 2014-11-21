@@ -161,6 +161,15 @@ Light.prototype.setLightEnabled = function()
     this.graphMgr.renderContext.enableLight(this.lightIndex, this.enabled.getValueDirect() ? 1 : 0);
 }
 
+Light.prototype.onRemove = function()
+{
+    // disable light
+    this.graphMgr.renderContext.enableLight(this.lightIndex, 0);
+    
+    // call base-class implementation
+    ParentableMotionElement.prototype.onRemove.call(this);
+}
+
 function Light_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;

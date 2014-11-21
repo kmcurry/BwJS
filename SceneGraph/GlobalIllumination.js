@@ -63,6 +63,16 @@ GlobalIllumination.prototype.applyGlobalIllumination = function()
     this.graphMgr.renderContext.setGlobalIllumination(this.ambient.getValueDirect());
 }
 
+GlobalIllumination.prototype.onRemove = function()
+{
+    // disable global illumination (set to black)
+    var black = new Color(0, 0, 0, 0);
+    this.graphMgr.renderContext.setGlobalIllumination(black);
+    
+    // call base-class implementation
+    SGNode.prototype.onRemove.call(this);    
+}
+
 function GlobalIllumination_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
