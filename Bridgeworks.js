@@ -31164,6 +31164,7 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
                 kfi.name.setValueDirect("Dissolve");
                 
                 this.initializeKeyframeInterpolator(kfi, 1);
+                this.attachDissolveInterpolator(kfi, this.models[this.models.length-1]);
                 
                 this.evaluators.push(kfi);
                 this.evaluatorsGroup.addChild(kfi);
