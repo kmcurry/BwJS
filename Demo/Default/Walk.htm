@@ -117,11 +117,13 @@
         <script type="text/javascript" src="../../Event/Event.js"></script> 
         <script type="text/javascript" src="../../Event/InputEvent.js"></script>
         <script type="text/javascript" src="../../Event/MouseEvent.js"></script>
+        <script type="text/javascript" src="../../Event/KeyboardEvent.js"></script>
         <script type="text/javascript" src="../../Event/EventAdapter.js"></script>
         <script type="text/javascript" src="../../Event/EventListener.js"></script>
         <script type="text/javascript" src="../../Event/EventMgr.js"></script>
         <script type="text/javascript" src="../../Device/DeviceHandler.js"></script>
         <script type="text/javascript" src="../../Device/MouseHandler.js"></script>
+        <script type="text/javascript" src="../../Device/KeyboardHandler.js"></script>
         <script type="text/javascript" src="../../BwCore/Command.js"></script>
         <script type="text/javascript" src="../../BwCore/Set.js"></script>
         <script type="text/javascript" src="../../BwCore/ConnectAttributes.js"></script>
@@ -191,7 +193,7 @@
         <img id="BackgroundImage" style="position: absolute; visibility: hidden; z-index: 1;" src="bwcontent/images/Sky.jpg">
         </img>
     <center>
-        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
+        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);">
             <canvas id="Canvas" style="position: relative; z-index: 2;">
             </canvas>     
         </div>

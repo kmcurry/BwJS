@@ -121,6 +121,7 @@ var eAttrType = {
 
     DeviceHandler               :4000,
     MouseHandler                :4001,
+    KeyboardHandler             :4002,
     DeviceHandler_End           :4999,
     
     UserDefined                 :5000

@@ -7,7 +7,6 @@ function BwSceneInspector()
     this.className = "BwSceneInspector";
     this.attrType = eAttrType.SceneInspector;
     
-    this.camera = null;
     this.viewport = new Viewport();
     this.worldUnitsPerPixel = new Vector2D();
     this.clickPosWorld = new Vector3D();
@@ -362,16 +361,6 @@ BwSceneInspector.prototype.zoom = function(delta)
         }
         break;
     }
-}
-
-BwSceneInspector.prototype.setCamera = function(camera)
-{
-    this.camera = camera;
-}
-
-BwSceneInspector.prototype.getCamera = function()
-{
-    return this.camera;
 }
 
 BwSceneInspector.prototype.getWorldUnitsPerPixel = function(viewSpace_Z)

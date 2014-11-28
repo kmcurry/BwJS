@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?bw onLoad="initialize"?>
 <!--<?bwplugin url="BBOGL11Engine" action="load"?>-->
-<?bwinclude url="./DefaultPreferences.xml"?>
+<?bwinclude url="./DefaultPreferencesWalk.xml"?>
 <Session>
      <Scene>
           <Isolator name="Root" isolateTransforms="true">
                <Selector name="Cameras">
                     <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
-                         <position x="3" y="4.2424" z="-3"/>
-                         <rotation x="45" y="-45" z="0"/>
+                         <position x="0" y=".2424" z="-3"/>
+                         <rotation x="0" y="0" z="0"/>
                     </PerspectiveCamera>
                </Selector>
                <Group name="Lights">
@@ -72,16 +72,13 @@
         <targetAttribute>rotation</targetAttribute>
     </ConnectAttributes>
      <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
-     <ConnectAttributes targetContainer="UV_BoxG" sourceContainer="WalkSimulator" connectionType="walkSimulation"/>
+     <ConnectAttributes targetContainer="Camera" sourceContainer="WalkSimulator" connectionType="walkSimulation"/>
      <Set target="SceneInspector" pivotDistance="6"/>
      <Set target="WalkSimulator">
-       <intersector>UV_BoxG</intersector>
-       <intersectees>
-         <intersectee>cylinderRight</intersectee>
-         <intersectee>cylinderLeft</intersectee>
-         <intersectee>sphereBack</intersectee>
-         <intersectee>sphereFront</intersectee>
-       </intersectees>
-     </Set>
-     <?bwinclude url="SendMessage.xml"?>
+        <linearSensitivity x="0.01" y="0.01" z="0.01"/>
+        <angularSensitivity>1</angularSensitivity>
+    </Set>
+    <Set target="SceneInspector" evaluate="false"/>
+    <Set target="WalkSimulator" evaluate="true"/>
+    <?bwinclude url="SendMessage.xml"?>
 </Session>

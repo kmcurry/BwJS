@@ -310,6 +310,9 @@ Node.prototype.update = function(params, visitChildren)
 
 Node.prototype.apply = function(directive, params, visitChildren)
 {
+    // commented this out because if an evaluator (e.g., WalkSimulator)
+    // happens to be the root node of a subtree and is currently disabled, its subtree will not be visited.
+    /*
     var enabled = this.enabled.getValueDirect();
     if (!enabled)
     {
@@ -318,7 +321,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
             return;
         }
     }
-
+    */
     switch (directive)
     {
         case "serialize":

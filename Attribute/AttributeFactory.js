@@ -149,6 +149,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
+    this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
 AttributeFactory.prototype.initializeConfigureMap = function()
@@ -203,6 +204,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
 
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
+    this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
 AttributeFactory.prototype.setRegistry = function(registry)
@@ -411,7 +413,6 @@ function newAnimalMover(name, factory)
 {
 	var resource = new AnimalMover();
 	
-	resource.setGraphMgr(factory.graphMgr);
 	registerEvaluatorAttributes(resource, factory);
 	
 	return resource;	
@@ -421,7 +422,6 @@ function newWalkSimulator(name, factory)
 {
     var resource = new WalkSimulator();
     
-    resource.setGraphMgr(factory.graphMgr);
     registerEvaluatorAttributes(resource, factory);
     
     return resource;
@@ -471,6 +471,7 @@ function newDeviceHandler(name, factory)
     switch (name)
     {
     case "MouseHandler":        resource = new MouseHandler(); break;
+    case "KeyboardHandler":     resource = new KeyboardHandler(); break;
     }
 	
 	return resource;
