@@ -75,7 +75,7 @@
      <ConnectAttributes targetContainer="Camera" sourceContainer="WalkSimulator" connectionType="walkSimulation"/>
      <Set target="SceneInspector" pivotDistance="6"/>
      <Set target="WalkSimulator">
-        <linearSensitivity x="0.01" y="0.01" z="0.01"/>
+        <linearSensitivity x="0.005" y="0.005" z="0.005"/>
         <angularSensitivity>1</angularSensitivity>
     </Set>
     <Set target="SceneInspector" evaluate="false"/>

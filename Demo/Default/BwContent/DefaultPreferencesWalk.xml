@@ -221,7 +221,7 @@
             <Set target="GUIInspector" evaluate="false"/>
         </CommandSequence>
         <CommandSequence name="EnableSceneInspection" numResponses="-1" undoable="false">
-            <event>VK_S</event>
+            <!--<event>VK_S</event>-->
             <event>EnableSceneInspection</event>
             <Set target="Selector" computePivotDistance="true"/>
             <Set target="SceneInspector" evaluate="true"/>
@@ -247,7 +247,7 @@
             </ConnectAttributes>
             <Set target="Camera" zoom="3.2"/>
         </CommandSequence>
-        <CommandSequence name="EnableFlightSimulation" numResponses="-1" undoable="false">
+        <!--<CommandSequence name="EnableFlightSimulation" numResponses="-1" undoable="false">
             <event>VK_F</event>
             <event>EnableFlightSimulation</event>
             <Set target="SceneInspector" evaluate="false"/>
@@ -255,7 +255,7 @@
             <Set target="FlightSimulator" evaluate="true"/>
             <Set target="WalkSimulator" evaluate="false"/>
             <Set target="GUIInspector" evaluate="false"/>
-        </CommandSequence>
+     </CommandSequence>-->
         <CommandSequence name="EnableWalkSimulation" numResponses="-1" undoable="false">
             <event>VK_W</event>
             <event>EnableWalkSimulation</event>
@@ -290,16 +290,28 @@
       <Set target="WalkSimulator" evaluate="true"/>
       <Set target="GUIInspector" evaluate="false"/>
     </CommandSequence>-->
-    <Set name="Walk_Forward" event="MButton1.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+    <Set name="Walk_Forward" event="VK_D.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="2"/>
     </Set>
-    <Set name="Walk_Forward_Stop" event="MButton1.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+    <Set name="Walk_Forward_Stop" event="VK_D.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="0"/>
     </Set>
-    <Set name="Walk_Backward" event="MButton3.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+    <Set name="Walk_Backward" event="VK_E.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="-2"/>
     </Set>
-    <Set name="Walk_Backward_Stop" event="MButton3.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+    <Set name="Walk_Backward_Stop" event="VK_E.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+        <linearDelta x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_StrafeRight" event="VK_F.Down" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
+        <linearDelta x="2" y="0" z="2"/>
+    </Set>
+    <Set name="Walk_StrafeRight_Stop" event="VK_F.Up" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
+        <linearDelta x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_StrafeLeft" event="VK_S.Down" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
+        <linearDelta x="-2" y="0" z="2"/>
+    </Set>
+    <Set name="Walk_StrafeLeft_Stop" event="VK_S.Up" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
         <linearDelta x="0" y="0" z="0"/>
     </Set>
     <Set name="Walk_TurnRight" event="VK_RIGHT.Down" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
