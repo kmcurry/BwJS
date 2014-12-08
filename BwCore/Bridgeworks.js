@@ -82,7 +82,7 @@ Bridgeworks.prototype.get = function(name) {
   return this.registry.find(name);
 }
 
-Bridgeworks.prototype.handleEvent = function(event)
+Bridgeworks.prototype.handleEvent = function(event, eventType /* optional; used for "keyup" */)
 {
     var bwEvent = null;
 
@@ -96,10 +96,14 @@ Bridgeworks.prototype.handleEvent = function(event)
                 bwEvent = this.eventAdapter.createMouseEvent(event);
             }
             break;
+        
         case "KeyboardEvent":
             {
-                bwEvent = this.eventAdapter.createKeyboardEvent(event);
+                bwEvent = this.eventAdapter.createKeyboardEvent(event, eventType);
             }
+            break;
+            
+        default:
             break;
     }
 

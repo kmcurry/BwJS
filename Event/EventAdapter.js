@@ -20,9 +20,34 @@ function EventAdapter()
     this.registerAttribute(this.name, "name");
 }
 
-EventAdapter.prototype.createKeyboardEvent = function(event)
+EventAdapter.prototype.createKeyboardEvent = function(event, eventType /* optional; used for "keyup" */)
 {
-    var keyboardEvent = null;//new KeyboardEvent(type, time, buttonId, modifiers, state, x, y);
+    var date = new Date();
+    
+    var type = eEventType.Unknown;
+    var time = date.getTime();
+    var buttonId = event.keyCode;
+    var modifiers = 0;  // TODO
+    var state = 0;      // TODO
+    
+    var eventType = eventType || event.type;
+    switch (eventType)
+    {
+        case "keydown":
+            {
+                type = eEventType.KeyDown_First + buttonId;
+            }
+            break;
+            
+        case "keyup":
+            {
+                type = eEventType.KeyUp_First + buttonId;
+            }
+            break;
+    }
+    
+    var keyboardEvent = new KeyboardEvent(type, time, buttonId, modifiers, state);
+    
     return keyboardEvent;
 }
 

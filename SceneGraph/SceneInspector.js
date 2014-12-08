@@ -7,6 +7,8 @@ function SceneInspector()
     this.className = "SceneInspector";
     this.attrType = eAttrType.SceneInspector;
     
+    this.camera = null;
+        
     this.viewPosition = new Vector3DAttr(0, 0, 0);
     this.viewRotation = new Vector3DAttr(0, 0, 0);
     this.translationDelta = new Vector3DAttr(0, 0, 0);
@@ -20,6 +22,19 @@ function SceneInspector()
     this.pivotPointWorld = new Vector3DAttr(0, 0, 0);
     this.resultPosition = new Vector3DAttr(0, 0, 0);
     this.resultRotation = new Vector3DAttr(0, 0, 0);
+    /// indicates the up/right/forward vectors to use for pan/track; if zero,
+    /// camera up/right/forward vectors are used (default: zero)
+    this.upVector = new Vector3DAttr(0, 0, 0);
+    this.rightVector = new Vector3DAttr(0, 0, 0);
+    this.forwardVector = new Vector3DAttr(0, 0, 0);
+    /// indicate which components of resultPosition/resultRotation should be set; if true,
+    /// the component is set, if false, it is not (default: true)
+    this.affectPosition_X = new BooleanAttr(true);
+    this.affectPosition_Y = new BooleanAttr(true);
+    this.affectPosition_Z = new BooleanAttr(true);
+    this.affectRotation_X = new BooleanAttr(true);
+    this.affectRotation_Y = new BooleanAttr(true);
+    this.affectRotation_Z = new BooleanAttr(true);
     
     this.registerAttribute(this.viewPosition, "viewPosition");
     this.registerAttribute(this.viewRotation, "viewRotation");
@@ -34,6 +49,25 @@ function SceneInspector()
     this.registerAttribute(this.pivotPointWorld, "pivotPointWorld");
     this.registerAttribute(this.resultPosition, "resultPosition");
     this.registerAttribute(this.resultRotation, "resultRotation");
+    this.registerAttribute(this.upVector, "upVector");
+    this.registerAttribute(this.rightVector, "rightVector");
+    this.registerAttribute(this.forwardVector, "forwardVector");
+    this.registerAttribute(this.affectPosition_X, "affectPosition_X");
+    this.registerAttribute(this.affectPosition_Y, "affectPosition_Y");
+    this.registerAttribute(this.affectPosition_Z, "affectPosition_Z");
+    this.registerAttribute(this.affectRotation_X, "affectRotation_X");
+    this.registerAttribute(this.affectRotation_Y, "affectRotation_Y");
+    this.registerAttribute(this.affectRotation_Z, "affectRotation_Z");
+}
+
+SceneInspector.prototype.setCamera = function(camera)
+{
+    this.camera = camera;
+}
+
+SceneInspector.prototype.getCamera = function()
+{
+    return this.camera;
 }
 
 SceneInspector.prototype.evaluate = function()
@@ -125,10 +159,18 @@ SceneInspector.prototype.evaluate = function()
     if (panDelta.x != 0 || panDelta.y != 0 || panDelta.z != 0 ||
         trackDelta.x != 0 || trackDelta.y != 0 || trackDelta.z != 0)
     {
+        // pan up/right/forward vectors
+        var up = this.upVector.getValueDirect();
+        var right = this.rightVector.getValueDirect();
+        var forward = this.forwardVector.getValueDirect();
+        if (up.x == 0 && up.y == 0 && up.z == 0) up = cameraUp;
+        if (right.x == 0 && right.y == 0 && right.z == 0) right = cameraRight;
+        if (forward.x == 0 && forward.y == 0 && forward.z == 0) forward = cameraForward;
+        
         // calculate direction vectors after scene rotation matrix is applied
-        var cameraUpRot = this.transformDirectionVector(cameraUp.x, cameraUp.y, cameraUp.z, sceneRot);
-        var cameraRightRot = this.transformDirectionVector(cameraRight.x, cameraRight.y, cameraRight.z, sceneRot);    
-        var cameraForwardRot = this.transformDirectionVector(cameraForward.x, cameraForward.y, cameraForward.z, sceneRot);    
+        var cameraUpRot = up;
+        var cameraRightRot = right;    
+        var cameraForwardRot = forward;    
             
         var scenePan = new Matrix4x4();
         scenePan.loadTranslation(
@@ -215,8 +257,12 @@ SceneInspector.prototype.evaluate = function()
     resultPosition = resultTransform.transform(resultPosition.x, resultPosition.y, resultPosition.z, 0);
 
     // output results
-    this.resultPosition.setValueDirect(-resultPosition.x, -resultPosition.y, -resultPosition.z);
-    this.resultRotation.setValueDirect(-resultRotation.x, -resultRotation.y, -resultRotation.z);
+    this.resultPosition.setValueDirect(this.affectPosition_X.getValueDirect() ? -resultPosition.x : viewPosition.x, 
+                                       this.affectPosition_Y.getValueDirect() ? -resultPosition.y : viewPosition.y,
+                                       this.affectPosition_Z.getValueDirect() ? -resultPosition.z : viewPosition.z);
+    this.resultRotation.setValueDirect(this.affectRotation_X.getValueDirect() ? -resultRotation.x : viewRotation.x, 
+                                       this.affectRotation_Y.getValueDirect() ? -resultRotation.y : viewRotation.y, 
+                                       this.affectRotation_Z.getValueDirect() ? -resultRotation.z : viewRotation.z);
 }
 
 SceneInspector.prototype.transformDirectionVector = function(x, y, z, matrix)

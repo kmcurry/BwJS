@@ -14,6 +14,7 @@ function ConnectionMgr()
     //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
     registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
     registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
+    registerConnectionHelper("walkSimulation", ConnectionMgr.prototype.connectWalkSimulation, ConnectionMgr.prototype.disconnectWalkSimulation);
 }
 
 ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
@@ -121,4 +122,14 @@ ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
             }
         }
     }
+}
+
+ConnectionMgr.prototype.connectWalkSimulation = function(simulator, target)
+{
+    ConnectionMgr.prototype.connectSceneInspection.call(null, simulator, target);
+}
+
+ConnectionMgr.prototype.disconnectWalkSimulation = function(simulator, target)
+{
+    ConnectionMgr.prototype.disconnectSceneInspection.call(null, simulator, target);
 }
