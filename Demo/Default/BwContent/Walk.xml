@@ -81,4 +81,12 @@
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="WalkSimulator" evaluate="true"/>
     <?bwinclude url="SendMessage.xml"?>
+    <Set name="Walk_Forward" event="VK_D.Down" numResponses="-1" undoable="false" target="Camera">
+        <!--<linearDelta x="0" y="0" z="10"/>-->
+        <panVelocity x="0" y="0" z="0.5"/>
+    </Set>
+    <Set name="Walk_Back" event="VK_E.Down" numResponses="-1" undoable="false" target="Camera">
+        <!--<linearDelta x="0" y="0" z="10"/>-->
+        <panVelocity x="0" y="0" z="0"/>
+    </Set>
 </Session>

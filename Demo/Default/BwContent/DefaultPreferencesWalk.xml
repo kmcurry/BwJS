@@ -290,12 +290,12 @@
       <Set target="WalkSimulator" evaluate="true"/>
       <Set target="GUIInspector" evaluate="false"/>
     </CommandSequence>-->
-    <Set name="Walk_Forward" event="VK_D.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
-        <linearDelta x="0" y="0" z="2"/>
+    <!--<Set name="Walk_Forward" event="VK_D.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
+        <linearDelta x="0" y="0" z="10"/>
     </Set>
     <Set name="Walk_Forward_Stop" event="VK_D.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="0"/>
-    </Set>
+    </Set>-->
     <Set name="Walk_Backward" event="VK_E.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="-2"/>
     </Set>
