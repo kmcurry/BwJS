@@ -39,6 +39,12 @@ EventAdapter.prototype.createKeyboardEvent = function(event, eventType /* option
             }
             break;
             
+        case "keypress":
+            {
+                type = eEventType.KeyDown_First + buttonId - 32; //  not sure why keycodes have +32 compared to keydown events
+            }
+            break;
+            
         case "keyup":
             {
                 type = eEventType.KeyUp_First + buttonId;

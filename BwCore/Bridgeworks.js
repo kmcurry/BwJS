@@ -82,7 +82,7 @@ Bridgeworks.prototype.get = function(name) {
   return this.registry.find(name);
 }
 
-Bridgeworks.prototype.handleEvent = function(event, eventType /* optional; used for "keyup" */)
+Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type override */)
 {
     var bwEvent = null;
 
