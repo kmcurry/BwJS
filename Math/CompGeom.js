@@ -271,3 +271,8 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
     
     return { result: false };
 }
+
+function planeProject(v, plane)
+{
+    return crossProduct(plane.normal, crossProduct(v, plane.normal));
+}

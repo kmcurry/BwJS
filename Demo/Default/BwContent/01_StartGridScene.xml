@@ -1,279 +1,91 @@
-<Session broadcast="false">
-	<Set target="Selector" computePivotDistance="false"/>
-	<MouseHandler>
-		<name>MouseHandler</name>
-		<numResponses>-1</numResponses>
-	</MouseHandler>
-	<ObjectInspector>
-		<name>ObjectInspector</name>
-	</ObjectInspector>
-	<BwSceneInspector>
-		<name>SceneInspector</name>
-		<viewRelativeXAxisRotation>true</viewRelativeXAxisRotation>
-		<viewRelativeZAxisRotation>true</viewRelativeZAxisRotation>
-		<pivotDistance>3</pivotDistance>
-		<rotationSensitivity item0="0.5" item1="0.5" item2="0.5"/>
-	</BwSceneInspector>
-	<Isolator>
-		<name>Root</name>
-		<isolateTransforms>true</isolateTransforms>
-		<PerspectiveCamera>
-			<name>Camera</name>
-			<position item0="3" item1="4.2424" item2="-3"/>
-			<rotation item0="45" item1="-45" item2="0"/>
-			<nearDistance>0.25</nearDistance>
-			<farDistance>4000</farDistance>
-			<zoom>3.2</zoom>
-		</PerspectiveCamera>
-		<Group>
-			<name>Lights</name>
-			<GlobalIllumination>
-				<name>GlobalLight</name>
-				<ambient item0="0.25" item1="0.25" item2="0.25" item3="0.25"/>
-			</GlobalIllumination>
-			<DirectionalLight>
-				<name>theLight</name>
-				<enabled>true</enabled>
-				<rotation item0="0" item1="0" item2="0"/>
-				<ambient item0="0.25" item1="0.25" item2="0.25" item3="1"/>
-				<diffuse item0="1" item1="1" item2="1" item3="1"/>
-				<specular item0="1" item1="1" item2="1" item3="1"/>
-			</DirectionalLight>
-		</Group>
-		<Group>
-			<name>Effects</name>
-		</Group>
-		<Group>
-			<name>Models</name>
-			<ModelRoot>
-				<Model>
-					<name>grid</name>
-					<position item0="0" item1="0" item2="0"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/GridG.lwo</url>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>UV_BoxG</name>
-					<position item0="0" item1="0.26" item2="0"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/UV_BoxG.lwo</url>
-					<indexedGeometry>false</indexedGeometry>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>cylinderRight</name>
-					<position item0="2" item1="0.26" item2="0"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/UV_CylinderG.lwo</url>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>cylinderLeft</name>
-					<position item0="-2" item1="0.26" item2="0"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/UV_CylinderG.lwo</url>
-					<enableSharing>false</enableSharing>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>sphereBack</name>
-					<position item0="0" item1="0.25" item2="2"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/UV_SphereG.lwo</url>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>sphereFront</name>
-					<position item0="0" item1="0.25" item2="-2"/>
-					<rotation item0="0" item1="0" item2="0"/>
-					<scale item0="1" item1="1" item2="1"/>
-					<url>/objects/UV_SphereG.lwo</url>
-					<enableSharing>false</enableSharing>
-				</Model>
-			</ModelRoot>
-			<ModelRoot>
-				<Model>
-					<name>F16</name>
-					<url>/objects/F16.lwo</url>
-				</Model>
-			</ModelRoot>
-		</Group>
-		<KeyframeInterpolator>
-			<name>F16Motion1</name>
-			<url>motions/F16New.mot</url>
-			<target>F16</target>
-		</KeyframeInterpolator>
-	</Isolator>
-	<RenderDirective>
-		<name>RenderDirective</name>
-		<backgroundImageFilename>http://localhost/bwjs/demo/default/BwContent/images/Sky2.jpg</backgroundImageFilename>
-		<root>Root</root>
-	</RenderDirective>
-	<SerializeDirective>
-		<root>Root</root>
-	</SerializeDirective>
-	<SetCommand>
-		<name>SetCapture_Down_Rot_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_DOWN.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Up_Rot_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_UP.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Left_Rot_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_LEFT.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Right_Rot_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_RIGHT.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Left_Pan_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_LEFT.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Right_Pan_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_RIGHT.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Up_Pan_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_UP.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Down_Pan_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_DOWN.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_ZoomIn_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_PLUS.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_ZoomOut_Scene</name>
-		<numResponses>-1</numResponses>
-		<event>VK_MINUS.Down</event>
-		<target>SceneInspector</target>
-		<pivotDistance>3</pivotDistance>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Down_Rot_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_DOWN.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Up_Rot_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_UP.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Left_Rot_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_LEFT.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_Right_Rot_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_RIGHT.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_S_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_LEFT.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_F_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_RIGHT.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_C_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_UP.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_V_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_CONTROL+VK_DOWN.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_E_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_MINUS.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<SetCommand>
-		<name>SetCapture_D_Pan_Objects</name>
-		<numResponses>-1</numResponses>
-		<event>VK_PLUS.Down</event>
-		<target>ObjectInspector</target>
-	</SetCommand>
-	<PlayCommand>
-		<numResponses>-1</numResponses>
-		<event>VK_PERIOD</event>
-	</PlayCommand>
-	<CommandSequence/>
-	<CommandSequence/>
-	<CommandSequence/>
-	<CommandSequence/>
-	<CommandSequence/>
-	<CommandSequence/>
-	<SetCommand>
-		<numResponses>-1</numResponses>
-		<event>VK_ADD</event>
-		<target>RenderAgent</target>
-	</SetCommand>
-	<SetCommand>
-		<numResponses>-1</numResponses>
-		<event>VK_SUBTRACT</event>
-		<target>RenderAgent</target>
-	</SetCommand>
-	<Serialize>
-		<target>Root</target>
-	</Serialize>
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<!--<?bwplugin url="BBOGL11Engine" action="load"?>-->
+<?bwinclude url="./DefaultPreferences.xml"?>
+<Session>
+     <Scene>
+          <Isolator name="Root" isolateTransforms="true">
+               <Selector name="Cameras">
+                    <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
+                         <position x="3" y="4.2424" z="-3"/>
+                         <rotation x="45" y="-45" z="0"/>
+                    </PerspectiveCamera>
+                    <!--<OrthographicCamera name="OrthoCam" nearDistance=".25" farDistance="4000" width="6">
+                         <position x="0" y="6" z="0"/>
+                         <rotation x="90" y="0" z="0"/>
+                 </OrthographicCamera>-->
+               </Selector>
+               <Group name="Lights">
+                    <GlobalIllumination name="GlobalLight">
+                         <ambient r=".25" g=".25" b=".25"/>
+                    </GlobalIllumination>
+                    <PointLight name="theLight" range="100" parent="Camera">
+                         <ambient r="0.25" g="0.25" b="0.25"/>
+                         <diffuse r="1" g="1" b="1"/>
+                         <specular r="1" g="1" b="1"/>
+                         <position x="-40.688" y="47.9691" z="-52.0672"/>
+                    </PointLight>
+               </Group>
+               <Group name="Effects"/>
+               <Group name="Models">
+                    <Isolator name="ProjectorIsolator" isolateTextures="true">
+                    <PerspectiveProjector name="PerspectiveProjector" zoom="3.2" nearDistance=".00001" farDistance="4000">
+                      <position x="0" y="0" z="0"/>
+                      <rotation p="0" h="0" r="0"/>
+                      <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
+                    </PerspectiveProjector>
+                    <Model name="grid" url="/objects/GridG.lwo">
+                         <position x="0" y="0" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo">
+                         <position x="0" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo">
+                         <position x="2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
+                         <position x="-2" y=".26" z="0"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereBack" url="/objects/UV_SphereG.lwo">
+                         <position x="0" y=".25" z="2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
+                         <position x="0" y=".25" z="-2"/>
+                         <rotation x="0" y="0" z="0"/>
+                         <scale x="1" y="1" z="1"/>
+                    </Model>
+                    </Isolator>
+               </Group>
+          </Isolator>
+          <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>
+     </Scene>
+     <ConnectAttributes sourceContainer="Camera" targetContainer="PerspectiveProjector" persist="false">
+        <sourceAttribute>position</sourceAttribute>
+        <targetAttribute>position</targetAttribute>
+        <sourceAttribute>rotation</sourceAttribute>
+        <targetAttribute>rotation</targetAttribute>
+    </ConnectAttributes>
+     <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+     <ConnectAttributes targetContainer="UV_BoxG" sourceContainer="WalkSimulator" connectionType="walkSimulation"/>
+     <Set target="SceneInspector" pivotDistance="6"/>
+     <Set target="WalkSimulator">
+       <intersector>UV_BoxG</intersector>
+       <intersectees>
+         <intersectee>cylinderRight</intersectee>
+         <intersectee>cylinderLeft</intersectee>
+         <intersectee>sphereBack</intersectee>
+         <intersectee>sphereFront</intersectee>
+       </intersectees>
+     </Set>
+     <?bwinclude url="SendMessage.xml"?>
 </Session>

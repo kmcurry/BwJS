@@ -88,6 +88,7 @@ function init(scene, container, recreateCanvas)
     
     bridgeworks.updateScene(scene);          
 	
+	addKeyEvents();
 	addTouchEvents();
 	
 	// gesture
@@ -125,6 +126,25 @@ function showBG()
         }
     }
     
+}
+
+function addKeyEvents()
+{
+    window.addEventListener("keyup", 
+        function(event) 
+        { 
+            console.debug("keyup"); 
+            bridgeworks.handleEvent(event); 
+        }
+    );
+    
+    window.addEventListener("keypress", 
+        function(event) 
+        { 
+            console.debug("keydown");
+            bridgeworks.handleEvent(event);
+        }
+    );
 }
 
 // temporary, transitional re-factor

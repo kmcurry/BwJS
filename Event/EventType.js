@@ -36,16 +36,18 @@
     Mouse_Last                  :199,
 
     Key_First                   :200,
-    Key_Down                    :201,
-    Key_Up                      :202,
-    Key_Last                    :299,
+    KeyDown_First               :201,
+    KeyDown_Last                :500,
+    KeyUp_First                 :501,
+    KeyUp_Last                  :798,
+    Key_Last                    :799,
     
-    Element_First               :700,
-    ElementSelected             :701,
-    ElementUnselected           :702,
-    ElementFocus                :703,
-    ElementBlur                 :704,
-    Element_Last                :799,
+    Element_First               :800,
+    ElementSelected             :801,
+    ElementUnselected           :802,
+    ElementFocus                :803,
+    ElementBlur                 :804,
+    Element_Last                :899,
     
     UserDefined                 :2000
 };
@@ -84,14 +86,104 @@ var eEventNameMap = {
 	"Element.Blur"              : eEventType.ElementBlur
 };
 
+// map of VK_* strings to javascript key codes
+var eKeyCodeMap = {
+    "VK_BACK"                   : 8,
+    "VK_TAB"                    : 9,
+    "VK_ENTER"                  : 13,
+    "VK_SHIFT"                  : 16,
+    "VK_CONTROL"                : 17,
+    "VK_ALT"                    : 18,
+    "VK_PAUSE"                  : 19,
+    "VK_CAPITAL"                : 20,
+    "VK_ESCAPE"                 : 27,
+    "VK_PAGEUP"                 : 33,
+    "VK_PAGEDOWN"               : 34,
+    "VK_END"                    : 35,
+    "VK_HOME"                   : 36,
+    "VK_LEFT"                   : 37,
+    "VK_UP"                     : 38,
+    "VK_RIGHT"                  : 39,
+    "VK_DOWN"                   : 40,
+    "VK_INSERT"                 : 45,
+    "VK_DELETE"                 : 46,
+    "VK_0"                      : 48,
+    "VK_1"                      : 49,
+    "VK_2"                      : 50,
+    "VK_3"                      : 51,
+    "VK_4"                      : 52,
+    "VK_5"                      : 53,
+    "VK_6"                      : 54,
+    "VK_7"                      : 55,
+    "VK_8"                      : 56,
+    "VK_9"                      : 57,
+    "VK_A"                      : 65,
+    "VK_B"                      : 66,
+    "VK_C"                      : 67,
+    "VK_D"                      : 68,
+    "VK_E"                      : 69,
+    "VK_F"                      : 70,
+    "VK_G"                      : 71,
+    "VK_H"                      : 72,
+    "VK_I"                      : 73,
+    "VK_J"                      : 74,
+    "VK_K"                      : 75,
+    "VK_L"                      : 76,
+    "VK_M"                      : 77,
+    "VK_N"                      : 78,
+    "VK_O"                      : 79,  
+    "VK_P"                      : 80,
+    "VK_Q"                      : 81,
+    "VK_R"                      : 82,    
+    "VK_S"                      : 83,
+    "VK_T"                      : 84,
+    "VK_U"                      : 85,
+    "VK_V"                      : 86,
+    "VK_W"                      : 87,
+    "VK_X"                      : 88,
+    "VK_Y"                      : 89,
+    "VK_Z"                      : 90,
+    "VK_COMMA"                  : 189,
+    "VK_PERIOD"                 : 190,
+    "VK_SLASH"                  : 191
+};
+
 function getEventTypeByName(name)
 {
     var type = eEventNameMap[name];
     
     if (type == undefined)
     {
-        // TODO  
-        type = eEventType.Unknown;      
+        // key
+        if (name.indexOf("VK") != -1)
+        {
+            var key = name;
+            var state = "";
+            var dot = name.indexOf(".");
+            if (dot != -1)
+            {
+                // key
+                key = name.substring(0, dot);
+                // state
+                state = name.substring(dot+1);
+            }
+                
+            var keyCode = eKeyCodeMap[key];
+            if (keyCode)
+            {
+                switch (state)
+                {
+                    case "Down":
+                        type = eEventType.KeyDown_First + keyCode;
+                        break;
+                        
+                    case "Up":
+                    default:
+                        type = eEventType.KeyUp_First + keyCode;
+                        break;
+                }
+            }
+        }     
     }   
     
     return type;
