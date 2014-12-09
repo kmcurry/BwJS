@@ -173,11 +173,11 @@ function getEventTypeByName(name)
             {
                 switch (state)
                 {
-                    case "DOWN":
+                    case "Down":
                         type = eEventType.KeyDown_First + keyCode;
                         break;
                         
-                    case "UP":
+                    case "Up":
                     default:
                         type = eEventType.KeyUp_First + keyCode;
                         break;

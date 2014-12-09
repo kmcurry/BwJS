@@ -154,12 +154,12 @@
         <rotationDelta x="5" y="0" z="0"/>
     </Set>
     <!-- Y AXIS -->
-    <Set name="SetCapture_Left_Rot_Objects" event="VK_LEFT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
+    <!--<Set name="SetCapture_Left_Rot_Objects" event="VK_LEFT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
         <rotationDelta x="0" y="-5" z="0"/>
     </Set>
     <Set name="SetCapture_Right_Rot_Objects" event="VK_RIGHT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
         <rotationDelta x="0" y="5" z="0"/>
-    </Set>
+    </Set>-->
     <!-- KEYBOARD PAN 
                           		S = Left
                           		F = Right
@@ -168,12 +168,12 @@
                           		C = Up
                           		V = Down
    	-->
-    <Set name="SetCapture_S_Pan_Objects" event="VK_CONTROL+VK_LEFT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
+    <!--<Set name="SetCapture_S_Pan_Objects" event="VK_CONTROL+VK_LEFT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
         <panDelta x="1" y="0" z="0"/>
     </Set>
     <Set name="SetCapture_F_Pan_Objects" event="VK_CONTROL+VK_RIGHT.Down" numResponses="-1" undoable="false" target="ObjectInspector">
         <panDelta x="-1" y="0" z="0"/>
-    </Set>
+    </Set>-->
     <!-- Y AXIS -->
     <Set name="SetCapture_C_Pan_Objects" event="VK_CONTROL+VK_UP.Down" numResponses="-1" undoable="false" target="ObjectInspector">
         <panDelta x="0" y="1" z="0"/>
@@ -295,7 +295,7 @@
     </Set>
     <Set name="Walk_Forward_Stop" event="VK_D.Up" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="0"/>
-    </Set>-->
+    </Set>
     <Set name="Walk_Backward" event="VK_E.Down" numResponses="-1" undoable="false" elementIndex="2" target="WalkSimulator">
         <linearDelta x="0" y="0" z="-2"/>
     </Set>
@@ -325,7 +325,7 @@
     </Set>
     <Set name="Walk_TurnLeft_Stop" event="VK_LEFT.Up" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
         <angularDelta x="0" y="0" z="0"/>
-    </Set>
+    </Set>-->
     <Set name="Walk_Up" event="VK_PAGEUP.Down" numResponses="-1" undoable="false" elementIndex="1" target="WalkSimulator">
         <linearDelta x="0" y="2" z="0"/>
     </Set>

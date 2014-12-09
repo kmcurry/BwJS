@@ -50,6 +50,7 @@ function ParentableMotionElement()
     this.sectorWorldPosition = new Vector3DAttr(0, 0, 0);
     this.panVelocity = new Vector3DAttr(0, 0, 0);          // linear velocity along direction vectors in world-units/second
     this.linearVelocity = new Vector3DAttr(0, 0, 0);       // linear velocity in world-units/second
+    this.linearVelocity_affectPosition_Y = new BooleanAttr(true);
     this.angularVelocity = new Vector3DAttr(0, 0, 0);      // angular velocity in degrees/second
     this.scalarVelocity = new Vector3DAttr(0, 0, 0);       // scalar velocity in world-units/second
     this.worldTransform = new Matrix4x4Attr(1, 0, 0, 0,
@@ -117,6 +118,7 @@ function ParentableMotionElement()
     this.registerAttribute(this.sectorWorldTransform, "sectorWorldTransform");
     this.registerAttribute(this.panVelocity, "panVelocity");
     this.registerAttribute(this.linearVelocity, "linearVelocity");
+    this.registerAttribute(this.linearVelocity_affectPosition_Y, "linearVelocity_affectPosition_Y");
     this.registerAttribute(this.angularVelocity, "angularVelocity");
     this.registerAttribute(this.scalarVelocity, "scalarVelocity");
     this.registerAttribute(this.parent, "parent");
@@ -254,16 +256,22 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // get direction vectors for pan
         var directionVectors = this.getDirectionVectors();
+        
+        // get affect position flags
+        var linearVelocity_affectPosition_Y = this.linearVelocity_affectPosition_Y.getValueDirect();
 
         // update position
         position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.x 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.x * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.x * timeIncrement);
-        /*position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
+        if (linearVelocity_affectPosition_Y)
+        {
+        position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.y * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.y * timeIncrement);*/
+        						  (linearVelocity.y * timeIncrement);
+        }
         position.z = position.z + (directionVectors.right.z   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.z 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 

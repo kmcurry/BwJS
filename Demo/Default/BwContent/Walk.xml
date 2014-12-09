@@ -82,11 +82,47 @@
     <Set target="WalkSimulator" evaluate="true"/>
     <?bwinclude url="SendMessage.xml"?>
     <Set name="Walk_Forward" event="VK_D.Down" numResponses="-1" undoable="false" target="Camera">
-        <!--<linearDelta x="0" y="0" z="10"/>-->
+        <linearVelocity_affectPosition_Y>false</linearVelocity_affectPosition_Y>
         <panVelocity x="0" y="0" z="0.5"/>
     </Set>
-    <Set name="Walk_Back" event="VK_E.Down" numResponses="-1" undoable="false" target="Camera">
-        <!--<linearDelta x="0" y="0" z="10"/>-->
+    <Set name="Walk_Back" event="VK_D.Up" numResponses="-1" undoable="false" target="Camera">
+        <linearVelocity_affectPosition_Y>true</linearVelocity_affectPosition_Y>
         <panVelocity x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_Backward" event="VK_E.Down" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>false</linearVelocity_affectPosition_Y>
+        <panVelocity x="0" y="0" z="-0.5"/>
+    </Set>
+    <Set name="Walk_Backward_Stop" event="VK_E.Up" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>true</linearVelocity_affectPosition_Y>
+        <panVelocity x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_StrafeRight" event="VK_F.Down" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>false</linearVelocity_affectPosition_Y>
+        <panVelocity x="0.5" y="0" z="0.5"/>
+    </Set>
+    <Set name="Walk_StrafeRight_Stop" event="VK_F.Up" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>true</linearVelocity_affectPosition_Y>
+        <panVelocity x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_StrafeLeft" event="VK_S.Down" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>false</linearVelocity_affectPosition_Y>
+        <panVelocity x="-0.5" y="0" z="0.5"/>
+    </Set>
+    <Set name="Walk_StrafeLeft_Stop" event="VK_S.Up" numResponses="-1" undoable="false" target="Camera">
+    	<linearVelocity_affectPosition_Y>true</linearVelocity_affectPosition_Y>
+        <panVelocity x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_TurnRight" event="VK_A.Down" numResponses="-1" undoable="false" target="Camera">
+        <angularVelocity x="0" y="-20" z="0"/>
+    </Set>
+    <Set name="Walk_TurnRight_Stop" event="VK_A.Up" numResponses="-1" undoable="false" target="Camera">
+        <angularVelocity x="0" y="0" z="0"/>
+    </Set>
+    <Set name="Walk_TurnLeft" event="VK_G.Down" numResponses="-1" undoable="false" target="Camera">
+        <angularVelocity x="0" y="20" z="0"/>
+    </Set>
+    <Set name="Walk_TurnLeft_Stop" event="VK_G.Up" numResponses="-1" undoable="false" target="Camera">
+        <angularVelocity x="0" y="0" z="0"/>
     </Set>
 </Session>

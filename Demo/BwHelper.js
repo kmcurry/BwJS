@@ -130,13 +130,19 @@ function showBG()
 
 function addKeyEvents()
 {
-    // NOTE: not receiving keyup events when keydown events are requested, so manually make one
-    //window.addEventListener("keyup", function(event) { bridgeworks.handleEvent(event); });
-    window.addEventListener("keydown", 
+    window.addEventListener("keyup", 
         function(event) 
         { 
+            console.debug("keyup"); 
+            bridgeworks.handleEvent(event); 
+        }
+    );
+    
+    window.addEventListener("keypress", 
+        function(event) 
+        { 
+            console.debug("keydown");
             bridgeworks.handleEvent(event);
-            bridgeworks.handleEvent(event, "keyup");
         }
     );
 }
