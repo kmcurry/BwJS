@@ -130,21 +130,48 @@ function showBG()
 
 function addKeyEvents()
 {
-    window.addEventListener("keyup", 
-        function(event) 
-        { 
-            console.debug("keyup"); 
-            bridgeworks.handleEvent(event); 
-        }
-    );
+    if (window.addEventListener)
+    {
+        window.addEventListener("keyup", 
+            function(event) 
+            { 
+                console.debug("keyup"); 
+                bridgeworks.handleEvent(event); 
+            }
+        );
+    }
+    else
+    {
+        window.attachEvent("keyup", 
+            function(event) 
+            { 
+                console.debug("keyup"); 
+                bridgeworks.handleEvent(event); 
+            }
+        );
+    }
     
-    window.addEventListener("keypress", 
-        function(event) 
-        { 
-            console.debug("keydown");
-            bridgeworks.handleEvent(event);
-        }
-    );
+    if (window.addEventListener)
+    {
+        window.addEventListener("keypress", 
+            function(event) 
+            { 
+                console.debug("keydown");
+                bridgeworks.handleEvent(event);
+            }
+        );
+    }
+    else
+    {
+        window.attachEvent("keypress", 
+            function(event) 
+            { 
+                console.debug("keydown");
+                bridgeworks.handleEvent(event);
+            }
+        );
+    }
+
 }
 
 // temporary, transitional re-factor

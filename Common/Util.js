@@ -83,6 +83,13 @@ function getObjectClassName(obj) {
         if (arr && arr.length == 2) {
             return arr[1];
         }
+        
+        // match [method name]
+        arr = obj.constructor.toString().split(" ");
+        
+        if (arr && arr.length == 2) {
+            return arr[1].substring(0, arr[1].length-1);
+        }
     }
 
     return undefined;
