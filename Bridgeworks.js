@@ -107,6 +107,13 @@ function getObjectClassName(obj) {
         if (arr && arr.length == 2) {
             return arr[1];
         }
+        
+        // match [method name]
+        arr = obj.constructor.toString().split(" ");
+        
+        if (arr && arr.length == 2) {
+            return arr[1].substring(0, arr[1].length-1);
+        }
     }
 
     return undefined;
@@ -4813,6 +4820,12 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
     
     return { result: false };
 }
+
+function planeProject(v, plane)
+{
+    return crossProduct(plane.normal, crossProduct(v, plane.normal));
+}
+
 var eAttrType = {
     Unknown                     :-1,
     
@@ -4901,7 +4914,8 @@ var eAttrType = {
     ObjectInspector             :1106,
     MultiTargetObserver			:1107,
     ObjectMover	 				:1108,
-    AnimalMover					:1109,   
+    AnimalMover					:1109, 
+    WalkSimulator               :1110,  
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -4935,6 +4949,7 @@ var eAttrType = {
 
     DeviceHandler               :4000,
     MouseHandler                :4001,
+    KeyboardHandler             :4002,
     DeviceHandler_End           :4999,
     
     UserDefined                 :5000
@@ -13744,6 +13759,9 @@ Node.prototype.update = function(params, visitChildren)
 
 Node.prototype.apply = function(directive, params, visitChildren)
 {
+    // commented this out because if an evaluator (e.g., WalkSimulator)
+    // happens to be the root node of a subtree and is currently disabled, its subtree will not be visited.
+    /*
     var enabled = this.enabled.getValueDirect();
     if (!enabled)
     {
@@ -13752,7 +13770,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
             return;
         }
     }
-
+    */
     switch (directive)
     {
         case "serialize":
@@ -14250,6 +14268,7 @@ function ParentableMotionElement()
     this.sectorWorldPosition = new Vector3DAttr(0, 0, 0);
     this.panVelocity = new Vector3DAttr(0, 0, 0);          // linear velocity along direction vectors in world-units/second
     this.linearVelocity = new Vector3DAttr(0, 0, 0);       // linear velocity in world-units/second
+    this.linearVelocity_affectPosition_Y = new BooleanAttr(true);
     this.angularVelocity = new Vector3DAttr(0, 0, 0);      // angular velocity in degrees/second
     this.scalarVelocity = new Vector3DAttr(0, 0, 0);       // scalar velocity in world-units/second
     this.worldTransform = new Matrix4x4Attr(1, 0, 0, 0,
@@ -14317,6 +14336,7 @@ function ParentableMotionElement()
     this.registerAttribute(this.sectorWorldTransform, "sectorWorldTransform");
     this.registerAttribute(this.panVelocity, "panVelocity");
     this.registerAttribute(this.linearVelocity, "linearVelocity");
+    this.registerAttribute(this.linearVelocity_affectPosition_Y, "linearVelocity_affectPosition_Y");
     this.registerAttribute(this.angularVelocity, "angularVelocity");
     this.registerAttribute(this.scalarVelocity, "scalarVelocity");
     this.registerAttribute(this.parent, "parent");
@@ -14454,16 +14474,22 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // get direction vectors for pan
         var directionVectors = this.getDirectionVectors();
+        
+        // get affect position flags
+        var linearVelocity_affectPosition_Y = this.linearVelocity_affectPosition_Y.getValueDirect();
 
         // update position
         position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.x 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.x * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.x * timeIncrement);
+        if (linearVelocity_affectPosition_Y)
+        {
         position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.y * panVelocity.z * timeIncrement) + 
         						  (linearVelocity.y * timeIncrement);
+        }
         position.z = position.z + (directionVectors.right.z   * panVelocity.x * timeIncrement) +
         						  (directionVectors.up.z 	  * panVelocity.y * timeIncrement) +
         						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 
@@ -19286,12 +19312,12 @@ function MediaTexture_NegateAlphaModifiedCB(attribute, container)
     container.updateNegateAlpha = true;
     container.incrementModificationCount();
 }
-Evaluator.prototype = new SGNode();
+Evaluator.prototype = new Node();
 Evaluator.prototype.constructor = Evaluator;
 
 function Evaluator()
 {
-    SGNode.call(this);
+    Node.call(this);
     this.className = "Evaluator";
     this.attrType = eAttrType.Evaluator;
     
@@ -19316,7 +19342,7 @@ Evaluator.prototype.update = function(params, visitChildren)
     }
     
     // call base-class implementation
-    SGNode.prototype.update.call(this, params, visitChildren);
+    Node.prototype.update.call(this, params, visitChildren);
 }
 SceneInspector.prototype = new Evaluator();
 SceneInspector.prototype.constructor = SceneInspector;
@@ -19327,6 +19353,8 @@ function SceneInspector()
     this.className = "SceneInspector";
     this.attrType = eAttrType.SceneInspector;
     
+    this.camera = null;
+        
     this.viewPosition = new Vector3DAttr(0, 0, 0);
     this.viewRotation = new Vector3DAttr(0, 0, 0);
     this.translationDelta = new Vector3DAttr(0, 0, 0);
@@ -19340,6 +19368,19 @@ function SceneInspector()
     this.pivotPointWorld = new Vector3DAttr(0, 0, 0);
     this.resultPosition = new Vector3DAttr(0, 0, 0);
     this.resultRotation = new Vector3DAttr(0, 0, 0);
+    /// indicates the up/right/forward vectors to use for pan/track; if zero,
+    /// camera up/right/forward vectors are used (default: zero)
+    this.upVector = new Vector3DAttr(0, 0, 0);
+    this.rightVector = new Vector3DAttr(0, 0, 0);
+    this.forwardVector = new Vector3DAttr(0, 0, 0);
+    /// indicate which components of resultPosition/resultRotation should be set; if true,
+    /// the component is set, if false, it is not (default: true)
+    this.affectPosition_X = new BooleanAttr(true);
+    this.affectPosition_Y = new BooleanAttr(true);
+    this.affectPosition_Z = new BooleanAttr(true);
+    this.affectRotation_X = new BooleanAttr(true);
+    this.affectRotation_Y = new BooleanAttr(true);
+    this.affectRotation_Z = new BooleanAttr(true);
     
     this.registerAttribute(this.viewPosition, "viewPosition");
     this.registerAttribute(this.viewRotation, "viewRotation");
@@ -19354,6 +19395,25 @@ function SceneInspector()
     this.registerAttribute(this.pivotPointWorld, "pivotPointWorld");
     this.registerAttribute(this.resultPosition, "resultPosition");
     this.registerAttribute(this.resultRotation, "resultRotation");
+    this.registerAttribute(this.upVector, "upVector");
+    this.registerAttribute(this.rightVector, "rightVector");
+    this.registerAttribute(this.forwardVector, "forwardVector");
+    this.registerAttribute(this.affectPosition_X, "affectPosition_X");
+    this.registerAttribute(this.affectPosition_Y, "affectPosition_Y");
+    this.registerAttribute(this.affectPosition_Z, "affectPosition_Z");
+    this.registerAttribute(this.affectRotation_X, "affectRotation_X");
+    this.registerAttribute(this.affectRotation_Y, "affectRotation_Y");
+    this.registerAttribute(this.affectRotation_Z, "affectRotation_Z");
+}
+
+SceneInspector.prototype.setCamera = function(camera)
+{
+    this.camera = camera;
+}
+
+SceneInspector.prototype.getCamera = function()
+{
+    return this.camera;
 }
 
 SceneInspector.prototype.evaluate = function()
@@ -19445,10 +19505,18 @@ SceneInspector.prototype.evaluate = function()
     if (panDelta.x != 0 || panDelta.y != 0 || panDelta.z != 0 ||
         trackDelta.x != 0 || trackDelta.y != 0 || trackDelta.z != 0)
     {
+        // pan up/right/forward vectors
+        var up = this.upVector.getValueDirect();
+        var right = this.rightVector.getValueDirect();
+        var forward = this.forwardVector.getValueDirect();
+        if (up.x == 0 && up.y == 0 && up.z == 0) up = cameraUp;
+        if (right.x == 0 && right.y == 0 && right.z == 0) right = cameraRight;
+        if (forward.x == 0 && forward.y == 0 && forward.z == 0) forward = cameraForward;
+        
         // calculate direction vectors after scene rotation matrix is applied
-        var cameraUpRot = this.transformDirectionVector(cameraUp.x, cameraUp.y, cameraUp.z, sceneRot);
-        var cameraRightRot = this.transformDirectionVector(cameraRight.x, cameraRight.y, cameraRight.z, sceneRot);    
-        var cameraForwardRot = this.transformDirectionVector(cameraForward.x, cameraForward.y, cameraForward.z, sceneRot);    
+        var cameraUpRot = up;
+        var cameraRightRot = right;    
+        var cameraForwardRot = forward;    
             
         var scenePan = new Matrix4x4();
         scenePan.loadTranslation(
@@ -19535,8 +19603,12 @@ SceneInspector.prototype.evaluate = function()
     resultPosition = resultTransform.transform(resultPosition.x, resultPosition.y, resultPosition.z, 0);
 
     // output results
-    this.resultPosition.setValueDirect(-resultPosition.x, -resultPosition.y, -resultPosition.z);
-    this.resultRotation.setValueDirect(-resultRotation.x, -resultRotation.y, -resultRotation.z);
+    this.resultPosition.setValueDirect(this.affectPosition_X.getValueDirect() ? -resultPosition.x : viewPosition.x, 
+                                       this.affectPosition_Y.getValueDirect() ? -resultPosition.y : viewPosition.y,
+                                       this.affectPosition_Z.getValueDirect() ? -resultPosition.z : viewPosition.z);
+    this.resultRotation.setValueDirect(this.affectRotation_X.getValueDirect() ? -resultRotation.x : viewRotation.x, 
+                                       this.affectRotation_Y.getValueDirect() ? -resultRotation.y : viewRotation.y, 
+                                       this.affectRotation_Z.getValueDirect() ? -resultRotation.z : viewRotation.z);
 }
 
 SceneInspector.prototype.transformDirectionVector = function(x, y, z, matrix)
@@ -23454,6 +23526,191 @@ AnimalMover.prototype.collisionDetected = function(collisionList)
     this.motionQueue.push(walk);
 }
 
+WalkSimulator.prototype = new SceneInspector();
+WalkSimulator.prototype.constructor = WalkSimulator;
+
+function WalkSimulator()
+{
+    SceneInspector.call(this);
+    this.className = "WalkSimulator";
+    this.attrType = eAttrType.WalkSimulator;
+    
+    this.sceneInspector_pivotDistanceValue = 0;
+    this.selector_computePivotDistanceValue = 0;
+    
+    this.groundPlane = new PlaneAttr();
+    this.linearDelta = new Vector3DAttr(0, 0, 0);
+    this.angularDelta = new Vector3DAttr(0, 0, 0);
+    this.linearSensitivity = new Vector3DAttr(1, 1, 1);
+    this.angularSensitivity = new Vector3DAttr(1, 1, 1);
+    this.resultLinear = new Vector3DAttr();
+    this.resultAngular = new Vector3DAttr();
+    
+    this.enabled.addModifiedCB(WalkSimulator_EnabledModifiedCB, this);
+    this.linearDelta.addModifiedCB(WalkSimulator_LinearDeltaModifiedCB, this);
+    this.angularDelta.addModifiedCB(WalkSimulator_AngularDeltaModifiedCB, this);
+    
+    this.registerAttribute(this.groundPlane, "groundPlane");
+    this.registerAttribute(this.linearDelta, "linearDelta");
+    this.registerAttribute(this.angularDelta, "angularDelta");
+    this.registerAttribute(this.linearSensitivity, "linearSensitivity");
+    this.registerAttribute(this.angularSensitivity, "angularSensitivity");
+    this.registerAttribute(this.resultLinear, "resultLinear");
+    this.registerAttribute(this.resultAngular, "resultAngular");
+    
+    this.viewRelativeXAxisRotation.setValueDirect(true);
+    this.viewRelativeYAxisRotation.setValueDirect(true);
+    this.viewRelativeZAxisRotation.setValueDirect(true);
+    this.groundPlane.normal.setValueDirect(0, 1, 0);
+}
+
+WalkSimulator.prototype.evaluate = function()
+{
+    var enabled = this.enabled.getValueDirect();
+    if (!enabled)
+    {
+        return;
+    }
+    
+    // get inputs
+    var linearDelta = this.linearDelta.getValueDirect();
+    // reverse pan x
+    linearDelta.x *= -1;
+    var linearSensitivity = this.linearSensitivity.getValueDirect();
+    var angularDelta = this.angularDelta.getValueDirect();
+    var angularSensitivity = this.angularSensitivity.getValueDirect();
+
+    var panDelta = new Vector3D(linearDelta.x, linearDelta.y, linearDelta.z);
+    panDelta.multiplyVector(linearSensitivity);
+    var rotationDelta = new Vector3D(angularDelta.x, angularDelta.y, angularDelta.z);
+    rotationDelta.multiplyVector(angularSensitivity);
+
+    // only evaluate if necessary
+    if (panDelta.x != 0 || panDelta.y != 0 || panDelta.z != 0 || 
+        rotationDelta.x != 0 || rotationDelta.y != 0 || rotationDelta.z != 0)
+    {
+        this.panDelta.setValueDirect(panDelta.x, panDelta.y, panDelta.z);
+        this.rotationDelta.setValueDirect(rotationDelta.x, rotationDelta.y, rotationDelta.z);
+
+        // set camera direction vectors based upon walkPlane
+        //if (m_updateDirectionVectors) // uncomment to retain forward direction when inspecting with mouse
+        {
+            // view position
+            var viewPosition = this.viewPosition.getValueDirect();
+
+            // view rotation
+            var viewRotation = this.viewRotation.getValueDirect();
+
+            // ground plane
+            var groundPlane = this.groundPlane.getValueDirect();
+
+            // formulate view transform
+            var viewTrans = new Matrix4x4();
+            viewTrans.loadTranslation(-viewPosition.x, -viewPosition.y, -viewPosition.z);
+            var viewRot = new Matrix4x4();
+            viewRot.loadXYZAxisRotation(-viewRotation.x, -viewRotation.y, -viewRotation.z);
+            var viewTransform = viewTrans.multiply(viewRot);
+
+            // formulate direction vectors
+            this.upVector.setValueDirect(groundPlane.normal.x, groundPlane.normal.y, groundPlane.normal.z);
+            
+            var xformedXYZ = this.transformDirectionVector(0, 0, 1, viewTransform);
+            var projectedXYZ = planeProject(xformedXYZ, groundPlane);
+            var vProjectedXYZ = new Vector3D(projectedXYZ.x, projectedXYZ.y, projectedXYZ.z);
+            vProjectedXYZ.normalize();
+            this.forwardVector.setValueDirect(vProjectedXYZ.x, vProjectedXYZ.y, vProjectedXYZ.z);
+
+            var m = new Matrix4x4();
+            m.loadYAxisRotation(90);
+            xformedXYZ = m.transform(vProjectedXYZ.x, vProjectedXYZ.y, vProjectedXYZ.z, 0);
+            this.rightVector.setValueDirect(xformedXYZ.x, xformedXYZ.y, xformedXYZ.z);
+            
+            //m_updateDirectionVectors = false;*/
+        }
+
+        // call base-class implementation
+        SceneInspector.prototype.evaluate.call(this);
+    }
+}
+
+WalkSimulator.prototype.enabledModified = function()
+{
+    var enabled = this.enabled.getValueDirect();
+    if (enabled)
+    {
+        this.enableSceneInspectionState(); // ensure scene inspection is enabled
+        //m_updateDirectionVectors = true;
+        this.affectRotation_Z.setValueDirect(false); // suspend bank
+    }
+    else if (this.lastEnabled) // only do the following if previously enabled
+    {
+        this.restoreSceneInspectionState(); // restore previous scene inspector state
+        //m_updateDirectionVectors = false;
+        this.affectRotation_Z.setValueDirect(true); // restore bank
+        this.upVector.setValueDirect(0, 0, 0, false);
+        this.rightVector.setValueDirect(0, 0, 0, false);
+        this.forwardVector.setValueDirect(0, 0, 0, false);
+    }
+
+    this.lastEnabled = enabled;
+}
+
+WalkSimulator.prototype.enableSceneInspectionState = function()
+{
+    var sceneInspector = this.registry.find("SceneInspector");
+    if (sceneInspector)
+    {
+        sceneInspector.enabled.setValueDirect(true);
+        this.sceneInspector_pivotDistanceValue = sceneInspector.pivotDistance.getValueDirect();
+        sceneInspector.pivotDistance.setValueDirect(0);
+    }
+    
+    var selector = this.registry.find("Selector");
+    if (selector)
+    {
+        this.selector_computePivotDistanceValue = selector.computePivotDistance.getValueDirect();
+        selector.computePivotDistance.setValueDirect(false);
+    }
+}
+
+WalkSimulator.prototype.restoreSceneInspectionState = function()
+{
+    var sceneInspector = this.registry.find("SceneInspector");
+    if (sceneInspector)
+    {
+        sceneInspector.pivotDistance.setValueDirect(this.sceneInspector_pivotDistanceValue);
+    }
+    
+    var selector = this.registry.find("Selector");
+    if (selector)
+    {
+        selector.computePivotDistance.setValueDirect(this.selector_computePivotDistanceValue);
+    }
+}
+
+function WalkSimulator_EnabledModifiedCB(attribute, container)
+{
+    container.enabledModified();
+}
+
+function WalkSimulator_LinearDeltaModifiedCB(attribute, container)
+{
+    // if orphaned, evaluate (otherwise graph will invoke evaluation)
+    //if (container.orphan.getValueDirect() == true)
+    {
+        container.evaluate();
+    }
+}
+
+function WalkSimulator_AngularDeltaModifiedCB(attribute, container)
+{
+    // if orphaned, evaluate (otherwise graph will invoke evaluation)
+    //if (container.orphan.getValueDirect() == true)
+    {
+        container.evaluate();
+    }
+}
+
 Cube.prototype = new TriList();
 Cube.prototype.constructor = Cube;
 
@@ -23651,16 +23908,18 @@ var eEventType = {
     Mouse_Last                  :199,
 
     Key_First                   :200,
-    Key_Down                    :201,
-    Key_Up                      :202,
-    Key_Last                    :299,
+    KeyDown_First               :201,
+    KeyDown_Last                :500,
+    KeyUp_First                 :501,
+    KeyUp_Last                  :798,
+    Key_Last                    :799,
     
-    Element_First               :700,
-    ElementSelected             :701,
-    ElementUnselected           :702,
-    ElementFocus                :703,
-    ElementBlur                 :704,
-    Element_Last                :799,
+    Element_First               :800,
+    ElementSelected             :801,
+    ElementUnselected           :802,
+    ElementFocus                :803,
+    ElementBlur                 :804,
+    Element_Last                :899,
     
     UserDefined                 :2000
 };
@@ -23699,14 +23958,104 @@ var eEventNameMap = {
 	"Element.Blur"              : eEventType.ElementBlur
 };
 
+// map of VK_* strings to javascript key codes
+var eKeyCodeMap = {
+    "VK_BACK"                   : 8,
+    "VK_TAB"                    : 9,
+    "VK_ENTER"                  : 13,
+    "VK_SHIFT"                  : 16,
+    "VK_CONTROL"                : 17,
+    "VK_ALT"                    : 18,
+    "VK_PAUSE"                  : 19,
+    "VK_CAPITAL"                : 20,
+    "VK_ESCAPE"                 : 27,
+    "VK_PAGEUP"                 : 33,
+    "VK_PAGEDOWN"               : 34,
+    "VK_END"                    : 35,
+    "VK_HOME"                   : 36,
+    "VK_LEFT"                   : 37,
+    "VK_UP"                     : 38,
+    "VK_RIGHT"                  : 39,
+    "VK_DOWN"                   : 40,
+    "VK_INSERT"                 : 45,
+    "VK_DELETE"                 : 46,
+    "VK_0"                      : 48,
+    "VK_1"                      : 49,
+    "VK_2"                      : 50,
+    "VK_3"                      : 51,
+    "VK_4"                      : 52,
+    "VK_5"                      : 53,
+    "VK_6"                      : 54,
+    "VK_7"                      : 55,
+    "VK_8"                      : 56,
+    "VK_9"                      : 57,
+    "VK_A"                      : 65,
+    "VK_B"                      : 66,
+    "VK_C"                      : 67,
+    "VK_D"                      : 68,
+    "VK_E"                      : 69,
+    "VK_F"                      : 70,
+    "VK_G"                      : 71,
+    "VK_H"                      : 72,
+    "VK_I"                      : 73,
+    "VK_J"                      : 74,
+    "VK_K"                      : 75,
+    "VK_L"                      : 76,
+    "VK_M"                      : 77,
+    "VK_N"                      : 78,
+    "VK_O"                      : 79,  
+    "VK_P"                      : 80,
+    "VK_Q"                      : 81,
+    "VK_R"                      : 82,    
+    "VK_S"                      : 83,
+    "VK_T"                      : 84,
+    "VK_U"                      : 85,
+    "VK_V"                      : 86,
+    "VK_W"                      : 87,
+    "VK_X"                      : 88,
+    "VK_Y"                      : 89,
+    "VK_Z"                      : 90,
+    "VK_COMMA"                  : 189,
+    "VK_PERIOD"                 : 190,
+    "VK_SLASH"                  : 191
+};
+
 function getEventTypeByName(name)
 {
     var type = eEventNameMap[name];
     
     if (type == undefined)
     {
-        // TODO  
-        type = eEventType.Unknown;      
+        // key
+        if (name.indexOf("VK") != -1)
+        {
+            var key = name;
+            var state = "";
+            var dot = name.indexOf(".");
+            if (dot != -1)
+            {
+                // key
+                key = name.substring(0, dot);
+                // state
+                state = name.substring(dot+1);
+            }
+                
+            var keyCode = eKeyCodeMap[key];
+            if (keyCode)
+            {
+                switch (state)
+                {
+                    case "Down":
+                        type = eEventType.KeyDown_First + keyCode;
+                        break;
+                        
+                    case "Up":
+                    default:
+                        type = eEventType.KeyUp_First + keyCode;
+                        break;
+                }
+            }
+        }     
     }   
     
     return type;
@@ -23766,6 +24115,14 @@ function MouseEvent(type, time, buttonId, modifiers, state, x, y, userData)
     this.x = x || 0;
     this.y = y || 0;
 }
+KeyboardEvent.prototype = new InputEvent();
+KeyboardEvent.prototype.constructor = KeyboardEvent;
+
+function KeyboardEvent(type, time, buttonId, modifiers, state, userData)
+{
+    InputEvent.call(this, type, time, buttonId, modifiers, state, userData);
+    this.className = "KeyboardEvent";
+}
 function MouseEventState()
 {
     this.leftButtonDown = false;
@@ -23788,9 +24145,40 @@ function EventAdapter()
     this.registerAttribute(this.name, "name");
 }
 
-EventAdapter.prototype.createKeyboardEvent = function(event)
+EventAdapter.prototype.createKeyboardEvent = function(event, eventType /* optional; used for "keyup" */)
 {
-    var keyboardEvent = null;//new KeyboardEvent(type, time, buttonId, modifiers, state, x, y);
+    var date = new Date();
+    
+    var type = eEventType.Unknown;
+    var time = date.getTime();
+    var buttonId = event.keyCode;
+    var modifiers = 0;  // TODO
+    var state = 0;      // TODO
+    
+    var eventType = eventType || event.type;
+    switch (eventType)
+    {
+        case "keydown":
+            {
+                type = eEventType.KeyDown_First + buttonId;
+            }
+            break;
+            
+        case "keypress":
+            {
+                type = eEventType.KeyDown_First + buttonId - 32; //  not sure why keycodes have +32 compared to keydown events
+            }
+            break;
+            
+        case "keyup":
+            {
+                type = eEventType.KeyUp_First + buttonId;
+            }
+            break;
+    }
+    
+    var keyboardEvent = new KeyboardEvent(type, time, buttonId, modifiers, state);
+    
     return keyboardEvent;
 }
 
@@ -24194,6 +24582,28 @@ MouseHandler.prototype.eventPerformed = function(event)
 	this.deltaY.setValueDirect(0);
 	this.delta.setValueDirect(0, 0);
 }
+KeyboardHandler.prototype = new DeviceHandler();
+KeyboardHandler.prototype.constructor = KeyboardHandler;
+
+function KeyboardHandler()
+{
+    DeviceHandler.call(this);
+    this.className = "KeyboardHandler";
+    this.attrType = eAttrType.KeyboardHandler;
+    
+    this.name.setValueDirect("KeyboardHandler");
+    
+    this.keyString = new StringAttr();
+    
+    this.registerAttribute(this.keyString, "keyString");
+}
+
+KeyboardHandler.prototype.eventPerformed = function(event)
+{
+    
+}
+
+
 Command.prototype = new EventListener();
 Command.prototype.constructor = Command;
 
@@ -26074,7 +26484,6 @@ function BwSceneInspector()
     this.className = "BwSceneInspector";
     this.attrType = eAttrType.SceneInspector;
     
-    this.camera = null;
     this.viewport = new Viewport();
     this.worldUnitsPerPixel = new Vector2D();
     this.clickPosWorld = new Vector3D();
@@ -26429,16 +26838,6 @@ BwSceneInspector.prototype.zoom = function(delta)
         }
         break;
     }
-}
-
-BwSceneInspector.prototype.setCamera = function(camera)
-{
-    this.camera = camera;
-}
-
-BwSceneInspector.prototype.getCamera = function()
-{
-    return this.camera;
 }
 
 BwSceneInspector.prototype.getWorldUnitsPerPixel = function(viewSpace_Z)
@@ -27118,6 +27517,7 @@ function ConnectionMgr()
     //registerConnectionHelper("DisconnectAllSources", null, ConnectionMgr.prototype.disconnectAllSources);
     registerConnectionHelper("DisconnectAllTargets", null, ConnectionMgr.prototype.disconnectAllTargets);
     registerConnectionHelper("dissolve", ConnectionMgr.prototype.connectDissolve, ConnectionMgr.prototype.disconnectDissolve);
+    registerConnectionHelper("walkSimulation", ConnectionMgr.prototype.connectWalkSimulation, ConnectionMgr.prototype.disconnectWalkSimulation);
 }
 
 ConnectionMgr.prototype.connectSceneInspection = function(inspector, camera)
@@ -27225,6 +27625,16 @@ ConnectionMgr.prototype.disconnectDissolve = function(evaluator, target)
             }
         }
     }
+}
+
+ConnectionMgr.prototype.connectWalkSimulation = function(simulator, target)
+{
+    ConnectionMgr.prototype.connectSceneInspection.call(null, simulator, target);
+}
+
+ConnectionMgr.prototype.disconnectWalkSimulation = function(simulator, target)
+{
+    ConnectionMgr.prototype.disconnectSceneInspection.call(null, simulator, target);
 }
 
 RenderAgent.prototype = new Agent();
@@ -31894,6 +32304,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["SceneInspector"] = newSceneInspector;
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
+    this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -31915,6 +32326,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
+    this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
 AttributeFactory.prototype.initializeConfigureMap = function()
@@ -31969,6 +32381,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
 
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
+    this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
 AttributeFactory.prototype.setRegistry = function(registry)
@@ -32177,10 +32590,18 @@ function newAnimalMover(name, factory)
 {
 	var resource = new AnimalMover();
 	
-	resource.setGraphMgr(factory.graphMgr);
 	registerEvaluatorAttributes(resource, factory);
 	
 	return resource;	
+}
+
+function newWalkSimulator(name, factory)
+{
+    var resource = new WalkSimulator();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
 }
 
 function newCommand(name, factory)
@@ -32227,6 +32648,7 @@ function newDeviceHandler(name, factory)
     switch (name)
     {
     case "MouseHandler":        resource = new MouseHandler(); break;
+    case "KeyboardHandler":     resource = new KeyboardHandler(); break;
     }
 	
 	return resource;
@@ -32567,7 +32989,7 @@ Bridgeworks.prototype.get = function(name) {
   return this.registry.find(name);
 }
 
-Bridgeworks.prototype.handleEvent = function(event)
+Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type override */)
 {
     var bwEvent = null;
 
@@ -32581,10 +33003,14 @@ Bridgeworks.prototype.handleEvent = function(event)
                 bwEvent = this.eventAdapter.createMouseEvent(event);
             }
             break;
+        
         case "KeyboardEvent":
             {
-                bwEvent = this.eventAdapter.createKeyboardEvent(event);
+                bwEvent = this.eventAdapter.createKeyboardEvent(event, eventType);
             }
+            break;
+            
+        default:
             break;
     }
 
