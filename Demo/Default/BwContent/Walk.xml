@@ -125,4 +125,5 @@
     <Set name="Walk_TurnLeft_Stop" event="VK_G.Up" numResponses="-1" undoable="false" target="Camera">
         <angularVelocity x="0" y="0" z="0"/>
     </Set>
+    <Serialize target="Root"/>
 </Session>
