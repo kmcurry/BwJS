@@ -87,6 +87,7 @@ function Model()
     this.texturesEnabled.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
     this.detectCollision.addModifiedCB(Model_DetectCollisionModifiedCB, this);
     this.collisionDetected.addModifiedCB(Model_CollisionDetectedModifiedCB, this);
+    this.vertices.addModifiedCB(Model_VerticesModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -781,5 +782,9 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 }
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
+{
+}
+
+function Model_VerticesModifiedCB(attribute, container)
 {
 }

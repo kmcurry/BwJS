@@ -117,6 +117,7 @@ var eAttrType = {
     Stop                        :3012,
     ConnectAttributes           :3013,
     DisconnectAttributes        :3014,
+    Export                      :3015,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
