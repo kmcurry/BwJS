@@ -210,7 +210,7 @@ function getShaders(gl, type)
                     "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
                     "   {",
                     "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b) discard;", // && fragmentColor.a == uTextureColorMask.a) discard;",
+                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
                     "       if (uTextureBlendOp == " + RC_MODULATE + ")",
                     "       {",
                     "           if (fragmentColor.a == 0.0) discard;",
