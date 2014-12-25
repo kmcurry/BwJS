@@ -8,7 +8,6 @@ function Texture()
     this.attrType = eAttrType.Texture;
    
     this.updateImage = false;
-    this.updateTextureType = false;
     this.updateMipmappingEnabled = false;
     this.setImage = false;
     this.imageSet = false;
@@ -21,6 +20,7 @@ function Texture()
     this.widthWrap = new NumberAttr(eTextureWrap.None);
     this.heightWrap = new NumberAttr(eTextureWrap.None);
     this.mipmappingEnabled = new BooleanAttr(false);
+    this.blendOp = new NumberAttr(RC_MODULATE);
     
     this.image.setTransient(true); // don't serialize image data
     
@@ -41,6 +41,7 @@ function Texture()
     this.registerAttribute(this.widthWrap, "widthWrap");
     this.registerAttribute(this.heightWrap, "heightWrap");
     this.registerAttribute(this.mipmappingEnabled, "mipmappingEnabled");
+    this.registerAttribute(this.blendOp, "blendOp");
 }
 
 Texture.prototype.setGraphMgr = function(graphMgr)
@@ -186,7 +187,28 @@ function Texture_OpacityModifiedCB(attribute, container)
 
 function Texture_TextureTypeModifiedCB(attribute, container)
 {
-    container.updateTextureType = true;
+    // update blendOp based upon type
+    switch (attribute.getValueDirect())
+    {
+        case eTextureType.Color:
+            op = RC_MODULATE;
+            break;
+
+        case eTextureType.Diffuse:
+        case eTextureType.Luminosity:
+        case eTextureType.Specularity:
+            op = RC_REPLACE;
+            break;
+
+        case eTextureType.Transparency:
+            op = RC_MODULATE;//BLEND;
+            break;
+
+        default:
+            return;
+    }
+    
+    container.blendOp.setValueDirect(op);
     container.incrementModificationCount();
 }
 

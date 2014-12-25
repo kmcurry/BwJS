@@ -109,6 +109,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
+    this.newResourceProcs["ScreenRect"] = newSGNode;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -290,6 +291,7 @@ function newSGNode(name, factory)
     case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
     case "Cube":                resource = new Cube(); break;
     case "Material":            resource = new Material(); break;
+    case "ScreenRect":          resource = new ScreenRect(); break;
     }
     
     if (resource)

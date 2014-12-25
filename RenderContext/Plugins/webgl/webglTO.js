@@ -175,6 +175,39 @@ function webglTO(rc, gl, program)
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
+    //texImage2D(GLenum target, GLint level, GLenum internalformat,
+    //           GLenum format, GLenum type, HTMLCanvasElement canvas)
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.canvas);
+    
+    this.setImageWithCanvas = function(canvas)
+    {
+        // following taken from:
+        // http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
+        var canvasPOT = canvas;
+        if (!isPowerOfTwo(canvas.width) || !isPowerOfTwo(canvas.height))
+        {
+            // Scale up the texture to the next highest power of two dimensions.
+            canvasPOT = document.createElement("canvas");
+            canvasPOT.width = nextHighestPowerOfTwo(canvas.width);
+            canvasPOT.height = nextHighestPowerOfTwo(canvas.height);
+            var ctx = canvasPOT.getContext("2d");
+            ctx.drawImage(canvas,
+                0, 0, canvas.width, canvas.height,
+                0, 0, canvasPOT.width, canvasPOT.height);
+        }
+        
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvasPOT);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);//LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);//LINEAR);
+        
+        gl.generateMipmap(gl.TEXTURE_2D);
+        
+        gl.bindTexture(gl.TEXTURE_2D, null);   
+    }   
+                 
     this.setVideo = function(video)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.TO_SetVideo, [this, video]);

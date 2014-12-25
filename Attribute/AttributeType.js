@@ -76,6 +76,7 @@ var eAttrType = {
     Cube                        :1032,
     Bone                        :1033,
     Selector                    :1034,
+    ScreenRect                  :1035,
     
     Evaluator                   :1100,
     SceneInspector              :1101,

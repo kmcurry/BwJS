@@ -259,7 +259,7 @@ MediaTexture.prototype.onImageLoad = function()
     if (this.textureType.getValueDirect() == eTextureType.Color &&
        !this.alphaPlayback)
     {
-        this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8, eImageFormat.RGB);
+        this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8A8, eImageFormat.RGBA);
         this.imageSet = true;
         this.incrementModificationCount();
         return;

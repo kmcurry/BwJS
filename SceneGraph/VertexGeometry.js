@@ -8,15 +8,19 @@ function VertexGeometry()
     this.attrType = eAttrType.VertexGeometry;
 
     this.updateVertices = false;
+    this.updateColors = false;
     this.updateUVCoords = [];
     this.uvCoords = [];
     this.vertexBuffer = null;
     
     this.vertices = new NumberArrayAttr();
+    this.colors = new NumberArrayAttr();
     
     this.vertices.addModifiedCB(VertexGeometry_VerticesModifiedCB, this);
+    this.colors.addModifiedCB(VertexGeometry_ColorsModifiedCB, this);
     
     this.registerAttribute(this.vertices, "vertices");
+    this.registerAttribute(this.colors, "colors");
 }
 
 VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
@@ -112,6 +116,13 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.updateBoundingTree = true;
         
         this.calculateBBox();
+    }
+    
+    if (this.updateColors)
+    {
+        this.updateColors = false;
+        
+        this.vertexBuffer.setColors(this.colors.getValueDirect());    
     }
     
     if (this.updateUVCoords.length)
@@ -421,28 +432,7 @@ VertexGeometry.prototype.setTextureStage = function(stage, type, texture, textur
     widthWrapType, heightWrapType, textureCoordSrc, planeCoefficients);
 
     // set texture blend operation
-    var op;
-    switch (type)
-    {
-        case eTextureType.Color:
-            op = RC_MODULATE;
-            break;
-
-        case eTextureType.Diffuse:
-        case eTextureType.Luminosity:
-        case eTextureType.Specularity:
-            op = RC_REPLACE;
-            break;
-
-        case eTextureType.Transparency:
-            op = RC_MODULATE;//BLEND;
-            break;
-
-        default:
-            return;
-    }
-
-    this.graphMgr.renderContext.setTextureBlendOp(op);
+    this.graphMgr.renderContext.setTextureBlendOp(texture.blendOp.getValueDirect());
 
     /* TODO
     // set texture matrix
@@ -544,6 +534,12 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
+    container.incrementModificationCount();
+}
+
+function VertexGeometry_ColorsModifiedCB(attribute, container)
+{
+    container.updateColors = true;
     container.incrementModificationCount();
 }
 
