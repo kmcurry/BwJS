@@ -9,6 +9,10 @@ function ScreenRect()
     
     this.primitiveType = RC_TRIANGLE_STRIP;
     
+    this.textureColorMask = new ColorAttr(0, 0, 0, 1);
+    
+    this.registerAttribute(this.textureColorMask, "textureColorMask");
+    
     var vertices = 
     [
         -1, -1,  1,
@@ -58,9 +62,11 @@ ScreenRect.prototype.draw = function(dissolve)
     this.graphMgr.renderContext.applyProjectionTransform();
     
     this.graphMgr.renderContext.disable(eRenderMode.DepthTest);
+    this.graphMgr.renderContext.disable(eRenderMode.DepthBufferWrite);
     this.graphMgr.renderContext.disable(eRenderMode.Lighting);
     
-    this.graphMgr.renderContext.setTextureColorMask(0, 0, 0, 1);
+    var textureColorMask = this.textureColorMask.getValueDirect();
+    this.graphMgr.renderContext.setTextureColorMask(textureColorMask.r, textureColorMask.g, textureColorMask.b, textureColorMask.a);
     
     // call base-class implementation
     TriList.prototype.draw.call(this, dissolve);
@@ -73,8 +79,10 @@ ScreenRect.prototype.draw = function(dissolve)
     this.graphMgr.renderContext.applyModelViewTransform();
     
     this.graphMgr.renderContext.enable(eRenderMode.DepthTest);
+    this.graphMgr.renderContext.enable(eRenderMode.DepthBufferWrite);
     this.graphMgr.renderContext.enable(eRenderMode.Lighting);
     
+    // reset color mask that won't affect rendering
     this.graphMgr.renderContext.setTextureColorMask(2, 2, 2, 2);
 }
 

@@ -118,7 +118,7 @@ ScreenCaptureCommand.prototype.eventPerformed = function(event)
                     screenCaptureTexture.textureObj.setImageWithCanvas(canvas2D.canvas);
                     screenCaptureTexture.imageSet = true;
                     // TODO: set blendOp/maskColor
-                    //screenCaptureTexture.graphMgr.renderContext.setTextureColorMask(0, 0, 0, 1);
+                    //screenCaptureTexture.setTextureColorMask(0, 0, 0, 1);
 
                     // set screen capture texture to screen capture rect object
                     screenCaptureRect.setTexture(screenCaptureTexture);
