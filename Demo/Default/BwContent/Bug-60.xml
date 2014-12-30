@@ -52,11 +52,14 @@
                          <scale x="1" y="1" z="1"/>
                     </Model>
                     <Model name="F16" url="/objects/F16.lwo"/>
-                    <Isolator name="ScreenCaptureIsolator" isolateTextures="true">
+                    
+               </Group>
+               <Group name="ScreenCapture">
+               		<Isolator name="ScreenCaptureIsolator" isolateTextures="true">
                     	<MediaTexture name="ScreenCaptureTexture"/>
                     	<ScreenRect name="ScreenCaptureRect" enabled="false"/>
                  	</Isolator>
-               </Group>
+               	</Group>
           </Isolator>
           <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images/Sky2.jpg"/>
        <KeyframeInterpolator name="F16Motion1" url="motions/F16New.mot" target="F16"/>
