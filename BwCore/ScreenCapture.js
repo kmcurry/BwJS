@@ -27,9 +27,10 @@ ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
     var imageData = canvas.toDataURL('image/png');
 
     // 3Scape-specific: decode the base64 data into 8bit array
-    var cnt = imageData.lastIndexOf(',') + 1;
-    imageData = imageData.substr(cnt);
-    imgeData = Base64Binary.decode(imageData);
+    cimageData = imageData;
+    //var cnt = imageData.lastIndexOf(',') + 1;
+    //imageData = imageData.substr(cnt);
+    //imageData = Base64Binary.decode(imageData);
         
     // for testing with Bug-60.htm
     //document.getElementById('imgCapture').src = imageData;
