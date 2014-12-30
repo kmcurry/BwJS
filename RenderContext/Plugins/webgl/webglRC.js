@@ -355,6 +355,13 @@ function webglRC(canvas, background)
         return pixels;
     }
     
+    this.setBlendColor = function(r, g, b, a)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendColor, [r, g, b, a]);
+        
+        gl.blendColor(r, g, b, a);
+    }
+    
     this.setBlendFactor = function(sfactor, dfactor)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendFactor, [sfactor, dfactor]);
@@ -487,7 +494,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetGlobalIllumination, [ambient]);
         
-        var values = [ ambient.r, ambient.g, ambient.g, ambient.a ];
+        var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
         gl.uniform4fv(program.globalAmbientLight, new Float32Array(values));
     }
@@ -698,7 +705,16 @@ function webglRC(canvas, background)
         
         gl.uniform1i(program.textureBlendOp, op);
     }
-
+    
+    this.setTextureColorMask = function(r, g, b, a)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureColorMask, [r, g, b, a]);
+        
+        var values = [ r, g, b, a ];
+        
+        gl.uniform4fv(program.textureColorMask, new Float32Array(values));   
+    }
+    
     this.setViewport = function(x, y, width, height)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetViewport, [x, y, width, height]);
@@ -818,7 +834,12 @@ function getProgram(gl, vShader, fShader)
         program.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
     }
     program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
+    program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
     
+    // TEMP
+    var v = [ 2, 2, 2, 2 ];
+    gl.uniform4fv(program.textureColorMask, new Float32Array(v));
+        
     // enabled
     program.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
     program.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");

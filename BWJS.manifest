@@ -111,6 +111,7 @@ SceneGraph/ObjectMover.js
 SceneGraph/AnimalMover.js
 SceneGraph/WalkSimulator.js
 SceneGraph/Cube.js
+SceneGraph/ScreenRect.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
