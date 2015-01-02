@@ -47,6 +47,9 @@ function Model()
     this.pivotAboutGeometricCenter = new BooleanAttr(true);
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
+    // TODO:
+    //this.collider = new BooleanAttr(false);
+    //this.collidee = new BooleanAttr(false);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
