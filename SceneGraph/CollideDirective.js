@@ -1,3 +1,5 @@
+var MAX_SEE_AHEAD   = 2;
+
 CollideParams.prototype = new DirectiveParams();
 CollideParams.prototype.constructor = CollideParams();
 
@@ -41,6 +43,9 @@ CollideDirective.prototype.execute = function(root)
     
     // detect collisions
     this.detectCollisions(params.detectCollisions);
+    
+    // detect obstructions
+    this.detectObstructions(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
@@ -55,9 +60,9 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         trees.push(collideRecs[i].tree);
         collisions.push(false);
 
-        collideRecs[i].model.getAttribute("collisionList").clear();        
+        collideRecs[i].model.getAttribute("collisionList").clear();
     }
-    
+
     for (var i = 0; i < trees.length; i++)
     {
         for (var j = i+1; j < trees.length; j++)
@@ -74,5 +79,50 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     for (var i = 0; i < collisions.length; i++)
     {
         models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
+    }
+}
+
+CollideDirective.prototype.detectObstructions = function(collideRecs)
+{
+    var models = [];
+    var trees = [];
+    var obstructions = [];
+    
+    for (var i in collideRecs)
+    {
+        models.push(collideRecs[i].model);
+        trees.push(collideRecs[i].tree);
+        obstructions.push(false);
+
+        collideRecs[i].model.getAttribute("obstructionList").clear();        
+    }
+
+    var distance = 0;
+    var minDistance = FLT_MAX;
+    for (var i = 0; i < trees.length; i++)
+    {
+        var directionVectors = models[i].getDirectionVectors();
+        directionVectors.forward.x *= MAX_SEE_AHEAD;
+        directionVectors.forward.y *= MAX_SEE_AHEAD;
+        directionVectors.forward.z *= MAX_SEE_AHEAD;
+        
+        for (var j = 0; j < trees.length; j++)
+        {
+            if (i == j) continue;
+            
+            if ((distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 &&
+                 distance < minDistance)
+            {
+                models[i].getAttribute("obstructionList").clear();
+                models[i].getAttribute("obstructionList").push_back(models[j]);
+                obstructions[i] = true;
+                minDistance = distance;
+            }
+        }
+    }
+    
+    for (var i = 0; i < obstructions.length; i++)
+    {
+        models[i].getAttribute("obstructionDetected").setValueDirect(obstructions[i]);
     }
 }

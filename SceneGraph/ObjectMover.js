@@ -135,12 +135,17 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
 		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+		target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);
 	}
 	
 	this.targetObject = target;
 }
 
-ObjectMover.prototype.collisionDetected = function()
+ObjectMover.prototype.collisionDetected = function(collisionList)
+{
+}
+
+ObjectMover.prototype.obstructionDetected = function(obstructionList)
 {
 }
 
@@ -173,4 +178,11 @@ function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
     var collisionList = attribute.getContainer().getAttribute("collisionList");
     container.collisionDetected(collisionList);
     container.lastCollisionDetected = collisionList.Size() > 0 ? true : false;
+}
+
+function ObjectMover_TargetObstructionDetectedModifiedCB(attribute, container)
+{
+    var obstructionDetected = attribute.getValueDirect();
+    var obstructionList = attribute.getContainer().getAttribute("obstructionList");
+    container.obstructionDetected(obstructionList);
 }

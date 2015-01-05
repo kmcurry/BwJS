@@ -276,3 +276,36 @@ function planeProject(v, plane)
 {
     return crossProduct(plane.normal, crossProduct(v, plane.normal));
 }
+
+function distanceBetweenLineSegmentAndPoint(a, b, point)
+{
+    // if segment points are coincident, return
+    if (a.equals(b))
+    {
+        return distanceBetween(a, point);
+    }
+
+    var mag = magnitude(b.x - a.x, 
+                        b.y - a.y, 
+                        b.z - a.z);
+
+    var u = (((point.x - a.x) * (b.x - a.x)) +
+             ((point.y - a.y) * (b.y - a.y)) +
+             ((point.z - a.z) * (b.z - a.z))) / (mag * mag);
+
+    // if u is not in range [0, 1], shortest distance lies on line outside of segment -- chose closest endpoint
+    if (u < 0)
+    {
+        return distanceBetween(a, point);
+    }
+    else if (u > 1)
+    {
+        return distanceBetween(b, point);
+    }
+    else // u E [0, 1]
+    {
+        return distanceBetween(new Vector3D(a.x + (b.x - a.x) * u,
+                                            a.y + (b.y - a.y) * u,
+                                            a.z + (b.z - a.z) * u), point);
+    }
+}
