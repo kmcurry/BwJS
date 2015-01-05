@@ -26,11 +26,11 @@
                          <rotation x="0" y="0" z="0"/>
                          <scale x="100" y="100" z="100"/>
                     </Model>
-                    <Model name="Cow1" url="/objects/Cow.lwo" detectCollision="true">
+                    <!--<Model name="Cow1" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y="0" z="0"/>
                          <rotation x="0" y="0" z="0"/>
                          <scale x="1" y="1" z="1"/>
-                    </Model>
+                 </Model>-->
                     <Model name="Cow2" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="-4" y="0" z="0"/>
                          <rotation x="0" y="45" z="0"/>
@@ -66,11 +66,11 @@
                          <rotation x="0" y="-80" z="0"/>
                          <scale x="1" y="1" z="1"/>
                     </Model>
-                    <Model name="Cow9" url="/objects/Cow.lwo" detectCollision="true">
+                    <!--<Model name="Cow9" url="/objects/Cow.lwo" detectCollision="true">
                          <position x="0" y="0" z="0"/>
                          <rotation x="0" y="40" z="0"/>
                          <scale x="1" y="1" z="1"/>
-                    </Model>
+                 </Model>-->
                     <!--<Model name="grid1" url="/objects/UV_BoxG.lwo" detectCollision="true">
                          <position x="-3" y="0.5" z="0"/>
                          <rotation x="0" y="0" z="0"/>

@@ -47,9 +47,14 @@ function Model()
     this.pivotAboutGeometricCenter = new BooleanAttr(true);
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
+    // TODO:
+    //this.collider = new BooleanAttr(false);
+    //this.collidee = new BooleanAttr(false);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
+    this.obstructionDetected = new BooleanAttr(false);
+    this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
@@ -125,6 +130,8 @@ function Model()
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
+    this.registerAttribute(this.obstructionDetected, "obstructionDetected");
+    this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");

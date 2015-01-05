@@ -396,6 +396,31 @@ SphereTree.prototype.collides = function(tree)
     return false;
 }
 
+SphereTree.prototype.obstructs = function(tree, forward)
+{
+    if (!this.root || !tree.root) // must be non-NULL
+    {
+        return 0; // indicates no obstruction
+    }
+    
+    // construct cylinder representing tree's root sphere extruded along the forward vector
+    var cylA = tree.root.sphere.xcenter;
+    var cylB = new Vector3D(cylA.x + forward.x, 
+                            cylA.y + forward.y,
+                            cylA.z + forward.z);
+    var cylRadius = tree.root.sphere.xradius;
+    
+    // find distance between cylinder center segment and this' center
+    var distance = distanceBetweenLineSegmentAndPoint(cylA, cylB, this.root.sphere.xcenter);   
+ 
+    if (distance < (this.root.sphere.xradius + cylRadius))
+    {
+        return distance;         
+    }
+    
+    return 0; // indicates no obstruction
+}
+
 SphereTree.prototype.nodesCollide = function(node1, node2)
 {
     return (node1.intersects(node2));    
