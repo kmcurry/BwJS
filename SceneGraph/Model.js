@@ -8,6 +8,7 @@ function Model()
     this.attrType = eAttrType.Model;
     
     this.geometry = [];
+    this.geometryIndices = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
     this.surfaceAttrConnections = [];
@@ -179,163 +180,6 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
     }
 }
 
-/*Model.prototype.postClone = function(clone,pathSrc,pathClone)
-{
-    var i;
-    var j;
-    var node;
-    var type;
-    // setup uv-coords for cloned vertex geometry
-
-    // find vertex geometry nodes under this node
-    var names = [];
-    var types = [];
-    if (!(types.push(eAttrType.TriList))) return;
-    if (!(types.push(eAttrType.LineList))) return;
-    if (!(types.push(eAttrType.PointList))) return;
-    var vertexGeometryNodes = [];
-    this.searchTree(names, types, false, true, false, null, null, null, vertexGeometryNodes);
-    //if (!(types.push(eAttrType.IndexedTriList))) return;
-    //if (!(Push_Back<eAttrType>(types, eAttrType_Node_IndexedLineList))) return;
-    //if (!(Push_Back<eAttrType>(types, eAttrType_Node_IndexedPointList))) return;
-
-
-    // find vertex geometry nodes under the clone
-    var vertexGeometryNodesClone = [];
-    for (i=0; i < pathClone.length(); i++)
-    {
-        node = pathClone.stack[i];
-        type = node.getAttribute();
-        if (type == eAttrType.TriList ||
-            type == eAttrType.LineList ||
-            type == eAttrType.PointList)
-//            type == eAttrType_Node_IndexedTriList ||
-//            type == eAttrType_Node_IndexedLineList ||
-//            type == eAttrType_Node_IndexedPointList)
-        {
-            if (!(vertexGeometryNodesClone.push(node))) return;
-        }
-    }
-
-    // find media texture nodes affecting this node
-    var textureNodes = [];
-    this.searchTree(null, eAttrType.MediaTexture, false, true, false, null, null, null, textureNodes);
-
-    // find media texture nodes affecting the clone
-    var textureNodesClone = [];
-    for (i=0; i < pathClone.length(); i++)
-    {
-        node = pathClone.stack[i];
-        if (node.getAttribute() == eAttrType.MediaTexture)
-        {
-            if (!(textureNodesClone.push(node))) return;
-        }
-    }
-
-    // for each vertex geometry node
-    for (i=0; i < vertexGeometryNodes.size(); i++)
-    {
-        // for each texture node, setup the uv-coords
-        var uvCoords = new NumberArrayAttr();
-        for (j=0; j < textureNodes.size() && j < textureNodesClone.size(); j++)
-        {
-            uvCoords = vertexGeometryNodes[i].findUVCoords(textureNodes[j]);
-            if (uvCoords)
-            {
-                var uvCoords2 = new NumberArrayAttr();
-                uvCoords2 = vertexGeometryNodesClone[i].getUVCoords(textureNodesClone[j]);
-                if (uvCoords2) uvCoords2.copyValue(uvCoords);
-            }
-        }
-    }
-
-    // setup m_geometry, m_geometryIndicesMap, m_geometryBBoxesMap, and m_surfaceNameMap
-    var modelClone = clone;
-
-    // find geometry nodes under the clone
-    var geometryNodesClone = [];
-    clone.searchesTree(names, types, false, true, false, null, null, null, geometryNodesClone);
-
-    // synchronize m_geometryAttrConnections using "OR" operation (this will ensure attributes set inline on the clone are not lost)
-    //std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
-    //this.geometryAttrConnections[]
-    //std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
-    */
-   /* for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
-         it != m_geometryAttrConnections.end(), clone_it != modelClone->m_geometryAttrConnections.end();
-         it++, clone_it++)*/
-    /*for(var i = 0;i<this.geometryAttrConnections.length;i++)
-    {
-        // if this node has had a geometry attribute set, and the clone has not, copy the value from this
-        if (it->second && !clone_it->second)
-        {
-            clone_it->first->CopyValue(it->first);
-        }
-
-        clone_it->second = clone_it->second | it->second;
-    }
-
-    var geometry;
-    var srcGeometry;
-    var srcIndices = [];
-    const std::pair<CVector3Df, CVector3Df>* srcBBox;
-    for (i=0; i < geometryNodesClone.size(); i++)
-    {
-        geometry = geometryNodesClone[i];
-
-        srcGeometry = GetGeometry(i);
-        srcIndices = GetGeometryIndices(srcGeometry);
-        srcBBox = GetGeometryBBox(srcGeometry);
-
-        if (!(Push_Back<GcGeometry*>(modelClone->m_geometry, geometry))) return;
-        if (srcIndices) modelClone.m_geometryIndicesMap[geometry] = *srcIndices;
-        if (srcBBox) modelClone->m_geometryBBoxesMap[geometry] = *srcBBox;
-
-        modelClone->UpdateGeometryAttrConnections(geometry, true);
-        modelClone->AddGeometryBBox(geometry);
-    }
-
-    // find surface nodes under the clone
-    var surfaceNodesClone = [];
-    clone.searchTree(null, eAttrType.Surface, false, true, false, null, null, null, surfaceNodesClone);
-
-    // synchronize m_surfaceAttrConnectionsMap using "OR" operation (this will ensure attributes set inline on the clone are not lost)
-    for (it = m_surfaceAttrConnections.begin(), clone_it = modelClone->m_surfaceAttrConnections.begin();
-         it != m_surfaceAttrConnections.end(), clone_it != modelClone->m_surfaceAttrConnections.end();
-         it++, clone_it++)
-    {
-        // if this node has had a surface attribute set, and the clone has not, copy the value from this
-        if (it->second && !clone_it->second)
-        {
-            clone_it->first->CopyValue(it->first);
-        }
-
-        clone_it->second = clone_it->second | it->second;
-    }
-
-    var surface;
-    for (i=0; i < surfaceNodesClone.size(); i++)
-    {
-        surface = surfaceNodesClone[i];
-
-        modelClone->m_surfaceNameMap[surface->GetName()->GetValueDirect(buffer, sizeof(buffer))] = surface;
-
-        // register surface to this for accessiblity with Set
-        modelClone->RegisterAttribute(surface, buffer);
-        if (surface.getContainer() == modelClone)
-        {
-            // don't want modelClone to be the registered container for the surface otherwise it will be released
-            // when unregistered
-            surface.setContainer(null);
-        }
-
-        modelClone->UpdateSurfaceAttrConnections(surface, true);
-    }
-
-    // call base-class implementation
-    this.postClone(clone, pathSrc, pathClone);
-}
-*/
 Model.prototype.initializeSurfaceAttrConnectionsMap = function()
 {
     this.surfaceAttrConnections.push(new Pair(this.color, false));
@@ -547,22 +391,16 @@ Model.prototype.addSurface = function(surface)
     this.connectSurfaceAttributes(surface);
 }
 
-Model.prototype.addGeometry = function(geometry, surface)
+Model.prototype.addGeometry = function(geometry, indices, surface)
 {
     surface.addChild(geometry);
     
     this.connectGeometryAttributes(geometry);
     this.addGeometryBBox(geometry);
     this.geometry.push(geometry);
+    this.geometryIndices.push(indices);
         
     this.updateBoundingTree = true;
-}
-
-Model.prototype.addIndexedGeometry = function(geometry, indices, surface)
-{
-    this.addGeometry(geometry, surface);
-    
-    // TODO: what to do with indices?
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)

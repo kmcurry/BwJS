@@ -88,7 +88,8 @@ var eAttrType = {
     MultiTargetObserver			:1107,
     ObjectMover	 				:1108,
     AnimalMover					:1109, 
-    WalkSimulator               :1110,  
+    WalkSimulator               :1110,
+    MorphEffector               :1111,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -119,6 +120,7 @@ var eAttrType = {
     ConnectAttributes           :3013,
     DisconnectAttributes        :3014,
     Export                      :3015,
+    Morph                       :3016,
     Command_End                 :3999,
 
     DeviceHandler               :4000,

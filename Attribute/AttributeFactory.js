@@ -129,6 +129,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
+    this.newResourceProcs["MorphEffector"] = newMorphEffector;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -148,6 +149,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
+    this.newResourceProcs["Morph"] = newCommand;
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
@@ -204,7 +206,8 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Serialize"] = finalizeCommand;
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
-
+    this.finalizeProcs["Morph"] = finalizeCommand;
+    
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
@@ -431,6 +434,15 @@ function newWalkSimulator(name, factory)
     return resource;
 }
 
+function newMorphEffector(name, factory)
+{
+    var resource = new MorphEffector();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
+}
+
 function newCommand(name, factory)
 {
     var resource = null;
@@ -454,6 +466,7 @@ function newCommand(name, factory)
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
+    case "Morph":               resource = new MorphCommand(); break;
     }
 
 	// if command sequence, set to command mgr
