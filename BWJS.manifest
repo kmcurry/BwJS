@@ -112,6 +112,7 @@ SceneGraph/AnimalMover.js
 SceneGraph/WalkSimulator.js
 SceneGraph/Cube.js
 SceneGraph/ScreenRect.js
+SceneGraph/MorphEffector.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
@@ -150,6 +151,7 @@ BwCore/ParentableMotionUtil.js
 BwCore/Serialize.js
 BwCore/ScreenCapture.js
 BwCore/Export.js
+BwCore/Morph.js
 ContentHandler/LWObjectHandler.js 
 ContentHandler/LWObjectBuilder.js
 ContentHandler/LWSceneHandler.js 
