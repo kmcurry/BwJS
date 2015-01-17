@@ -110,8 +110,8 @@ BoneEffector.prototype.calculateBoneFalloffValues = function(root)
         return;
     }
 
-    root.calculateFalloffValues(this.verticesArray);
-    this.boneFalloffValuesMap.push(new Pair(root, root.falloffValues));
+    var falloffValues = root.calculateFalloffValues(this.verticesArray);
+    this.boneFalloffValuesMap.push(new Pair(root, falloffValues));
 
     // recurse on children
     for (var i=0; i < root.getChildCount(); i++)
@@ -137,6 +137,7 @@ BoneEffector.prototype.sumFalloffValues = function()
 
     // sum falloff values
     this.falloffSums.length = numVertices;
+    for (var i=0; i < numVertices; i++) this.falloffSums[i] = 0;
     for (var i=0; i < this.boneFalloffValuesMap.length; i++)
     {
         var boneFalloffValues = this.boneFalloffValuesMap[i].second;
@@ -155,7 +156,7 @@ BoneEffector.prototype.sumFalloffValues = function()
         {
             if (this.falloffSums[j] != 0)
             {
-                boneFalloffValues[j] /= m_falloffSums[j];
+                boneFalloffValues[j] /= this.falloffSums[j];
             }
             else // this.falloffSums[j] == 0
             {
@@ -195,18 +196,26 @@ BoneEffector.prototype.evaluateBones = function(root, initial)
     }
 
     // get bone falloff values
-    var boneFalloffValues = root.falloffValues;
-
+    var boneFalloffValues = null;
+    for (var i=0; i < this.boneFalloffValuesMap.length; i++)
+    {
+        if (this.boneFalloffValuesMap[i].first == root)
+        {
+            boneFalloffValues = this.boneFalloffValuesMap[i].second;
+            break;
+        }
+    }
+    
     // get bone transform
-    var boneTransform = root.getTransform();
+    var boneTransform = root.boneMatrix;
 
     // transform vertices
-    var numVertices = m_verticesArray.length / 3;
+    var numVertices = this.verticesArray.length / 3;
     for (var i=0, j=0; i < numVertices; i++, j+=3)
     {
         if (boneFalloffValues[i] > 0)
         {
-            var xformed = boneTransform.Transform(m_verticesArray[j], m_verticesArray[j+1], m_verticesArray[j+2], 1);
+            var xformed = boneTransform.transform(this.verticesArray[j], this.verticesArray[j+1], this.verticesArray[j+2], 1);
 
             if (initial)
             {
@@ -224,9 +233,9 @@ BoneEffector.prototype.evaluateBones = function(root, initial)
         else // boneFalloffValues[i] == 0
         {
             // use untransformed vertex
-            this.resultVerticesArray[j  ] = m_verticesArray[j  ];
-            this.resultVerticesArray[j+1] = m_verticesArray[j+1];
-            this.resultVerticesArray[j+2] = m_verticesArray[j+2];
+            this.resultVerticesArray[j  ] = this.verticesArray[j  ];
+            this.resultVerticesArray[j+1] = this.verticesArray[j+1];
+            this.resultVerticesArray[j+2] = this.verticesArray[j+2];
         }
     }
 
@@ -236,7 +245,7 @@ BoneEffector.prototype.evaluateBones = function(root, initial)
     {
         if (boneFalloffValues[i] > 0)
         {
-            var xformed = boneTransform.Transform(m_normalsArray[j], m_normalsArray[j+1], m_normalsArray[j+2], 0);
+            var xformed = boneTransform.transform(this.normalsArray[j], this.normalsArray[j+1], this.normalsArray[j+2], 0);
 
             if (initial)
             {

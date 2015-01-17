@@ -9,7 +9,6 @@ function Bone()
     
     this.parent = null;
     this.children = [];
-    this.falloffValues = [];
     this.translationMatrix = new Matrix4x4();
     this.rotationMatrix = new Matrix4x4();
     this.rotationQuat = new Quaternion();
@@ -179,9 +178,9 @@ Bone.prototype.calculateFalloffValues = function(vertices)
 
     var boneDir = this.restMatrix.transform(0, 0, 1, 0);
 
-    var restLength = m_restLength.getValueDirect();
+    var restLength = this.restLength.getValueDirect();
 
-    var boneSegment_a = bonePos;
+    var boneSegment_a = new Vector3D(bonePos.x, bonePos.y, bonePos.z);
     var boneSegment_b = new Vector3D(bonePos.x + boneDir.x * restLength,
                                      bonePos.y + boneDir.y * restLength,
                                      bonePos.z + boneDir.z * restLength);
@@ -190,7 +189,7 @@ Bone.prototype.calculateFalloffValues = function(vertices)
 
     var falloffType = this.falloffType.getValueDirect();
 
-    this.falloffValues.length = numVertices;
+    var falloffValues = []; falloffValues.length = numVertices;
     for (var i=0, j=0; i < numVertices; i++, j+=3)
     {
         var distance = distanceBetweenLineSegmentAndPoint(boneSegment_a, boneSegment_b, new Vector3D(vertices[j], vertices[j+1], vertices[j+2]));
@@ -198,32 +197,34 @@ Bone.prototype.calculateFalloffValues = function(vertices)
         switch (falloffType)
         {
         case eBoneFalloffType.InverseDistance:
-            this.falloffValues[i] = 1 / distance;
+            falloffValues[i] = 1 / distance;
             break;
 
         case eBoneFalloffType.InverseDistance_2:
-            this.falloffValues[i] = 1 / (distance * distance);
+            falloffValues[i] = 1 / (distance * distance);
             break;
 
         case eBoneFalloffType.InverseDistance_4:
-            this.falloffValues[i] = 1 / (distance * distance * distance * distance);
+            falloffValues[i] = 1 / (distance * distance * distance * distance);
             break;
 
         case eBoneFalloffType.InverseDistance_8:
-            this.falloffValues[i] = 1 / (distance * distance * distance * distance *
-                                         distance * distance * distance * distance);
+            falloffValues[i] = 1 / (distance * distance * distance * distance *
+                                    distance * distance * distance * distance);
             break;
 
         case eBoneFalloffType.InverseDistance_16:
-            this.falloffValues[i] = 1 / (distance * distance * distance * distance *
-                                         distance * distance * distance * distance *
-                                         distance * distance * distance * distance *
-                                         distance * distance * distance * distance);  
+            falloffValues[i] = 1 / (distance * distance * distance * distance *
+                                    distance * distance * distance * distance *
+                                    distance * distance * distance * distance *
+                                    distance * distance * distance * distance);  
             break;
         }
 
-        this.falloffValues[i] *= this.getScaledStrength();
+        falloffValues[i] *= this.getScaledStrength();
     }
+    
+    return falloffValues;
 }
 
 Bone.prototype.update = function()
@@ -301,7 +302,8 @@ Bone.prototype.update = function()
 
         this.restMatrix = restRotationMatrix.multiply(restPositionMatrix.multiply(parentRestMatrix));
 
-        this.restMatrixInv = this.restMatrix;
+        this.restMatrixInv = new Matrix4x4();
+        this.restMatrixInv.loadMatrix(this.restMatrix);
         this.restMatrixInv.invert();
 
         // set rest matrix to rest transform attribute so children will be notified of modification
