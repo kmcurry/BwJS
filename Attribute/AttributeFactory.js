@@ -109,6 +109,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
+    this.newResourceProcs["ScreenRect"] = newSGNode;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -128,6 +129,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
+    this.newResourceProcs["MorphEffector"] = newMorphEffector;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -137,6 +139,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["ConnectOutputs"] = newCommand;
     this.newResourceProcs["DisconnectAttributes"] = newCommand;
     this.newResourceProcs["DisconnectOutputs"] = newCommand;
+    this.newResourceProcs["Export"] = newCommand;
     this.newResourceProcs["Locate"] = newCommand;
     this.newResourceProcs["MotionInterpolate"] = newCommand;
     this.newResourceProcs["Pause"] = newCommand;
@@ -146,6 +149,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
+    this.newResourceProcs["Morph"] = newCommand;
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
@@ -192,6 +196,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["ConnectOutputs"] = finalizeCommand;
     this.finalizeProcs["DisconnectAttributes"] = finalizeCommand;
     this.finalizeProcs["DisconnectOutputs"] = finalizeCommand;
+    this.finalizeProcs["Export"] = finalizeCommand;
     this.finalizeProcs["Locate"] = finalizeCommand;
     this.finalizeProcs["MotionInterpolate"] = finalizeCommand;
     this.finalizeProcs["Pause"] = finalizeCommand;
@@ -201,7 +206,8 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Serialize"] = finalizeCommand;
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
-
+    this.finalizeProcs["Morph"] = finalizeCommand;
+    
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
@@ -288,6 +294,7 @@ function newSGNode(name, factory)
     case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
     case "Cube":                resource = new Cube(); break;
     case "Material":            resource = new Material(); break;
+    case "ScreenRect":          resource = new ScreenRect(); break;
     }
     
     if (resource)
@@ -427,6 +434,15 @@ function newWalkSimulator(name, factory)
     return resource;
 }
 
+function newMorphEffector(name, factory)
+{
+    var resource = new MorphEffector();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
+}
+
 function newCommand(name, factory)
 {
     var resource = null;
@@ -440,6 +456,7 @@ function newCommand(name, factory)
     case "ConnectOutputs":      resource = new ConnectAttributesCommand(); break;    
     case "DisconnectAttributes":resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
     case "DisconnectOutputs":   resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
+    case "Export":              resource = new ExportCommand(); break;
     case "Locate":              resource = new LocateCommand(); break;
     case "MotionInterpolate":   resource = new MotionInterpolateCommand(); break;
     case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
@@ -449,6 +466,7 @@ function newCommand(name, factory)
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
+    case "Morph":               resource = new MorphCommand(); break;
     }
 
 	// if command sequence, set to command mgr

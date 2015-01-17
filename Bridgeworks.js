@@ -4826,6 +4826,39 @@ function planeProject(v, plane)
     return crossProduct(plane.normal, crossProduct(v, plane.normal));
 }
 
+function distanceBetweenLineSegmentAndPoint(a, b, point)
+{
+    // if segment points are coincident, return
+    if (a.equals(b))
+    {
+        return distanceBetween(a, point);
+    }
+
+    var mag = magnitude(b.x - a.x, 
+                        b.y - a.y, 
+                        b.z - a.z);
+
+    var u = (((point.x - a.x) * (b.x - a.x)) +
+             ((point.y - a.y) * (b.y - a.y)) +
+             ((point.z - a.z) * (b.z - a.z))) / (mag * mag);
+
+    // if u is not in range [0, 1], shortest distance lies on line outside of segment -- chose closest endpoint
+    if (u < 0)
+    {
+        return distanceBetween(a, point);
+    }
+    else if (u > 1)
+    {
+        return distanceBetween(b, point);
+    }
+    else // u E [0, 1]
+    {
+        return distanceBetween(new Vector3D(a.x + (b.x - a.x) * u,
+                                            a.y + (b.y - a.y) * u,
+                                            a.z + (b.z - a.z) * u), point);
+    }
+}
+
 var eAttrType = {
     Unknown                     :-1,
     
@@ -4904,6 +4937,7 @@ var eAttrType = {
     Cube                        :1032,
     Bone                        :1033,
     Selector                    :1034,
+    ScreenRect                  :1035,
     
     Evaluator                   :1100,
     SceneInspector              :1101,
@@ -4915,7 +4949,8 @@ var eAttrType = {
     MultiTargetObserver			:1107,
     ObjectMover	 				:1108,
     AnimalMover					:1109, 
-    WalkSimulator               :1110,  
+    WalkSimulator               :1110,
+    MorphEffector               :1111,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -4945,6 +4980,8 @@ var eAttrType = {
     Stop                        :3012,
     ConnectAttributes           :3013,
     DisconnectAttributes        :3014,
+    Export                      :3015,
+    Morph                       :3016,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
@@ -7924,6 +7961,31 @@ SphereTree.prototype.collides = function(tree)
     return false;
 }
 
+SphereTree.prototype.obstructs = function(tree, forward)
+{
+    if (!this.root || !tree.root) // must be non-NULL
+    {
+        return 0; // indicates no obstruction
+    }
+    
+    // construct cylinder representing tree's root sphere extruded along the forward vector
+    var cylA = tree.root.sphere.xcenter;
+    var cylB = new Vector3D(cylA.x + forward.x, 
+                            cylA.y + forward.y,
+                            cylA.z + forward.z);
+    var cylRadius = tree.root.sphere.xradius;
+    
+    // find distance between cylinder center segment and this' center
+    var distance = distanceBetweenLineSegmentAndPoint(cylA, cylB, this.root.sphere.xcenter);   
+ 
+    if (distance < (this.root.sphere.xradius + cylRadius))
+    {
+        return distance;         
+    }
+    
+    return 0; // indicates no obstruction
+}
+
 SphereTree.prototype.nodesCollide = function(node1, node2)
 {
     return (node1.intersects(node2));    
@@ -8288,35 +8350,37 @@ var eRenderContextMethod =
     GetMaxTextureStages						: 19,
     PerspectiveMatrixLH						: 20,
     OrthographicMatrixLH					: 21,
-    SetBlendFactor							: 22,
-    SetDepthFunc                            : 23,
-    SetEnabledLights						: 24,
-    SetFrontMaterial						: 25,
-    SetGlobalIllumination					: 26,
-    SetLight 			                    : 27,
-    SetShadeModel                           : 28,
-    SetStencilFunc                          : 29,
-    SetStencilMask                          : 30,
-    SetStencilOp                            : 31,
-    SetTextureBlendFactor					: 32,
-    SetTextureBlendOp						: 33,
-    SetViewport						        : 34,
-    VB_SetPrimitiveType                     : 35,
-    VB_SetVertices                          : 36,
-    VB_SetNormals                           : 37,
-    VB_SetColors                            : 38,
-    VB_SetUVCoords                          : 39,
-    VB_SetTextureStage                      : 40,
-    VB_Draw                                 : 41,
-    TO_SetImage                             : 42,
-    TO_SetImageData                         : 43,
-    TO_SetVideo                             : 44,
-    SetMatrixMode							: 45,
-    PushMatrix								: 46,
-    PopMatrix								: 47,
-    LoadMatrix								: 48,
-    LeftMultMatrix							: 49,
-    RightMultMatrix							: 50
+    SetBlendColor                           : 22,
+    SetBlendFactor							: 23,
+    SetDepthFunc                            : 24,
+    SetEnabledLights						: 25,
+    SetFrontMaterial						: 26,
+    SetGlobalIllumination					: 27,
+    SetLight 			                    : 28,
+    SetShadeModel                           : 29,
+    SetStencilFunc                          : 30,
+    SetStencilMask                          : 31,
+    SetStencilOp                            : 32,
+    SetTextureBlendFactor					: 33,
+    SetTextureBlendOp						: 34,
+    SetTextureColorMask                     : 35,
+    SetViewport						        : 36,
+    VB_SetPrimitiveType                     : 37,
+    VB_SetVertices                          : 38,
+    VB_SetNormals                           : 39,
+    VB_SetColors                            : 40,
+    VB_SetUVCoords                          : 41,
+    VB_SetTextureStage                      : 42,
+    VB_Draw                                 : 43,
+    TO_SetImage                             : 44,
+    TO_SetImageData                         : 45,
+    TO_SetVideo                             : 46,
+    SetMatrixMode							: 47,
+    PushMatrix								: 48,
+    PopMatrix								: 49,
+    LoadMatrix								: 50,
+    LeftMultMatrix							: 51,
+    RightMultMatrix							: 52
 }
 
 function RenderContextMethodDesc(method, params)
@@ -8492,6 +8556,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         }
         break;
         
+        case eRenderContextMethod.SetBlendColor:
+        {
+            this.renderContext.setBlendColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
+        }
+        break;
+        
         case eRenderContextMethod.SetBlendFactor:
         {
             this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);
@@ -8561,6 +8631,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         case eRenderContextMethod.SetTextureBlendOp:
         {
             this.renderContext.setTextureBlendOp(desc.params[0]);    
+        }
+        break;
+        
+        case eRenderContextMethod.SetTextureColorMask:
+        {
+            this.renderContext.setTextureColorMask(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
         }
         break;
         
@@ -9905,6 +9981,13 @@ function webglRC(canvas, background)
         return pixels;
     }
     
+    this.setBlendColor = function(r, g, b, a)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendColor, [r, g, b, a]);
+        
+        gl.blendColor(r, g, b, a);
+    }
+    
     this.setBlendFactor = function(sfactor, dfactor)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendFactor, [sfactor, dfactor]);
@@ -10037,7 +10120,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetGlobalIllumination, [ambient]);
         
-        var values = [ ambient.r, ambient.g, ambient.g, ambient.a ];
+        var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
         gl.uniform4fv(program.globalAmbientLight, new Float32Array(values));
     }
@@ -10248,7 +10331,16 @@ function webglRC(canvas, background)
         
         gl.uniform1i(program.textureBlendOp, op);
     }
-
+    
+    this.setTextureColorMask = function(r, g, b, a)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureColorMask, [r, g, b, a]);
+        
+        var values = [ r, g, b, a ];
+        
+        gl.uniform4fv(program.textureColorMask, new Float32Array(values));   
+    }
+    
     this.setViewport = function(x, y, width, height)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetViewport, [x, y, width, height]);
@@ -10368,7 +10460,12 @@ function getProgram(gl, vShader, fShader)
         program.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
     }
     program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
+    program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
     
+    // TEMP
+    var v = [ 2, 2, 2, 2 ];
+    gl.uniform4fv(program.textureColorMask, new Float32Array(v));
+        
     // enabled
     program.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
     program.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");
@@ -10743,6 +10840,39 @@ function webglTO(rc, gl, program)
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
+    //texImage2D(GLenum target, GLint level, GLenum internalformat,
+    //           GLenum format, GLenum type, HTMLCanvasElement canvas)
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.canvas);
+    
+    this.setImageWithCanvas = function(canvas)
+    {
+        // following taken from:
+        // http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
+        var canvasPOT = canvas;
+        if (!isPowerOfTwo(canvas.width) || !isPowerOfTwo(canvas.height))
+        {
+            // Scale up the texture to the next highest power of two dimensions.
+            canvasPOT = document.createElement("canvas");
+            canvasPOT.width = nextHighestPowerOfTwo(canvas.width);
+            canvasPOT.height = nextHighestPowerOfTwo(canvas.height);
+            var ctx = canvasPOT.getContext("2d");
+            ctx.drawImage(canvas,
+                0, 0, canvas.width, canvas.height,
+                0, 0, canvasPOT.width, canvasPOT.height);
+        }
+        
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvasPOT);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);//LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);//LINEAR);
+        
+        gl.generateMipmap(gl.TEXTURE_2D);
+        
+        gl.bindTexture(gl.TEXTURE_2D, null);   
+    }   
+                 
     this.setVideo = function(video)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.TO_SetVideo, [this, video]);
@@ -10985,6 +11115,7 @@ function getShaders(gl, type)
                     "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
                     "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
                     "uniform int uTextureBlendOp;",
+                    "uniform vec4 uTextureColorMask;",
                     "",
                     "varying vec4 vLightingFactor;",
                     "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
@@ -10997,6 +11128,7 @@ function getShaders(gl, type)
                     "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
                     "   {",
                     "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
                     "       if (uTextureBlendOp == " + RC_MODULATE + ")",
                     "       {",
                     "           if (fragmentColor.a == 0.0) discard;",
@@ -11140,6 +11272,7 @@ function getShaders(gl, type)
                     "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
                     "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
                     "uniform int uTextureBlendOp;",
+                    "uniform vec4 uTextureColorMask;",
                     "",
                     "varying vec4 vVertexPosition;",
                     "varying vec4 vTransformedNormal;",
@@ -11266,6 +11399,7 @@ function getShaders(gl, type)
                     "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
                     "   {",
                     "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
                     "       if (uTextureBlendOp == " + RC_MODULATE + ")",
                     "       {",
                     "           if (fragmentColor.a == 0.0) discard;",
@@ -16379,7 +16513,7 @@ function RenderDirective()
     
     this.name.setValueDirect("RenderDirective");
 
-    this.distanceSortAgent = new DistanceSortAgent();
+    this.backgroundImageSet = false;
     
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
@@ -16409,10 +16543,36 @@ function RenderDirective()
     this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
     
+    this.distanceSortAgent = new DistanceSortAgent();
+    
     this.collideDirective = new CollideDirective();
     
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
+    
+    this.backgroundScreen = new Isolator();
+    this.backgroundScreen.isolateTextures.setValueDirect(true);
+    
+    this.backgroundTexture = new MediaTexture();
+    this.backgroundScreen.addChild(this.backgroundTexture);
+    
+    this.backgroundScreenRect = new ScreenRect();
+    this.backgroundScreenRect.setTexture(this.backgroundTexture);
+    this.backgroundScreen.addChild(this.backgroundScreenRect);
+}
+
+RenderDirective.prototype.setRegistry = function(registry)
+{
+    this.distanceSortAgent.setRegistry(registry);
+    this.updateDirective.setRegistry(registry);
+    this.collideDirective.setRegistry(registry);
+    this.highlightDirective.setRegistry(registry);
+    this.backgroundScreen.setRegistry(registry);
+    this.backgroundTexture.setRegistry(registry);
+    this.backgroundScreenRect.setRegistry(registry);
+    
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);    
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
@@ -16421,13 +16581,19 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.updateDirective.setGraphMgr(graphMgr);
     this.collideDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
+    this.backgroundScreen.setGraphMgr(graphMgr);
+    this.backgroundTexture.setGraphMgr(graphMgr);
+    this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
 
 RenderDirective.prototype.execute = function(root)
-{
+{  
+    // draw background
+    this.drawBackground();
+    
     root = root || this.rootNode.getValueDirect();
 
     // update; combined CUpdateParams & GtUpdateParams in this version
@@ -16438,12 +16604,12 @@ RenderDirective.prototype.execute = function(root)
     var visited = this.updateDirective.execute(root, params);
 
     // detect collisions
-    var params = new CollideParams();
+    params = new CollideParams();
     params.directive = this.collideDirective;
     this.collideDirective.execute(root, params);
     
     // render
-    var params = new RenderParams();
+    params = new RenderParams();
     /*
     renderParams.path = NULL;//m_path;
     renderParams.pathIndex = 1;
@@ -16482,6 +16648,26 @@ RenderDirective.prototype.execute = function(root)
     
     // draw highlights
     this.drawHighlights(root);
+}
+
+RenderDirective.prototype.drawBackground = function()
+{
+    if (!this.backgroundImageSet) return;
+    
+    // update
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+
+    var visited = this.updateDirective.execute(this.backgroundScreen, params);
+    
+    // render
+    params = new RenderParams();
+    params.directive = this;
+    params.path = null;
+    params.pathIndex = 1;
+    params.viewport.loadViewport(this.viewport.getValueDirect());
+
+    visited[0].apply("render", params, true);
 }
 
 RenderDirective.prototype.drawHighlights = function(root)
@@ -16527,7 +16713,9 @@ function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
     container.backgroundImageFilename.setValueDirect(pathInfo[0]);
     container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
     
-    container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+    //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+    container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
+    container.backgroundImageSet = true;
 }
 RayPickParams.prototype = new DirectiveParams();
 RayPickParams.prototype.constructor = RayPickParams();
@@ -16916,15 +17104,19 @@ function VertexGeometry()
     this.attrType = eAttrType.VertexGeometry;
 
     this.updateVertices = false;
+    this.updateColors = false;
     this.updateUVCoords = [];
     this.uvCoords = [];
     this.vertexBuffer = null;
     
     this.vertices = new NumberArrayAttr();
+    this.colors = new NumberArrayAttr();
     
     this.vertices.addModifiedCB(VertexGeometry_VerticesModifiedCB, this);
+    this.colors.addModifiedCB(VertexGeometry_ColorsModifiedCB, this);
     
     this.registerAttribute(this.vertices, "vertices");
+    this.registerAttribute(this.colors, "colors");
 }
 
 VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
@@ -17020,6 +17212,13 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.updateBoundingTree = true;
         
         this.calculateBBox();
+    }
+    
+    if (this.updateColors)
+    {
+        this.updateColors = false;
+        
+        this.vertexBuffer.setColors(this.colors.getValueDirect());    
     }
     
     if (this.updateUVCoords.length)
@@ -17329,28 +17528,7 @@ VertexGeometry.prototype.setTextureStage = function(stage, type, texture, textur
     widthWrapType, heightWrapType, textureCoordSrc, planeCoefficients);
 
     // set texture blend operation
-    var op;
-    switch (type)
-    {
-        case eTextureType.Color:
-            op = RC_MODULATE;
-            break;
-
-        case eTextureType.Diffuse:
-        case eTextureType.Luminosity:
-        case eTextureType.Specularity:
-            op = RC_REPLACE;
-            break;
-
-        case eTextureType.Transparency:
-            op = RC_MODULATE;//BLEND;
-            break;
-
-        default:
-            return;
-    }
-
-    this.graphMgr.renderContext.setTextureBlendOp(op);
+    this.graphMgr.renderContext.setTextureBlendOp(texture.blendOp.getValueDirect());
 
     /* TODO
     // set texture matrix
@@ -17455,6 +17633,12 @@ function VertexGeometry_VerticesModifiedCB(attribute, container)
     container.incrementModificationCount();
 }
 
+function VertexGeometry_ColorsModifiedCB(attribute, container)
+{
+    container.updateColors = true;
+    container.incrementModificationCount();
+}
+
 function VertexGeometry_UVCoordsModifiedCB(attribute, container)
 {
     container.updateUVCoords.push(attribute);
@@ -17469,6 +17653,7 @@ function TriList()
     this.className = "TriList";
     this.attrType = eAttrType.TriList;
     
+    this.primitiveType = RC_TRIANGLES;
     this.updateNormals = false;
     
     this.normals = new NumberArrayAttr();
@@ -17484,7 +17669,7 @@ TriList.prototype.update = function(params, visitChildren)
     if (!this.vertexBuffer)
     {
         this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
-        this.vertexBuffer.setPrimitiveType(RC_TRIANGLES);
+        this.vertexBuffer.setPrimitiveType(this.primitiveType);
     }
        
     if (this.updateNormals)
@@ -18000,6 +18185,7 @@ function Model()
     this.attrType = eAttrType.Model;
     
     this.geometry = [];
+    this.geometryIndices = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
     this.surfaceAttrConnections = [];
@@ -18039,9 +18225,14 @@ function Model()
     this.pivotAboutGeometricCenter = new BooleanAttr(true);
     this.screenScaleEnabled = new BooleanAttr(false);
     this.screenScalePixels = new Vector3DAttr(0, 0, 0);
+    // TODO:
+    //this.collider = new BooleanAttr(false);
+    //this.collidee = new BooleanAttr(false);
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
+    this.obstructionDetected = new BooleanAttr(false);
+    this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
@@ -18079,6 +18270,7 @@ function Model()
     this.texturesEnabled.addModifiedCB(Model_SurfaceAttrModifiedCB, this);
     this.detectCollision.addModifiedCB(Model_DetectCollisionModifiedCB, this);
     this.collisionDetected.addModifiedCB(Model_CollisionDetectedModifiedCB, this);
+    this.vertices.addModifiedCB(Model_VerticesModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -18116,6 +18308,8 @@ function Model()
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
+    this.registerAttribute(this.obstructionDetected, "obstructionDetected");
+    this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
@@ -18163,163 +18357,6 @@ Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
     }
 }
 
-/*Model.prototype.postClone = function(clone,pathSrc,pathClone)
-{
-    var i;
-    var j;
-    var node;
-    var type;
-    // setup uv-coords for cloned vertex geometry
-
-    // find vertex geometry nodes under this node
-    var names = [];
-    var types = [];
-    if (!(types.push(eAttrType.TriList))) return;
-    if (!(types.push(eAttrType.LineList))) return;
-    if (!(types.push(eAttrType.PointList))) return;
-    var vertexGeometryNodes = [];
-    this.searchTree(names, types, false, true, false, null, null, null, vertexGeometryNodes);
-    //if (!(types.push(eAttrType.IndexedTriList))) return;
-    //if (!(Push_Back<eAttrType>(types, eAttrType_Node_IndexedLineList))) return;
-    //if (!(Push_Back<eAttrType>(types, eAttrType_Node_IndexedPointList))) return;
-
-
-    // find vertex geometry nodes under the clone
-    var vertexGeometryNodesClone = [];
-    for (i=0; i < pathClone.length(); i++)
-    {
-        node = pathClone.stack[i];
-        type = node.getAttribute();
-        if (type == eAttrType.TriList ||
-            type == eAttrType.LineList ||
-            type == eAttrType.PointList)
-//            type == eAttrType_Node_IndexedTriList ||
-//            type == eAttrType_Node_IndexedLineList ||
-//            type == eAttrType_Node_IndexedPointList)
-        {
-            if (!(vertexGeometryNodesClone.push(node))) return;
-        }
-    }
-
-    // find media texture nodes affecting this node
-    var textureNodes = [];
-    this.searchTree(null, eAttrType.MediaTexture, false, true, false, null, null, null, textureNodes);
-
-    // find media texture nodes affecting the clone
-    var textureNodesClone = [];
-    for (i=0; i < pathClone.length(); i++)
-    {
-        node = pathClone.stack[i];
-        if (node.getAttribute() == eAttrType.MediaTexture)
-        {
-            if (!(textureNodesClone.push(node))) return;
-        }
-    }
-
-    // for each vertex geometry node
-    for (i=0; i < vertexGeometryNodes.size(); i++)
-    {
-        // for each texture node, setup the uv-coords
-        var uvCoords = new NumberArrayAttr();
-        for (j=0; j < textureNodes.size() && j < textureNodesClone.size(); j++)
-        {
-            uvCoords = vertexGeometryNodes[i].findUVCoords(textureNodes[j]);
-            if (uvCoords)
-            {
-                var uvCoords2 = new NumberArrayAttr();
-                uvCoords2 = vertexGeometryNodesClone[i].getUVCoords(textureNodesClone[j]);
-                if (uvCoords2) uvCoords2.copyValue(uvCoords);
-            }
-        }
-    }
-
-    // setup m_geometry, m_geometryIndicesMap, m_geometryBBoxesMap, and m_surfaceNameMap
-    var modelClone = clone;
-
-    // find geometry nodes under the clone
-    var geometryNodesClone = [];
-    clone.searchesTree(names, types, false, true, false, null, null, null, geometryNodesClone);
-
-    // synchronize m_geometryAttrConnections using "OR" operation (this will ensure attributes set inline on the clone are not lost)
-    //std::vector<std::pair<CAttribute*, bool> >::const_iterator it;
-    //this.geometryAttrConnections[]
-    //std::vector<std::pair<CAttribute*, bool> >::iterator clone_it;
-    */
-   /* for (it = m_geometryAttrConnections.begin(), clone_it = modelClone->m_geometryAttrConnections.begin();
-         it != m_geometryAttrConnections.end(), clone_it != modelClone->m_geometryAttrConnections.end();
-         it++, clone_it++)*/
-    /*for(var i = 0;i<this.geometryAttrConnections.length;i++)
-    {
-        // if this node has had a geometry attribute set, and the clone has not, copy the value from this
-        if (it->second && !clone_it->second)
-        {
-            clone_it->first->CopyValue(it->first);
-        }
-
-        clone_it->second = clone_it->second | it->second;
-    }
-
-    var geometry;
-    var srcGeometry;
-    var srcIndices = [];
-    const std::pair<CVector3Df, CVector3Df>* srcBBox;
-    for (i=0; i < geometryNodesClone.size(); i++)
-    {
-        geometry = geometryNodesClone[i];
-
-        srcGeometry = GetGeometry(i);
-        srcIndices = GetGeometryIndices(srcGeometry);
-        srcBBox = GetGeometryBBox(srcGeometry);
-
-        if (!(Push_Back<GcGeometry*>(modelClone->m_geometry, geometry))) return;
-        if (srcIndices) modelClone.m_geometryIndicesMap[geometry] = *srcIndices;
-        if (srcBBox) modelClone->m_geometryBBoxesMap[geometry] = *srcBBox;
-
-        modelClone->UpdateGeometryAttrConnections(geometry, true);
-        modelClone->AddGeometryBBox(geometry);
-    }
-
-    // find surface nodes under the clone
-    var surfaceNodesClone = [];
-    clone.searchTree(null, eAttrType.Surface, false, true, false, null, null, null, surfaceNodesClone);
-
-    // synchronize m_surfaceAttrConnectionsMap using "OR" operation (this will ensure attributes set inline on the clone are not lost)
-    for (it = m_surfaceAttrConnections.begin(), clone_it = modelClone->m_surfaceAttrConnections.begin();
-         it != m_surfaceAttrConnections.end(), clone_it != modelClone->m_surfaceAttrConnections.end();
-         it++, clone_it++)
-    {
-        // if this node has had a surface attribute set, and the clone has not, copy the value from this
-        if (it->second && !clone_it->second)
-        {
-            clone_it->first->CopyValue(it->first);
-        }
-
-        clone_it->second = clone_it->second | it->second;
-    }
-
-    var surface;
-    for (i=0; i < surfaceNodesClone.size(); i++)
-    {
-        surface = surfaceNodesClone[i];
-
-        modelClone->m_surfaceNameMap[surface->GetName()->GetValueDirect(buffer, sizeof(buffer))] = surface;
-
-        // register surface to this for accessiblity with Set
-        modelClone->RegisterAttribute(surface, buffer);
-        if (surface.getContainer() == modelClone)
-        {
-            // don't want modelClone to be the registered container for the surface otherwise it will be released
-            // when unregistered
-            surface.setContainer(null);
-        }
-
-        modelClone->UpdateSurfaceAttrConnections(surface, true);
-    }
-
-    // call base-class implementation
-    this.postClone(clone, pathSrc, pathClone);
-}
-*/
 Model.prototype.initializeSurfaceAttrConnectionsMap = function()
 {
     this.surfaceAttrConnections.push(new Pair(this.color, false));
@@ -18531,22 +18568,16 @@ Model.prototype.addSurface = function(surface)
     this.connectSurfaceAttributes(surface);
 }
 
-Model.prototype.addGeometry = function(geometry, surface)
+Model.prototype.addGeometry = function(geometry, indices, surface)
 {
     surface.addChild(geometry);
     
     this.connectGeometryAttributes(geometry);
     this.addGeometryBBox(geometry);
     this.geometry.push(geometry);
+    this.geometryIndices.push(indices);
         
     this.updateBoundingTree = true;
-}
-
-Model.prototype.addIndexedGeometry = function(geometry, indices, surface)
-{
-    this.addGeometry(geometry, surface);
-    
-    // TODO: what to do with indices?
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)
@@ -18775,6 +18806,11 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
 }
+
+function Model_VerticesModifiedCB(attribute, container)
+{
+}
+
 Texture.prototype = new ParentableMotionElement();
 Texture.prototype.constructor = Texture;
 
@@ -18785,7 +18821,6 @@ function Texture()
     this.attrType = eAttrType.Texture;
    
     this.updateImage = false;
-    this.updateTextureType = false;
     this.updateMipmappingEnabled = false;
     this.setImage = false;
     this.imageSet = false;
@@ -18798,6 +18833,7 @@ function Texture()
     this.widthWrap = new NumberAttr(eTextureWrap.None);
     this.heightWrap = new NumberAttr(eTextureWrap.None);
     this.mipmappingEnabled = new BooleanAttr(false);
+    this.blendOp = new NumberAttr(RC_MODULATE);
     
     this.image.setTransient(true); // don't serialize image data
     
@@ -18818,6 +18854,7 @@ function Texture()
     this.registerAttribute(this.widthWrap, "widthWrap");
     this.registerAttribute(this.heightWrap, "heightWrap");
     this.registerAttribute(this.mipmappingEnabled, "mipmappingEnabled");
+    this.registerAttribute(this.blendOp, "blendOp");
 }
 
 Texture.prototype.setGraphMgr = function(graphMgr)
@@ -18963,7 +19000,28 @@ function Texture_OpacityModifiedCB(attribute, container)
 
 function Texture_TextureTypeModifiedCB(attribute, container)
 {
-    container.updateTextureType = true;
+    // update blendOp based upon type
+    switch (attribute.getValueDirect())
+    {
+        case eTextureType.Color:
+            op = RC_MODULATE;
+            break;
+
+        case eTextureType.Diffuse:
+        case eTextureType.Luminosity:
+        case eTextureType.Specularity:
+            op = RC_REPLACE;
+            break;
+
+        case eTextureType.Transparency:
+            op = RC_MODULATE;//BLEND;
+            break;
+
+        default:
+            return;
+    }
+    
+    container.blendOp.setValueDirect(op);
     container.incrementModificationCount();
 }
 
@@ -19238,7 +19296,7 @@ MediaTexture.prototype.onImageLoad = function()
     if (this.textureType.getValueDirect() == eTextureType.Color &&
        !this.alphaPlayback)
     {
-        this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8, eImageFormat.RGB);
+        this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8A8, eImageFormat.RGBA);
         this.imageSet = true;
         this.incrementModificationCount();
         return;
@@ -22863,6 +22921,8 @@ SerializeDirective.prototype.execute = function(root)
 }
 
 
+var MAX_SEE_AHEAD   = 2;
+
 CollideParams.prototype = new DirectiveParams();
 CollideParams.prototype.constructor = CollideParams();
 
@@ -22906,6 +22966,9 @@ CollideDirective.prototype.execute = function(root)
     
     // detect collisions
     this.detectCollisions(params.detectCollisions);
+    
+    // detect obstructions
+    this.detectObstructions(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
@@ -22920,9 +22983,9 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         trees.push(collideRecs[i].tree);
         collisions.push(false);
 
-        collideRecs[i].model.getAttribute("collisionList").clear();        
+        collideRecs[i].model.getAttribute("collisionList").clear();
     }
-    
+
     for (var i = 0; i < trees.length; i++)
     {
         for (var j = i+1; j < trees.length; j++)
@@ -22939,6 +23002,51 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     for (var i = 0; i < collisions.length; i++)
     {
         models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
+    }
+}
+
+CollideDirective.prototype.detectObstructions = function(collideRecs)
+{
+    var models = [];
+    var trees = [];
+    var obstructions = [];
+    
+    for (var i in collideRecs)
+    {
+        models.push(collideRecs[i].model);
+        trees.push(collideRecs[i].tree);
+        obstructions.push(false);
+
+        collideRecs[i].model.getAttribute("obstructionList").clear();        
+    }
+
+    var distance = 0;
+    var minDistance = FLT_MAX;
+    for (var i = 0; i < trees.length; i++)
+    {
+        var directionVectors = models[i].getDirectionVectors();
+        directionVectors.forward.x *= MAX_SEE_AHEAD;
+        directionVectors.forward.y *= MAX_SEE_AHEAD;
+        directionVectors.forward.z *= MAX_SEE_AHEAD;
+        
+        for (var j = 0; j < trees.length; j++)
+        {
+            if (i == j) continue;
+            
+            if ((distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 &&
+                 distance < minDistance)
+            {
+                models[i].getAttribute("obstructionList").clear();
+                models[i].getAttribute("obstructionList").push_back(models[j]);
+                obstructions[i] = true;
+                minDistance = distance;
+            }
+        }
+    }
+    
+    for (var i = 0; i < obstructions.length; i++)
+    {
+        models[i].getAttribute("obstructionDetected").setValueDirect(obstructions[i]);
     }
 }
 function HighlightTarget()
@@ -23329,7 +23437,16 @@ function ObjectMotionDesc()
 	this.scalarVelocity = new Vector3D(0, 0, 0);
 	this.duration = 0; // seconds
 	this.stopOnCollision = true;
-	this.reverseOnCollision = false;
+}
+
+ObjectMotionDesc.prototype.assign = function(rhs)
+{
+    this.validMembersMask = rhs.validMembersMask;
+    this.panVelocity = rhs.panVelocity;
+    this.linearVelocity = rhs.linearVelocity;
+    this.angularVelocity = rhs.angularVelocity;
+    this.scalarVelocity = rhs.scalarVelocity;
+    this.duration = rhs.duration;   
 }
 
 ObjectMover.prototype = new Evaluator();
@@ -23343,7 +23460,9 @@ function ObjectMover()
 
     this.targetObject = null;
     this.motionQueue = new Queue();
+    this.activeMotion = null;
     this.activeDuration = 0;
+    this.lastCollisionDetected = false;
 
     this.target = new StringAttr("");
     this.timeIncrement = new NumberAttr(0);
@@ -23440,12 +23559,17 @@ ObjectMover.prototype.connectTarget = function(target)
 		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
 		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
 		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+		target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);
 	}
 	
 	this.targetObject = target;
 }
 
-ObjectMover.prototype.collisionDetected = function()
+ObjectMover.prototype.collisionDetected = function(collisionList)
+{
+}
+
+ObjectMover.prototype.obstructionDetected = function(obstructionList)
 {
 }
 
@@ -23475,10 +23599,16 @@ function ObjectMover_TargetModifiedCB(attribute, container)
 function ObjectMover_TargetCollisionDetectedModifiedCB(attribute, container)
 {
     var collisionDetected = attribute.getValueDirect();
-    if (collisionDetected)
-    {
-        container.collisionDetected(attribute.getContainer().getAttribute("collisionList"));
-    }
+    var collisionList = attribute.getContainer().getAttribute("collisionList");
+    container.collisionDetected(collisionList);
+    container.lastCollisionDetected = collisionList.Size() > 0 ? true : false;
+}
+
+function ObjectMover_TargetObstructionDetectedModifiedCB(attribute, container)
+{
+    var obstructionDetected = attribute.getValueDirect();
+    var obstructionList = attribute.getContainer().getAttribute("obstructionList");
+    container.obstructionDetected(obstructionList);
 }
 
 var ANIMALMOVER_MAX_QUEUE_LENGTH	= 2;
@@ -23491,17 +23621,22 @@ function AnimalMover()
     ObjectMover.call(this);
     this.className = "AnimalMover";
     this.attrType = eAttrType.AnimalMover;
+    
+    this.linearDirection = null;
 }
 
 AnimalMover.prototype.evaluate = function()
 {
-	if (this.motionQueue.length() < ANIMALMOVER_MAX_QUEUE_LENGTH)
+	if (this.motionQueue.length() == 0)
 	{
-		var motion = new ObjectMotionDesc();
-		motion.duration = FLT_MAX;
-		motion.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
+	    var rand = Math.random();
+	    var negateAngle = rand < 0.5 ? -1 : 1;
+	    var walk = new ObjectMotionDesc();
+		walk.duration = 5 * rand; // 
+		walk.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect() * rand * negateAngle , 0);
+		walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
 		
-		this.motionQueue.push(motion);
+		this.motionQueue.push(walk);
 	}
 	
 	// call base-class implementation
@@ -23510,22 +23645,62 @@ AnimalMover.prototype.evaluate = function()
 
 AnimalMover.prototype.collisionDetected = function(collisionList)
 {   
-    this.activeMotion = null;
-    this.motionQueue.clear();
-    
-    var turn = new ObjectMotionDesc();
-    turn.duration = 1 / this.angularSpeed.getValueDirect();
-    turn.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect(), 0);
-        
-    this.motionQueue.push(turn);
-      
-    var walk = new ObjectMotionDesc();
-    walk.duration = 1 / this.linearSpeed.getValueDirect();
-    walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
-        
-    this.motionQueue.push(walk);
 }
 
+AnimalMover.prototype.obstructionDetected = function(obstructionList)
+{   
+    if (obstructionList.Size() > 0) // obstructions(s) occurred
+    {
+       this.motionQueue.clear();
+       this.activeMotion = null;
+
+       // determine vector to avoid obstruction
+       var directionVectors = this.targetObject.getDirectionVectors();
+       var thisPos = this.targetObject.getAttribute("sectorPosition").getValueDirect();
+       var linearDirection = new Vector3D(directionVectors.forward.x, directionVectors.forward.y, directionVectors.forward.z);
+       var obstructorPos = obstructionList.getAt(0).getAttribute("sectorPosition").getValueDirect();
+       var angleBetween = toDegrees(Math.acos(cosineAngleBetween(directionVectors.forward, 
+                                                                 new Vector3D(obstructorPos.x - thisPos.x, 
+                                                                              obstructorPos.y - thisPos.y, 
+                                                                              obstructorPos.z - thisPos.z))));
+       // if angleBetween is 0, offset obstructorPos so that deltaPos is not (0, 0, 0)
+       if (angleBetween == 0)
+       {
+           obstructorPos.x += 0.1;
+           obstructorPos.z += 0.1;
+       }
+       var mag = distanceBetween(thisPos, obstructorPos);       
+       var deltaPos = new Vector3D(((directionVectors.forward.x * mag) - (obstructorPos.x)), 
+                                   ((directionVectors.forward.y * mag) - (obstructorPos.y)), 
+                                   ((directionVectors.forward.z * mag) - (obstructorPos.z)));
+       deltaPos.normalize();
+       //deltaPos.multiplyScalar(MAX_AVOID_FORCE);
+       linearDirection.addVector(deltaPos);
+       linearDirection.normalize();
+       
+       // scale by linear speed   
+       linearDirection.multiplyScalar(this.linearSpeed.getValueDirect());
+       this.linearDirection = linearDirection;
+       
+       // turn so this will travel in direction of this vector
+       var cosAngle = cosineAngleBetween(directionVectors.forward, this.linearDirection);
+       angleBetween = toDegrees(Math.acos(cosAngle));
+       if (angleBetween > 0)
+       {
+           if (cosAngle < 0) angleBetween = -angleBetween;
+           var rotation = this.targetObject.getAttribute("rotation").getValueDirect();
+           //this.targetObject.getAttribute("rotation").setValueDirect(rotation.x, angleBetween + rotation.y, rotation.z);
+           
+           var turn = new ObjectMotionDesc();
+           turn.angularVelocity = new Vector3D(0, angleBetween, 0);
+           turn.duration = angleBetween / this.angularSpeed.getValueDirect();
+           this.motionQueue.push(turn);
+       }
+    }
+    else // no obstruction(s)
+    {
+    }
+}
 WalkSimulator.prototype = new SceneInspector();
 WalkSimulator.prototype.constructor = WalkSimulator;
 
@@ -23761,9 +23936,9 @@ function Cube()
         -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
         0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
         0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
-        1, -0, 0, 1, -0, 0, 1, -0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
-        0, 1, -0, 0, 1, -0, 0, 1, -0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
-        0, -0, 1, 0, -0, 1, 0, -0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1
+        1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+        0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1
     ];
     
     this.vertices.setValue(vertices);
@@ -23870,6 +24045,164 @@ function Cube_MaterialModifiedCB(attribute, container)
 {
     container.updateMaterial = true;
 }
+ScreenRect.prototype = new TriList();
+ScreenRect.prototype.constructor = ScreenRect;
+
+function ScreenRect()
+{
+    TriList.call(this);
+    this.className = "ScreenRect";
+    this.attrType = eAttrType.ScreenRect;
+    
+    this.primitiveType = RC_TRIANGLE_STRIP;
+    
+    this.textureColorMask = new ColorAttr(0, 0, 0, 1);
+    
+    this.registerAttribute(this.textureColorMask, "textureColorMask");
+    
+    var vertices = 
+    [
+        -1, -1,  1,
+        -1,  1,  1,
+         1, -1,  1,
+         1,  1,  1
+    ];
+    
+    var normals =
+    [
+        0,  0,  -1,
+        0,  0,  -1,
+        0,  0,  -1,
+        0,  0,  -1
+    ];
+    
+    var colors =
+    [
+        1,  1,  1,  1,
+        1,  1,  1,  1,
+        1,  1,  1,  1,
+        1,  1,  1,  1
+    ];
+    
+    this.vertices.setValueDirect(vertices);
+    this.normals.setValueDirect(normals);
+    this.colors.setValueDirect(colors);
+}
+
+ScreenRect.prototype.update = function(params, visitChildren)
+{
+    // call base-class implementation
+    TriList.prototype.update.call(this, params, visitChildren);
+}
+
+ScreenRect.prototype.draw = function(dissolve)
+{
+    // set projection matrix
+    var m = new Matrix4x4();
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.pushMatrix();
+    this.graphMgr.renderContext.loadMatrix(m);
+    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+    this.graphMgr.renderContext.pushMatrix();
+    this.graphMgr.renderContext.loadMatrix(m);
+    this.graphMgr.renderContext.applyProjectionTransform();
+    
+    this.graphMgr.renderContext.disable(eRenderMode.DepthTest);
+    this.graphMgr.renderContext.disable(eRenderMode.DepthBufferWrite);
+    this.graphMgr.renderContext.disable(eRenderMode.Lighting);
+    
+    var textureColorMask = this.textureColorMask.getValueDirect();
+    this.graphMgr.renderContext.setTextureColorMask(textureColorMask.r, textureColorMask.g, textureColorMask.b, textureColorMask.a);
+    
+    // call base-class implementation
+    TriList.prototype.draw.call(this, dissolve);
+    
+    // restore projection matrix
+    this.graphMgr.renderContext.popMatrix();
+    this.graphMgr.renderContext.applyProjectionTransform();
+    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.popMatrix();
+    this.graphMgr.renderContext.applyModelViewTransform();
+    
+    this.graphMgr.renderContext.enable(eRenderMode.DepthTest);
+    this.graphMgr.renderContext.enable(eRenderMode.DepthBufferWrite);
+    this.graphMgr.renderContext.enable(eRenderMode.Lighting);
+    
+    // reset color mask that won't affect rendering
+    this.graphMgr.renderContext.setTextureColorMask(2, 2, 2, 2);
+}
+
+ScreenRect.prototype.setTexture = function(texture)
+{
+    var uvs =
+    [
+        0, 0,
+        0, 1,
+        1, 0,
+        1, 1
+    ];
+    
+    var uvCoords = this.getUVCoords(texture); 
+    uvCoords.setValueDirect(uvs);
+}
+
+MorphEffector.prototype = new Evaluator();
+MorphEffector.prototype.constructor = MorphEffector;
+
+function MorphEffector()
+{
+    Evaluator.call(this);
+    this.className = "MorphEffector";
+    this.attrType = eAttrType.MorphEffector;
+    
+    this.morphAmt = new NumberAttr(0);
+    this.morphIncr = new NumberAttr(0);
+    this.sourceVertices = new NumberArrayAttr();
+    this.targetVertices = new NumberArrayAttr();
+    this.resultVertices = new NumberArrayAttr();
+    
+    this.registerAttribute(this.morphAmt, "morphAmt");
+    this.registerAttribute(this.morphIncr, "morphIncr");
+    this.registerAttribute(this.sourceVertices, "sourceVertices");
+    this.registerAttribute(this.targetVertices, "targetVertices");
+    this.registerAttribute(this.resultVertices, "resultVertices");
+}
+
+MorphEffector.prototype.evaluate = function()
+{
+    // get input values
+
+    // morph amount
+    var morphAmt = this.morphAmt.getValueDirect();
+
+    // morph increment
+    var morphIncr = this.morphIncr.getValueDirect();
+
+    // increment morph amount by morph increment
+    morphAmt += morphIncr;
+
+    // clamp morph amount to range [0, 1]
+    morphAmt = clamp(morphAmt, 0, 1);
+
+    // update morph amount attribute value
+    this.morphAmt.setValueDirect(morphAmt);
+
+    var sourceVertices = this.sourceVertices.getValueDirect();
+    var targetVertices = this.targetVertices.getValueDirect();
+    var resultVertices = [];
+    
+    var count = Math.min(sourceVertices.length, targetVertices.length);
+    resultVertices.length = count;
+    
+    for (var i = 0; i < count; i++)
+    {
+        resultVertices[i] = (targetVertices[i] - sourceVertices[i]) * morphAmt + sourceVertices[i];
+    }
+    
+    this.resultVertices.setValue(resultVertices);
+}
+
 var eEventType = {
     Unknown                     :-1,
     
@@ -27637,6 +27970,58 @@ ConnectionMgr.prototype.disconnectWalkSimulation = function(simulator, target)
     ConnectionMgr.prototype.disconnectSceneInspection.call(null, simulator, target);
 }
 
+ConnectionMgr.prototype.connectModelsToMorph = function(source, target, morphIncr)
+{
+    if (!source || !target) return;
+    
+    var factory = this.registry.find("AttributeFactory");
+    
+    // get target vertices
+    var targetVertices = target.getAttribute("vertices").getValueDirect();
+    
+    // for each geometry set in the source...
+    for (var i = 0; i < source.geometry.length; i++)
+    {
+        // get indices
+        var indices = source.geometryIndices[i];    
+        if (!indices) continue;
+        
+        // create morph effector    
+        var morpher = factory.create("MorphEffector");   
+        morpher.getAttribute("renderAndRelease").setValueDirect(true);
+        morpher.getAttribute("morphIncr").setValueDirect(morphIncr);
+        
+        // get source vertices from geometry and set to sourceVertices on morpher
+        var sourceVertices = source.geometry[i].getAttribute("vertices").getValueDirect();
+        morpher.getAttribute("sourceVertices").setValueDirect(sourceVertices);
+        
+        // set target vertices
+        var morpher_targetVertices = [];
+        for (var j = 0; j < indices.length; j++)
+        {
+            var index = indices[j];
+            
+            if (index * 3 + 2 < targetVertices.length)
+            {
+                morpher_targetVertices.push(targetVertices[index * 3    ]);
+                morpher_targetVertices.push(targetVertices[index * 3 + 1]);
+                morpher_targetVertices.push(targetVertices[index * 3 + 2]);
+            }
+            else // target deosn't contain enough points, use source
+            {
+                morpher_targetVertices.push(sourceVertices[j * 3    ]);
+                morpher_targetVertices.push(sourceVertices[j * 3 + 1]);
+                morpher_targetVertices.push(sourceVertices[j * 3 + 2]);
+            }
+        }
+        morpher.getAttribute("targetVertices").setValueDirect(morpher_targetVertices);
+        
+        // connect result vertices to source vertices
+        morpher.getAttribute("resultVertices").addTarget(source.geometry[i].getAttribute("vertices"));
+    }
+}
+
+
 RenderAgent.prototype = new Agent();
 RenderAgent.prototype.constructor = RenderAgent;
 
@@ -29264,39 +29649,100 @@ function ScreenCaptureCommand()
     this.attrType = eAttrType.ScreenCapture;
 
     this.canvasId = new StringAttr();
-    
+
     this.registerAttribute(this.canvasId, "canvasId");
-    
+
     this.numResponses.setValueDirect(0);
 }
 
 ScreenCaptureCommand.prototype.execute = function()
 {
     var bworks = this.registry.find("Bridgeworks");
+    bworks.eventMgr.addListener(eEventType.RenderBegin, this);
     bworks.eventMgr.addListener(eEventType.RenderEnd, this);
 }
 
 ScreenCaptureCommand.prototype.screenCapture = function(canvasId)
 {
     var canvas = document.getElementById(canvasId);
-    cimageData = canvas.toDataURL('image/png');
-    var imageData = cimageData;
+    var imageData = canvas.toDataURL('image/png');
 
-//    window.open(imageData);
-
-    //Decode the base64 data into 8bit array. Used Specifically for 3Scape
+    // 3Scape-specific: decode the base64 data into 8bit array
+    cimageData = imageData;
     var cnt = imageData.lastIndexOf(',') + 1;
     imageData = imageData.substr(cnt);
     imgeData = Base64Binary.decode(imageData);
-    
+        
+    // for testing with Bug-60.htm
+    //document.getElementById('imgCapture').src = imageData;
+
     // copy to clipboard
     // TODO: investigate method described at: https://forums.mozilla.org/addons/viewtopic.php?t=9736&p=21119
-    
-    // open in new window
 
+    // open in new window
+    //window.open(imageData);
+    
     // download
     //var imageDataStream = imageData.replace("image/png", "image/octet-stream");
     //window.location.href = imageDataStream;
+}
+
+ScreenCaptureCommand.prototype.get2DElementCanvas = function(canvas3D)
+{
+    // create 2D canvas for labels
+    var canvas2D = document.createElement('canvas');
+    canvas2D.id = "canvas2D";
+    canvas2D.width = canvas3D.width;
+    canvas2D.height = canvas3D.height;
+    var ctx = canvas2D.getContext('2d');
+
+    // get labels
+    var labels = this.registry.getByType(eAttrType.Label);
+    
+    // calculate mask color which is different from all labels colors
+    var maskColor = "black";
+    
+    // setup img src data for labels
+    var data = "data:image/svg+xml," + 
+               "<svg xmlns='http://www.w3.org/2000/svg' width='" + canvas2D.width + "' height='" + canvas2D.height + "'>" + 
+               "<foreignObject width='100%' height='100%'>" + 
+               "<div xmlns='http://www.w3.org/1999/xhtml' style='background:" + maskColor + ";'>";   
+    for (var i=0; i < labels.length; i++)
+    {
+        var style = labels[i].htmlLabel.style;
+        data += "<span style='position:absolute; " +
+                "font-family:" + style.fontFamily + "; " +
+                "font-size:" + style.fontSize + "; " +
+                "font-weight:" + style.fontWeight + "; " +
+                "color:" + style.color + "; " +
+                "background-color:" + style.backgroundColor + "; " +
+                "text-shadow:" + style.textShadow + "; " +
+                "visibility:" + style.visibility + "; " +
+                "left:" + style.left + "; " +
+                "top:" + style.top + "; " +
+                "padding-left:" + style.paddingLeft + "; " +
+                "padding-right:" + style.paddingRight + "; " +
+                "padding-top:" + style.paddingTop + "; " +
+                "padding-bottom:" + style.paddingBottom + "; " +
+                "'>" + labels[i].text.getValueDirect().join("") + 
+                "</span>";                
+    }   
+    data += "</div>" +
+            "</foreignObject>" + 
+            "</svg>";
+        
+    // create Image and set data as its src
+    var img = new Image();
+    img.src = data;
+
+    // fill 2D canvas with background color
+    ctx.fillStyle = maskColor;
+    ctx.fillRect(0, 0, canvas2D.width, canvas2D.height);
+    
+    // draw image to 2D canvas
+    ctx.drawImage(img, 0, 0);
+
+    return { canvas: canvas2D, maskColor: maskColor }
 }
 
 ScreenCaptureCommand.prototype.eventPerformed = function(event)
@@ -29304,12 +29750,213 @@ ScreenCaptureCommand.prototype.eventPerformed = function(event)
     // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
     switch (event.type)
     {
+        case eEventType.RenderBegin:
+            {
+                var screenCaptureRect = this.registry.find("ScreenCaptureRect");                    // TODO: change name
+                var screenCaptureTexture = this.registry.find("ScreenCaptureTexture")
+                if (screenCaptureRect && screenCaptureTexture)
+                {
+                    // set 2D element canvas to screen capture texture
+                    var canvas2D = this.get2DElementCanvas(document.getElementById(this.canvasId.getValueDirect().join("")));
+                    screenCaptureTexture.textureObj.setImageWithCanvas(canvas2D.canvas);
+                    screenCaptureTexture.imageSet = true;
+                    // TODO: set blendOp/maskColor
+                    //screenCaptureTexture.setTextureColorMask(0, 0, 0, 1);
+
+                    // set screen capture texture to screen capture rect object
+                    screenCaptureRect.setTexture(screenCaptureTexture);
+
+                    // show screen capture rect object
+                    screenCaptureRect.enabled.setValueDirect(true);
+                }
+            }
+            break;
+
         case eEventType.RenderEnd:
+            {
+                this.screenCapture(this.canvasId.getValueDirect().join(""));
+                // hide screen capture rect object
+                var screenCaptureRect = this.registry.find("ScreenCaptureRect");
+                if (screenCaptureRect)
+                {
+                    screenCaptureRect.enabled.setValueDirect(false);
+                }
+            }
+            break;
+    }
+}
+
+ExportCommand.prototype = new Command();
+ExportCommand.prototype.constructor = ExportCommand;
+
+function ExportCommand()
+{
+    Command.call(this);
+    this.className = "Export";
+    this.attrType = eAttrType.Export;
+
+    this.targetNode = null;
+    
+    this.url = new StringAttr();
+    
+    this.target.addModifiedCB(ExportCommand_TargetModifiedCB, this);
+
+    this.registerAttribute(this.url, "url");
+}
+
+ExportCommand.prototype.execute = function()
+{
+    if (!this.targetNode) return;
+    
+    var url = this.url.getValueDirect().join("");   
+    switch (getFileExtension(url))
+    {
+        case "stl":
+            this.exportSTL(this.targetNode, url);
+            break;
+            
+        default:
+            break;
+    }
+}
+
+ExportCommand.prototype.exportSTL = function(model, url)
+{
+    // name
+    var name = model.name.getValueDirect().join("");
+    
+    // vertices/normals
+    var vertices = [];
+    var normals = [];   
+    for (var i=0; i < model.geometry.length; i++)
+    {
+        var geometry = model.geometry[i];
+        switch (geometry.attrType)
         {
-            this.screenCapture(this.canvasId.getValueDirect().join(""));
-            return;        
+            case eAttrType.TriList:
+                {
+                    vertices = vertices.concat(geometry.vertices.getValueDirect());
+                    normals = normals.concat(geometry.vertices.getValueDirect());
+                }
+                break;
         }
-        break;
+    }
+    if (vertices.length == 0) return;
+    
+    // vertices cannot have negative values, so offset vertices if negative values are present
+    var x = FLT_MAX, y = FLT_MAX, z = FLT_MAX;
+    for (var i=0; i < vertices.length; i+=3)
+    {
+        x = Math.min(x, vertices[i  ]);
+        y = Math.min(y, vertices[i+1]);
+        z = Math.min(z, vertices[i+2]);
+    }
+    if (x < 0)
+    {
+        x = Math.abs(x);
+        for (var i=0; i < vertices.length; i+=3)
+        {
+            vertices[i  ] += x;
+        }
+    }
+    if (y < 0)
+    {
+        y = Math.abs(y);
+        for (var i=0; i < vertices.length; i+=3)
+        {
+            vertices[i+1] += y;
+        }
+    }
+    if (z < 0)
+    {
+        z = Math.abs(z);
+        for (var i=0; i < vertices.length; i+=3)
+        {
+            vertices[i+2] += z;
+        }
+    }
+    
+    var stl = "";
+    stl += "solid " + name + "\r\n";
+    for (var v=0, n=0; v < vertices.length && n < normals.length; v+=9, n+=9) // one normal per face
+    {
+    stl += "   facet normal " + normals[n].toExponential() + " " + normals[n+1].toExponential() + " " + normals[n+2].toExponential() + "\r\n";
+    stl += "      outer loop\r\n";
+    stl += "         vertex " + vertices[v  ].toExponential() + " " + vertices[v+1].toExponential() + " " + vertices[v+2].toExponential() + "\r\n";
+    stl += "         vertex " + vertices[v+3].toExponential() + " " + vertices[v+4].toExponential() + " " + vertices[v+5].toExponential() + "\r\n";
+    stl += "         vertex " + vertices[v+6].toExponential() + " " + vertices[v+7].toExponential() + " " + vertices[v+8].toExponential() + "\r\n";
+    stl += "      endloop\r\n";
+    stl += "   end facet\r\n";    
+    }
+    stl += "endsolid " + name;
+    
+    var blob = new Blob([stl], {type: "text/plain"});
+    saveAs(blob, url);
+}
+
+function ExportCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var resource = container.registry.find(target);
+    if (resource)
+    {
+        container.targetNode = resource;
+    }
+}
+
+
+MorphCommand.prototype = new Command();
+MorphCommand.prototype.constructor = MorphCommand;
+
+function MorphCommand()
+{
+    Command.call(this);
+    this.className = "Morph";
+    this.attrType = eAttrType.Morph;
+
+    this.sourceModel = null;
+    this.targetModel = null;
+    
+    this.source = new StringAttr("");
+    this.morphIncr = new NumberAttr(0.1);
+    
+    this.source.addModifiedCB(MorphCommand_SourceModifiedCB, this);
+    this.target.addModifiedCB(MorphCommand_TargetModifiedCB, this);
+
+    this.registerAttribute(this.source, "source");
+    this.registerAttribute(this.morphIncr, "morphIncr");
+}
+
+MorphCommand.prototype.execute = function()
+{
+    if (this.sourceModel && this.targetModel)
+    {
+        var connectionMgr = this.registry.find("ConnectionMgr");
+        if (connectionMgr)
+        {
+            connectionMgr.connectModelsToMorph(this.sourceModel, this.targetModel, this.morphIncr.getValueDirect());
+        }    
+    }
+}
+
+function MorphCommand_SourceModifiedCB(attribute, container)
+{
+    var source = attribute.getValueDirect().join("");
+    var resource = container.registry.find(source);
+    if (resource)
+    {
+        container.sourceModel = resource;
+    }
+}
+
+
+function MorphCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var resource = container.registry.find(target);
+    if (resource)
+    {
+        container.targetModel = resource;
     }
 }
 
@@ -30599,7 +31246,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var triList = factory.create("TriList");
 
-            model.addGeometry(triList, surfaces[surfIndex]); // TODO: call method that accepts indices
+            model.addGeometry(triList, vertexOrder[surfIndex], surfaces[surfIndex]);
 
             triList.getAttribute("vertices").setValue(vertices);
             triList.getAttribute("normals").setValue(normals);
@@ -30633,7 +31280,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var lineList = factory.create("LineList");
 
-            model.addGeometry(lineList, surfaces[surfIndex]); // TODO: call method that accepts indices   
+            model.addGeometry(lineList, null, surfaces[surfIndex]);
             
             lineList.getAttribute("vertices").setValue(vertices);
         }
@@ -30659,7 +31306,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var pointList = factory.create("PointList");
 
-            model.addGeometry(pointList, surfaces[surfIndex]); // TODO: call method that accepts indices   
+            model.addGeometry(pointList, null, surfaces[surfIndex]);
             
             pointList.getAttribute("vertices").setValue(vertices);
         }
@@ -32286,6 +32933,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
+    this.newResourceProcs["ScreenRect"] = newSGNode;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -32305,6 +32953,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["TargetObserver"] = newTargetObserver;
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
+    this.newResourceProcs["MorphEffector"] = newMorphEffector;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -32314,6 +32963,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["ConnectOutputs"] = newCommand;
     this.newResourceProcs["DisconnectAttributes"] = newCommand;
     this.newResourceProcs["DisconnectOutputs"] = newCommand;
+    this.newResourceProcs["Export"] = newCommand;
     this.newResourceProcs["Locate"] = newCommand;
     this.newResourceProcs["MotionInterpolate"] = newCommand;
     this.newResourceProcs["Pause"] = newCommand;
@@ -32323,6 +32973,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Serialize"] = newCommand;
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
+    this.newResourceProcs["Morph"] = newCommand;
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
@@ -32369,6 +33020,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["ConnectOutputs"] = finalizeCommand;
     this.finalizeProcs["DisconnectAttributes"] = finalizeCommand;
     this.finalizeProcs["DisconnectOutputs"] = finalizeCommand;
+    this.finalizeProcs["Export"] = finalizeCommand;
     this.finalizeProcs["Locate"] = finalizeCommand;
     this.finalizeProcs["MotionInterpolate"] = finalizeCommand;
     this.finalizeProcs["Pause"] = finalizeCommand;
@@ -32378,7 +33030,8 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Serialize"] = finalizeCommand;
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
-
+    this.finalizeProcs["Morph"] = finalizeCommand;
+    
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
@@ -32465,6 +33118,7 @@ function newSGNode(name, factory)
     case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
     case "Cube":                resource = new Cube(); break;
     case "Material":            resource = new Material(); break;
+    case "ScreenRect":          resource = new ScreenRect(); break;
     }
     
     if (resource)
@@ -32604,6 +33258,15 @@ function newWalkSimulator(name, factory)
     return resource;
 }
 
+function newMorphEffector(name, factory)
+{
+    var resource = new MorphEffector();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
+}
+
 function newCommand(name, factory)
 {
     var resource = null;
@@ -32617,6 +33280,7 @@ function newCommand(name, factory)
     case "ConnectOutputs":      resource = new ConnectAttributesCommand(); break;    
     case "DisconnectAttributes":resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
     case "DisconnectOutputs":   resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
+    case "Export":              resource = new ExportCommand(); break;
     case "Locate":              resource = new LocateCommand(); break;
     case "MotionInterpolate":   resource = new MotionInterpolateCommand(); break;
     case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
@@ -32626,6 +33290,7 @@ function newCommand(name, factory)
     case "Serialize":           resource = new SerializeCommand(); break;
     case "Set":                 resource = new SetCommand(); break;
     case "Stop":                resource = new StopCommand(); break;
+    case "Morph":               resource = new MorphCommand(); break;
     }
 
 	// if command sequence, set to command mgr

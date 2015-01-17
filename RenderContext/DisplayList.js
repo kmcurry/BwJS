@@ -23,35 +23,37 @@ var eRenderContextMethod =
     GetMaxTextureStages						: 19,
     PerspectiveMatrixLH						: 20,
     OrthographicMatrixLH					: 21,
-    SetBlendFactor							: 22,
-    SetDepthFunc                            : 23,
-    SetEnabledLights						: 24,
-    SetFrontMaterial						: 25,
-    SetGlobalIllumination					: 26,
-    SetLight 			                    : 27,
-    SetShadeModel                           : 28,
-    SetStencilFunc                          : 29,
-    SetStencilMask                          : 30,
-    SetStencilOp                            : 31,
-    SetTextureBlendFactor					: 32,
-    SetTextureBlendOp						: 33,
-    SetViewport						        : 34,
-    VB_SetPrimitiveType                     : 35,
-    VB_SetVertices                          : 36,
-    VB_SetNormals                           : 37,
-    VB_SetColors                            : 38,
-    VB_SetUVCoords                          : 39,
-    VB_SetTextureStage                      : 40,
-    VB_Draw                                 : 41,
-    TO_SetImage                             : 42,
-    TO_SetImageData                         : 43,
-    TO_SetVideo                             : 44,
-    SetMatrixMode							: 45,
-    PushMatrix								: 46,
-    PopMatrix								: 47,
-    LoadMatrix								: 48,
-    LeftMultMatrix							: 49,
-    RightMultMatrix							: 50
+    SetBlendColor                           : 22,
+    SetBlendFactor							: 23,
+    SetDepthFunc                            : 24,
+    SetEnabledLights						: 25,
+    SetFrontMaterial						: 26,
+    SetGlobalIllumination					: 27,
+    SetLight 			                    : 28,
+    SetShadeModel                           : 29,
+    SetStencilFunc                          : 30,
+    SetStencilMask                          : 31,
+    SetStencilOp                            : 32,
+    SetTextureBlendFactor					: 33,
+    SetTextureBlendOp						: 34,
+    SetTextureColorMask                     : 35,
+    SetViewport						        : 36,
+    VB_SetPrimitiveType                     : 37,
+    VB_SetVertices                          : 38,
+    VB_SetNormals                           : 39,
+    VB_SetColors                            : 40,
+    VB_SetUVCoords                          : 41,
+    VB_SetTextureStage                      : 42,
+    VB_Draw                                 : 43,
+    TO_SetImage                             : 44,
+    TO_SetImageData                         : 45,
+    TO_SetVideo                             : 46,
+    SetMatrixMode							: 47,
+    PushMatrix								: 48,
+    PopMatrix								: 49,
+    LoadMatrix								: 50,
+    LeftMultMatrix							: 51,
+    RightMultMatrix							: 52
 }
 
 function RenderContextMethodDesc(method, params)
@@ -227,6 +229,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         }
         break;
         
+        case eRenderContextMethod.SetBlendColor:
+        {
+            this.renderContext.setBlendColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
+        }
+        break;
+        
         case eRenderContextMethod.SetBlendFactor:
         {
             this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);
@@ -296,6 +304,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         case eRenderContextMethod.SetTextureBlendOp:
         {
             this.renderContext.setTextureBlendOp(desc.params[0]);    
+        }
+        break;
+        
+        case eRenderContextMethod.SetTextureColorMask:
+        {
+            this.renderContext.setTextureColorMask(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
         }
         break;
         

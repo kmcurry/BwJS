@@ -113,6 +113,7 @@
 		<script type="text/javascript" src="../../SceneGraph/ObjectMover.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/AnimalMover.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/WalkSimulator.js"></script>
+		<script type="text/javascript" src="../../SceneGraph/MorphEffector.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/Cube.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/ScreenRect.js"></script>
 		<script type="text/javascript" src="../../Event/EventType.js"></script>
@@ -154,6 +155,7 @@
 		<script type="text/javascript" src="../../BwCore/ScreenCapture.js"></script>
 		<script type="text/javascript" src="../../BwCore/Serialize.js"></script>
 		<script type="text/javascript" src="../../BwCore/Export.js"></script>
+		<script type="text/javascript" src="../../BwCore/Morph.js"></script>
 		<script type="text/javascript" src="../../ContentHandler/LWObjectHandler.js"></script>
 		<script type="text/javascript" src="../../ContentHandler/LWObjectBuilder.js"></script>
 		<script type="text/javascript" src="../../ContentHandler/LWSceneHandler.js"></script>
@@ -217,7 +219,7 @@
     <script type="text/javascript">
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
-                bridgeworks = init("Velocity.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("Morph.xml", document.getElementById("BwContainer"));
             }
         }
     </script>

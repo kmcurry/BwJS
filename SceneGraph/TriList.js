@@ -7,6 +7,7 @@ function TriList()
     this.className = "TriList";
     this.attrType = eAttrType.TriList;
     
+    this.primitiveType = RC_TRIANGLES;
     this.updateNormals = false;
     
     this.normals = new NumberArrayAttr();
@@ -22,7 +23,7 @@ TriList.prototype.update = function(params, visitChildren)
     if (!this.vertexBuffer)
     {
         this.vertexBuffer = this.graphMgr.renderContext.createVertexBuffer(3);
-        this.vertexBuffer.setPrimitiveType(RC_TRIANGLES);
+        this.vertexBuffer.setPrimitiveType(this.primitiveType);
     }
        
     if (this.updateNormals)

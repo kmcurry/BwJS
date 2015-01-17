@@ -275,7 +275,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var triList = factory.create("TriList");
 
-            model.addGeometry(triList, surfaces[surfIndex]); // TODO: call method that accepts indices
+            model.addGeometry(triList, vertexOrder[surfIndex], surfaces[surfIndex]);
 
             triList.getAttribute("vertices").setValue(vertices);
             triList.getAttribute("normals").setValue(normals);
@@ -309,7 +309,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var lineList = factory.create("LineList");
 
-            model.addGeometry(lineList, surfaces[surfIndex]); // TODO: call method that accepts indices   
+            model.addGeometry(lineList, null, surfaces[surfIndex]);
             
             lineList.getAttribute("vertices").setValue(vertices);
         }
@@ -335,7 +335,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         {
             var pointList = factory.create("PointList");
 
-            model.addGeometry(pointList, surfaces[surfIndex]); // TODO: call method that accepts indices   
+            model.addGeometry(pointList, null, surfaces[surfIndex]);
             
             pointList.getAttribute("vertices").setValue(vertices);
         }

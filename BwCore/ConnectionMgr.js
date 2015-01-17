@@ -133,3 +133,55 @@ ConnectionMgr.prototype.disconnectWalkSimulation = function(simulator, target)
 {
     ConnectionMgr.prototype.disconnectSceneInspection.call(null, simulator, target);
 }
+
+ConnectionMgr.prototype.connectModelsToMorph = function(source, target, morphIncr)
+{
+    if (!source || !target) return;
+    
+    var factory = this.registry.find("AttributeFactory");
+    
+    // get target vertices
+    var targetVertices = target.getAttribute("vertices").getValueDirect();
+    
+    // for each geometry set in the source...
+    for (var i = 0; i < source.geometry.length; i++)
+    {
+        // get indices
+        var indices = source.geometryIndices[i];    
+        if (!indices) continue;
+        
+        // create morph effector    
+        var morpher = factory.create("MorphEffector");   
+        morpher.getAttribute("renderAndRelease").setValueDirect(true);
+        morpher.getAttribute("morphIncr").setValueDirect(morphIncr);
+        
+        // get source vertices from geometry and set to sourceVertices on morpher
+        var sourceVertices = source.geometry[i].getAttribute("vertices").getValueDirect();
+        morpher.getAttribute("sourceVertices").setValueDirect(sourceVertices);
+        
+        // set target vertices
+        var morpher_targetVertices = [];
+        for (var j = 0; j < indices.length; j++)
+        {
+            var index = indices[j];
+            
+            if (index * 3 + 2 < targetVertices.length)
+            {
+                morpher_targetVertices.push(targetVertices[index * 3    ]);
+                morpher_targetVertices.push(targetVertices[index * 3 + 1]);
+                morpher_targetVertices.push(targetVertices[index * 3 + 2]);
+            }
+            else // target deosn't contain enough points, use source
+            {
+                morpher_targetVertices.push(sourceVertices[j * 3    ]);
+                morpher_targetVertices.push(sourceVertices[j * 3 + 1]);
+                morpher_targetVertices.push(sourceVertices[j * 3 + 2]);
+            }
+        }
+        morpher.getAttribute("targetVertices").setValueDirect(morpher_targetVertices);
+        
+        // connect result vertices to source vertices
+        morpher.getAttribute("resultVertices").addTarget(source.geometry[i].getAttribute("vertices"));
+    }
+}
+

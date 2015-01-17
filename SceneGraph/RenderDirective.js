@@ -29,7 +29,7 @@ function RenderDirective()
     
     this.name.setValueDirect("RenderDirective");
 
-    this.distanceSortAgent = new DistanceSortAgent();
+    this.backgroundImageSet = false;
     
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
@@ -59,10 +59,36 @@ function RenderDirective()
     this.timeIncrement.addTarget(this.updateDirective.getAttribute("timeIncrement"));
     this.resetDisplayLists = false;
     
+    this.distanceSortAgent = new DistanceSortAgent();
+    
     this.collideDirective = new CollideDirective();
     
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
+    
+    this.backgroundScreen = new Isolator();
+    this.backgroundScreen.isolateTextures.setValueDirect(true);
+    
+    this.backgroundTexture = new MediaTexture();
+    this.backgroundScreen.addChild(this.backgroundTexture);
+    
+    this.backgroundScreenRect = new ScreenRect();
+    this.backgroundScreenRect.setTexture(this.backgroundTexture);
+    this.backgroundScreen.addChild(this.backgroundScreenRect);
+}
+
+RenderDirective.prototype.setRegistry = function(registry)
+{
+    this.distanceSortAgent.setRegistry(registry);
+    this.updateDirective.setRegistry(registry);
+    this.collideDirective.setRegistry(registry);
+    this.highlightDirective.setRegistry(registry);
+    this.backgroundScreen.setRegistry(registry);
+    this.backgroundTexture.setRegistry(registry);
+    this.backgroundScreenRect.setRegistry(registry);
+    
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);    
 }
 
 RenderDirective.prototype.setGraphMgr = function(graphMgr)
@@ -71,13 +97,19 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.updateDirective.setGraphMgr(graphMgr);
     this.collideDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
+    this.backgroundScreen.setGraphMgr(graphMgr);
+    this.backgroundTexture.setGraphMgr(graphMgr);
+    this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
 
 RenderDirective.prototype.execute = function(root)
-{
+{  
+    // draw background
+    this.drawBackground();
+    
     root = root || this.rootNode.getValueDirect();
 
     // update; combined CUpdateParams & GtUpdateParams in this version
@@ -88,12 +120,12 @@ RenderDirective.prototype.execute = function(root)
     var visited = this.updateDirective.execute(root, params);
 
     // detect collisions
-    var params = new CollideParams();
+    params = new CollideParams();
     params.directive = this.collideDirective;
     this.collideDirective.execute(root, params);
     
     // render
-    var params = new RenderParams();
+    params = new RenderParams();
     /*
     renderParams.path = NULL;//m_path;
     renderParams.pathIndex = 1;
@@ -132,6 +164,26 @@ RenderDirective.prototype.execute = function(root)
     
     // draw highlights
     this.drawHighlights(root);
+}
+
+RenderDirective.prototype.drawBackground = function()
+{
+    if (!this.backgroundImageSet) return;
+    
+    // update
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+
+    var visited = this.updateDirective.execute(this.backgroundScreen, params);
+    
+    // render
+    params = new RenderParams();
+    params.directive = this;
+    params.path = null;
+    params.pathIndex = 1;
+    params.viewport.loadViewport(this.viewport.getValueDirect());
+
+    visited[0].apply("render", params, true);
 }
 
 RenderDirective.prototype.drawHighlights = function(root)
@@ -177,5 +229,7 @@ function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
     container.backgroundImageFilename.setValueDirect(pathInfo[0]);
     container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
     
-    container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+    //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+    container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
+    container.backgroundImageSet = true;
 }
