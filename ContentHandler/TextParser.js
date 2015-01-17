@@ -82,6 +82,6 @@
 		    token = "";
 		}
 		
-		return tokens;
+		return tokens.length > 0 ? tokens : null;
     }
 }
