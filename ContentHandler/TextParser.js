@@ -25,7 +25,7 @@
         {
             c = this.stream[pos++];
         }
-        while (pos < this.stream.length && isSpace(c));
+        while (pos <= this.stream.length && isSpace(c));
 
         // read token
         do
@@ -33,7 +33,7 @@
             token += c;
             c = this.stream[pos++];
         }
-        while (pos < this.stream.length && !isSpace(c));
+        while (pos <= this.stream.length && !isSpace(c));
 
         return (token.length > 0 ? token : null);
     }
