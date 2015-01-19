@@ -42,7 +42,7 @@ function LWSceneBuilder()
     this.lightsGroup = null;
     this.modelsGroup = null;
     this.renderDirective = null;
-    this.boneFalloffType = 0;//GeBoneFalloffType_InverseDistance;
+    this.boneFalloffType = eBoneFalloffType.InverseDistance;
     this.parsingBgImage = false;
     this.parsingFgImage = false;
     this.parsingFgAlphaImage = false;
@@ -54,6 +54,8 @@ function LWSceneBuilder()
     this.globalLightDesc = new TLWSCv3LightDesc();
     this.lightDescs = [];
     this.parentItems = [];
+    this.bones = [];
+    this.objectBones = [];
     
     this.indexGeometry = new BooleanAttr(true);
     
@@ -178,6 +180,8 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
             
             // load model
             finalizeModel(model, this.factory);
+            
+            this.objectBones.push(new Array());
         }
         break;
         
@@ -516,6 +520,115 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         }
         break;
         
+        case "BoneFalloffType":
+        {
+            this.boneFalloffType = parseInt(params[0]);
+        }
+        break;
+        
+        case "AddBone":
+        {
+            var bone = this.factory.create("Bone");
+            bone.falloffType.setValueDirect(this.boneFalloffType);
+            this.currElement = bone;
+            this.bones.push(bone);
+            this.objectBones[this.objectBones.length-1].push(bone);
+            
+        }
+        break;
+        
+        case "BoneName":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                // check if this bone name has already been specified; if it has, append " (n)" to the
+                // bone name, where n is the number of occurrences of this bone name
+                var numOccurrences = 0;
+                var s = "";
+                for (var i=0; i < this.bones.length; i++)
+                {
+                    if (params[0] == this.bones[i].name.getValueDirect().join(""))
+                    {
+                        numOccurrences++;
+                    }
+                }
+                if (numOccurrences > 0)
+                {
+                    params[0] += "(" + numOccurrences+1 + ")";
+                }
+
+                bone.name.setValueDirect(params[0]);
+            }    
+        }
+        break;
+        
+        case "BoneRestPosition":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restPosition.setValueDirect(parseFloat(params[0]), parseFloat(params[1]), parseFloat(params[2]));
+            }
+        }
+        break;
+        
+        case "BoneRestDirection":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restRotation.setValueDirect(parseFloat(params[1]), parseFloat(params[0]), parseFloat(params[2]));
+            }
+        }
+        break;
+        
+        case "BoneRestLength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restLength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneStrength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.strength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneScaleBoneStrength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.scaleBoneStrength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneMotion":
+        {
+            var kfi = this.factory.create("KeyframeInterpolator");
+            kfi.name.setValueDirect("Motion");
+            
+            // add to last light record
+            if (this.bones.length > 0)
+            {
+                this.bones[this.bones.length-1].motion = kfi;
+            }
+                
+            this.evaluators.push(kfi);
+            this.evaluatorsGroup.addChild(kfi);
+        }
+        break;
+        
         case "ParentItem":
         {
             if (this.currElement)
@@ -696,8 +809,15 @@ LWSceneBuilder.prototype.finalize = function()
     // TODO
     
     // create bone effectors
-    // TODO
-    
+    for (var i=0; i < this.models.length; i++)
+    {
+        var model = this.models[i];
+        if (model.bones.length > 0)
+        {
+            this.attachBoneEffectors(model, model.bones);
+        }
+    }
+
     // create morph effectors
     // TODO
     
@@ -856,6 +976,42 @@ LWSceneBuilder.prototype.attachDissolveInterpolator = function(kfi, target)
     resultValue.addElementTarget(target.getAttribute("dissolve"), 0, 0);
 }
 
+LWSceneBuilder.prototype.attachBoneEffectors = function(model, bones)
+{
+    // for each geometry set in model...
+    for (var i=0; i < model.geometry.length; i++)
+    {
+        var geometry = model.geometry[i];
+        
+        // allocate bone effector
+        var boneEffector = this.factory.create("BoneEffector");
+        this.evaluators.push(boneEffector);
+        this.evaluatorsGroup.addChild(boneEffector);
+        
+        // add bones to bone effector
+        for (var j=0; j < bones.length; j++)
+        {
+            boneEffector.addBoneHierarchy(bones[j]);
+        }
+
+        // get vertices/normals from geometry
+        var verticesAttr = geometry.getAttribute("vertices");
+        var vertices = verticesAttr.getValueDirect();
+
+        // points/lines will not have normals
+        var normalsAttr = geometry.getAttribute("normals");
+        var normals = normalsAttr.getValueDirect();
+
+        // assign to bone effector inputs
+        boneEffector.getAttribute("vertices").setValueDirect(vertices);
+        boneEffector.getAttribute("normals").setValueDirect(normals);
+
+        // route bone effector outputs back to geometry
+        boneEffector.getAttribute("resultVertices").addTarget(verticesAttr);
+        boneEffector.getAttribute("resultNormals").addTarget(normalsAttr);
+    }
+}
+
 LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
 {
     var itemNum = hexStrToULong(parentItem.substring(1));
@@ -865,6 +1021,10 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
         case "1": // model parent
             {
                 parent = this.models[itemNum];
+                if (object.attrType == eAttrType.Bone)
+                {
+                    parent.bones.push(object);
+                }
             }
             break;
     
@@ -882,7 +1042,23 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
     
         case "4": // bone parent
             {
-                // TODO
+                var boneNum = hexStrToULong(parentItem.substring(1, 4));
+                var objNum = hexStrToULong(parentItem.substring(4));
+
+                if (this.bones.length > boneNum)
+                {
+                    var childBone = object;
+                    var parentBone = null;
+                    if (this.objectBones.length > objNum && this.objectBones[objNum].length > boneNum)
+                    {
+                        parentBone = this.objectBones[objNum][boneNum];
+                    }
+
+                    if (parentBone && childBone)
+                    {
+                        parentBone.addChild(childBone);
+                    }
+                }  
             }
             break;
         
@@ -894,7 +1070,6 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
     switch (object.attrType)
     {
         case eAttrType.Bone:
-            // TODO
             break;
         
         default:

@@ -3012,6 +3012,19 @@ var eHighlightType =
     EightPass: 2  
 };
 
+var eBoneFalloffType =
+{
+    InverseDistance: 0,
+    // inverse distance / 2
+    InverseDistance_2: 1,
+    // inverse distance / 4
+    InverseDistance_4: 2,
+    // inverse distance / 8
+    InverseDistance_8: 3,
+    // inverse distance / 16
+    InverseDistance_16: 4  
+};
+
 var FLT_EPSILON = 1.192092896e-07;
 var FLT_MAX     = 3.402823466e+38;
 
@@ -4900,6 +4913,7 @@ var eAttrType = {
     ViewportAttr                :30,
     ViewVolumeAttr              :31,
     RenderableElementStyleAttr  :32,
+    Bone                        :33,
     
     Node                        :1000,
        
@@ -4951,6 +4965,7 @@ var eAttrType = {
     AnimalMover					:1109, 
     WalkSimulator               :1110,
     MorphEffector               :1111,
+    BoneEffector                :1112,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -11662,65 +11677,69 @@ function BinaryParser(stream, bigEndian)
 function TextParser(stream)
 {
     this.stream = stream;
-    
+
     var pos = 0;
-    
-    this.readCharacter = function()
+
+    this.readCharacter = function ()
     {
-        if (pos >= this.stream.length) return null;
-        
+        if (pos >= this.stream.length)
+            return null;
+
         return this.stream[pos++];
     }
-    
-    this.readToken = function()
+
+    this.readToken = function ()
     {
         var c;
         var token = "";
-        
-        if (pos >= this.stream.length) return null;
-        
+
+        if (pos >= this.stream.length)
+            return null;
+
         // read leading whitespace
         do
         {
             c = this.stream[pos++];
         }
-        while (pos < this.stream.length && isSpace(c));
-        
+        while (pos <= this.stream.length && isSpace(c));
+
         // read token
-		do
-		{
-			token += c;
-			c = this.stream[pos++];
-		}
-		while (pos < this.stream.length && !isSpace(c));
-		
-		return (token.length > 0 ? token : null);
+        do
+        {
+            token += c;
+            c = this.stream[pos++];
+        }
+        while (pos <= this.stream.length && !isSpace(c));
+
+        return (token.length > 0 ? token : null);
     }
-    
-    this.readLine = function()
+
+    this.readLine = function ()
     {
         var line = "";
-        
-        if (pos >= this.stream.length) return null;
-        
+
+        if (pos >= this.stream.length)
+            return null;
+
         while (pos < this.stream.length && this.stream[pos] != '\n')
         {
             line += this.stream[pos++];
         }
         pos++;
-        
-        return line;        
+
+        return line;
     }
-    
-    this.readLineTokens = function()
+
+    this.readLineTokens = function ()
     {
         var c;
         var p = 0;
         var token = "";
         var tokens = [];
-        
+
         var line = this.readLine();
-        if (line == null) return null;
+        if (line == null)
+            return null;
 
         while (p < line.length)
         {
@@ -11729,21 +11748,21 @@ function TextParser(stream)
             {
                 c = line[p++];
             }
-            while (p < line.length && isSpace(c));
-            
+            while (p <= line.length && isSpace(c));
+
             // read token
-		    do
-		    {
-			    token += c;
-			    c = line[p++];
-		    }
-		    while (p < line.length && !isSpace(c));
-    		
-		    tokens.push(token);
-		    token = "";
-		}
-		
-		return tokens;
+            do
+            {
+                token += c;
+                c = line[p++];
+            }
+            while (p <= line.length && !isSpace(c));
+
+            tokens.push(token);
+            token = "";
+        }
+
+        return tokens;
     }
 }
 function XMLParser(factory, registry, contentDir)
@@ -14173,7 +14192,7 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
                                  !params.displayListObj && 
                                  !params.disableDisplayLists;
     
-                if (useDisplayList)
+                if (useDisplayList && 0)
                 {
                     // set as current display list
                     params.displayListObj = this.displayListObj;
@@ -14890,6 +14909,8 @@ ParentableMotionElement.prototype.getDirectionVectors = function()
 
 ParentableMotionElement.prototype.setMotionParent = function(parent)
 {
+    if (parent == this) return;
+    
     this.motionParent = parent;
     
     // set sector position to account for parenting
@@ -18191,6 +18212,7 @@ function Model()
     this.surfaceAttrConnections = [];
     this.boundingTree = new Octree();
     this.updateBoundingTree = false;
+    this.bones = [];
     
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);
@@ -24201,6 +24223,675 @@ MorphEffector.prototype.evaluate = function()
     }
     
     this.resultVertices.setValue(resultVertices);
+}
+
+Bone.prototype = new AttributeContainer();
+Bone.prototype.constructor = Bone;
+
+function Bone()
+{
+    AttributeContainer.call(this);
+    this.className = "Bone";
+    this.attrType = eAttrType.Bone;
+    
+    this.parent = null;
+    this.children = [];
+    this.translationMatrix = new Matrix4x4();
+    this.rotationMatrix = new Matrix4x4();
+    this.rotationQuat = new Quaternion();
+    this.scaleMatrix = new Matrix4x4();
+    this.pivotMatrix = new Matrix4x4();
+    this.matrix = new Matrix4x4();
+    this.restMatrix = new Matrix4x4();
+    this.restMatrixInv = new Matrix4x4();
+    this.parentMatrix = new Matrix4x4();
+    this.boneMatrix = new Matrix4x4();
+    this.updatePosition = false;
+    this.updateRotation = false;
+    this.updateScale = false;
+    this.updatePivot = false;
+    this.updateRestPosition = false;
+    this.updateRestRotation = false;
+    this.updateRestLength = false;
+    this.updateFalloffType = false;
+    this.updateParentTransform = false;
+    this.updateParentRestTransform = false;
+    
+    this.name = new StringAttr("");
+    this.position = new Vector3DAttr(0, 0, 0);
+    this.rotation = new Vector3DAttr(0, 0, 0);
+    this.scale = new Vector3DAttr(1, 1, 1);
+    this.pivot = new Vector3DAttr(0, 0, 0);
+    this.restPosition = new Vector3DAttr(0, 0, 0);
+    this.restRotation = new Vector3DAttr(0, 0, 0);
+    this.restLength = new NumberAttr(0);
+    this.strength = new NumberAttr(0);
+    this.falloffType = new NumberAttr(eBoneFalloffType.InverseDistance);
+    this.scaleBoneStrength = new BooleanAttr(false);
+    this.transform = new Matrix4x4Attr(1, 0, 0, 0,
+                                       0, 1, 0, 0,
+                                       0, 0, 1, 0,
+                                       0, 0, 0, 1);
+    this.parentTransform = new Matrix4x4Attr(1, 0, 0, 0,
+                                             0, 1, 0, 0,
+                                             0, 0, 1, 0,
+                                             0, 0, 0, 1);
+    this.restTransform = new Matrix4x4Attr(1, 0, 0, 0,
+                                           0, 1, 0, 0,
+                                           0, 0, 1, 0,
+                                           0, 0, 0, 1);
+    this.parentRestTransform = new Matrix4x4Attr(1, 0, 0, 0,
+                                                 0, 1, 0, 0,
+                                                 0, 0, 1, 0,
+                                                 0, 0, 0, 1);
+    
+    this.position.addModifiedCB(Bone_PositionModifiedCB, this);
+    this.rotation.addModifiedCB(Bone_RotationModifiedCB, this);
+    this.scale.addModifiedCB(Bone_ScaleModifiedCB, this);
+    this.pivot.addModifiedCB(Bone_PivotModifiedCB, this);
+    this.restPosition.addModifiedCB(Bone_RestPositionModifiedCB, this);
+    this.restRotation.addModifiedCB(Bone_RestRotationModifiedCB, this);
+    this.restLength.addModifiedCB(Bone_RestLengthModifiedCB, this);
+    this.falloffType.addModifiedCB(Bone_FalloffTypeModifiedCB, this);
+    this.parentTransform.addModifiedCB(Bone_ParentTransformModifiedCB, this);
+    this.parentRestTransform.addModifiedCB(Bone_ParentRestTransformModifiedCB, this);
+    
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.position, "position");
+    this.registerAttribute(this.rotation, "rotation");
+    this.registerAttribute(this.scale, "scale");
+    this.registerAttribute(this.pivot, "pivot");
+    this.registerAttribute(this.restPosition, "restPosition");
+    this.registerAttribute(this.restRotation, "restRotation");
+    this.registerAttribute(this.restLength, "restLength");
+    this.registerAttribute(this.strength, "strength");
+    this.registerAttribute(this.falloffType, "falloffType");
+    this.registerAttribute(this.scaleBoneStrength, "scaleBoneStrength");
+}
+
+Bone.prototype.addChild = function(child)
+{
+    // child can only have one parent
+    if (!child || child.parent)
+    {
+        return false;
+    }
+
+    // set child's parent to this
+    child.parent = this;
+
+    // set child's parent transform source to this transform
+    this.transform.addTarget(child.parentTransform);
+
+    // set child's parent rest tranform source to this rest transform
+    this.restTransform.addTarget(child.parentRestTransform);
+
+    this.children.push(child);
+
+    return true;
+}
+
+Bone.prototype.removeChild = function(child)
+{
+    if (!child)
+    {
+        return false;
+    }
+
+    for (var i = 0; i < this.children.length; i++)
+    {
+        if (this.children[i] == child)
+        {
+            // clear child's parent
+            child.parent = null;
+            
+            // clear child's parent transform source
+            this.transform.removeTarget(child.parentTransform);
+            
+            // clear child's parent rest transform source
+            this.restTransform.removeTarget(child.parentRestTransform);
+
+            // set child's parent transform to identity
+            var identity = new Matrix4x4();
+            identity.loadIdentity();
+            child.parentTransform.setValueDirect(identity);
+
+            // set child's parent rest transform to identity
+            child.parentRestTransform.setValueDirect(identity);
+
+            this.children.splice(i, 1);
+            
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Bone.prototype.getChild = function(n)
+{
+    if (n >= this.children.length)
+    {
+        return null;
+    }
+
+    return this.children[n];
+}
+    
+Bone.prototype.getChildCount = function()
+{
+    return this.children.length;
+}
+
+Bone.prototype.getParent = function()
+{
+    return this.parent;
+}
+
+Bone.prototype.getScaledStrength = function()
+{
+    var strength = this.strength.getValueDirect(); 
+    if (this.scaleBoneStrength.getValueDirect())
+    {
+        strength *= this.restLength.getValueDirect();
+    }
+
+    return strength;
+}
+
+Bone.prototype.calculateFalloffValues = function(vertices)
+{
+    var bonePos = this.restMatrix.transform(0, 0, 0, 1);
+
+    var boneDir = this.restMatrix.transform(0, 0, 1, 0);
+
+    var restLength = this.restLength.getValueDirect();
+
+    var boneSegment_a = new Vector3D(bonePos.x, bonePos.y, bonePos.z);
+    var boneSegment_b = new Vector3D(bonePos.x + boneDir.x * restLength,
+                                     bonePos.y + boneDir.y * restLength,
+                                     bonePos.z + boneDir.z * restLength);
+                                     
+    var numVertices = vertices.length / 3;
+
+    var falloffType = this.falloffType.getValueDirect();
+
+    var falloffValues = []; falloffValues.length = numVertices;
+    for (var i=0, j=0; i < numVertices; i++, j+=3)
+    {
+        var distance = distanceBetweenLineSegmentAndPoint(boneSegment_a, boneSegment_b, new Vector3D(vertices[j], vertices[j+1], vertices[j+2]));
+
+        switch (falloffType)
+        {
+        case eBoneFalloffType.InverseDistance:
+            falloffValues[i] = 1 / distance;
+            break;
+
+        case eBoneFalloffType.InverseDistance_2:
+            falloffValues[i] = 1 / (distance * distance);
+            break;
+
+        case eBoneFalloffType.InverseDistance_4:
+            falloffValues[i] = 1 / (distance * distance * distance * distance);
+            break;
+
+        case eBoneFalloffType.InverseDistance_8:
+            falloffValues[i] = 1 / (distance * distance * distance * distance *
+                                    distance * distance * distance * distance);
+            break;
+
+        case eBoneFalloffType.InverseDistance_16:
+            falloffValues[i] = 1 / (distance * distance * distance * distance *
+                                    distance * distance * distance * distance *
+                                    distance * distance * distance * distance *
+                                    distance * distance * distance * distance);  
+            break;
+        }
+
+        falloffValues[i] *= this.getScaledStrength();
+    }
+    
+    return falloffValues;
+}
+
+Bone.prototype.update = function()
+{
+    var updateBoneMatrix = false;
+    
+    if (this.updatePosition || this.updateRotation || this.updateScale || this.updatePivot || this.updateParentTransform)
+    {
+        if (this.updatePosition)
+        {
+            this.updatePosition = false;
+
+            var position = this.position.getValueDirect();
+            this.translationMatrix.loadTranslation(position.x, position.y, position.z);
+        }
+
+        if (this.updateRotation)
+        {
+            this.updateRotation = false;
+
+            var rotation = this.rotation.getValueDirect();
+            this.rotationQuat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+            this.rotationMatrix = this.rotationQuat.getMatrix();
+        }
+
+        if (this.updateScale)
+        {
+            this.updateScale = false;
+
+            var scale = this.scale.getValueDirect();
+            this.scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+        }
+
+        if (this.updatePivot)
+        {
+            this.updatePivot = false;
+
+            var pivot = this.pivot.getValueDirect();
+            this.pivotMatrix.loadTranslation(-pivot.x, -pivot.y, -pivot.z);
+        }
+
+        if (this.updateParentTransform)
+        {
+            this.updateParentTransform = false;
+
+            this.parentMatrix = this.parentTransform.getValueDirect();
+        }
+
+        this.matrix = this.pivotMatrix.multiply(this.scaleMatrix.multiply(this.rotationMatrix.multiply(this.translationMatrix.multiply(this.parentMatrix))));
+
+        // set matrix to transform attribute so children will be notified of modification
+        this.transform.setValueDirect(this.matrix);
+
+        updateBoneMatrix = true;
+    }
+
+    if (this.updateRestPosition || this.updateRestRotation || this.updateParentRestTransform)
+    {
+        this.updateRestPosition = false;
+        this.updateRestRotation = false;
+        this.updateParentRestTransform = false;
+
+        var restPosition = this.restPosition.getValueDirect();
+
+        var restPositionMatrix = new Matrix4x4();
+        restPositionMatrix.loadTranslation(restPosition.x, restPosition.y, restPosition.z);
+
+        var restRotation = this.restRotation.getValueDirect();
+
+        var restRotationQuat = new Quaternion();
+        restRotationQuat.loadXYZAxisRotation(restRotation.x, restRotation.y, restRotation.z);
+        var restRotationMatrix = restRotationQuat.getMatrix();
+
+        var parentRestMatrix = this.parentRestTransform.getValueDirect();
+
+        this.restMatrix = restRotationMatrix.multiply(restPositionMatrix.multiply(parentRestMatrix));
+
+        this.restMatrixInv = new Matrix4x4();
+        this.restMatrixInv.loadMatrix(this.restMatrix);
+        this.restMatrixInv.invert();
+
+        // set rest matrix to rest transform attribute so children will be notified of modification
+        this.restTransform.setValueDirect(this.restMatrix);
+
+        updateBoneMatrix = true;
+    }
+
+    if (this.updateRestLength)
+    {
+        this.updateRestLength = false;
+    }
+
+    if (updateBoneMatrix)
+    {
+        this.boneMatrix = this.restMatrixInv.multiply(this.matrix);
+    }
+}
+
+function Bone_PositionModifiedCB(attribute, container)
+{
+    container.updatePosition = true;
+}
+
+function Bone_RotationModifiedCB(attribute, container)
+{
+    container.updateRotation = true;
+}
+
+function Bone_ScaleModifiedCB(attribute, container)
+{
+    container.updateScale = true;
+}
+
+function Bone_PivotModifiedCB(attribute, container)
+{
+    container.updatePivot = true;
+}
+
+function Bone_RestPositionModifiedCB(attribute, container)
+{
+    container.updateRestPosition = true;
+}
+
+function Bone_RestRotationModifiedCB(attribute, container)
+{
+    container.updateRestRotation = true;
+}
+
+function Bone_RestLengthModifiedCB(attribute, container)
+{
+    container.updateRestLength = true;
+}
+
+function Bone_FalloffTypeModifiedCB(attribute, container)
+{
+    container.updateFalloffType = true;
+}
+
+function Bone_ParentTransformModifiedCB(attribute, container)
+{
+    container.updateParentTransform = true;
+}
+
+function Bone_ParentRestTransformModifiedCB(attribute, container)
+{
+    container.updateParentRestTransform = true;
+}
+
+BoneEffector.prototype = new Evaluator();
+BoneEffector.prototype.constructor = BoneEffector;
+
+function BoneEffector()
+{
+    Evaluator.call(this);
+    this.className = "BoneEffector";
+    this.attrType = eAttrType.BoneEffector;
+    
+    this.bones = [];
+    this.verticesArray = [];
+    this.normalsArray = [];
+    this.resultVerticesArray = [];
+    this.resultNormalsArray = [];
+    this.boneFalloffValuesMap = [];
+    this.falloffSums = [];
+    this.updateVertices = false;
+    this.updateNormals = false;
+    
+    this.vertices = new NumberArrayAttr();
+    this.normals = new NumberArrayAttr();
+    this.resultVertices = new NumberArrayAttr();
+    this.resultNormals = new NumberArrayAttr();
+    
+    this.vertices.addModifiedCB(BoneEffector_VerticesModifiedCB, this);
+    this.normals.addModifiedCB(BoneEffector_NormalsModifiedCB, this);
+    
+    this.registerAttribute(this.vertices, "vertices");
+    this.registerAttribute(this.normals, "normals");
+    this.registerAttribute(this.resultVertices, "resultVertices");
+    this.registerAttribute(this.resultNormals, "resultNormals");
+}
+
+BoneEffector.prototype.evaluate = function()
+{
+    this.update();
+
+    // update bones
+    for (var i=0; i < this.bones.length; i++)
+    {
+        this.updateBones(this.bones[i]);
+    }
+
+    // evaluate bones
+    for (var i=0; i < this.bones.length; i++)
+    {
+        // pass true for "initial" param, so that result arrays will be loaded instead of appended
+        this.evaluateBones(this.bones[i], i == 0 ? true : false);
+    }
+
+    // output result
+    this.resultVertices.setValueDirect(this.resultVerticesArray);
+    this.resultNormals.setValueDirect(this.resultNormalsArray);
+}
+
+BoneEffector.prototype.addBoneHierarchy = function(root)
+{
+    if (!root)
+    {
+        return false;
+    }
+
+    this.bones.push(root);
+
+    if (this.verticesArray.length > 0)
+    {
+        this.calculateFalloffValues();
+    }
+
+    return true;
+}
+
+BoneEffector.prototype.update = function()
+{
+    if (this.updateVertices)
+    {
+        this.updateVertices = false;
+
+        this.verticesArray = this.vertices.getValueDirect();
+        this.resultVerticesArray.length = this.verticesArray.length;
+        
+        this.calculateFalloffValues();
+    }
+
+    if (this.updateNormals)
+    {
+        this.updateNormals = false;
+
+        this.normalsArray = this.normals.getValueDirect();
+        this.resultNormalsArray.length = this.normalsArray.length;
+    }
+}
+
+BoneEffector.prototype.calculateFalloffValues = function()
+{
+    this.boneFalloffValuesMap = [];
+    for (var i=0; i < this.bones.length; i++)
+    {
+        this.updateBones(this.bones[i]);
+        this.calculateBoneFalloffValues(this.bones[i]);
+    }
+
+    this.sumFalloffValues();
+}
+
+BoneEffector.prototype.calculateBoneFalloffValues = function(root)
+{
+    if (!root || this.verticesArray.length == 0)
+    {
+        return;
+    }
+
+    var falloffValues = root.calculateFalloffValues(this.verticesArray);
+    this.boneFalloffValuesMap.push(new Pair(root, falloffValues));
+
+    // recurse on children
+    for (var i=0; i < root.getChildCount(); i++)
+    {
+        var child = root.getChild(i);
+        if (!child)
+        {
+            continue;
+        }
+
+        this.calculateBoneFalloffValues(child);
+    }
+}
+
+BoneEffector.prototype.sumFalloffValues = function()
+{
+    if (this.verticesArray.length == 0)
+    {
+        return;
+    }
+
+    var numVertices = this.verticesArray.length / 3;
+
+    // sum falloff values
+    this.falloffSums.length = numVertices;
+    for (var i=0; i < numVertices; i++) this.falloffSums[i] = 0;
+    for (var i=0; i < this.boneFalloffValuesMap.length; i++)
+    {
+        var boneFalloffValues = this.boneFalloffValuesMap[i].second;
+        for (var j=0; j < numVertices; j++)
+        {
+            this.falloffSums[j] += boneFalloffValues[j];
+        }
+    }
+
+    // divide falloff values by sum
+    for (var i=0; i < this.boneFalloffValuesMap.length; i++)
+    {
+        var boneFalloffValues = this.boneFalloffValuesMap[i].second;
+
+        for (var j=0; j < numVertices; j++)
+        {
+            if (this.falloffSums[j] != 0)
+            {
+                boneFalloffValues[j] /= this.falloffSums[j];
+            }
+            else // this.falloffSums[j] == 0
+            {
+                boneFalloffValues[j] = 0;
+            }
+        }
+    }
+}
+
+BoneEffector.prototype.updateBones = function(root)
+{
+    if (!root)
+    {
+        return;
+    }
+
+    root.update();
+
+    // recurse on children
+    for (var i=0; i < root.getChildCount(); i++)
+    {
+        var child = root.getChild(i);
+        if (!child)
+        {
+            continue;
+        }
+
+        this.updateBones(child);
+    }
+}
+
+BoneEffector.prototype.evaluateBones = function(root, initial)
+{
+    if (!root)
+    {
+        return;
+    }
+
+    // get bone falloff values
+    var boneFalloffValues = null;
+    for (var i=0; i < this.boneFalloffValuesMap.length; i++)
+    {
+        if (this.boneFalloffValuesMap[i].first == root)
+        {
+            boneFalloffValues = this.boneFalloffValuesMap[i].second;
+            break;
+        }
+    }
+    
+    // get bone transform
+    var boneTransform = root.boneMatrix;
+
+    // transform vertices
+    var numVertices = this.verticesArray.length / 3;
+    for (var i=0, j=0; i < numVertices; i++, j+=3)
+    {
+        if (boneFalloffValues[i] > 0)
+        {
+            var xformed = boneTransform.transform(this.verticesArray[j], this.verticesArray[j+1], this.verticesArray[j+2], 1);
+
+            if (initial)
+            {
+                this.resultVerticesArray[j  ] = xformed.x * boneFalloffValues[i];
+                this.resultVerticesArray[j+1] = xformed.y * boneFalloffValues[i];
+                this.resultVerticesArray[j+2] = xformed.z * boneFalloffValues[i];
+            }
+            else // !initial
+            {
+                this.resultVerticesArray[j  ] += xformed.x * boneFalloffValues[i];
+                this.resultVerticesArray[j+1] += xformed.y * boneFalloffValues[i];
+                this.resultVerticesArray[j+2] += xformed.z * boneFalloffValues[i];
+            }
+        }
+        else // boneFalloffValues[i] == 0
+        {
+            // use untransformed vertex
+            this.resultVerticesArray[j  ] = this.verticesArray[j  ];
+            this.resultVerticesArray[j+1] = this.verticesArray[j+1];
+            this.resultVerticesArray[j+2] = this.verticesArray[j+2];
+        }
+    }
+
+    // transform normals
+    var numNormals = this.normalsArray.length / 3;
+    for (var i=0, j=0; i < numNormals; i++, j+=3)
+    {
+        if (boneFalloffValues[i] > 0)
+        {
+            var xformed = boneTransform.transform(this.normalsArray[j], this.normalsArray[j+1], this.normalsArray[j+2], 0);
+
+            if (initial)
+            {
+                this.resultNormalsArray[j  ] = xformed.x * boneFalloffValues[i];
+                this.resultNormalsArray[j+1] = xformed.y * boneFalloffValues[i];
+                this.resultNormalsArray[j+2] = xformed.z * boneFalloffValues[i];
+            }
+            else // !initial
+            {
+                this.resultNormalsArray[j  ] += xformed.x * boneFalloffValues[i];
+                this.resultNormalsArray[j+1] += xformed.y * boneFalloffValues[i];
+                this.resultNormalsArray[j+2] += xformed.z * boneFalloffValues[i];
+            }
+        }
+        else // boneFalloffValues[i] == 0
+        {
+            // use untransformed normal
+            this.resultNormalsArray[j  ] = this.normalsArray[j  ];
+            this.resultNormalsArray[j+1] = this.normalsArray[j+1];
+            this.resultNormalsArray[j+2] = this.normalsArray[j+2];
+        }
+    }
+
+    // recurse on children
+    for (var i=0; i < root.getChildCount(); i++)
+    {
+        var child = root.getChild(i);
+        if (!child)
+        {
+            continue;
+        }
+
+        this.evaluateBones(child);
+    }
+}
+
+function BoneEffector_VerticesModifiedCB(attribute, container)
+{
+    container.updateVertices = true;
+}
+
+function BoneEffector_NormalsModifiedCB(attribute, container)
+{
+    container.updateNormals = true;
 }
 
 var eEventType = {
@@ -31893,6 +32584,8 @@ LWSceneHandler.prototype.parseFileStream = function(url)
     var tokens;
     while (tokens = parser.readLineTokens())
     {
+        if (tokens.length == 0) continue;
+        
         // check for string
         if (tokens[0].indexOf("\"") != -1)
         {
@@ -31957,7 +32650,7 @@ function LWSceneBuilder()
     this.lightsGroup = null;
     this.modelsGroup = null;
     this.renderDirective = null;
-    this.boneFalloffType = 0;//GeBoneFalloffType_InverseDistance;
+    this.boneFalloffType = eBoneFalloffType.InverseDistance;
     this.parsingBgImage = false;
     this.parsingFgImage = false;
     this.parsingFgAlphaImage = false;
@@ -31969,6 +32662,8 @@ function LWSceneBuilder()
     this.globalLightDesc = new TLWSCv3LightDesc();
     this.lightDescs = [];
     this.parentItems = [];
+    this.bones = [];
+    this.objectBones = [];
     
     this.indexGeometry = new BooleanAttr(true);
     
@@ -32093,6 +32788,8 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
             
             // load model
             finalizeModel(model, this.factory);
+            
+            this.objectBones.push(new Array());
         }
         break;
         
@@ -32431,6 +33128,115 @@ LWSceneBuilder.prototype.allocateSceneElement = function(token, params)
         }
         break;
         
+        case "BoneFalloffType":
+        {
+            this.boneFalloffType = parseInt(params[0]);
+        }
+        break;
+        
+        case "AddBone":
+        {
+            var bone = this.factory.create("Bone");
+            bone.falloffType.setValueDirect(this.boneFalloffType);
+            this.currElement = bone;
+            this.bones.push(bone);
+            this.objectBones[this.objectBones.length-1].push(bone);
+            
+        }
+        break;
+        
+        case "BoneName":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                // check if this bone name has already been specified; if it has, append " (n)" to the
+                // bone name, where n is the number of occurrences of this bone name
+                var numOccurrences = 0;
+                var s = "";
+                for (var i=0; i < this.bones.length; i++)
+                {
+                    if (params[0] == this.bones[i].name.getValueDirect().join(""))
+                    {
+                        numOccurrences++;
+                    }
+                }
+                if (numOccurrences > 0)
+                {
+                    params[0] += "(" + numOccurrences+1 + ")";
+                }
+
+                bone.name.setValueDirect(params[0]);
+            }    
+        }
+        break;
+        
+        case "BoneRestPosition":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restPosition.setValueDirect(parseFloat(params[0]), parseFloat(params[1]), parseFloat(params[2]));
+            }
+        }
+        break;
+        
+        case "BoneRestDirection":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restRotation.setValueDirect(parseFloat(params[1]), parseFloat(params[0]), parseFloat(params[2]));
+            }
+        }
+        break;
+        
+        case "BoneRestLength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.restLength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneStrength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.strength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneScaleBoneStrength":
+        {
+            var bone = this.bones.length > 0 ? this.bones[this.bones.length-1] : null;
+            if (bone)
+            {
+                bone.scaleBoneStrength.setValueDirect(parseFloat(params[0]));
+            }
+        }
+        break;
+        
+        case "BoneMotion":
+        {
+            var kfi = this.factory.create("KeyframeInterpolator");
+            kfi.name.setValueDirect("Motion");
+            
+            // add to last light record
+            if (this.bones.length > 0)
+            {
+                this.bones[this.bones.length-1].motion = kfi;
+            }
+                
+            this.evaluators.push(kfi);
+            this.evaluatorsGroup.addChild(kfi);
+        }
+        break;
+        
         case "ParentItem":
         {
             if (this.currElement)
@@ -32611,8 +33417,15 @@ LWSceneBuilder.prototype.finalize = function()
     // TODO
     
     // create bone effectors
-    // TODO
-    
+    for (var i=0; i < this.models.length; i++)
+    {
+        var model = this.models[i];
+        if (model.bones.length > 0)
+        {
+            this.attachBoneEffectors(model, model.bones);
+        }
+    }
+
     // create morph effectors
     // TODO
     
@@ -32771,6 +33584,42 @@ LWSceneBuilder.prototype.attachDissolveInterpolator = function(kfi, target)
     resultValue.addElementTarget(target.getAttribute("dissolve"), 0, 0);
 }
 
+LWSceneBuilder.prototype.attachBoneEffectors = function(model, bones)
+{
+    // for each geometry set in model...
+    for (var i=0; i < model.geometry.length; i++)
+    {
+        var geometry = model.geometry[i];
+        
+        // allocate bone effector
+        var boneEffector = this.factory.create("BoneEffector");
+        this.evaluators.push(boneEffector);
+        this.evaluatorsGroup.addChild(boneEffector);
+        
+        // add bones to bone effector
+        for (var j=0; j < bones.length; j++)
+        {
+            boneEffector.addBoneHierarchy(bones[j]);
+        }
+
+        // get vertices/normals from geometry
+        var verticesAttr = geometry.getAttribute("vertices");
+        var vertices = verticesAttr.getValueDirect();
+
+        // points/lines will not have normals
+        var normalsAttr = geometry.getAttribute("normals");
+        var normals = normalsAttr.getValueDirect();
+
+        // assign to bone effector inputs
+        boneEffector.getAttribute("vertices").setValueDirect(vertices);
+        boneEffector.getAttribute("normals").setValueDirect(normals);
+
+        // route bone effector outputs back to geometry
+        boneEffector.getAttribute("resultVertices").addTarget(verticesAttr);
+        boneEffector.getAttribute("resultNormals").addTarget(normalsAttr);
+    }
+}
+
 LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
 {
     var itemNum = hexStrToULong(parentItem.substring(1));
@@ -32780,6 +33629,10 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
         case "1": // model parent
             {
                 parent = this.models[itemNum];
+                if (object.attrType == eAttrType.Bone)
+                {
+                    parent.bones.push(object);
+                }
             }
             break;
     
@@ -32797,7 +33650,23 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
     
         case "4": // bone parent
             {
-                // TODO
+                var boneNum = hexStrToULong(parentItem.substring(1, 4));
+                var objNum = hexStrToULong(parentItem.substring(4));
+
+                if (this.bones.length > boneNum)
+                {
+                    var childBone = object;
+                    var parentBone = null;
+                    if (this.objectBones.length > objNum && this.objectBones[objNum].length > boneNum)
+                    {
+                        parentBone = this.objectBones[objNum][boneNum];
+                    }
+
+                    if (parentBone && childBone)
+                    {
+                        parentBone.addChild(childBone);
+                    }
+                }  
             }
             break;
         
@@ -32809,7 +33678,6 @@ LWSceneBuilder.prototype.setParentItem = function(object, parentItem)
     switch (object.attrType)
     {
         case eAttrType.Bone:
-            // TODO
             break;
         
         default:
@@ -32907,6 +33775,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["BalloonTipLabelStyle"] = newAttribute;
     this.newResourceProcs["RenderableElementStyle"] = newAttribute;
     this.newResourceProcs["Serializer"] = newAttribute;
+    this.newResourceProcs["Bone"] = newAttribute;
 
     // nodes
     this.newResourceProcs["DirectionalLight"] = newSGNode;
@@ -32954,6 +33823,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
+    this.newResourceProcs["BoneEffector"] = newBoneEffector;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -33083,6 +33953,7 @@ function newAttribute(name, factory)
     case "ViewVolumeAttr":              resource = new ViewVolumeAttr(); break;
     case "RenderableElementStyleAttr":  resource = new RenderableElementStyleAttr(); break;
     case "Serializer":                  resource = new Serializer(); break;
+    case "Bone":                        resource = new Bone(); break;
     }
     
     return resource;
@@ -33261,6 +34132,15 @@ function newWalkSimulator(name, factory)
 function newMorphEffector(name, factory)
 {
     var resource = new MorphEffector();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
+}
+
+function newBoneEffector(name, factory)
+{
+    var resource = new BoneEffector();
     
     registerEvaluatorAttributes(resource, factory);
     

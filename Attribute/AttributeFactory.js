@@ -83,6 +83,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["BalloonTipLabelStyle"] = newAttribute;
     this.newResourceProcs["RenderableElementStyle"] = newAttribute;
     this.newResourceProcs["Serializer"] = newAttribute;
+    this.newResourceProcs["Bone"] = newAttribute;
 
     // nodes
     this.newResourceProcs["DirectionalLight"] = newSGNode;
@@ -130,6 +131,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["AnimalMover"] = newAnimalMover;
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
+    this.newResourceProcs["BoneEffector"] = newBoneEffector;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -259,6 +261,7 @@ function newAttribute(name, factory)
     case "ViewVolumeAttr":              resource = new ViewVolumeAttr(); break;
     case "RenderableElementStyleAttr":  resource = new RenderableElementStyleAttr(); break;
     case "Serializer":                  resource = new Serializer(); break;
+    case "Bone":                        resource = new Bone(); break;
     }
     
     return resource;
@@ -437,6 +440,15 @@ function newWalkSimulator(name, factory)
 function newMorphEffector(name, factory)
 {
     var resource = new MorphEffector();
+    
+    registerEvaluatorAttributes(resource, factory);
+    
+    return resource;
+}
+
+function newBoneEffector(name, factory)
+{
+    var resource = new BoneEffector();
     
     registerEvaluatorAttributes(resource, factory);
     

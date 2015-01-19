@@ -39,6 +39,7 @@ var eAttrType = {
     ViewportAttr                :30,
     ViewVolumeAttr              :31,
     RenderableElementStyleAttr  :32,
+    Bone                        :33,
     
     Node                        :1000,
        
@@ -90,6 +91,7 @@ var eAttrType = {
     AnimalMover					:1109, 
     WalkSimulator               :1110,
     MorphEffector               :1111,
+    BoneEffector                :1112,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,

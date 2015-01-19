@@ -14,6 +14,7 @@ function Model()
     this.surfaceAttrConnections = [];
     this.boundingTree = new Octree();
     this.updateBoundingTree = false;
+    this.bones = [];
     
     this.url = new StringAttr("");
     this.layer = new NumberAttr(0);//0xffffffff);

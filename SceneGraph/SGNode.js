@@ -150,7 +150,7 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
                                  !params.displayListObj && 
                                  !params.disableDisplayLists;
     
-                if (useDisplayList)
+                if (useDisplayList && 0)
                 {
                     // set as current display list
                     params.displayListObj = this.displayListObj;
