@@ -113,6 +113,8 @@ SceneGraph/WalkSimulator.js
 SceneGraph/Cube.js
 SceneGraph/ScreenRect.js
 SceneGraph/MorphEffector.js
+SceneGraph/Bone.js
+SceneGraph/BoneEffector.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
