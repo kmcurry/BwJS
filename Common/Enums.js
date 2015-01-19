@@ -78,3 +78,16 @@ var eHighlightType =
     // 8-pass
     EightPass: 2  
 };
+
+var eBoneFalloffType =
+{
+    InverseDistance: 0,
+    // inverse distance / 2
+    InverseDistance_2: 1,
+    // inverse distance / 4
+    InverseDistance_4: 2,
+    // inverse distance / 8
+    InverseDistance_8: 3,
+    // inverse distance / 16
+    InverseDistance_16: 4  
+};

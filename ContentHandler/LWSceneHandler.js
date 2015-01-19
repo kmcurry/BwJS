@@ -30,6 +30,8 @@ LWSceneHandler.prototype.parseFileStream = function(url)
     var tokens;
     while (tokens = parser.readLineTokens())
     {
+        if (tokens.length == 0) continue;
+        
         // check for string
         if (tokens[0].indexOf("\"") != -1)
         {

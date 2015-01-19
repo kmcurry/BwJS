@@ -538,6 +538,8 @@ ParentableMotionElement.prototype.getDirectionVectors = function()
 
 ParentableMotionElement.prototype.setMotionParent = function(parent)
 {
+    if (parent == this) return;
+    
     this.motionParent = parent;
     
     // set sector position to account for parenting
