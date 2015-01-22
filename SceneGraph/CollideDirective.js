@@ -163,8 +163,13 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     // test plugs for collision with sockets
     for (var i=0; i < plugs.length; i++)
     {
+        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
+        
         for (var j=0; j < sockets.length; j++)
         {
+            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
+            if (plugType != socketType) continue;
+            
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
@@ -179,7 +184,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
                 snapTo.getAttribute("slot").setValueDirect(connection);
                 snapTo.execute();
-                
     
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);             

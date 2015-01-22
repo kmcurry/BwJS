@@ -434,7 +434,7 @@ Matrix4x4.prototype.multiply = function(rhs)
     
     if (!rhs)
     {
-        return;    
+        return null;    
     }
     
     result.load
