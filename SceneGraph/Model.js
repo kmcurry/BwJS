@@ -1,4 +1,4 @@
-﻿Model.prototype = new ParentableMotionElement();
+Model.prototype = new ParentableMotionElement();
 Model.prototype.constructor = Model;
 
 function Model()
@@ -61,6 +61,8 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
+    this.socketConnectors = new SocketConnectors();
+    this.plugConnectors = new PlugConnectors();
     
     this.show.addTarget(this.enabled);
     
@@ -137,6 +139,9 @@ function Model()
     this.registerAttribute(this.highlight, "highlight");
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
+    this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
+    this.registerAttribute(this.socketConnectors, "socketConnectors");
+    this.registerAttribute(this.plugConnectors, "plugConnectors");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -324,7 +329,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 if (this.detectCollision.getValueDirect()) 
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
-                    params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree);
+                    params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree, params.worldMatrix);
                     this.collisionDetected.setValueDirect(false);
                 }
                 

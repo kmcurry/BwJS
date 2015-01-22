@@ -6,61 +6,64 @@ function AttributeFactory()
     AttributeContainer.call(this);
     this.className = "AttributeFactory";
     this.attrType = eAttrType.AttributeFactory;
-    
+
     this.newResourceProcs = [];
     this.configureProcs = [];
     this.finalizeProcs = [];
     this.registry = null;
     this.graphMgr = null;
-    
+
     this.name = new StringAttr("AttributeFactory");
-    
+
     this.registerAttribute(this.name, "name");
-    
+
     this.initializeNewResourceMap();
     this.initializeConfigureMap();
     this.initializeFinalizeMap();
 }
 
-AttributeFactory.prototype.create = function(name)
+AttributeFactory.prototype.create = function (name)
 {
     var resource = null;
-    
+
     // invoke new resource proc
     var newResourceProc = this.newResourceProcs[name];
     if (newResourceProc)
     {
         resource = newResourceProc(name, this);
     }
-    if (!resource) return null;
-    
+    if (!resource)
+        return null;
+
     // invoke configuration proc (if specified)
     var configureProc = this.configureProcs[name];
     if (configureProc)
     {
         configureProc(resource, this);
     }
-    
+
     // if resource is a container, register name and userData if not already registered
-	if (resource.isContainer())
-	{
-	    if (!resource.getAttribute("name")) resource.registerAttribute(new StringAttr(""), "name");
-	    if (!resource.getAttribute("userData")) resource.registerAttribute(new StringAttr(""), "userData");
-	}
-	
-	// register resource
-	if (this.registry)
-	{
-	    this.registry.register(resource);
-	    resource.setRegistry(this.registry);   
-	}
-	
-	// invoke post-register proc (if specified)
-	
-	return resource;
+    if (resource.isContainer())
+    {
+        if (!resource.getAttribute("name"))
+            resource.registerAttribute(new StringAttr(""), "name");
+        if (!resource.getAttribute("userData"))
+            resource.registerAttribute(new StringAttr(""), "userData");
+    }
+
+    // register resource
+    if (this.registry)
+    {
+        this.registry.register(resource);
+        resource.setRegistry(this.registry);
+    }
+
+    // invoke post-register proc (if specified)
+
+    return resource;
 }
 
-AttributeFactory.prototype.finalize = function(name, attribute)
+AttributeFactory.prototype.finalize = function (name, attribute)
 {
     // invoke finalize proc
     var finalizeProc = this.finalizeProcs[name];
@@ -70,7 +73,7 @@ AttributeFactory.prototype.finalize = function(name, attribute)
     }
 }
 
-AttributeFactory.prototype.initializeNewResourceMap = function()
+AttributeFactory.prototype.initializeNewResourceMap = function ()
 {
     // attributes
     this.newResourceProcs["Styles"] = newAttribute;
@@ -120,7 +123,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
     this.newResourceProcs["CollideDirective"] = newSGDirective;
     this.newResourceProcs["HighlightDirective"] = newSGDirective;
-    
+
     // evaluators
     this.newResourceProcs["BBoxLocator"] = newBBoxLocator;
     this.newResourceProcs["KeyframeInterpolator"] = newKeyframeInterpolator;
@@ -152,13 +155,14 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
     this.newResourceProcs["Morph"] = newCommand;
+    this.newResourceProcs["SnapTo"] = newCommand;
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
     this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
-AttributeFactory.prototype.initializeConfigureMap = function()
+AttributeFactory.prototype.initializeConfigureMap = function ()
 {
     // nodes
     this.configureProcs["Model"] = configureModel;
@@ -173,7 +177,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["HighlightDirective"] = configureDirective;
 }
 
-AttributeFactory.prototype.initializeFinalizeMap = function()
+AttributeFactory.prototype.initializeFinalizeMap = function ()
 {
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
@@ -209,18 +213,19 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
     this.finalizeProcs["Morph"] = finalizeCommand;
-    
+    this.finalizeProcs["SnapTo"] = finalizeCommand;
+
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
-AttributeFactory.prototype.setRegistry = function(registry)
+AttributeFactory.prototype.setRegistry = function (registry)
 {
     this.registry = registry;
 }
 
-AttributeFactory.prototype.setGraphMgr = function(graphMgr)
+AttributeFactory.prototype.setGraphMgr = function (graphMgr)
 {
     this.graphMgr = graphMgr;
 }
@@ -228,106 +233,237 @@ AttributeFactory.prototype.setGraphMgr = function(graphMgr)
 function newAttribute(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "BalloonTipLabelStyleAttr":    resource = new BalloonTipLabelStyleAttr(); break;
-    case "BBoxAttr":                    resource = new BBoxAttr(); break;
-    case "BooleanAttr":                 resource = new BooleanAttr(); break;
-    case "ColorAttr":                   resource = new ColorAttr(); break;
-    case "FontStyleAttr":               resource = new FontStyleAttr(); break;
-    case "IconStyleAttr":               resource = new IconStyleAttr(); break;
-    case "ImageAttr":                   resource = new ImageAttr(); break;
-    case "KeyframeAttr":                resource = new KeyframeAttr(); break;
-    case "KeyframesAttr":               resource = new KeyframesAttr(); break;
-    case "LabelStyleAttr":              resource = new LabelStyleAttr(); break;
-    case "HTMLLabelStyleAttr":          resource = new HTMLLabelStyleAttr(); break;
-    case "NumberArrayAttr":             resource = new NumberArrayAttr(); break;
-    case "NumberAttr":                  resource = new NumberAttr(); break;
-    case "Matrix4x4Attr":               resource = new Matrix4x4Attr(); break;
-    case "PlaneAttr":                   resource = new PlaneAttr(); break;
-    case "PulseAttr":                   resource = new PulseAttr(); break;
-    case "QuaternionAttr":              resource = new QuaternionAttr(); break;
-    case "RectAttr":                    resource = new RectAttr(); break;
-    case "ReferenceAttr":               resource = new ReferenceAttr(); break;
-    case "StringAttr":                  resource = new StringAttr(); break;
-    case "StyleAttr":                   resource = new StyleAttr(); break;
-    case "StylesAttr":                  resource = new StylesAttr(); break;
-    case "StyleMapAttr":                resource = new StyleMapAttr(); break;
-    case "StylesMapAttr":               resource = new StylesMapAttr(); break;
-    case "Vector2DAttr":                resource = new Vector2DAttr(); break;
-    case "Vector3DAttr":                resource = new Vector3DAttr(); break;
-    case "ViewportAttr":                resource = new ViewportAttr(); break;
-    case "ViewVolumeAttr":              resource = new ViewVolumeAttr(); break;
-    case "RenderableElementStyleAttr":  resource = new RenderableElementStyleAttr(); break;
-    case "Serializer":                  resource = new Serializer(); break;
-    case "Bone":                        resource = new Bone(); break;
+        case "BalloonTipLabelStyleAttr":
+            resource = new BalloonTipLabelStyleAttr();
+            break;
+        case "BBoxAttr":
+            resource = new BBoxAttr();
+            break;
+        case "BooleanAttr":
+            resource = new BooleanAttr();
+            break;
+        case "ColorAttr":
+            resource = new ColorAttr();
+            break;
+        case "FontStyleAttr":
+            resource = new FontStyleAttr();
+            break;
+        case "IconStyleAttr":
+            resource = new IconStyleAttr();
+            break;
+        case "ImageAttr":
+            resource = new ImageAttr();
+            break;
+        case "KeyframeAttr":
+            resource = new KeyframeAttr();
+            break;
+        case "KeyframesAttr":
+            resource = new KeyframesAttr();
+            break;
+        case "LabelStyleAttr":
+            resource = new LabelStyleAttr();
+            break;
+        case "HTMLLabelStyleAttr":
+            resource = new HTMLLabelStyleAttr();
+            break;
+        case "NumberArrayAttr":
+            resource = new NumberArrayAttr();
+            break;
+        case "NumberAttr":
+            resource = new NumberAttr();
+            break;
+        case "Matrix4x4Attr":
+            resource = new Matrix4x4Attr();
+            break;
+        case "PlaneAttr":
+            resource = new PlaneAttr();
+            break;
+        case "PulseAttr":
+            resource = new PulseAttr();
+            break;
+        case "QuaternionAttr":
+            resource = new QuaternionAttr();
+            break;
+        case "RectAttr":
+            resource = new RectAttr();
+            break;
+        case "ReferenceAttr":
+            resource = new ReferenceAttr();
+            break;
+        case "StringAttr":
+            resource = new StringAttr();
+            break;
+        case "StyleAttr":
+            resource = new StyleAttr();
+            break;
+        case "StylesAttr":
+            resource = new StylesAttr();
+            break;
+        case "StyleMapAttr":
+            resource = new StyleMapAttr();
+            break;
+        case "StylesMapAttr":
+            resource = new StylesMapAttr();
+            break;
+        case "Vector2DAttr":
+            resource = new Vector2DAttr();
+            break;
+        case "Vector3DAttr":
+            resource = new Vector3DAttr();
+            break;
+        case "ViewportAttr":
+            resource = new ViewportAttr();
+            break;
+        case "ViewVolumeAttr":
+            resource = new ViewVolumeAttr();
+            break;
+        case "RenderableElementStyleAttr":
+            resource = new RenderableElementStyleAttr();
+            break;
+        case "Serializer":
+            resource = new Serializer();
+            break;
+        case "Bone":
+            resource = new Bone();
+            break;
     }
-    
+
     return resource;
 }
 
 function newSGNode(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "DirectionalLight":    resource = new DirectionalLight(); registerParentableAttributes(resource, factory); break;
-    case "GlobalIllumination":  resource = new GlobalIllumination(); break;
-    case "Group":               resource = new Group(); break;
-    case "Isolator":            resource = new Isolator(); break;
-    case "Label":               resource = new Label(); break;
-    case "HTMLLabel":           resource = new HTMLLabel(); break;
-    case "BalloonTipLabel":     resource = new BalloonTipLabel(); break;
-    case "LineList":            resource = new LineList(); break;
-    case "MediaTexture":        resource = new MediaTexture(); break;
-    case "OrthographicCamera":  resource = new OrthographicCamera(); registerParentableAttributes(resource, factory); break;
-    case "PerspectiveCamera":   resource = new PerspectiveCamera(); registerParentableAttributes(resource, factory); break;
-    case "PointLight":          resource = new PointLight(); registerParentableAttributes(resource, factory); break;
-    case "PointList":           resource = new PointList(); break;
-    case "QuaternionRotate":    resource = new QuaternionRotate(); break;
-    case "Rotate":              resource = new Rotate(); break;
-    case "Scale":               resource = new Scale(); break;
-    case "Selector":            resource = new Selector(); break;
-    case "Surface":             resource = new Surface(); break;
-    case "Transform":           resource = new Transform(); break;
-    case "Translate":           resource = new Translate(); break;
-    case "TriList":             resource = new TriList(); break;
-    case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
-    case "Cube":                resource = new Cube(); break;
-    case "Material":            resource = new Material(); break;
-    case "ScreenRect":          resource = new ScreenRect(); break;
+        case "DirectionalLight":
+            resource = new DirectionalLight();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "GlobalIllumination":
+            resource = new GlobalIllumination();
+            break;
+        case "Group":
+            resource = new Group();
+            break;
+        case "Isolator":
+            resource = new Isolator();
+            break;
+        case "Label":
+            resource = new Label();
+            break;
+        case "HTMLLabel":
+            resource = new HTMLLabel();
+            break;
+        case "BalloonTipLabel":
+            resource = new BalloonTipLabel();
+            break;
+        case "LineList":
+            resource = new LineList();
+            break;
+        case "MediaTexture":
+            resource = new MediaTexture();
+            break;
+        case "OrthographicCamera":
+            resource = new OrthographicCamera();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PerspectiveCamera":
+            resource = new PerspectiveCamera();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PointLight":
+            resource = new PointLight();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PointList":
+            resource = new PointList();
+            break;
+        case "QuaternionRotate":
+            resource = new QuaternionRotate();
+            break;
+        case "Rotate":
+            resource = new Rotate();
+            break;
+        case "Scale":
+            resource = new Scale();
+            break;
+        case "Selector":
+            resource = new Selector();
+            break;
+        case "Surface":
+            resource = new Surface();
+            break;
+        case "Transform":
+            resource = new Transform();
+            break;
+        case "Translate":
+            resource = new Translate();
+            break;
+        case "TriList":
+            resource = new TriList();
+            break;
+        case "NullObject":
+            resource = new NullObject();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "Cube":
+            resource = new Cube();
+            break;
+        case "Material":
+            resource = new Material();
+            break;
+        case "ScreenRect":
+            resource = new ScreenRect();
+            break;
     }
-    
+
     if (resource)
     {
         resource.setGraphMgr(factory.graphMgr);
     }
-    
+
     return resource;
 }
 
 function newSGDirective(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "BBoxDirective":               resource = new BBoxDirective(); break;
-    case "RayPickDirective":            resource = new RayPickDirective(); break;
-    case "RenderDirective":             resource = new RenderDirective(); break;  
-    case "SerializeDirective":          resource = new SerializeDirective(); break;
-    case "UpdateDirective":             resource = new UpdateDirective(); break;
-    case "CollideDirective":            resource = new CollideDirective(); break;
-    case "HighlightDirective":          resource = new HighlightDirective(); break;
+        case "BBoxDirective":
+            resource = new BBoxDirective();
+            break;
+        case "RayPickDirective":
+            resource = new RayPickDirective();
+            break;
+        case "RenderDirective":
+            resource = new RenderDirective();
+            break;
+        case "SerializeDirective":
+            resource = new SerializeDirective();
+            break;
+        case "UpdateDirective":
+            resource = new UpdateDirective();
+            break;
+        case "CollideDirective":
+            resource = new CollideDirective();
+            break;
+        case "HighlightDirective":
+            resource = new HighlightDirective();
+            break;
     }
-    
+
     if (resource)
     {
         resource.setGraphMgr(factory.graphMgr);
     }
-    
+
     return resource;
 }
 
@@ -351,9 +487,9 @@ function newBBoxLocator(name, factory)
 function newKeyframeInterpolator(name, factory)
 {
     var resource = new KeyframeInterpolator();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
@@ -369,142 +505,188 @@ function newMapProjectionCalculator(name, factory)
 function newObjectInspector(name, factory)
 {
     var resource = new ObjectInspector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     // target the Inspector's selection flag with the selector's clickPoint
     var selector = factory.registry.find("Selector");
     if (selector)
     {
         selector.getAttribute("selectionOccurred").addTarget(
-            resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("selectionCleared").addTarget(
-            resource.getAttribute("selectionCleared"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionCleared"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("pointView").addTarget(
-            resource.getAttribute("pointView"), eAttrSetOp.Replace, null, false);
+                resource.getAttribute("pointView"), eAttrSetOp.Replace, null, false);
     }
-    
+
     return resource;
 }
 
 function newSceneInspector(name, factory)
 {
     var resource = new BwSceneInspector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-   
+
     // target the Inspector's selection flag with the selector's clickPoint
     // target the Inspector's pivotDistance with the selector's distanceFromScreenCenter
     var selector = factory.registry.find("Selector");
     if (selector)
     {
         selector.getAttribute("selectionOccurred").addTarget(
-            resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("distanceFromScreenCenter").addTarget(
-            resource.getAttribute("pivotDistance"), eAttrSetOp.Replace, null, false);
+                resource.getAttribute("pivotDistance"), eAttrSetOp.Replace, null, false);
     }
-     
+
     return resource;
 }
 
 function newTargetObserver(name, factory)
 {
-	var resource = new BwTargetObserver();
-    
+    var resource = new BwTargetObserver();
+
     registerEvaluatorAttributes(resource, factory);
-   
-   	return resource;	
+
+    return resource;
 }
 
 function newAnimalMover(name, factory)
 {
-	var resource = new AnimalMover();
-	
-	registerEvaluatorAttributes(resource, factory);
-	
-	return resource;	
+    var resource = new AnimalMover();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
 }
 
 function newWalkSimulator(name, factory)
 {
     var resource = new WalkSimulator();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newMorphEffector(name, factory)
 {
     var resource = new MorphEffector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newBoneEffector(name, factory)
 {
     var resource = new BoneEffector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newCommand(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "AppendNode":     	    resource = new AppendNodeCommand(); break;
-    case "AutoInterpolate":     resource = new AutoInterpolateCommand(); break;
-    case "CommandSequence":     resource = new CommandSequence(); break;
-    case "ConnectAttributes":   resource = new ConnectAttributesCommand(); break;
-    case "ConnectOutputs":      resource = new ConnectAttributesCommand(); break;    
-    case "DisconnectAttributes":resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "DisconnectOutputs":   resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "Export":              resource = new ExportCommand(); break;
-    case "Locate":              resource = new LocateCommand(); break;
-    case "MotionInterpolate":   resource = new MotionInterpolateCommand(); break;
-    case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "Play":                resource = new PlayCommand(); break;
-    case "Remove":              resource = new RemoveCommand(); break;
-    case "ScreenCapture":       resource = new ScreenCaptureCommand(); break;
-    case "Serialize":           resource = new SerializeCommand(); break;
-    case "Set":                 resource = new SetCommand(); break;
-    case "Stop":                resource = new StopCommand(); break;
-    case "Morph":               resource = new MorphCommand(); break;
+        case "AppendNode":
+            resource = new AppendNodeCommand();
+            break;
+        case "AutoInterpolate":
+            resource = new AutoInterpolateCommand();
+            break;
+        case "CommandSequence":
+            resource = new CommandSequence();
+            break;
+        case "ConnectAttributes":
+            resource = new ConnectAttributesCommand();
+            break;
+        case "ConnectOutputs":
+            resource = new ConnectAttributesCommand();
+            break;
+        case "DisconnectAttributes":
+            resource = new ConnectAttributesCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "DisconnectOutputs":
+            resource = new ConnectAttributesCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "Export":
+            resource = new ExportCommand();
+            break;
+        case "Locate":
+            resource = new LocateCommand();
+            break;
+        case "MotionInterpolate":
+            resource = new MotionInterpolateCommand();
+            break;
+        case "Pause":
+            resource = new PlayCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "Play":
+            resource = new PlayCommand();
+            break;
+        case "Remove":
+            resource = new RemoveCommand();
+            break;
+        case "ScreenCapture":
+            resource = new ScreenCaptureCommand();
+            break;
+        case "Serialize":
+            resource = new SerializeCommand();
+            break;
+        case "Set":
+            resource = new SetCommand();
+            break;
+        case "Stop":
+            resource = new StopCommand();
+            break;
+        case "Morph":
+            resource = new MorphCommand();
+            break;
+        case "SnapTo":
+            resource = new SnapToCommand();
+            break;
     }
 
-	// if command sequence, set to command mgr
-	if (name == "CommandSequence")
-	{
-	    var commandMgr = factory.registry.find("CommandMgr");
-	    if (commandMgr)
-	    {
-	        commandMgr.pushCommandSequence(resource);
-	    }    
-	}
-	
-	return resource;
+    // if command sequence, set to command mgr
+    if (name == "CommandSequence")
+    {
+        var commandMgr = factory.registry.find("CommandMgr");
+        if (commandMgr)
+        {
+            commandMgr.pushCommandSequence(resource);
+        }
+    }
+
+    return resource;
 }
 
 function newDeviceHandler(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "MouseHandler":        resource = new MouseHandler(); break;
-    case "KeyboardHandler":     resource = new KeyboardHandler(); break;
+        case "MouseHandler":
+            resource = new MouseHandler();
+            break;
+        case "KeyboardHandler":
+            resource = new KeyboardHandler();
+            break;
     }
-	
-	return resource;
+
+    return resource;
 }
 
 function configureModel(model, factory)
@@ -518,7 +700,7 @@ function configureDirective(directive, factory)
     var root = new StringAttr("");
     root.addModifiedCB(AttributeFactory_DirectiveRootModifiedCB, factory);
     directive.registerAttribute(root, "root");
-    
+
     var rootNode = factory.registry.getAttribute("rootPtr").getValueDirect();
     if (rootNode)
     {
@@ -530,28 +712,28 @@ function finalizeModel(model, factory)
 {
     // TODO
     console.debug("TODO: remove LWO assumption");
-    
+
     var url = model.getAttribute("url").getValueDirect();
     if (url) {
-        
+
         url = url.join("");
-        
+
         var pathInfo = formatPath(url);
         console.debug("path: " + pathInfo[0]);
         console.debug("content dir: " + pathInfo[1]);
-        
+
         var contentHandler = new LWObjectHandler();
         contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
 
-        var contentBuilder = new LWObjectBuilder(); 
+        var contentBuilder = new LWObjectBuilder();
         contentBuilder.setRegistry(factory.registry);
         contentBuilder.models.push(model);
         contentBuilder.layer = model.getAttribute("layer").getValueDirect();
         contentBuilder.visitHandler(contentHandler);
-        
-        contentHandler.parseFileStream(pathInfo[0]);  
+
+        contentHandler.parseFileStream(pathInfo[0]);
     }
-    
+
     addInspectionGroup(model, factory);
 }
 
@@ -562,7 +744,7 @@ function finalizeDirective(directive, factory)
 function finalizeCommand(command, factory)
 {
     command.finalize();
-    
+
     var commandMgr = factory.registry.find("CommandMgr");
     if (commandMgr)
     {
@@ -571,7 +753,7 @@ function finalizeCommand(command, factory)
         {
             commandMgr.popCommandSequence();
         }
-        
+
         commandMgr.addCommand(command);
     }
 }
@@ -582,7 +764,7 @@ function finalizeDeviceHandler(handler, factory)
     if (eventMgr)
     {
         var events = handler.getEventTypes();
-        for (var i=0; i < events.length; i++)
+        for (var i = 0; i < events.length; i++)
         {
             eventMgr.addListener(events[i], handler);
         }
@@ -593,30 +775,30 @@ function finalizeEvaluator(evaluator, factory)
 {
     // TODO
     console.debug("TODO: " + arguments.callee.name);
-    
+
     switch (evaluator.className)
     {
-    case "KeyframeInterpolator":
-        
-        var url = evaluator.getAttribute("url").getValueDirect();
-        if (url) {
-        
-            url = url.join("");
-            
-            var pathInfo = formatPath(url);
-            
-            var contentHandler = new LWSceneHandler();
-            contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-            
-            var contentBuilder = new LWSceneBuilder(); 
-            contentBuilder.setRegistry(factory.registry);
-            contentBuilder.evaluators.push(evaluator);
-            contentBuilder.visitHandler(contentHandler);
-            
-            contentHandler.parseFileStream(pathInfo[0]); 
-        }
-        AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
-        break;
+        case "KeyframeInterpolator":
+
+            var url = evaluator.getAttribute("url").getValueDirect();
+            if (url) {
+
+                url = url.join("");
+
+                var pathInfo = formatPath(url);
+
+                var contentHandler = new LWSceneHandler();
+                contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
+
+                var contentBuilder = new LWSceneBuilder();
+                contentBuilder.setRegistry(factory.registry);
+                contentBuilder.evaluators.push(evaluator);
+                contentBuilder.visitHandler(contentHandler);
+
+                contentHandler.parseFileStream(pathInfo[0]);
+            }
+            AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
+            break;
     }
 }
 
@@ -625,30 +807,30 @@ function registerEvaluatorAttributes(evaluator, factory)
     // url
     if (!evaluator.getAttribute("url"))
     {
-    	var url = new StringAttr("");
-    	evaluator.registerAttribute(url, "url");
-	}
-	
+        var url = new StringAttr("");
+        evaluator.registerAttribute(url, "url");
+    }
+
     // target
     if (!evaluator.getAttribute("target"))
     {
-    	var target = new StringAttr("");
-    	evaluator.registerAttribute(target, "target");
-	}
-	
+        var target = new StringAttr("");
+        evaluator.registerAttribute(target, "target");
+    }
+
     // renderAndRelease
     if (!evaluator.getAttribute("renderAndRelease"))
     {
-    	var renderAndRelease = new BooleanAttr(false);
-    	evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
-	}
-	
+        var renderAndRelease = new BooleanAttr(false);
+        evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+    }
+
     // targetConnectionType
     if (!evaluator.getAttribute("targetConnectionType"))
     {
-    	var targetConnectionType = new StringAttr("transform");
-    	targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
-    	evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
+        var targetConnectionType = new StringAttr("transform");
+        targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
+        evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
     }
 }
 
@@ -657,42 +839,42 @@ function registerParentableAttributes(pme, factory)
     // label
     if (!pme.getAttribute("label"))
     {
-		var label = new StringAttr("");
-		pme.registerAttribute(label, "label");
-		label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
-	}
-	
-	// geoPosition
-	if (!pme.getAttribute("geoPosition"))
-	{
-		var geoPosition = new Vector3DAttr();
-		pme.registerAttribute(geoPosition, "geoPosition");
-		geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
-	}
+        var label = new StringAttr("");
+        pme.registerAttribute(label, "label");
+        label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
+    }
 
-	// altitude
-	if (!pme.getAttribute("altitude"))
-	{
-		var altitude = new NumberAttr();
-		pme.registerAttribute(altitude, "altitude");
-	}
-	
-	// latitude
-	if (!pme.getAttribute("latitude"))
-	{
-		var latitude = new NumberAttr();
-		pme.registerAttribute(latitude, "latitude");
-	}
-	
-	// longitude
-	if (!pme.getAttribute("longitude"))
-	{
-		var longitude = new NumberAttr();
-		pme.registerAttribute(longitude, "longitude");
-	}
-	
-	// misc modified callbacks
-	pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
+    // geoPosition
+    if (!pme.getAttribute("geoPosition"))
+    {
+        var geoPosition = new Vector3DAttr();
+        pme.registerAttribute(geoPosition, "geoPosition");
+        geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
+    }
+
+    // altitude
+    if (!pme.getAttribute("altitude"))
+    {
+        var altitude = new NumberAttr();
+        pme.registerAttribute(altitude, "altitude");
+    }
+
+    // latitude
+    if (!pme.getAttribute("latitude"))
+    {
+        var latitude = new NumberAttr();
+        pme.registerAttribute(latitude, "latitude");
+    }
+
+    // longitude
+    if (!pme.getAttribute("longitude"))
+    {
+        var longitude = new NumberAttr();
+        pme.registerAttribute(longitude, "longitude");
+    }
+
+    // misc modified callbacks
+    pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
 }
 
 function getSceneGraph()
@@ -724,7 +906,7 @@ function AttributeFactory_ParentableGeoPositionModifiedCB(attribute, container)
         if (cms && cms.length)
         {
             var cm = cms[0];
-            
+
             var mpcs = container.registry.getByType(eAttrType.MapProjectionCalculator);
             if (mpcs && mpcs.length)
             {
@@ -746,7 +928,7 @@ function AttributeFactory_ParentableWorldPositionModifiedCB(attribute, container
 }
 
 function AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(attribute, container)
-{  
+{
     var evaluator = attribute.getContainer();
     if (evaluator)
     {
