@@ -59,7 +59,7 @@
                     </Model>
                     <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
+                        <rotation x="0" y="90" z="90"/>
                         <scale x="1" y="1" z="1"/>
                         <plugConnectors>
                             <plugConnector type="110v">
@@ -69,7 +69,7 @@
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="-0.25" y="0.25" z="0.25"/>
+                                    <center x="-0.25" y="0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
