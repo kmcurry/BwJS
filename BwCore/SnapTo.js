@@ -51,7 +51,9 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 {
     var socketWorldMatrix = this.socketWorldMatrix.getValueDirect();
     var plugWorldMatrix = this.plugWorldMatrix.getValueDirect();
-
+    
+    var matrix = new Matrix4x4();
+    
     // set rotation
 
     // rotate so that normals are coincident; do this by rotating angle between
@@ -68,25 +70,25 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 
     var cross = crossProduct(socketNormal, plugNormal);
     var cosAngle = cosineAngleBetween(socketNormal, plugNormal);
-    angleBetween = toDegrees(Math.acos(cosAngle));
+    angleBetween = 180 - toDegrees(Math.acos(cosAngle));
     if (angleBetween > 0)
     {
-        if (cosAngle < 0)
-            angleBetween = -angleBetween;
-
         var rotationMatrix = new Matrix4x4();
-        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);   
-        //var rotation = rotationMatrix.getRotationAngles(); 
-        //plug.getAttribute("rotation").setValueDirect(rotation.x, rotation.y, rotation.z);
-
+        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);
+               
         plugWorldMatrix = plugWorldMatrix.multiply(rotationMatrix);
-        
-        var factory = this.registry.find("AttributeFactory");
-        var transformNode = factory.create("Transform");
-        transformNode.getAttribute("matrix").setValueDirect(plugWorldMatrix);
-        plug.insertChild(transformNode, 1);
+        matrix.loadMatrix(rotationMatrix);
     }
-
+    
+    var swt = plug.sectorTransformCompound;
+    var back = new Matrix4x4();
+    back.loadMatrix(swt);
+    back.invert();
+    var fwd = new Matrix4x4();
+    fwd.loadMatrix(swt);
+    matrix.loadMatrix(fwd.multiply(matrix.multiply(back)));
+    
+    /*
     // line up the unconnected slot; do this by rotating the angle between the
     // remaining slot (socket unconnected - connected) and
     // (plug unconnected - connected) about the socket normal
@@ -127,11 +129,11 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         var rotationMatrix = new Matrix4x4();
         rotationMatrix.loadRotation(socketNormal.x, socketNormal.y, socketNormal.z, angleBetween);
 
-        //plugWorldMatrix = plugWorldMatrix.leftMultiply(rotationMatrix);
+        plugWorldMatrix = plugWorldMatrix.leftMultiply(rotationMatrix);
     }
-
+    */
     // set position
-    // 
+
     // get world positions of pin and slot to connect 
     var pin, slot;
     switch (this.slot.getValueDirect())
@@ -148,29 +150,43 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 
         default:
             return;
-    }
+    }   
     pin = plugWorldMatrix.transform(pin.x, pin.y, pin.z, 1);
     slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
 
-    var delta = new Vector3D(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
-    var plugPos = plug.getAttribute("sectorPosition").getValueDirect();
-    //plugPos = plugWorldMatrix.transform(plugPos.x, plugPos.y, plugPos.z, 1);
-    //var plugWorldMatrixInv = new Matrix4x4();
-    //plugWorldMatrixInv.loadMatrix(plugWorldMatrix);
-    //plugWorldMatrixInv.invert();
-    var deltaPos = new Vector3D(plugPos.x + delta.x,
-            plugPos.y + delta.y,
-            plugPos.z + delta.z);
-    //deltaPos = plugWorldMatrixInv.transform(deltaPos.x, deltaPos.y, deltaPos.z, 1);
-    //plug.getAttribute("position").setValueDirect(deltaPos.x, deltaPos.y, deltaPos.z);
-
-    // set rotation angles to plug
-    //var rotation = plugWorldMatrix.getRotationAngles();
-    //plug.getAttribute("rotation").setValueDirect(rotation.x,
-    //        rotation.y, rotation.z);
-
+    var delta = new Vector3D((slot.x - pin.x), (slot.y - pin.y), (slot.z - pin.z)); 
+    //var matrixInv = new Matrix4x4();
+    //matrixInv.loadMatrix(matrix);
+    //matrixInv.invert();
+    //delta = matrixInv.transform(delta.x, delta.y, delta.z, 1);
+    //delta = rotationMatrix.transform(delta.x, delta.y, delta.z, 1);
+    //var sectorPos = plug.getAttribute("sectorPosition").getValueDirect();
+    //plug.getAttribute("sectorPosition").setValueDirect(sectorPos.x + delta.x, 
+    //    sectorPos.y + delta.y, sectorPos.z + delta.z);
+        
+    //plugWorldMatrix = plugWorldMatrix.multiply(matrix);
+    //plugWorldMatrix.invert();
+    var translation = new Matrix4x4();
+    translation.loadTranslation(delta.x, delta.y, delta.z);
+    var swt = plug.sectorTransformCompound;
+    var back = new Matrix4x4();
+    back.loadMatrix(swt);
+    back.invert();
+    var fwd = new Matrix4x4();
+    fwd.loadMatrix(swt);
+    translation.loadMatrix(fwd.multiply(translation.multiply(back)));
+    //matrix = matrix.leftMultiply(translation);
+        
+    var factory = this.registry.find("AttributeFactory");
+    var transformNode = factory.create("Transform");
+    transformNode.getAttribute("matrix").setValueDirect(matrix);
+    plug.insertChild(transformNode, 0); // must be located before object-inspection rotation group
+    var transformNode = factory.create("Transform");
+    transformNode.getAttribute("matrix").setValueDirect(translation);
+    plug.insertChild(transformNode, 0); // must be located before object-inspection rotation group
+     
     // zero inspection group rotation
-    zeroInspectionGroup(plug);
+    //zeroInspectionGroup(plug);
 }
 
 function SnapToCommand_TargetModifiedCB(attribute, container)

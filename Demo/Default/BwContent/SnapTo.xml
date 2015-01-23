@@ -7,8 +7,8 @@
         <Isolator name="Root" isolateTransforms="true">
             <Selector name="Cameras">
                 <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
-                    <position x="3" y="4.2424" z="-3"/>
-                    <rotation x="45" y="-45" z="0"/>
+                    <position x="0" y="4.2424" z="-3"/>
+                    <rotation x="45" y="0" z="0"/>
                 </PerspectiveCamera>
                 <!--<OrthographicCamera name="OrthoCam" nearDistance=".25" farDistance="4000" width="6">
                         <position x="0" y="6" z="0"/>
@@ -59,7 +59,7 @@
                     </Model>
                     <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
+                        <rotation x="90" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <plugConnectors>
                             <plugConnector type="110v">
@@ -114,4 +114,6 @@
         </intersectees>
     </Set>
     <?bwinclude url="SendMessage.xml"?>
+    <Set target="SceneInspector" evaluate="false"/>
+    <Set target="ObjectInspector" evaluate="true"/>
 </Session>

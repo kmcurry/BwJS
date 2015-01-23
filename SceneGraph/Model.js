@@ -322,10 +322,11 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
         case "collide":
             {
-                //var lastWorldMatrix = new Matrix4x4();
-                //lastWorldMatrix.loadMatrix(params.worldMatrix);              
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);              
 
-                params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
+                //params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
   
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
@@ -337,7 +338,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                     this.collisionDetected.setValueDirect(false);
                 }
 
-                //params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
             break;
            
