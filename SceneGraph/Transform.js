@@ -54,7 +54,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
         return;
     }
     
-    params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
+    //params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
             
     switch (directive)
     {

@@ -51,7 +51,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 {
     var socketWorldMatrix = this.socketWorldMatrix.getValueDirect();
     var plugWorldMatrix = this.plugWorldMatrix.getValueDirect();
-            
+
     // set rotation
 
     // rotate so that normals are coincident; do this by rotating angle between
@@ -60,12 +60,12 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     socketNormal = socketWorldMatrix.transform(socketNormal.x, socketNormal.y, socketNormal.z, 0);
     socketNormal = new Vector3D(socketNormal.x, socketNormal.y, socketNormal.z);
     socketNormal.normalize();
-    
+
     var plugNormal = this.plugConnector.getAttribute("normal").getValueDirect();
     plugNormal = plugWorldMatrix.transform(plugNormal.x, plugNormal.y, plugNormal.z, 0);
     plugNormal = new Vector3D(plugNormal.x, plugNormal.y, plugNormal.z);
     plugNormal.normalize();
-    
+
     var cross = crossProduct(socketNormal, plugNormal);
     var cosAngle = cosineAngleBetween(socketNormal, plugNormal);
     angleBetween = toDegrees(Math.acos(cosAngle));
@@ -77,7 +77,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         var rotationMatrix = new Matrix4x4();
         rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);
 
-        plugWorldMatrix = plugWorldMatrix.leftMultiply(rotationMatrix);
+        plugWorldMatrix = plugWorldMatrix.multiply(rotationMatrix);
     }
 
     // line up the unconnected slot; do this by rotating the angle between the
@@ -87,12 +87,12 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     var slot1 = this.socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
     var pin2 = this.plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
     var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
-    
+
     pin1 = plugWorldMatrix.transform(pin1.x, pin1.y, pin1.z, 1);
     slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
     pin2 = plugWorldMatrix.transform(pin2.x, pin2.y, pin2.z, 1);
     slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
-    
+
     var pinToPin, slotToSlot;
     switch (this.slot.getValueDirect())
     {
@@ -109,7 +109,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         default:
             return;
     }
-    
+
     cosAngle = cosineAngleBetween(pinToPin, slotToSlot);
     angleBetween = toDegrees(Math.acos(cosAngle));
     if (angleBetween > 0)
@@ -144,7 +144,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     }
     pin = plugWorldMatrix.transform(pin.x, pin.y, pin.z, 1);
     slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
-    
+
     var delta = new Vector3D(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
     var plugPos = plug.getAttribute("sectorPosition").getValueDirect();
     //plugPos = plugWorldMatrix.transform(plugPos.x, plugPos.y, plugPos.z, 1);
@@ -161,7 +161,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     var rotation = plugWorldMatrix.getRotationAngles();
     plug.getAttribute("rotation").setValueDirect(rotation.x,
             rotation.y, rotation.z);
-            
+
     // zero inspection group rotation
     zeroInspectionGroup(plug);
 }

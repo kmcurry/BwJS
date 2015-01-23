@@ -17,7 +17,8 @@ function CollideRec(model, tree, worldMatrix)
 {
     this.model = model;
     this.tree = tree;
-    this.worldMatrix = worldMatrix;
+    this.worldMatrix = new Matrix4x4();
+    this.worldMatrix.loadMatrix(worldMatrix);
 }
 
 CollideDirective.prototype = new SGDirective();
