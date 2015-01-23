@@ -109,6 +109,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function ()
     this.newResourceProcs["Selector"] = newSGNode;
     this.newResourceProcs["Surface"] = newSGNode;
     this.newResourceProcs["Translate"] = newSGNode;
+    this.newResourceProcs["Transform"] = newSGNode;
     this.newResourceProcs["TriList"] = newSGNode;
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;

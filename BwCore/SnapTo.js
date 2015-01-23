@@ -75,9 +75,16 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
             angleBetween = -angleBetween;
 
         var rotationMatrix = new Matrix4x4();
-        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);
+        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);   
+        //var rotation = rotationMatrix.getRotationAngles(); 
+        //plug.getAttribute("rotation").setValueDirect(rotation.x, rotation.y, rotation.z);
 
         plugWorldMatrix = plugWorldMatrix.multiply(rotationMatrix);
+        
+        var factory = this.registry.find("AttributeFactory");
+        var transformNode = factory.create("Transform");
+        transformNode.getAttribute("matrix").setValueDirect(plugWorldMatrix);
+        plug.insertChild(transformNode, 1);
     }
 
     // line up the unconnected slot; do this by rotating the angle between the
@@ -158,9 +165,9 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     //plug.getAttribute("position").setValueDirect(deltaPos.x, deltaPos.y, deltaPos.z);
 
     // set rotation angles to plug
-    var rotation = plugWorldMatrix.getRotationAngles();
-    plug.getAttribute("rotation").setValueDirect(rotation.x,
-            rotation.y, rotation.z);
+    //var rotation = plugWorldMatrix.getRotationAngles();
+    //plug.getAttribute("rotation").setValueDirect(rotation.x,
+    //        rotation.y, rotation.z);
 
     // zero inspection group rotation
     zeroInspectionGroup(plug);
