@@ -114,6 +114,7 @@
 		<script type="text/javascript" src="../../SceneGraph/AnimalMover.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/WalkSimulator.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/MorphEffector.js"></script>
+    <script type="text/javascript" src="../../SceneGraph/SnapConnector.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/Cube.js"></script>
 		<script type="text/javascript" src="../../SceneGraph/ScreenRect.js"></script>
 		<script type="text/javascript" src="../../Event/EventType.js"></script>
@@ -170,22 +171,22 @@
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-	<script src="../../Libs/jquery/jquery.hoverIntent.minified.js" type="text/javascript" charset="utf-8"></script> 
-	<script src="../../Libs/jquery/jquery.bgiframe.min.js" type="text/javascript" charset="utf-8"></script> 
-    <script src="../../Libs/jquery/bt/jquery.bt.min.js" type="text/javascript" ></script> 
-    <script src="UI/scripts/viewControls.js" type="text/javascript" charset="utf-8"></script>  
+	<script src="../../Libs/jquery/jquery.hoverIntent.minified.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../Libs/jquery/jquery.bgiframe.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../Libs/jquery/bt/jquery.bt.min.js" type="text/javascript" ></script>
+    <script src="UI/scripts/viewControls.js" type="text/javascript" charset="utf-8"></script>
     <script src="../BwHelper.js"></script>
     <script src="../../Libs/qTip2/jquery-1.10.2.min.js" type="text/javascript"></script>
 	<script src="../../Libs/qTip2/jquery.qtip.js" type="text/javascript"></script>
 	<link href="../../Libs/qTip2/jquery.qtip.css" rel="stylesheet" type="text/css" />
   </head>
   <body onresize="resize();">
-<H1 id="H1">Bridgeworks - WebGL Version</H1>  
+<H1 id="H1">Bridgeworks - WebGL Version</H1>
 
     <script type="text/javascript">
         var bridgeworks = null;
         var xml = "";
-        
+
         function locate()
         {
             var xml = "\<Locate target='" + document.getElementById('objectname').value + "'/>";
@@ -199,7 +200,7 @@
     <center>
         <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
           <canvas id="Canvas" style="position: relative; z-index: 2;">
-          </canvas>     
+          </canvas>
         </div>
         <div id="DVDControls" style="position:relative;">
             <!--<button onclick="bridgeworks.renderController.rewind();">RW</button>-->
@@ -215,7 +216,7 @@
     <!--<video controls="controls" src="http://localhost/bwjs/bwcontent/images/quake.mpg">
     Your browser does not support the video tag.
     </video>-->
-        
+
     <script type="text/javascript">
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
