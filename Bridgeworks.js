@@ -3873,7 +3873,7 @@ Matrix4x4.prototype.multiply = function(rhs)
     
     if (!rhs)
     {
-        return;    
+        return null;    
     }
     
     result.load
@@ -4914,6 +4914,11 @@ var eAttrType = {
     ViewVolumeAttr              :31,
     RenderableElementStyleAttr  :32,
     Bone                        :33,
+    SnapConnector               :34,
+    SnapConnectors              :35,
+    SocketConnector             :36,
+    PlugConnector               :37,
+    SphereAttr                  :38,
     
     Node                        :1000,
        
@@ -4960,9 +4965,9 @@ var eAttrType = {
     ArcballInspector            :1104,
     MapProjectionCalculator     :1105,
     ObjectInspector             :1106,
-    MultiTargetObserver			:1107,
-    ObjectMover	 				:1108,
-    AnimalMover					:1109, 
+    MultiTargetObserver		:1107,
+    ObjectMover	 		:1108,
+    AnimalMover			:1109, 
     WalkSimulator               :1110,
     MorphEffector               :1111,
     BoneEffector                :1112,
@@ -4970,7 +4975,7 @@ var eAttrType = {
 
     Node_End                    :1999,
 
-	Directive                   :2000,
+    Directive                   :2000,
     UpdateDirective             :2001,
     RenderDirective             :2002,
     RayPickDirective            :2003,
@@ -4997,6 +5002,7 @@ var eAttrType = {
     DisconnectAttributes        :3014,
     Export                      :3015,
     Morph                       :3016,
+    SnapTo                      :3017,
     Command_End                 :3999,
 
     DeviceHandler               :4000,
@@ -6938,26 +6944,34 @@ function KeyframeAttr()
     AttributeContainer.call(this);
     this.className = "KeyframeAttr";
     this.attrType = eAttrType.KeyframeAttr;
-    
+
     this.time = new NumberAttr();
     this.value = new NumberAttr();
     this.shape = new NumberAttr();
     this.params = new AttributeVector();
-    
-    for (var i=0; i < 6; i++)
+
+    for (var i = 0; i < 6; i++)
     {
         this.params.push_back(new NumberAttr(0));
     }
-    
+
     this.registerAttribute(this.time, "time");
     this.registerAttribute(this.value, "value");
     this.registerAttribute(this.shape, "shape");
     this.registerAttribute(this.params, "params");
-    
-    this.getTime = function() { return this.time.getValueDirect(); }
-    this.getValue = function() { return this.value.getValueDirect(); }
-    this.getShape = function() { return this.shape.getValueDirect(); }
-    this.getParams = function(i) { return this.params.getAt(i).getValueDirect(); }
+
+    this.getTime = function () {
+        return this.time.getValueDirect();
+    }
+    this.getValue = function () {
+        return this.value.getValueDirect();
+    }
+    this.getShape = function () {
+        return this.shape.getValueDirect();
+    }
+    this.getParams = function (i) {
+        return this.params.getAt(i).getValueDirect();
+    }
 }
 
 KeyframesAttr.prototype = new AttributeVector();
@@ -6969,7 +6983,7 @@ function KeyframesAttr()
     this.className = "KeyframesAttr";
     this.attrType = eAttrType.KeyframesAttr;
 }
-    
+
 BBoxAttr.prototype = new AttributeContainer();
 BBoxAttr.prototype.constructor = BBoxAttr;
 
@@ -6978,15 +6992,15 @@ function BBoxAttr()
     AttributeContainer.call(this);
     this.className = "BBoxAttr";
     this.attrType = eAttrType.BBoxAttr;
-    
+
     this.min = new Vector3DAttr();
     this.max = new Vector3DAttr();
-    
+
     this.registerAttribute(this.min, "min");
     this.registerAttribute(this.max, "max");
 }
 
-BBoxAttr.prototype.setValueDirect = function(min, max)
+BBoxAttr.prototype.setValueDirect = function (min, max)
 {
     this.min.setValueDirect(min.x, min.y, min.z);
     this.max.setValueDirect(max.x, max.y, max.z);
@@ -7006,12 +7020,12 @@ function ImageAttr()
     this.byteAlignment = new NumberAttr(0);
     this.pixelFormat = new NumberAttr(ePixelFormat.Unknown);
     this.pixels = new NumberArrayAttr();
-    
+
     this.registerAttribute(this.width, "width");
     this.registerAttribute(this.height, "height");
     this.registerAttribute(this.byteAlignment, "byteAlignment");
     this.registerAttribute(this.pixelFormat, "pixelFormat");
-    this.registerAttribute(this.pixels, "pixels");    
+    this.registerAttribute(this.pixels, "pixels");
 }
 
 RectAttr.prototype = new AttributeContainer();
@@ -7034,7 +7048,7 @@ function RectAttr()
     this.registerAttribute(this.bottom, "bottom");
 }
 
-RectAttr.prototype.getValueDirect = function()
+RectAttr.prototype.getValueDirect = function ()
 {
     var rect = new Rect();
     rect.left = this.left.getValueDirect();
@@ -7044,7 +7058,7 @@ RectAttr.prototype.getValueDirect = function()
     return rect;
 }
 
-RectAttr.prototype.setValueDirect = function(rect)
+RectAttr.prototype.setValueDirect = function (rect)
 {
     this.left.setValueDirect(rect.left);
     this.top.setValueDirect(rect.top);
@@ -7052,12 +7066,12 @@ RectAttr.prototype.setValueDirect = function(rect)
     this.bottom.setValueDirect(rect.bottom);
 }
 
-RectAttr.prototype.containsPoint = function(x, y)
+RectAttr.prototype.containsPoint = function (x, y)
 {
     if (x >= this.left.getValueDirect() &&
-        y >= this.top.getValueDirect() &&
-        x <= this.right.getValueDirect() &&
-        y <= this.bottom.getValueDirect())
+            y >= this.top.getValueDirect() &&
+            x <= this.right.getValueDirect() &&
+            y <= this.bottom.getValueDirect())
         return true;
 
     return false;
@@ -7093,7 +7107,7 @@ function FontStyleAttr()
     this.registerAttribute(this.style, "style");
 }
 
-FontStyleAttr.prototype.updateStyle = function(style)
+FontStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -7103,49 +7117,49 @@ FontStyleAttr.prototype.updateStyle = function(style)
         this.antialiasType.copyValue(style.antialiasType, setOp);
     }
 
-	// borderColor
+    // borderColor
     if (style.getAttributeModificationCount(style.borderColor))
     {
         this.borderColor.copyValue(style.borderColor, setOp);
     }
 
-	// borderWidth
+    // borderWidth
     if (style.getAttributeModificationCount(style.borderWidth))
     {
         this.borderWidth.copyValue(style.borderWidth, setOp);
     }
 
-	// color
+    // color
     if (style.getAttributeModificationCount(style.color))
     {
         this.color.copyValue(style.color, setOp);
     }
-	
-	// effects
+
+    // effects
     if (style.getAttributeModificationCount(style.effects))
     {
         this.effects.copyValue(style.effects, setOp);
     }
 
-	// font
+    // font
     if (style.getAttributeModificationCount(style.font))
     {
         this.font.copyValue(style.font, setOp);
     }
 
-	// opacity
+    // opacity
     if (style.getAttributeModificationCount(style.opacity))
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
-	// size
+    // size
     if (style.getAttributeModificationCount(style.size))
     {
         this.size.copyValue(style.size, setOp);
     }
 
-	// style
+    // style
     if (style.getAttributeModificationCount(style.style))
     {
         this.style.copyValue(style.style, setOp);
@@ -7186,7 +7200,7 @@ function LabelStyleAttr()
     this.registerAttribute(this.width, "width");
 }
 
-LabelStyleAttr.prototype.updateStyle = function(style)
+LabelStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -7276,7 +7290,7 @@ function IconStyleAttr()
     this.registerAttribute(this.url, "url");
 }
 
-IconStyleAttr.prototype.updateStyle = function(style)
+IconStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -7319,7 +7333,7 @@ function HTMLLabelStyleAttr()
     StyleAttr.call(this);
     this.className = "HTMLLabelStyleAttr";
     this.attrType = eAttrType.HTMLLabelStyleAttr;
-    
+
     this.bgColor = new ColorAttr(1, 1, 1, 1); // white
     this.height = new NumberAttr(0); // 0 (auto-calculate)
     this.html = new StringAttr(); // empty string
@@ -7328,7 +7342,7 @@ function HTMLLabelStyleAttr()
     this.top = new NumberAttr(0);
     this.url = new StringAttr(); // empty string
     this.width = new NumberAttr(0); // 0 (auto-calculate)
-    
+
     this.registerAttribute(this.bgColor, "bgColor");
     this.registerAttribute(this.height, "height");
     this.registerAttribute(this.html, "html");
@@ -7348,23 +7362,23 @@ function BalloonTipLabelStyleAttr()
     StyleAttr.call(this);
     this.className = "BalloonTipLabelStyleAttr";
     this.attrType = eAttrType.BalloonTipLabelStyleAttr;
-    
+
     this.balloonOffset = new NumberAttr(100);
     this.bgColor = new ColorAttr(1, 1, 1, 1);
     this.displayMode = new StringAttr("default");
     this.htmlLabelStyle = new HTMLLabelStyleAttr();
     this.text = new StringAttr();
     this.textColor = new ColorAttr(0, 0, 0, 1);
-	
-	this.registerAttribute(this.balloonOffset, "balloonOffset");
-	this.registerAttribute(this.bgColor, "bgColor");
-	this.registerAttribute(this.displayMode, "displayMode");
-	this.registerAttribute(this.htmlLabelStyle, "htmlLabelStyle");
-	this.registerAttribute(this.text, "text");
-	this.registerAttribute(this.textColor, "textColor");
+
+    this.registerAttribute(this.balloonOffset, "balloonOffset");
+    this.registerAttribute(this.bgColor, "bgColor");
+    this.registerAttribute(this.displayMode, "displayMode");
+    this.registerAttribute(this.htmlLabelStyle, "htmlLabelStyle");
+    this.registerAttribute(this.text, "text");
+    this.registerAttribute(this.textColor, "textColor");
 }
 
-BalloonTipLabelStyleAttr.prototype.updateStyle = function(style)
+BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -7418,7 +7432,7 @@ function RenderableElementStyleAttr()
     this.registerAttribute(this.selected, "selected");
 }
 
-RenderableElementStyleAttr.prototype.updateStyle = function(style)
+RenderableElementStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -7453,7 +7467,7 @@ function PlaneAttr()
     this.registerAttribute(this.dot, "dot");
 }
 
-PlaneAttr.prototype.getValueDirect = function()
+PlaneAttr.prototype.getValueDirect = function ()
 {
     var point = this.point.getValueDirect();
     var normal = this.normal.getValueDirect();
@@ -7461,7 +7475,7 @@ PlaneAttr.prototype.getValueDirect = function()
     return plane;
 }
 
-PlaneAttr.prototype.setValueDirect = function(plane)
+PlaneAttr.prototype.setValueDirect = function (plane)
 {
     this.point.setValueDirect(plane.point.x, plane.point.y, plane.point.z);
     this.normal.setValueDirect(plane.normal.x, plane.normal.y, plane.normal.z);
@@ -7492,7 +7506,7 @@ function ViewVolumeAttr()
     this.registerAttribute(this.far, "far");
 }
 
-ViewVolumeAttr.prototype.setValueDirect = function(left, right, top, bottom, near, far)
+ViewVolumeAttr.prototype.setValueDirect = function (left, right, top, bottom, near, far)
 {
     this.left.setValueDirect(left);
     this.right.setValueDirect(right);
@@ -7500,6 +7514,37 @@ ViewVolumeAttr.prototype.setValueDirect = function(left, right, top, bottom, nea
     this.bottom.setValueDirect(bottom);
     this.near.setValueDirect(near);
     this.far.setValueDirect(far);
+}
+
+SphereAttr.prototype = new AttributeContainer();
+SphereAttr.prototype.constructor = SphereAttr;
+
+function SphereAttr()
+{
+    AttributeContainer.call(this);
+    this.className = "SphereAttr";
+    this.attrType = eAttrType.SphereAttr;
+
+    this.sphere = new Sphere();
+
+    this.center = new Vector3DAttr(0, 0, 0);
+    this.radius = new NumberAttr(0);
+
+    this.center.addModifiedCB(SphereAttr_CenterModifiedCB, this);
+    this.radius.addModifiedCB(SphereAttr_RadiusModifiedCB, this);
+    
+    this.registerAttribute(this.center, "center");
+    this.registerAttribute(this.radius, "radius");
+}
+
+function SphereAttr_CenterModifiedCB(attribute, container)
+{
+    container.sphere.center = attribute.getValueDirect();
+}
+
+function SphereAttr_RadiusModifiedCB(attribute, container)
+{
+    container.sphere.radius = attribute.getValueDirect();
 }
 function setAttributeValue(attribute, value)
 {
@@ -7624,6 +7669,17 @@ function Sphere()
     this.radius = 0;
     this.xcenter = new Vector3D(); // transformed center
     this.xradius = 0;              // transformed (scaled) radius
+}
+
+Sphere.prototype.setTransform = function(matrix)
+{
+    var result = matrix.transform(this.center.x, this.center.y, this.center.z, 1);
+    this.xcenter.x = result.x;
+    this.xcenter.y = result.y;
+    this.xcenter.z = result.z;
+    
+    var scale = matrix.getScalingFactors();
+    this.xradius = this.radius * max3(scale.x, scale.y, scale.z);
 }
 
 Sphere.prototype.intersects = function(sphere)
@@ -7923,13 +7979,7 @@ SphereTree.prototype.setTransform = function(matrix)
 
 SphereTree.prototype.transformNode = function(matrix, node)
 {
-    var result = matrix.transform(node.sphere.center.x, node.sphere.center.y, node.sphere.center.z, 1);
-    node.sphere.xcenter.x = result.x;
-    node.sphere.xcenter.y = result.y;
-    node.sphere.xcenter.z = result.z;
-    
-    var scale = matrix.getScalingFactors();
-    node.sphere.xradius = node.sphere.radius * max3(scale.x, scale.y, scale.z);
+    node.sphere.setTransform(matrix);
     
     // recurse on node children
     for (var i = 0; i < node.children.length; i++)
@@ -13807,9 +13857,9 @@ Node.prototype.addChild = function(child)
     child.addParent(this);
 }
 
-Node.prototype.insertChild = function(child, before)
+Node.prototype.insertChild = function(child, at)
 {
-    this.children.splice(before, 0, child);
+    this.children.splice(at, 0, child);
     
     this.incrementModificationCount();
     
@@ -14370,14 +14420,14 @@ RenderableElement.prototype.apply = function(directive, params, visitChildren)
 }
 
 ParentableMotionElement.prototype = new RenderableElement();
-ParentableMotionElement.prototype.constructor = ParentableMotionElement;
+        ParentableMotionElement.prototype.constructor = ParentableMotionElement;
 
 function ParentableMotionElement()
 {
     RenderableElement.call(this);
     this.className = "ParentableMotionElement";
     this.attrType = eAttrType.ParentableMotionElement;
-    
+
     this.translationMatrix = new Matrix4x4();           // matrix representing this element's position translation
     this.rotationQuat = new Quaternion();               // quaternion for calculating rotation
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
@@ -14392,7 +14442,7 @@ function ParentableMotionElement()
     this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-                                                        // parent's transformations (if any) for the current sector                                        
+    // parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
     this.updateScale = false;
     this.updatePivot = false;
@@ -14404,7 +14454,7 @@ function ParentableMotionElement()
     this.inheritsPivot = true;
     this.nonZeroVelocity = false;
     this.motionParent = null;
-    
+
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
@@ -14425,13 +14475,13 @@ function ParentableMotionElement()
     this.angularVelocity = new Vector3DAttr(0, 0, 0);      // angular velocity in degrees/second
     this.scalarVelocity = new Vector3DAttr(0, 0, 0);       // scalar velocity in world-units/second
     this.worldTransform = new Matrix4x4Attr(1, 0, 0, 0,
-                                            0, 1, 0, 0,
-                                            0, 0, 1, 0,
-                                            0, 0, 0, 1);
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
     this.sectorWorldTransform = new Matrix4x4Attr(1, 0, 0, 0,
-                                                  0, 1, 0, 0,
-                                                  0, 0, 1, 0,
-                                                  0, 0, 0, 1);
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
     this.parent = new StringAttr("");
     this.inheritPosition_X = new BooleanAttr(true);
     this.inheritPosition_Y = new BooleanAttr(true);
@@ -14446,7 +14496,7 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-    
+
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.scale.addModifiedCB(ParentableMotionElement_ScaleModifiedCB, this);
@@ -14470,7 +14520,7 @@ function ParentableMotionElement()
     this.linearVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
     this.angularVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
     this.scalarVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
-    
+
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
     this.registerAttribute(this.scale, "scale");
@@ -14479,11 +14529,11 @@ function ParentableMotionElement()
     this.registerAttribute(this.worldCenter, "worldCenter");
     this.registerAttribute(this.worldPosition, "worldPosition");
     this.registerAttribute(this.worldRotation, "worldRotation");
-    this.registerAttribute(this.worldScale, "worldScale");    
-    this.registerAttribute(this.screenPosition, "screenPosition"); 
-    this.registerAttribute(this.sectorOrigin, "sectorOrigin"); 
-    this.registerAttribute(this.sectorPosition, "sectorPosition"); 
-    this.registerAttribute(this.sectorWorldCenter, "sectorWorldCenter"); 
+    this.registerAttribute(this.worldScale, "worldScale");
+    this.registerAttribute(this.screenPosition, "screenPosition");
+    this.registerAttribute(this.sectorOrigin, "sectorOrigin");
+    this.registerAttribute(this.sectorPosition, "sectorPosition");
+    this.registerAttribute(this.sectorWorldCenter, "sectorWorldCenter");
     this.registerAttribute(this.sectorWorldPosition, "sectorWorldPosition");
     this.registerAttribute(this.worldTransform, "worldTransform");
     this.registerAttribute(this.sectorWorldTransform, "sectorWorldTransform");
@@ -14524,38 +14574,38 @@ ParentableMotionElement.prototype.getSectorTransform = function()
 
 ParentableMotionElement.prototype.update = function(params, visitChildren)
 {
-	// update this element's position/rotation as affected by velocity
-	if (this.nonZeroVelocity)
-	{
-    	this.updateVelocityMotion(params.timeIncrement);
+    // update this element's position/rotation as affected by velocity
+    if (this.nonZeroVelocity)
+    {
+        this.updateVelocityMotion(params.timeIncrement);
     }
-        
+
     if (this.updateInheritance)
     {
         this.updateInheritance = false;
 
         this.inheritsPosition = this.inheritPosition_X.getValueDirect() &&
-        this.inheritPosition_Y.getValueDirect() &&
-        this.inheritPosition_Z.getValueDirect();
+                this.inheritPosition_Y.getValueDirect() &&
+                this.inheritPosition_Z.getValueDirect();
 
         this.inheritsRotation = this.inheritRotation_X.getValueDirect() &&
-        this.inheritRotation_Y.getValueDirect() &&
-        this.inheritRotation_Z.getValueDirect();
+                this.inheritRotation_Y.getValueDirect() &&
+                this.inheritRotation_Z.getValueDirect();
 
-        this.inheritsScale    = this.inheritScale_X.getValueDirect() &&
-        this.inheritScale_Y.getValueDirect() &&
-        this.inheritScale_Z.getValueDirect();
+        this.inheritsScale = this.inheritScale_X.getValueDirect() &&
+                this.inheritScale_Y.getValueDirect() &&
+                this.inheritScale_Z.getValueDirect();
 
-        this.inheritsPivot    = this.inheritPivot_X.getValueDirect() &&
-        this.inheritPivot_Y.getValueDirect() &&
-        this.inheritPivot_Z.getValueDirect();
+        this.inheritsPivot = this.inheritPivot_X.getValueDirect() &&
+                this.inheritPivot_Y.getValueDirect() &&
+                this.inheritPivot_Z.getValueDirect();
     }
-    
+
     // update this element's transformations (translation/rotation/scale/pivot)
     var modified = this.updateSimpleTransform();
     if (modified)
     {
-    	this.incrementModificationCount();
+        this.incrementModificationCount();
     }
     if (this.motionParent)
     {
@@ -14563,7 +14613,7 @@ ParentableMotionElement.prototype.update = function(params, visitChildren)
     }
     this.updateCompoundTransform();
     this.updateWorldMotionInfo();
-    
+
     // call base-class implementation
     RenderableElement.prototype.update.call(this, params, visitChildren);
 }
@@ -14577,18 +14627,18 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
         RenderableElement.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-    
+
     switch (directive)
     {
         case "render":
-        {
-            var screen = toScreenSpace(this.sectorWorldPosition.getValueDirect(),
-                params.viewMatrix, params.projMatrix, params.viewport);
-            this.screenPosition.setValueDirect(screen.x, screen.y, screen.z);
-        }
-        break;
+            {
+                var screen = toScreenSpace(this.sectorWorldPosition.getValueDirect(),
+                        params.viewMatrix, params.projMatrix, params.viewport);
+                this.screenPosition.setValueDirect(screen.x, screen.y, screen.z);
+            }
+            break;
     }
-    
+
     // call base-class implementation
     RenderableElement.prototype.apply.call(this, directive, params, visitChildren);
 }
@@ -14596,22 +14646,22 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
 ParentableMotionElement.prototype.updateChildDisplayLists = function()
 {
     /*for (var i=0; i < this.motionChildren.length; i++)
-    {
-        this.motionChildren[i].updateDisplayList.pulse();
-    }*/
+     {
+     this.motionChildren[i].updateDisplayList.pulse();
+     }*/
 }
 
 ParentableMotionElement.prototype.applyTransform = function()
 {
     // TODO: if scaling factors are not 1, apply inverse scale before this transformation is
     // applied to avoid translation caused by scaling  
-    
+
     // set transformation matrix
     this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
     this.graphMgr.renderContext.leftMultMatrix(this.sectorTransformCompound);
     this.graphMgr.renderContext.applyModelViewTransform();
-    
-	// TODO: if invsere scale was applied, re-apply scale
+
+    // TODO: if invsere scale was applied, re-apply scale
 }
 
 ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
@@ -14620,33 +14670,33 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
     var panVelocity = this.panVelocity.getValueDirect();
     var linearVelocity = this.linearVelocity.getValueDirect();
     if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
-        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+            linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
     {
         // position
         var position = this.position.getValueDirect();
 
         // get direction vectors for pan
         var directionVectors = this.getDirectionVectors();
-        
+
         // get affect position flags
         var linearVelocity_affectPosition_Y = this.linearVelocity_affectPosition_Y.getValueDirect();
 
         // update position
-        position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.x 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.x * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.x * timeIncrement);
+        position.x = position.x + (directionVectors.right.x * panVelocity.x * timeIncrement) +
+                (directionVectors.up.x * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.x * panVelocity.z * timeIncrement) +
+                (linearVelocity.x * timeIncrement);
         if (linearVelocity_affectPosition_Y)
         {
-        position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.y * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.y * timeIncrement);
+            position.y = position.y + (directionVectors.right.y * panVelocity.x * timeIncrement) +
+                    (directionVectors.up.y * panVelocity.y * timeIncrement) +
+                    (directionVectors.forward.y * panVelocity.z * timeIncrement) +
+                    (linearVelocity.y * timeIncrement);
         }
-        position.z = position.z + (directionVectors.right.z   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.z 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.z * timeIncrement);						  
+        position.z = position.z + (directionVectors.right.z * panVelocity.x * timeIncrement) +
+                (directionVectors.up.z * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.z * panVelocity.z * timeIncrement) +
+                (linearVelocity.z * timeIncrement);
 
         this.position.setValueDirect(position.x, position.y, position.z);
     }
@@ -14662,7 +14712,7 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
         rotation.x = rotation.x + (angularVelocity.x * timeIncrement);
         rotation.y = rotation.y + (angularVelocity.y * timeIncrement);
         rotation.z = rotation.z + (angularVelocity.z * timeIncrement);
-        
+
         this.rotation.setValueDirect(rotation.x, rotation.y, rotation.z);
     }
 
@@ -14677,86 +14727,86 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
         scale.x = scale.x + (scalarVelocity.x * timeIncrement);
         scale.y = scale.y + (scalarVelocity.y * timeIncrement);
         scale.z = scale.z + (scalarVelocity.z * timeIncrement);
-        
+
         this.scale.setValueDirect(scale.x, scale.y, scale.z);
-    }   
+    }
 }
 
 ParentableMotionElement.prototype.updateSimpleTransform = function()
 {
     var modified = false;
-    
+
     if (this.updatePosition || this.updateRotation || this.updateScale || this.updatePivot)
     {
         var values;
-        
+
         if (this.updatePosition)
         {
             this.updatePosition = false;
-            
+
             values = this.position.getValueDirect();
             this.translationMatrix.loadTranslation(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updateRotation)
         {
             this.updateRotation = false;
-            
+
             values = this.rotation.getValueDirect();
             this.rotationQuat.loadXYZAxisRotation(values.x, values.y, values.z);
             this.rotationMatrix = this.rotationQuat.getMatrix();
-            
+
             modified = true;
         }
-        
+
         if (this.updateScale)
         {
             this.updateScale = false;
-            
+
             values = this.scale.getValueDirect();
             this.scaleMatrix.loadScale(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updatePivot)
         {
             this.updatePivot = false;
-            
+
             values = this.pivot.getValueDirect();
             this.pivotMatrix.loadTranslation(-values.x, -values.y, -values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updateSectorPosition)
         {
             this.updateSectorPosition = false;
-            
+
             values = this.sectorPosition.getValueDirect();
             this.sectorTranslationMatrix.loadTranslation(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (modified)
         {
             this.transformModified.pulse();
-            
+
             // pre-multiply pivot/scale/rotation since this is applied to both regular and sector transforms
             var psr = new Matrix4x4();
             psr.loadMatrix(this.pivotMatrix.multiply(this.scaleMatrix.multiply(this.rotationMatrix)));
-    
+
             this.transformSimple.loadMatrix(psr.multiply(this.translationMatrix));
             this.sectorTransformSimple.loadMatrix(psr.multiply(this.sectorTranslationMatrix));
-            
+
             // force any motion children to update their display lists
             this.updateChildDisplayLists();
         }
     }
-    
+
     return modified;
 }
 
@@ -14764,7 +14814,7 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
 {
     this.transformCompound.loadMatrix(this.transformSimple);
     this.sectorTransformCompound.loadMatrix(this.sectorTransformSimple);
-    
+
     if (this.motionParent)
     {
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
@@ -14774,7 +14824,7 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
         }
         else // !m_inheritsPosition || !m_inheritsRotation || !m_inheritsScale || !m_inheritsPivot
         {
-        // TODO
+            // TODO
         }
     }
 }
@@ -14783,7 +14833,7 @@ ParentableMotionElement.prototype.updateWorldMotionInfo = function()
 {
     this.worldTransform.setValueDirect(this.transformCompound);
     this.sectorWorldTransform.setValueDirect(this.sectorTransformCompound);
-    
+
     this.updateWorldCenter();
     this.updateWorldPosition();
     this.updateWorldRotation();
@@ -14795,7 +14845,7 @@ ParentableMotionElement.prototype.updateWorldCenter = function()
     var center = this.center.getValueDirect();
     center = this.transformCompound.transform(center.x, center.y, center.z, 1);
     this.worldCenter.setValueDirect(center.x, center.y, center.z);
-    
+
     center = this.center.getValueDirect();
     center = this.sectorTransformCompound.transform(center.x, center.y, center.z, 1);
     this.sectorWorldCenter.setValueDirect(center.x, center.y, center.z);
@@ -14805,7 +14855,7 @@ ParentableMotionElement.prototype.updateWorldPosition = function()
 {
     var position = this.transformCompound.transform(0, 0, 0, 1);
     this.worldPosition.setValueDirect(position.x, position.y, position.z);
-    
+
     position = this.sectorTransformCompound.transform(0, 0, 0, 1);
     this.sectorWorldPosition.setValueDirect(position.x, position.y, position.z);
 }
@@ -14839,21 +14889,21 @@ ParentableMotionElement.prototype.synchronizePosition = function()
     {
         sectorOrigin = this.sectorOrigin.getValueDirect();
     }
-    
+
     // get sector position
     var sectorPosition = this.sectorPosition.getValueDirect();
-    
+
     // get world position
     var position = new Vector3D();
     position.x = sectorOrigin.x + sectorPosition.x;
     position.y = sectorOrigin.y + sectorPosition.y;
     position.z = sectorOrigin.z + sectorPosition.z;
-    
+
     // update position
     this.position.removeModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.position.setValueDirect(position.x, position.y, position.z);
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
-    
+
     // flag a position update
     this.updatePosition = true;
 }
@@ -14862,7 +14912,7 @@ ParentableMotionElement.prototype.synchronizeSectorPosition = function()
 {
     // synchronize sector position with position if necessary (don't sync if not necessary to avoid 
     // the circular dependency between position & sector position
-	
+
     // get sector origin (use [0, 0, 0] for parented objects)
     var sectorOrigin = new Vector3D;
     if (this.motionParent)
@@ -14899,37 +14949,38 @@ ParentableMotionElement.prototype.getDirectionVectors = function()
     var up = this.sectorTransformCompound.transform(0, 1, 0, 0);
     var right = this.sectorTransformCompound.transform(1, 0, 0, 0);
     var forward = this.sectorTransformCompound.transform(0, 0, 1, 0);
-    
+
     return {
-        up: up, 
-        right: right, 
+        up: up,
+        right: right,
         forward: forward
     };
 }
 
 ParentableMotionElement.prototype.setMotionParent = function(parent)
 {
-    if (parent == this) return;
-    
+    if (parent == this)
+        return;
+
     this.motionParent = parent;
-    
+
     // set sector position to account for parenting
-    this.synchronizeSectorPosition();       
+    this.synchronizeSectorPosition();
 }
 
 ParentableMotionElement.prototype.velocityModified = function()
 {
-	if (this.panVelocity.isZero() &&
-		this.linearVelocity.isZero() &&
-		this.angularVelocity.isZero() &&
-		this.scalarVelocity.isZero())
-	{
-		this.nonZeroVelocity = false;
-	}
-	else
-	{
-		this.nonZeroVelocity = true;
-	}
+    if (this.panVelocity.isZero() &&
+            this.linearVelocity.isZero() &&
+            this.angularVelocity.isZero() &&
+            this.scalarVelocity.isZero())
+    {
+        this.nonZeroVelocity = false;
+    }
+    else
+    {
+        this.nonZeroVelocity = true;
+    }
 }
 
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
@@ -14977,8 +15028,8 @@ function ParentableMotionElement_ParentModifiedCB(attribute, container)
 
 function ParentableMotionElement_VelocityModifiedCB(attribute, container)
 {
-	container.velocityModified();
-	container.incrementModificationCount();
+    container.velocityModified();
+    container.incrementModificationCount();
 }
 
 function ParentableMotionElement_InheritanceModifiedCB(attribute, container)
@@ -15949,7 +16000,7 @@ Group.prototype.addChild = function(child)
     SGNode.prototype.addChild.call(this, child);
 }
 
-Group.prototype.insertChild = function(child, before)
+Group.prototype.insertChild = function(child, at)
 {
     if (this.proxyChildAttrs.getValueDirect() == true)
     {
@@ -15968,7 +16019,7 @@ Group.prototype.insertChild = function(child, before)
 	}
 
     // call base-class implementation
-    SGNode.prototype.insertChild.call(this, child, before);
+    SGNode.prototype.insertChild.call(this, child, at);
 }
     
 Group.prototype.removeChild = function(child)
@@ -18259,6 +18310,8 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
+    this.socketConnectors = new SocketConnectors();
+    this.plugConnectors = new PlugConnectors();
     
     this.show.addTarget(this.enabled);
     
@@ -18335,6 +18388,9 @@ function Model()
     this.registerAttribute(this.highlight, "highlight");
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
+    this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
+    this.registerAttribute(this.socketConnectors, "socketConnectors");
+    this.registerAttribute(this.plugConnectors, "plugConnectors");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -18516,18 +18572,20 @@ Model.prototype.apply = function(directive, params, visitChildren)
         case "collide":
             {
                 var lastWorldMatrix = new Matrix4x4();
-                lastWorldMatrix.loadMatrix(params.worldMatrix);
-                params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
+                lastWorldMatrix.loadMatrix(params.worldMatrix);              
 
+                //params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+  
+                // call base-class implementation
+                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
+                
                 if (this.detectCollision.getValueDirect()) 
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
-                    params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree);
+                    params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree, params.worldMatrix);
                     this.collisionDetected.setValueDirect(false);
                 }
-                
-                // call base-class implementation
-                ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
@@ -22456,7 +22514,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
         return;
     }
     
-    params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
+    //params.worldMatrix = params.worldMatrix.leftMultiply(this.matrixTransform);
             
     switch (directive)
     {
@@ -22560,7 +22618,32 @@ QuaternionRotate.prototype.apply = function(directive, params, visitChildren)
         Transform.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-
+    /*
+    switch (directive)
+    {
+        case "render":
+        {
+        }
+        break;
+         
+        case "rayPick":
+        {
+            
+        }
+        break;
+        
+        case "bbox":
+        {
+            
+        }
+        break;
+        
+        case "collide":
+        {
+        }
+        break;
+    }
+    */
     // call base-class implementation
     Transform.prototype.apply.call(this, directive, params, visitChildren);
 }
@@ -22958,10 +23041,12 @@ function CollideParams()
     this.detectCollisions = new Array();
 }
 
-function CollideRec(model, tree)
+function CollideRec(model, tree, worldMatrix)
 {
     this.model = model;
-    this.tree = tree;    
+    this.tree = tree;
+    this.worldMatrix = new Matrix4x4();
+    this.worldMatrix.loadMatrix(worldMatrix);
 }
 
 CollideDirective.prototype = new SGDirective();
@@ -22991,6 +23076,9 @@ CollideDirective.prototype.execute = function(root)
     
     // detect obstructions
     this.detectObstructions(params.detectCollisions);
+    
+    // detect snap-to connections
+    this.detectSnapConnections(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
@@ -23069,6 +23157,71 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
     for (var i = 0; i < obstructions.length; i++)
     {
         models[i].getAttribute("obstructionDetected").setValueDirect(obstructions[i]);
+    }
+}
+
+CollideDirective.prototype.detectSnapConnections = function(collideRecs)
+{
+    var sockets = [];
+    var plugs = [];
+    
+    // get disconnected sockets/plugs
+    for (var i in collideRecs)
+    {
+        var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
+        for (var j=0; j < socketConnectors.Size(); j++)
+        {
+            var socketConnector = socketConnectors.getAt(j);
+            if (socketConnector.getAttribute("connected").getValueDirect() == false)
+            {
+                sockets.push(new Pair(socketConnector, collideRecs[i]));
+            }
+        }
+        
+        var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
+        for (var j=0; j < plugConnectors.Size(); j++)
+        {
+            var plugConnector = plugConnectors.getAt(j);
+            if (plugConnector.getAttribute("connected").getValueDirect() == false)
+            {
+                plugs.push(new Pair(plugConnector, collideRecs[i]));
+            }
+        }
+    }
+    
+    // test plugs for collision with sockets
+    for (var i=0; i < plugs.length; i++)
+    {
+        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
+        
+        for (var j=0; j < sockets.length; j++)
+        {
+            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
+            if (plugType != socketType) continue;
+            
+            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
+            if (connection > 0)
+            {
+                // perform snap-to!
+                var factory = this.registry.find("AttributeFactory");
+                var snapTo = factory.create("SnapTo");
+                snapTo.getAttribute("target").copyValue(sockets[j].second.model.getAttribute("name"));
+                snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
+                snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
+                snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
+                snapTo.getAttribute("socketWorldMatrix").setValueDirect(sockets[j].second.worldMatrix);
+                snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
+                snapTo.getAttribute("slot").setValueDirect(connection);
+                snapTo.execute();
+    
+                // flag plug/socket as connected
+                plugs[i].first.getAttribute("connected").setValueDirect(true);             
+                sockets[j].first.getAttribute("connected").setValueDirect(true);
+                
+                // make plug model unmoveable
+                plugs[i].second.model.getAttribute("moveable").setValueDirect(false);
+            }
+        }
     }
 }
 function HighlightTarget()
@@ -24893,6 +25046,130 @@ function BoneEffector_NormalsModifiedCB(attribute, container)
 {
     container.updateNormals = true;
 }
+
+SnapConnector.prototype = new AttributeContainer();
+SnapConnector.prototype.constructor = SnapConnector;
+
+function SnapConnector()
+{
+    AttributeContainer.call(this);
+    this.className = "SnapConnector";
+    this.attrType = eAttrType.SnapConnector;
+
+    this.type = new StringAttr("");
+    this.normal = new Vector3DAttr(0, 0, 0);
+    this.connected = new BooleanAttr(false);
+
+    this.registerAttribute(this.type, "type");
+    this.registerAttribute(this.normal, "normal");
+    this.registerAttribute(this.connected, "connected");
+}
+
+SocketConnector.prototype = new SnapConnector();
+SocketConnector.prototype.constructor = SocketConnector;
+
+function SocketConnector()
+{
+    SnapConnector.call(this);
+    this.className = "SocketConnector";
+    this.attrType = eAttrType.SocketConnector;
+
+    this.slot1 = new SphereAttr();
+    this.slot2 = new SphereAttr();
+
+    this.registerAttribute(this.slot1, "slot1");
+    this.registerAttribute(this.slot2, "slot2");
+}
+
+PlugConnector.prototype = new SnapConnector();
+PlugConnector.prototype.constructor = PlugConnector;
+
+function PlugConnector()
+{
+    SnapConnector.call(this);
+    this.className = "PlugConnector";
+    this.attrType = eAttrType.PlugConnector;
+
+    this.pin1 = new SphereAttr();
+    this.pin2 = new SphereAttr();
+
+    this.registerAttribute(this.pin1, "pin1");
+    this.registerAttribute(this.pin2, "pin2");
+}
+
+PlugConnector.prototype.collides = function (socketConnector, plugWorldMatrix, socketWorldMatrix)
+{
+    // check pin1/socket1
+    this.pin1.sphere.setTransform(plugWorldMatrix);
+    socketConnector.slot1.sphere.setTransform(socketWorldMatrix);
+
+    if (this.pin1.sphere.intersects(socketConnector.slot1.sphere))
+    {
+        return 1;
+    }
+
+    // check pin2/socket2
+    this.pin2.sphere.setTransform(plugWorldMatrix);
+    socketConnector.slot2.sphere.setTransform(socketWorldMatrix);
+
+    if (this.pin2.sphere.intersects(socketConnector.slot2.sphere))
+    {
+        return 2;
+    }
+
+    // no collision detected
+    return 0;
+}
+
+SocketConnectors.prototype = new AttributeVector();
+SocketConnectors.prototype.constructor = SocketConnectors;
+
+function SocketConnectors()
+{
+    AttributeVector.call(this, new SocketConnectorAllocator());
+    this.className = "SocketConnectors";
+    this.attrType = eAttrType.SocketConnectors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SocketConnectorAllocator.prototype = new Allocator();
+SocketConnectorAllocator.prototype.constructor = SocketConnectorAllocator;
+
+function SocketConnectorAllocator()
+{
+}
+
+SocketConnectorAllocator.prototype.allocate = function ()
+{
+    return new SocketConnector();
+}
+
+PlugConnectors.prototype = new AttributeVector();
+PlugConnectors.prototype.constructor = PlugConnectors;
+
+function PlugConnectors()
+{
+    AttributeVector.call(this, new PlugConnectorAllocator());
+    this.className = "PlugConnectors";
+    this.attrType = eAttrType.PlugConnectors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+PlugConnectorAllocator.prototype = new Allocator();
+PlugConnectorAllocator.prototype.constructor = PlugConnectorAllocator;
+
+function PlugConnectorAllocator()
+{
+}
+
+PlugConnectorAllocator.prototype.allocate = function ()
+{
+    return new PlugConnector();
+}
+
+
 
 var eEventType = {
     Unknown                     :-1,
@@ -29910,43 +30187,44 @@ function addInspectionGroup(node, factory)
 {
 
     // ensure that rotation group has not already been added
-	var rotGroup = getInspectionGroup(node);
-	
-    if (rotGroup) return;
-		
-	var pGrp        = new Group();
+    var rotGroup = getInspectionGroup(node);
+
+    if (rotGroup)
+        return;
+
+    var pGrp = new Group();
     pGrp.setGraphMgr(factory.graphMgr);
-    var pTranslate  = new Translate();
+    var pTranslate = new Translate();
     pTranslate.setGraphMgr(factory.graphMgr);
-    var pScaleInv   = new Scale();
+    var pScaleInv = new Scale();
     pScaleInv.setGraphMgr(factory.graphMgr);
-    var pQuat       = new QuaternionRotate();
+    var pQuat = new QuaternionRotate();
     pQuat.setGraphMgr(factory.graphMgr);
-    var pTransBack  = new Translate();
+    var pTransBack = new Translate();
     pTransBack.setGraphMgr(factory.graphMgr);
-    var pScale      = new Scale();
+    var pScale = new Scale();
     pScale.setGraphMgr(factory.graphMgr);
-    
+
     pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
 
     pGrp.name.setValueDirect("InspectionGroup");
-	pTranslate.name.setValueDirect("Translate");
+    pTranslate.name.setValueDirect("Translate");
     pScaleInv.name.setValueDirect("ScaleInverse");
-	pQuat.name.setValueDirect("Quaternion");
-	pTransBack.name.setValueDirect("TranslateBack");			
+    pQuat.name.setValueDirect("Quaternion");
+    pTransBack.name.setValueDirect("TranslateBack");
     pScale.name.setValueDirect("Scale");
 
-	pGrp.addChild(pTranslate); // child 0
+    pGrp.addChild(pTranslate); // child 0
     pGrp.addChild(pScaleInv);  // child 1
-	pGrp.addChild(pQuat);      // child 2
+    pGrp.addChild(pQuat);      // child 2
     pGrp.addChild(pScale);     // child 3
-	pGrp.addChild(pTransBack); // child 4
+    pGrp.addChild(pTransBack); // child 4
 
-	var pChildZero = node.getChild(0);
-	if (pChildZero)
-	{
-		pChildZero.insertChild(pGrp, 0);
-	}
+    var pChildZero = node.getChild(0);
+    if (pChildZero)
+    {
+        pChildZero.insertChild(pGrp, 0);
+    }
 
     node.registerAttribute(pTranslate.translation, "inspectionGroup_translate");
     node.registerAttribute(pScaleInv.scale, "inspectionGroup_scaleInverse");
@@ -29962,14 +30240,14 @@ function addInspectionGroup(node, factory)
     pScale.scale.setContainer(node);
     pTransBack.translation.setContainer(node);
 
-	return;
+    return;
 }
 
 function deleteInspectionGroup(node)
 {
-	var rotGroup = getInspectionGroup(node);
-	if (rotGroup)
-	{
+    var rotGroup = getInspectionGroup(node);
+    if (rotGroup)
+    {
         rotGroup.getChild(0).getAttribute("translation").setContainer(rotGroup.getChild(0));
         rotGroup.getChild(1).getAttribute("scale").setContainer(rotGroup.getChild(1));
         rotGroup.getChild(2).getAttribute("rotationQuat").setContainer(rotGroup.getChild(2));
@@ -29986,69 +30264,69 @@ function deleteInspectionGroup(node)
 
         node.removeChild(rotGroup);
 
-	}
+    }
 
-	return;
+    return;
 }
 
 function getInspectionGroup(moveableNode)
 {
     var group = null;
-    
-	var childZero = moveableNode.getChild(0);
-	if (childZero)
-	{
-		group = childZero.getNamedChild("InspectionGroup")
-	}
 
-	return group;
+    var childZero = moveableNode.getChild(0);
+    if (childZero)
+    {
+        group = childZero.getNamedChild("InspectionGroup")
+    }
+
+    return group;
 }
 
 function setInspectionGroupActivationState(node, enable)
 {
-	var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
-		var pQuat = pRotGroup.getChild(2);
-		if (pQuat)
-		{
-			pQuat.enabled.setValueDirect(enable);
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
+        var pQuat = pRotGroup.getChild(2);
+        if (pQuat)
+        {
+            pQuat.enabled.setValueDirect(enable);
 
-			if (!enable)
-			{
-				var quat = new Quaternion();
-				quat.loadIdentity();
+            if (!enable)
+            {
+                var quat = new Quaternion();
+                quat.loadIdentity();
 
-				var quatAttr = pQuat.rotationQuat;
-				quatAttr.setValueDirect(quat);
-			}
-		}
-		
-		var pPos = node.getAttribute("position");
-		if (enable)
-		{
-			if (!(node in g_objPosMap))
-			{
-				g_objPosMap[node] = pPos.getValueDirect();
-			}
-		}
-		else // !enable
-		{
-			var pos = g_objPosMap[node];
-			pPos.setValueDirect(pos);
-		}
-		
-	}
+                var quatAttr = pQuat.rotationQuat;
+                quatAttr.setValueDirect(quat);
+            }
+        }
 
-	return;
+        var pPos = node.getAttribute("position");
+        if (enable)
+        {
+            if (!(node in g_objPosMap))
+            {
+                g_objPosMap[node] = pPos.getValueDirect();
+            }
+        }
+        else // !enable
+        {
+            var pos = g_objPosMap[node];
+            pPos.setValueDirect(pos);
+        }
+
+    }
+
+    return;
 }
 
 function setInspectionGroupContainer(node)
 {
 
-	var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
         node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
         node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
         node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
@@ -30075,22 +30353,20 @@ function setInspectionGroupContainer(node)
     return;
 }
 
-
-// Isn't called. Commented out in RenderAgent.cpp
 function zeroInspectionGroup(node)
 {
-   var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
-		var pQuat = pRotGroup.getChild(2);
-		if (pQuat)
-		{
-			var quat = new Quaternion();
-			quat.loadIdentity();
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
+        var pQuat = pRotGroup.getChild(2);
+        if (pQuat)
+        {
+            var quat = new Quaternion();
+            quat.loadIdentity();
 
-			var quatAttr = pQuat.rotationQuat;
-			quatAttr.setValueDirect(quat);
-		}
+            var quatAttr = pQuat.rotationQuat;
+            quatAttr.setValueDirect(quat);
+        }
     }
 
     return;
@@ -30098,22 +30374,22 @@ function zeroInspectionGroup(node)
 
 function clearObjectPositionMap()
 {
-	g_objPosMap = {};
+    g_objPosMap = {};
 
-	return;
+    return;
 }
 
 // Doesn't do anything.
 function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
 {
     /* 
-    CQuaternionf q;
-	CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
-	if (quat)
-	{
-		quat.getValueDirect(q);
-	}
-    */
+     CQuaternionf q;
+     CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
+     if (quat)
+     {
+     quat.getValueDirect(q);
+     }
+     */
 }
 SerializeCommand.prototype = new Command();
 SerializeCommand.prototype.constructor = SerializeCommand;
@@ -30640,7 +30916,6 @@ function MorphCommand_SourceModifiedCB(attribute, container)
     }
 }
 
-
 function MorphCommand_TargetModifiedCB(attribute, container)
 {
     var target = attribute.getValueDirect().join("");
@@ -30648,6 +30923,184 @@ function MorphCommand_TargetModifiedCB(attribute, container)
     if (resource)
     {
         container.targetModel = resource;
+    }
+}
+
+SnapToCommand.prototype = new Command();
+SnapToCommand.prototype.constructor = SnapToCommand;
+
+function SnapToCommand()
+{
+    Command.call(this);
+    this.className = "SnapTo";
+    this.attrType = eAttrType.SnapTo;
+
+    this.plugModel = null;
+    this.socketModel = null;
+
+    this.socket = new StringAttr("");
+    this.plug = new StringAttr("");
+    this.slot = new NumberAttr(0);
+    this.socketConnector = new SocketConnector();
+    this.plugConnector = new PlugConnector();
+    this.socketWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+    this.plugWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+
+    this.target.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
+    this.socket.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
+    this.plug.addModifiedCB(SnapToCommand_PlugModifiedCB, this);
+
+    this.registerAttribute(this.socket, "socket");
+    this.registerAttribute(this.plug, "plug");
+    this.registerAttribute(this.slot, "slot");
+    this.registerAttribute(this.socketConnector, "socketConnector");
+    this.registerAttribute(this.plugConnector, "plugConnector");
+    this.registerAttribute(this.socketWorldMatrix, "socketWorldMatrix");
+    this.registerAttribute(this.plugWorldMatrix, "plugWorldMatrix");
+
+    this.target.addTarget(this.socket, null, null, false);
+}
+
+SnapToCommand.prototype.execute = function()
+{
+    if (this.socketModel && this.plugModel)
+    {
+        this.snapTo(this.socketModel, this.plugModel);
+    }
+}
+
+SnapToCommand.prototype.snapTo = function(socket, plug)
+{
+    // parent plug to socket; clear its position/rotation and inspection group
+    plug.setMotionParent(socket);
+    plug.getAttribute("position").setValueDirect(0, 0, 0);
+    plug.getAttribute("rotation").setValueDirect(0, 0, 0);
+    zeroInspectionGroup(plug);
+
+    var socketWorldMatrix = new Matrix4x4();//this.socketWorldMatrix.getValueDirect();
+
+    var matrix = new Matrix4x4();
+
+    // set rotation
+
+    // rotate so that normals are coincident; do this by rotating angle between
+    // the normals degrees about the cross product of the normals
+    var socketNormal = this.socketConnector.getAttribute("normal").getValueDirect();
+    socketNormal = socketWorldMatrix.transform(socketNormal.x, socketNormal.y, socketNormal.z, 0);
+    socketNormal = new Vector3D(socketNormal.x, socketNormal.y, socketNormal.z);
+    socketNormal.normalize();
+
+    var plugNormal = this.plugConnector.getAttribute("normal").getValueDirect();
+    plugNormal = new Vector3D(plugNormal.x, plugNormal.y, plugNormal.z);
+    plugNormal.normalize();
+
+    var cross = crossProduct(socketNormal, plugNormal);
+    var cosAngle = cosineAngleBetween(socketNormal, plugNormal);
+    angleBetween = 180 - toDegrees(Math.acos(cosAngle));
+    if (angleBetween > 0)
+    {
+        var rotationMatrix = new Matrix4x4();
+        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);
+
+        matrix = rotationMatrix;
+    }
+
+    // line up the unconnected slot; do this by rotating the angle between the
+    // remaining slot (socket unconnected - connected) and
+    // (plug unconnected - connected) about the socket normal
+    var pin1 = this.plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
+    var slot1 = this.socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
+    var pin2 = this.plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
+    var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
+
+    pin1 = matrix.transform(pin1.x, pin1.y, pin1.z, 1);
+    slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
+    pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
+    slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
+
+    var pinToPin, slotToSlot;
+    switch (this.slot.getValueDirect())
+    {
+        case 1:
+            pinToPin = new Vector3D(pin2.x - pin1.x, pin2.y - pin1.y, pin2.z - pin1.z);
+            slotToSlot = new Vector3D(slot2.x - slot1.x, slot2.y - slot1.y, slot2.z - slot1.z);
+            break;
+
+        case 2:
+            pinToPin = new Vector3D(pin1.x - pin2.x, pin1.y - pin2.y, pin1.z - pin2.z);
+            slotToSlot = new Vector3D(slot1.x - slot2.x, slot1.y - slot2.y, slot1.z - slot2.z);
+            break;
+
+        default:
+            return;
+    }
+
+    cosAngle = cosineAngleBetween(pinToPin, slotToSlot);
+    angleBetween = toDegrees(Math.acos(cosAngle));
+    if (angleBetween > 0)
+    {
+        var rotationMatrix = new Matrix4x4();
+        rotationMatrix.loadRotation(plugNormal.x, plugNormal.y, plugNormal.z, angleBetween);
+
+        matrix = matrix.multiply(rotationMatrix);
+    }
+
+    var rotationAngles = matrix.getRotationAngles();
+    plug.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+    // set position
+
+    // get world positions of pin and slot to connect 
+    var pin, slot;
+    switch (this.slot.getValueDirect())
+    {
+        case 1:
+            pin = this.plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
+            slot = this.socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
+            break;
+
+        case 2:
+            pin = this.plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
+            slot = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
+            break;
+
+        default:
+            return;
+    }
+    pin = new Vector3D(pin.x, pin.y, pin.z);
+    slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
+
+    // project pin onto plug normal, scale socketNormal
+    var dot = dotProduct(pin, plugNormal);
+    socketNormal.multiplyScalar(dot);
+    
+    plug.getAttribute("sectorPosition").setValueDirect(slot.x + slotToSlot.x / 2 + socketNormal.x, 
+        slot.y + slotToSlot.y / 2 + socketNormal.y, slot.z + slotToSlot.z / 2 + socketNormal.z);
+}
+
+function SnapToCommand_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var resource = container.registry.find(target);
+    if (resource)
+    {
+        container.socketModel = resource;
+    }
+}
+
+function SnapToCommand_PlugModifiedCB(attribute, container)
+{
+    var plug = attribute.getValueDirect().join("");
+    var resource = container.registry.find(plug);
+    if (resource)
+    {
+        container.plugModel = resource;
     }
 }
 
@@ -33698,61 +34151,64 @@ function AttributeFactory()
     AttributeContainer.call(this);
     this.className = "AttributeFactory";
     this.attrType = eAttrType.AttributeFactory;
-    
+
     this.newResourceProcs = [];
     this.configureProcs = [];
     this.finalizeProcs = [];
     this.registry = null;
     this.graphMgr = null;
-    
+
     this.name = new StringAttr("AttributeFactory");
-    
+
     this.registerAttribute(this.name, "name");
-    
+
     this.initializeNewResourceMap();
     this.initializeConfigureMap();
     this.initializeFinalizeMap();
 }
 
-AttributeFactory.prototype.create = function(name)
+AttributeFactory.prototype.create = function (name)
 {
     var resource = null;
-    
+
     // invoke new resource proc
     var newResourceProc = this.newResourceProcs[name];
     if (newResourceProc)
     {
         resource = newResourceProc(name, this);
     }
-    if (!resource) return null;
-    
+    if (!resource)
+        return null;
+
     // invoke configuration proc (if specified)
     var configureProc = this.configureProcs[name];
     if (configureProc)
     {
         configureProc(resource, this);
     }
-    
+
     // if resource is a container, register name and userData if not already registered
-	if (resource.isContainer())
-	{
-	    if (!resource.getAttribute("name")) resource.registerAttribute(new StringAttr(""), "name");
-	    if (!resource.getAttribute("userData")) resource.registerAttribute(new StringAttr(""), "userData");
-	}
-	
-	// register resource
-	if (this.registry)
-	{
-	    this.registry.register(resource);
-	    resource.setRegistry(this.registry);   
-	}
-	
-	// invoke post-register proc (if specified)
-	
-	return resource;
+    if (resource.isContainer())
+    {
+        if (!resource.getAttribute("name"))
+            resource.registerAttribute(new StringAttr(""), "name");
+        if (!resource.getAttribute("userData"))
+            resource.registerAttribute(new StringAttr(""), "userData");
+    }
+
+    // register resource
+    if (this.registry)
+    {
+        this.registry.register(resource);
+        resource.setRegistry(this.registry);
+    }
+
+    // invoke post-register proc (if specified)
+
+    return resource;
 }
 
-AttributeFactory.prototype.finalize = function(name, attribute)
+AttributeFactory.prototype.finalize = function (name, attribute)
 {
     // invoke finalize proc
     var finalizeProc = this.finalizeProcs[name];
@@ -33762,7 +34218,7 @@ AttributeFactory.prototype.finalize = function(name, attribute)
     }
 }
 
-AttributeFactory.prototype.initializeNewResourceMap = function()
+AttributeFactory.prototype.initializeNewResourceMap = function ()
 {
     // attributes
     this.newResourceProcs["Styles"] = newAttribute;
@@ -33798,6 +34254,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Selector"] = newSGNode;
     this.newResourceProcs["Surface"] = newSGNode;
     this.newResourceProcs["Translate"] = newSGNode;
+    this.newResourceProcs["Transform"] = newSGNode;
     this.newResourceProcs["TriList"] = newSGNode;
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;
@@ -33812,7 +34269,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["UpdateDirective"] = newSGDirective;
     this.newResourceProcs["CollideDirective"] = newSGDirective;
     this.newResourceProcs["HighlightDirective"] = newSGDirective;
-    
+
     // evaluators
     this.newResourceProcs["BBoxLocator"] = newBBoxLocator;
     this.newResourceProcs["KeyframeInterpolator"] = newKeyframeInterpolator;
@@ -33844,13 +34301,14 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Set"] = newCommand;
     this.newResourceProcs["Stop"] = newCommand;
     this.newResourceProcs["Morph"] = newCommand;
+    this.newResourceProcs["SnapTo"] = newCommand;
 
     // device handlers
     this.newResourceProcs["MouseHandler"] = newDeviceHandler;
     this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
-AttributeFactory.prototype.initializeConfigureMap = function()
+AttributeFactory.prototype.initializeConfigureMap = function ()
 {
     // nodes
     this.configureProcs["Model"] = configureModel;
@@ -33865,7 +34323,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["HighlightDirective"] = configureDirective;
 }
 
-AttributeFactory.prototype.initializeFinalizeMap = function()
+AttributeFactory.prototype.initializeFinalizeMap = function ()
 {
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
@@ -33901,18 +34359,19 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["Set"] = finalizeCommand;
     this.finalizeProcs["Stop"] = finalizeCommand;
     this.finalizeProcs["Morph"] = finalizeCommand;
-    
+    this.finalizeProcs["SnapTo"] = finalizeCommand;
+
     // device handlers
     this.finalizeProcs["MouseHandler"] = finalizeDeviceHandler;
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
-AttributeFactory.prototype.setRegistry = function(registry)
+AttributeFactory.prototype.setRegistry = function (registry)
 {
     this.registry = registry;
 }
 
-AttributeFactory.prototype.setGraphMgr = function(graphMgr)
+AttributeFactory.prototype.setGraphMgr = function (graphMgr)
 {
     this.graphMgr = graphMgr;
 }
@@ -33920,106 +34379,237 @@ AttributeFactory.prototype.setGraphMgr = function(graphMgr)
 function newAttribute(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "BalloonTipLabelStyleAttr":    resource = new BalloonTipLabelStyleAttr(); break;
-    case "BBoxAttr":                    resource = new BBoxAttr(); break;
-    case "BooleanAttr":                 resource = new BooleanAttr(); break;
-    case "ColorAttr":                   resource = new ColorAttr(); break;
-    case "FontStyleAttr":               resource = new FontStyleAttr(); break;
-    case "IconStyleAttr":               resource = new IconStyleAttr(); break;
-    case "ImageAttr":                   resource = new ImageAttr(); break;
-    case "KeyframeAttr":                resource = new KeyframeAttr(); break;
-    case "KeyframesAttr":               resource = new KeyframesAttr(); break;
-    case "LabelStyleAttr":              resource = new LabelStyleAttr(); break;
-    case "HTMLLabelStyleAttr":          resource = new HTMLLabelStyleAttr(); break;
-    case "NumberArrayAttr":             resource = new NumberArrayAttr(); break;
-    case "NumberAttr":                  resource = new NumberAttr(); break;
-    case "Matrix4x4Attr":               resource = new Matrix4x4Attr(); break;
-    case "PlaneAttr":                   resource = new PlaneAttr(); break;
-    case "PulseAttr":                   resource = new PulseAttr(); break;
-    case "QuaternionAttr":              resource = new QuaternionAttr(); break;
-    case "RectAttr":                    resource = new RectAttr(); break;
-    case "ReferenceAttr":               resource = new ReferenceAttr(); break;
-    case "StringAttr":                  resource = new StringAttr(); break;
-    case "StyleAttr":                   resource = new StyleAttr(); break;
-    case "StylesAttr":                  resource = new StylesAttr(); break;
-    case "StyleMapAttr":                resource = new StyleMapAttr(); break;
-    case "StylesMapAttr":               resource = new StylesMapAttr(); break;
-    case "Vector2DAttr":                resource = new Vector2DAttr(); break;
-    case "Vector3DAttr":                resource = new Vector3DAttr(); break;
-    case "ViewportAttr":                resource = new ViewportAttr(); break;
-    case "ViewVolumeAttr":              resource = new ViewVolumeAttr(); break;
-    case "RenderableElementStyleAttr":  resource = new RenderableElementStyleAttr(); break;
-    case "Serializer":                  resource = new Serializer(); break;
-    case "Bone":                        resource = new Bone(); break;
+        case "BalloonTipLabelStyleAttr":
+            resource = new BalloonTipLabelStyleAttr();
+            break;
+        case "BBoxAttr":
+            resource = new BBoxAttr();
+            break;
+        case "BooleanAttr":
+            resource = new BooleanAttr();
+            break;
+        case "ColorAttr":
+            resource = new ColorAttr();
+            break;
+        case "FontStyleAttr":
+            resource = new FontStyleAttr();
+            break;
+        case "IconStyleAttr":
+            resource = new IconStyleAttr();
+            break;
+        case "ImageAttr":
+            resource = new ImageAttr();
+            break;
+        case "KeyframeAttr":
+            resource = new KeyframeAttr();
+            break;
+        case "KeyframesAttr":
+            resource = new KeyframesAttr();
+            break;
+        case "LabelStyleAttr":
+            resource = new LabelStyleAttr();
+            break;
+        case "HTMLLabelStyleAttr":
+            resource = new HTMLLabelStyleAttr();
+            break;
+        case "NumberArrayAttr":
+            resource = new NumberArrayAttr();
+            break;
+        case "NumberAttr":
+            resource = new NumberAttr();
+            break;
+        case "Matrix4x4Attr":
+            resource = new Matrix4x4Attr();
+            break;
+        case "PlaneAttr":
+            resource = new PlaneAttr();
+            break;
+        case "PulseAttr":
+            resource = new PulseAttr();
+            break;
+        case "QuaternionAttr":
+            resource = new QuaternionAttr();
+            break;
+        case "RectAttr":
+            resource = new RectAttr();
+            break;
+        case "ReferenceAttr":
+            resource = new ReferenceAttr();
+            break;
+        case "StringAttr":
+            resource = new StringAttr();
+            break;
+        case "StyleAttr":
+            resource = new StyleAttr();
+            break;
+        case "StylesAttr":
+            resource = new StylesAttr();
+            break;
+        case "StyleMapAttr":
+            resource = new StyleMapAttr();
+            break;
+        case "StylesMapAttr":
+            resource = new StylesMapAttr();
+            break;
+        case "Vector2DAttr":
+            resource = new Vector2DAttr();
+            break;
+        case "Vector3DAttr":
+            resource = new Vector3DAttr();
+            break;
+        case "ViewportAttr":
+            resource = new ViewportAttr();
+            break;
+        case "ViewVolumeAttr":
+            resource = new ViewVolumeAttr();
+            break;
+        case "RenderableElementStyleAttr":
+            resource = new RenderableElementStyleAttr();
+            break;
+        case "Serializer":
+            resource = new Serializer();
+            break;
+        case "Bone":
+            resource = new Bone();
+            break;
     }
-    
+
     return resource;
 }
 
 function newSGNode(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "DirectionalLight":    resource = new DirectionalLight(); registerParentableAttributes(resource, factory); break;
-    case "GlobalIllumination":  resource = new GlobalIllumination(); break;
-    case "Group":               resource = new Group(); break;
-    case "Isolator":            resource = new Isolator(); break;
-    case "Label":               resource = new Label(); break;
-    case "HTMLLabel":           resource = new HTMLLabel(); break;
-    case "BalloonTipLabel":     resource = new BalloonTipLabel(); break;
-    case "LineList":            resource = new LineList(); break;
-    case "MediaTexture":        resource = new MediaTexture(); break;
-    case "OrthographicCamera":  resource = new OrthographicCamera(); registerParentableAttributes(resource, factory); break;
-    case "PerspectiveCamera":   resource = new PerspectiveCamera(); registerParentableAttributes(resource, factory); break;
-    case "PointLight":          resource = new PointLight(); registerParentableAttributes(resource, factory); break;
-    case "PointList":           resource = new PointList(); break;
-    case "QuaternionRotate":    resource = new QuaternionRotate(); break;
-    case "Rotate":              resource = new Rotate(); break;
-    case "Scale":               resource = new Scale(); break;
-    case "Selector":            resource = new Selector(); break;
-    case "Surface":             resource = new Surface(); break;
-    case "Transform":           resource = new Transform(); break;
-    case "Translate":           resource = new Translate(); break;
-    case "TriList":             resource = new TriList(); break;
-    case "NullObject":          resource = new NullObject(); registerParentableAttributes(resource, factory);  break;
-    case "Cube":                resource = new Cube(); break;
-    case "Material":            resource = new Material(); break;
-    case "ScreenRect":          resource = new ScreenRect(); break;
+        case "DirectionalLight":
+            resource = new DirectionalLight();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "GlobalIllumination":
+            resource = new GlobalIllumination();
+            break;
+        case "Group":
+            resource = new Group();
+            break;
+        case "Isolator":
+            resource = new Isolator();
+            break;
+        case "Label":
+            resource = new Label();
+            break;
+        case "HTMLLabel":
+            resource = new HTMLLabel();
+            break;
+        case "BalloonTipLabel":
+            resource = new BalloonTipLabel();
+            break;
+        case "LineList":
+            resource = new LineList();
+            break;
+        case "MediaTexture":
+            resource = new MediaTexture();
+            break;
+        case "OrthographicCamera":
+            resource = new OrthographicCamera();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PerspectiveCamera":
+            resource = new PerspectiveCamera();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PointLight":
+            resource = new PointLight();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "PointList":
+            resource = new PointList();
+            break;
+        case "QuaternionRotate":
+            resource = new QuaternionRotate();
+            break;
+        case "Rotate":
+            resource = new Rotate();
+            break;
+        case "Scale":
+            resource = new Scale();
+            break;
+        case "Selector":
+            resource = new Selector();
+            break;
+        case "Surface":
+            resource = new Surface();
+            break;
+        case "Transform":
+            resource = new Transform();
+            break;
+        case "Translate":
+            resource = new Translate();
+            break;
+        case "TriList":
+            resource = new TriList();
+            break;
+        case "NullObject":
+            resource = new NullObject();
+            registerParentableAttributes(resource, factory);
+            break;
+        case "Cube":
+            resource = new Cube();
+            break;
+        case "Material":
+            resource = new Material();
+            break;
+        case "ScreenRect":
+            resource = new ScreenRect();
+            break;
     }
-    
+
     if (resource)
     {
         resource.setGraphMgr(factory.graphMgr);
     }
-    
+
     return resource;
 }
 
 function newSGDirective(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "BBoxDirective":               resource = new BBoxDirective(); break;
-    case "RayPickDirective":            resource = new RayPickDirective(); break;
-    case "RenderDirective":             resource = new RenderDirective(); break;  
-    case "SerializeDirective":          resource = new SerializeDirective(); break;
-    case "UpdateDirective":             resource = new UpdateDirective(); break;
-    case "CollideDirective":            resource = new CollideDirective(); break;
-    case "HighlightDirective":          resource = new HighlightDirective(); break;
+        case "BBoxDirective":
+            resource = new BBoxDirective();
+            break;
+        case "RayPickDirective":
+            resource = new RayPickDirective();
+            break;
+        case "RenderDirective":
+            resource = new RenderDirective();
+            break;
+        case "SerializeDirective":
+            resource = new SerializeDirective();
+            break;
+        case "UpdateDirective":
+            resource = new UpdateDirective();
+            break;
+        case "CollideDirective":
+            resource = new CollideDirective();
+            break;
+        case "HighlightDirective":
+            resource = new HighlightDirective();
+            break;
     }
-    
+
     if (resource)
     {
         resource.setGraphMgr(factory.graphMgr);
     }
-    
+
     return resource;
 }
 
@@ -34043,9 +34633,9 @@ function newBBoxLocator(name, factory)
 function newKeyframeInterpolator(name, factory)
 {
     var resource = new KeyframeInterpolator();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
@@ -34061,142 +34651,188 @@ function newMapProjectionCalculator(name, factory)
 function newObjectInspector(name, factory)
 {
     var resource = new ObjectInspector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     // target the Inspector's selection flag with the selector's clickPoint
     var selector = factory.registry.find("Selector");
     if (selector)
     {
         selector.getAttribute("selectionOccurred").addTarget(
-            resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("selectionCleared").addTarget(
-            resource.getAttribute("selectionCleared"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionCleared"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("pointView").addTarget(
-            resource.getAttribute("pointView"), eAttrSetOp.Replace, null, false);
+                resource.getAttribute("pointView"), eAttrSetOp.Replace, null, false);
     }
-    
+
     return resource;
 }
 
 function newSceneInspector(name, factory)
 {
     var resource = new BwSceneInspector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-   
+
     // target the Inspector's selection flag with the selector's clickPoint
     // target the Inspector's pivotDistance with the selector's distanceFromScreenCenter
     var selector = factory.registry.find("Selector");
     if (selector)
     {
         selector.getAttribute("selectionOccurred").addTarget(
-            resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
-            
+                resource.getAttribute("selectionOccurred"), eAttrSetOp.Replace, null, false);
+
         selector.getAttribute("distanceFromScreenCenter").addTarget(
-            resource.getAttribute("pivotDistance"), eAttrSetOp.Replace, null, false);
+                resource.getAttribute("pivotDistance"), eAttrSetOp.Replace, null, false);
     }
-     
+
     return resource;
 }
 
 function newTargetObserver(name, factory)
 {
-	var resource = new BwTargetObserver();
-    
+    var resource = new BwTargetObserver();
+
     registerEvaluatorAttributes(resource, factory);
-   
-   	return resource;	
+
+    return resource;
 }
 
 function newAnimalMover(name, factory)
 {
-	var resource = new AnimalMover();
-	
-	registerEvaluatorAttributes(resource, factory);
-	
-	return resource;	
+    var resource = new AnimalMover();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
 }
 
 function newWalkSimulator(name, factory)
 {
     var resource = new WalkSimulator();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newMorphEffector(name, factory)
 {
     var resource = new MorphEffector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newBoneEffector(name, factory)
 {
     var resource = new BoneEffector();
-    
+
     registerEvaluatorAttributes(resource, factory);
-    
+
     return resource;
 }
 
 function newCommand(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "AppendNode":     	    resource = new AppendNodeCommand(); break;
-    case "AutoInterpolate":     resource = new AutoInterpolateCommand(); break;
-    case "CommandSequence":     resource = new CommandSequence(); break;
-    case "ConnectAttributes":   resource = new ConnectAttributesCommand(); break;
-    case "ConnectOutputs":      resource = new ConnectAttributesCommand(); break;    
-    case "DisconnectAttributes":resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "DisconnectOutputs":   resource = new ConnectAttributesCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "Export":              resource = new ExportCommand(); break;
-    case "Locate":              resource = new LocateCommand(); break;
-    case "MotionInterpolate":   resource = new MotionInterpolateCommand(); break;
-    case "Pause":               resource = new PlayCommand(); resource.getAttribute("negate").setValueDirect(true); break;
-    case "Play":                resource = new PlayCommand(); break;
-    case "Remove":              resource = new RemoveCommand(); break;
-    case "ScreenCapture":       resource = new ScreenCaptureCommand(); break;
-    case "Serialize":           resource = new SerializeCommand(); break;
-    case "Set":                 resource = new SetCommand(); break;
-    case "Stop":                resource = new StopCommand(); break;
-    case "Morph":               resource = new MorphCommand(); break;
+        case "AppendNode":
+            resource = new AppendNodeCommand();
+            break;
+        case "AutoInterpolate":
+            resource = new AutoInterpolateCommand();
+            break;
+        case "CommandSequence":
+            resource = new CommandSequence();
+            break;
+        case "ConnectAttributes":
+            resource = new ConnectAttributesCommand();
+            break;
+        case "ConnectOutputs":
+            resource = new ConnectAttributesCommand();
+            break;
+        case "DisconnectAttributes":
+            resource = new ConnectAttributesCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "DisconnectOutputs":
+            resource = new ConnectAttributesCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "Export":
+            resource = new ExportCommand();
+            break;
+        case "Locate":
+            resource = new LocateCommand();
+            break;
+        case "MotionInterpolate":
+            resource = new MotionInterpolateCommand();
+            break;
+        case "Pause":
+            resource = new PlayCommand();
+            resource.getAttribute("negate").setValueDirect(true);
+            break;
+        case "Play":
+            resource = new PlayCommand();
+            break;
+        case "Remove":
+            resource = new RemoveCommand();
+            break;
+        case "ScreenCapture":
+            resource = new ScreenCaptureCommand();
+            break;
+        case "Serialize":
+            resource = new SerializeCommand();
+            break;
+        case "Set":
+            resource = new SetCommand();
+            break;
+        case "Stop":
+            resource = new StopCommand();
+            break;
+        case "Morph":
+            resource = new MorphCommand();
+            break;
+        case "SnapTo":
+            resource = new SnapToCommand();
+            break;
     }
 
-	// if command sequence, set to command mgr
-	if (name == "CommandSequence")
-	{
-	    var commandMgr = factory.registry.find("CommandMgr");
-	    if (commandMgr)
-	    {
-	        commandMgr.pushCommandSequence(resource);
-	    }    
-	}
-	
-	return resource;
+    // if command sequence, set to command mgr
+    if (name == "CommandSequence")
+    {
+        var commandMgr = factory.registry.find("CommandMgr");
+        if (commandMgr)
+        {
+            commandMgr.pushCommandSequence(resource);
+        }
+    }
+
+    return resource;
 }
 
 function newDeviceHandler(name, factory)
 {
     var resource = null;
-    
+
     switch (name)
     {
-    case "MouseHandler":        resource = new MouseHandler(); break;
-    case "KeyboardHandler":     resource = new KeyboardHandler(); break;
+        case "MouseHandler":
+            resource = new MouseHandler();
+            break;
+        case "KeyboardHandler":
+            resource = new KeyboardHandler();
+            break;
     }
-	
-	return resource;
+
+    return resource;
 }
 
 function configureModel(model, factory)
@@ -34210,7 +34846,7 @@ function configureDirective(directive, factory)
     var root = new StringAttr("");
     root.addModifiedCB(AttributeFactory_DirectiveRootModifiedCB, factory);
     directive.registerAttribute(root, "root");
-    
+
     var rootNode = factory.registry.getAttribute("rootPtr").getValueDirect();
     if (rootNode)
     {
@@ -34222,28 +34858,28 @@ function finalizeModel(model, factory)
 {
     // TODO
     console.debug("TODO: remove LWO assumption");
-    
+
     var url = model.getAttribute("url").getValueDirect();
     if (url) {
-        
+
         url = url.join("");
-        
+
         var pathInfo = formatPath(url);
         console.debug("path: " + pathInfo[0]);
         console.debug("content dir: " + pathInfo[1]);
-        
+
         var contentHandler = new LWObjectHandler();
         contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
 
-        var contentBuilder = new LWObjectBuilder(); 
+        var contentBuilder = new LWObjectBuilder();
         contentBuilder.setRegistry(factory.registry);
         contentBuilder.models.push(model);
         contentBuilder.layer = model.getAttribute("layer").getValueDirect();
         contentBuilder.visitHandler(contentHandler);
-        
-        contentHandler.parseFileStream(pathInfo[0]);  
+
+        contentHandler.parseFileStream(pathInfo[0]);
     }
-    
+
     addInspectionGroup(model, factory);
 }
 
@@ -34254,7 +34890,7 @@ function finalizeDirective(directive, factory)
 function finalizeCommand(command, factory)
 {
     command.finalize();
-    
+
     var commandMgr = factory.registry.find("CommandMgr");
     if (commandMgr)
     {
@@ -34263,7 +34899,7 @@ function finalizeCommand(command, factory)
         {
             commandMgr.popCommandSequence();
         }
-        
+
         commandMgr.addCommand(command);
     }
 }
@@ -34274,7 +34910,7 @@ function finalizeDeviceHandler(handler, factory)
     if (eventMgr)
     {
         var events = handler.getEventTypes();
-        for (var i=0; i < events.length; i++)
+        for (var i = 0; i < events.length; i++)
         {
             eventMgr.addListener(events[i], handler);
         }
@@ -34285,30 +34921,30 @@ function finalizeEvaluator(evaluator, factory)
 {
     // TODO
     console.debug("TODO: " + arguments.callee.name);
-    
+
     switch (evaluator.className)
     {
-    case "KeyframeInterpolator":
-        
-        var url = evaluator.getAttribute("url").getValueDirect();
-        if (url) {
-        
-            url = url.join("");
-            
-            var pathInfo = formatPath(url);
-            
-            var contentHandler = new LWSceneHandler();
-            contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-            
-            var contentBuilder = new LWSceneBuilder(); 
-            contentBuilder.setRegistry(factory.registry);
-            contentBuilder.evaluators.push(evaluator);
-            contentBuilder.visitHandler(contentHandler);
-            
-            contentHandler.parseFileStream(pathInfo[0]); 
-        }
-        AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
-        break;
+        case "KeyframeInterpolator":
+
+            var url = evaluator.getAttribute("url").getValueDirect();
+            if (url) {
+
+                url = url.join("");
+
+                var pathInfo = formatPath(url);
+
+                var contentHandler = new LWSceneHandler();
+                contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
+
+                var contentBuilder = new LWSceneBuilder();
+                contentBuilder.setRegistry(factory.registry);
+                contentBuilder.evaluators.push(evaluator);
+                contentBuilder.visitHandler(contentHandler);
+
+                contentHandler.parseFileStream(pathInfo[0]);
+            }
+            AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
+            break;
     }
 }
 
@@ -34317,30 +34953,30 @@ function registerEvaluatorAttributes(evaluator, factory)
     // url
     if (!evaluator.getAttribute("url"))
     {
-    	var url = new StringAttr("");
-    	evaluator.registerAttribute(url, "url");
-	}
-	
+        var url = new StringAttr("");
+        evaluator.registerAttribute(url, "url");
+    }
+
     // target
     if (!evaluator.getAttribute("target"))
     {
-    	var target = new StringAttr("");
-    	evaluator.registerAttribute(target, "target");
-	}
-	
+        var target = new StringAttr("");
+        evaluator.registerAttribute(target, "target");
+    }
+
     // renderAndRelease
     if (!evaluator.getAttribute("renderAndRelease"))
     {
-    	var renderAndRelease = new BooleanAttr(false);
-    	evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
-	}
-	
+        var renderAndRelease = new BooleanAttr(false);
+        evaluator.registerAttribute(renderAndRelease, "renderAndRelease");
+    }
+
     // targetConnectionType
     if (!evaluator.getAttribute("targetConnectionType"))
     {
-    	var targetConnectionType = new StringAttr("transform");
-    	targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
-    	evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
+        var targetConnectionType = new StringAttr("transform");
+        targetConnectionType.addModifiedCB(AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB, factory);
+        evaluator.registerAttribute(targetConnectionType, "targetConnectionType");
     }
 }
 
@@ -34349,42 +34985,42 @@ function registerParentableAttributes(pme, factory)
     // label
     if (!pme.getAttribute("label"))
     {
-		var label = new StringAttr("");
-		pme.registerAttribute(label, "label");
-		label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
-	}
-	
-	// geoPosition
-	if (!pme.getAttribute("geoPosition"))
-	{
-		var geoPosition = new Vector3DAttr();
-		pme.registerAttribute(geoPosition, "geoPosition");
-		geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
-	}
+        var label = new StringAttr("");
+        pme.registerAttribute(label, "label");
+        label.addModifiedCB(AttributeFactory_ParentableLabelModifiedCB, factory);
+    }
 
-	// altitude
-	if (!pme.getAttribute("altitude"))
-	{
-		var altitude = new NumberAttr();
-		pme.registerAttribute(altitude, "altitude");
-	}
-	
-	// latitude
-	if (!pme.getAttribute("latitude"))
-	{
-		var latitude = new NumberAttr();
-		pme.registerAttribute(latitude, "latitude");
-	}
-	
-	// longitude
-	if (!pme.getAttribute("longitude"))
-	{
-		var longitude = new NumberAttr();
-		pme.registerAttribute(longitude, "longitude");
-	}
-	
-	// misc modified callbacks
-	pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
+    // geoPosition
+    if (!pme.getAttribute("geoPosition"))
+    {
+        var geoPosition = new Vector3DAttr();
+        pme.registerAttribute(geoPosition, "geoPosition");
+        geoPosition.addModifiedCB(AttributeFactory_ParentableGeoPositionModifiedCB, factory);
+    }
+
+    // altitude
+    if (!pme.getAttribute("altitude"))
+    {
+        var altitude = new NumberAttr();
+        pme.registerAttribute(altitude, "altitude");
+    }
+
+    // latitude
+    if (!pme.getAttribute("latitude"))
+    {
+        var latitude = new NumberAttr();
+        pme.registerAttribute(latitude, "latitude");
+    }
+
+    // longitude
+    if (!pme.getAttribute("longitude"))
+    {
+        var longitude = new NumberAttr();
+        pme.registerAttribute(longitude, "longitude");
+    }
+
+    // misc modified callbacks
+    pme.getAttribute("worldCenter").addModifiedCB(AttributeFactory_ParentableWorldPositionModifiedCB, factory);
 }
 
 function getSceneGraph()
@@ -34416,7 +35052,7 @@ function AttributeFactory_ParentableGeoPositionModifiedCB(attribute, container)
         if (cms && cms.length)
         {
             var cm = cms[0];
-            
+
             var mpcs = container.registry.getByType(eAttrType.MapProjectionCalculator);
             if (mpcs && mpcs.length)
             {
@@ -34438,7 +35074,7 @@ function AttributeFactory_ParentableWorldPositionModifiedCB(attribute, container
 }
 
 function AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(attribute, container)
-{  
+{
     var evaluator = attribute.getContainer();
     if (evaluator)
     {

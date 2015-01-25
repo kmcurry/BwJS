@@ -115,6 +115,7 @@ SceneGraph/ScreenRect.js
 SceneGraph/MorphEffector.js
 SceneGraph/Bone.js
 SceneGraph/BoneEffector.js
+SceneGraph/SnapConnector.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
@@ -154,6 +155,7 @@ BwCore/Serialize.js
 BwCore/ScreenCapture.js
 BwCore/Export.js
 BwCore/Morph.js
+BwCore/SnapTo.js
 ContentHandler/LWObjectHandler.js 
 ContentHandler/LWObjectBuilder.js
 ContentHandler/LWSceneHandler.js 
