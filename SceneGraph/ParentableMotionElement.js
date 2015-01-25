@@ -1,12 +1,12 @@
 ﻿ParentableMotionElement.prototype = new RenderableElement();
-ParentableMotionElement.prototype.constructor = ParentableMotionElement;
+        ParentableMotionElement.prototype.constructor = ParentableMotionElement;
 
 function ParentableMotionElement()
 {
     RenderableElement.call(this);
     this.className = "ParentableMotionElement";
     this.attrType = eAttrType.ParentableMotionElement;
-    
+
     this.translationMatrix = new Matrix4x4();           // matrix representing this element's position translation
     this.rotationQuat = new Quaternion();               // quaternion for calculating rotation
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
@@ -21,7 +21,7 @@ function ParentableMotionElement()
     this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-                                                        // parent's transformations (if any) for the current sector                                        
+    // parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
     this.updateScale = false;
     this.updatePivot = false;
@@ -33,7 +33,7 @@ function ParentableMotionElement()
     this.inheritsPivot = true;
     this.nonZeroVelocity = false;
     this.motionParent = null;
-    
+
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
@@ -54,13 +54,13 @@ function ParentableMotionElement()
     this.angularVelocity = new Vector3DAttr(0, 0, 0);      // angular velocity in degrees/second
     this.scalarVelocity = new Vector3DAttr(0, 0, 0);       // scalar velocity in world-units/second
     this.worldTransform = new Matrix4x4Attr(1, 0, 0, 0,
-                                            0, 1, 0, 0,
-                                            0, 0, 1, 0,
-                                            0, 0, 0, 1);
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
     this.sectorWorldTransform = new Matrix4x4Attr(1, 0, 0, 0,
-                                                  0, 1, 0, 0,
-                                                  0, 0, 1, 0,
-                                                  0, 0, 0, 1);
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
     this.parent = new StringAttr("");
     this.inheritPosition_X = new BooleanAttr(true);
     this.inheritPosition_Y = new BooleanAttr(true);
@@ -75,7 +75,7 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-    
+
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.scale.addModifiedCB(ParentableMotionElement_ScaleModifiedCB, this);
@@ -99,7 +99,7 @@ function ParentableMotionElement()
     this.linearVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
     this.angularVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
     this.scalarVelocity.addModifiedCB(ParentableMotionElement_VelocityModifiedCB, this);
-    
+
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
     this.registerAttribute(this.scale, "scale");
@@ -108,11 +108,11 @@ function ParentableMotionElement()
     this.registerAttribute(this.worldCenter, "worldCenter");
     this.registerAttribute(this.worldPosition, "worldPosition");
     this.registerAttribute(this.worldRotation, "worldRotation");
-    this.registerAttribute(this.worldScale, "worldScale");    
-    this.registerAttribute(this.screenPosition, "screenPosition"); 
-    this.registerAttribute(this.sectorOrigin, "sectorOrigin"); 
-    this.registerAttribute(this.sectorPosition, "sectorPosition"); 
-    this.registerAttribute(this.sectorWorldCenter, "sectorWorldCenter"); 
+    this.registerAttribute(this.worldScale, "worldScale");
+    this.registerAttribute(this.screenPosition, "screenPosition");
+    this.registerAttribute(this.sectorOrigin, "sectorOrigin");
+    this.registerAttribute(this.sectorPosition, "sectorPosition");
+    this.registerAttribute(this.sectorWorldCenter, "sectorWorldCenter");
     this.registerAttribute(this.sectorWorldPosition, "sectorWorldPosition");
     this.registerAttribute(this.worldTransform, "worldTransform");
     this.registerAttribute(this.sectorWorldTransform, "sectorWorldTransform");
@@ -153,38 +153,38 @@ ParentableMotionElement.prototype.getSectorTransform = function()
 
 ParentableMotionElement.prototype.update = function(params, visitChildren)
 {
-	// update this element's position/rotation as affected by velocity
-	if (this.nonZeroVelocity)
-	{
-    	this.updateVelocityMotion(params.timeIncrement);
+    // update this element's position/rotation as affected by velocity
+    if (this.nonZeroVelocity)
+    {
+        this.updateVelocityMotion(params.timeIncrement);
     }
-        
+
     if (this.updateInheritance)
     {
         this.updateInheritance = false;
 
         this.inheritsPosition = this.inheritPosition_X.getValueDirect() &&
-        this.inheritPosition_Y.getValueDirect() &&
-        this.inheritPosition_Z.getValueDirect();
+                this.inheritPosition_Y.getValueDirect() &&
+                this.inheritPosition_Z.getValueDirect();
 
         this.inheritsRotation = this.inheritRotation_X.getValueDirect() &&
-        this.inheritRotation_Y.getValueDirect() &&
-        this.inheritRotation_Z.getValueDirect();
+                this.inheritRotation_Y.getValueDirect() &&
+                this.inheritRotation_Z.getValueDirect();
 
-        this.inheritsScale    = this.inheritScale_X.getValueDirect() &&
-        this.inheritScale_Y.getValueDirect() &&
-        this.inheritScale_Z.getValueDirect();
+        this.inheritsScale = this.inheritScale_X.getValueDirect() &&
+                this.inheritScale_Y.getValueDirect() &&
+                this.inheritScale_Z.getValueDirect();
 
-        this.inheritsPivot    = this.inheritPivot_X.getValueDirect() &&
-        this.inheritPivot_Y.getValueDirect() &&
-        this.inheritPivot_Z.getValueDirect();
+        this.inheritsPivot = this.inheritPivot_X.getValueDirect() &&
+                this.inheritPivot_Y.getValueDirect() &&
+                this.inheritPivot_Z.getValueDirect();
     }
-    
+
     // update this element's transformations (translation/rotation/scale/pivot)
     var modified = this.updateSimpleTransform();
     if (modified)
     {
-    	this.incrementModificationCount();
+        this.incrementModificationCount();
     }
     if (this.motionParent)
     {
@@ -192,7 +192,7 @@ ParentableMotionElement.prototype.update = function(params, visitChildren)
     }
     this.updateCompoundTransform();
     this.updateWorldMotionInfo();
-    
+
     // call base-class implementation
     RenderableElement.prototype.update.call(this, params, visitChildren);
 }
@@ -206,18 +206,18 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
         RenderableElement.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-    
+
     switch (directive)
     {
         case "render":
-        {
-            var screen = toScreenSpace(this.sectorWorldPosition.getValueDirect(),
-                params.viewMatrix, params.projMatrix, params.viewport);
-            this.screenPosition.setValueDirect(screen.x, screen.y, screen.z);
-        }
-        break;
+            {
+                var screen = toScreenSpace(this.sectorWorldPosition.getValueDirect(),
+                        params.viewMatrix, params.projMatrix, params.viewport);
+                this.screenPosition.setValueDirect(screen.x, screen.y, screen.z);
+            }
+            break;
     }
-    
+
     // call base-class implementation
     RenderableElement.prototype.apply.call(this, directive, params, visitChildren);
 }
@@ -225,22 +225,22 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
 ParentableMotionElement.prototype.updateChildDisplayLists = function()
 {
     /*for (var i=0; i < this.motionChildren.length; i++)
-    {
-        this.motionChildren[i].updateDisplayList.pulse();
-    }*/
+     {
+     this.motionChildren[i].updateDisplayList.pulse();
+     }*/
 }
 
 ParentableMotionElement.prototype.applyTransform = function()
 {
     // TODO: if scaling factors are not 1, apply inverse scale before this transformation is
     // applied to avoid translation caused by scaling  
-    
+
     // set transformation matrix
     this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
     this.graphMgr.renderContext.leftMultMatrix(this.sectorTransformCompound);
     this.graphMgr.renderContext.applyModelViewTransform();
-    
-	// TODO: if invsere scale was applied, re-apply scale
+
+    // TODO: if invsere scale was applied, re-apply scale
 }
 
 ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
@@ -249,33 +249,33 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
     var panVelocity = this.panVelocity.getValueDirect();
     var linearVelocity = this.linearVelocity.getValueDirect();
     if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
-        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+            linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
     {
         // position
         var position = this.position.getValueDirect();
 
         // get direction vectors for pan
         var directionVectors = this.getDirectionVectors();
-        
+
         // get affect position flags
         var linearVelocity_affectPosition_Y = this.linearVelocity_affectPosition_Y.getValueDirect();
 
         // update position
-        position.x = position.x + (directionVectors.right.x   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.x 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.x * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.x * timeIncrement);
+        position.x = position.x + (directionVectors.right.x * panVelocity.x * timeIncrement) +
+                (directionVectors.up.x * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.x * panVelocity.z * timeIncrement) +
+                (linearVelocity.x * timeIncrement);
         if (linearVelocity_affectPosition_Y)
         {
-        position.y = position.y + (directionVectors.right.y   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.y 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.y * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.y * timeIncrement);
+            position.y = position.y + (directionVectors.right.y * panVelocity.x * timeIncrement) +
+                    (directionVectors.up.y * panVelocity.y * timeIncrement) +
+                    (directionVectors.forward.y * panVelocity.z * timeIncrement) +
+                    (linearVelocity.y * timeIncrement);
         }
-        position.z = position.z + (directionVectors.right.z   * panVelocity.x * timeIncrement) +
-        						  (directionVectors.up.z 	  * panVelocity.y * timeIncrement) +
-        						  (directionVectors.forward.z * panVelocity.z * timeIncrement) + 
-        						  (linearVelocity.z * timeIncrement);						  
+        position.z = position.z + (directionVectors.right.z * panVelocity.x * timeIncrement) +
+                (directionVectors.up.z * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.z * panVelocity.z * timeIncrement) +
+                (linearVelocity.z * timeIncrement);
 
         this.position.setValueDirect(position.x, position.y, position.z);
     }
@@ -291,7 +291,7 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
         rotation.x = rotation.x + (angularVelocity.x * timeIncrement);
         rotation.y = rotation.y + (angularVelocity.y * timeIncrement);
         rotation.z = rotation.z + (angularVelocity.z * timeIncrement);
-        
+
         this.rotation.setValueDirect(rotation.x, rotation.y, rotation.z);
     }
 
@@ -306,86 +306,86 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
         scale.x = scale.x + (scalarVelocity.x * timeIncrement);
         scale.y = scale.y + (scalarVelocity.y * timeIncrement);
         scale.z = scale.z + (scalarVelocity.z * timeIncrement);
-        
+
         this.scale.setValueDirect(scale.x, scale.y, scale.z);
-    }   
+    }
 }
 
 ParentableMotionElement.prototype.updateSimpleTransform = function()
 {
     var modified = false;
-    
+
     if (this.updatePosition || this.updateRotation || this.updateScale || this.updatePivot)
     {
         var values;
-        
+
         if (this.updatePosition)
         {
             this.updatePosition = false;
-            
+
             values = this.position.getValueDirect();
             this.translationMatrix.loadTranslation(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updateRotation)
         {
             this.updateRotation = false;
-            
+
             values = this.rotation.getValueDirect();
             this.rotationQuat.loadXYZAxisRotation(values.x, values.y, values.z);
             this.rotationMatrix = this.rotationQuat.getMatrix();
-            
+
             modified = true;
         }
-        
+
         if (this.updateScale)
         {
             this.updateScale = false;
-            
+
             values = this.scale.getValueDirect();
             this.scaleMatrix.loadScale(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updatePivot)
         {
             this.updatePivot = false;
-            
+
             values = this.pivot.getValueDirect();
             this.pivotMatrix.loadTranslation(-values.x, -values.y, -values.z);
-            
+
             modified = true;
         }
-        
+
         if (this.updateSectorPosition)
         {
             this.updateSectorPosition = false;
-            
+
             values = this.sectorPosition.getValueDirect();
             this.sectorTranslationMatrix.loadTranslation(values.x, values.y, values.z);
-            
+
             modified = true;
         }
-        
+
         if (modified)
         {
             this.transformModified.pulse();
-            
+
             // pre-multiply pivot/scale/rotation since this is applied to both regular and sector transforms
             var psr = new Matrix4x4();
             psr.loadMatrix(this.pivotMatrix.multiply(this.scaleMatrix.multiply(this.rotationMatrix)));
-    
+
             this.transformSimple.loadMatrix(psr.multiply(this.translationMatrix));
             this.sectorTransformSimple.loadMatrix(psr.multiply(this.sectorTranslationMatrix));
-            
+
             // force any motion children to update their display lists
             this.updateChildDisplayLists();
         }
     }
-    
+
     return modified;
 }
 
@@ -393,7 +393,7 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
 {
     this.transformCompound.loadMatrix(this.transformSimple);
     this.sectorTransformCompound.loadMatrix(this.sectorTransformSimple);
-    
+
     if (this.motionParent)
     {
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
@@ -403,7 +403,7 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
         }
         else // !m_inheritsPosition || !m_inheritsRotation || !m_inheritsScale || !m_inheritsPivot
         {
-        // TODO
+            // TODO
         }
     }
 }
@@ -412,7 +412,7 @@ ParentableMotionElement.prototype.updateWorldMotionInfo = function()
 {
     this.worldTransform.setValueDirect(this.transformCompound);
     this.sectorWorldTransform.setValueDirect(this.sectorTransformCompound);
-    
+
     this.updateWorldCenter();
     this.updateWorldPosition();
     this.updateWorldRotation();
@@ -424,7 +424,7 @@ ParentableMotionElement.prototype.updateWorldCenter = function()
     var center = this.center.getValueDirect();
     center = this.transformCompound.transform(center.x, center.y, center.z, 1);
     this.worldCenter.setValueDirect(center.x, center.y, center.z);
-    
+
     center = this.center.getValueDirect();
     center = this.sectorTransformCompound.transform(center.x, center.y, center.z, 1);
     this.sectorWorldCenter.setValueDirect(center.x, center.y, center.z);
@@ -434,7 +434,7 @@ ParentableMotionElement.prototype.updateWorldPosition = function()
 {
     var position = this.transformCompound.transform(0, 0, 0, 1);
     this.worldPosition.setValueDirect(position.x, position.y, position.z);
-    
+
     position = this.sectorTransformCompound.transform(0, 0, 0, 1);
     this.sectorWorldPosition.setValueDirect(position.x, position.y, position.z);
 }
@@ -468,21 +468,21 @@ ParentableMotionElement.prototype.synchronizePosition = function()
     {
         sectorOrigin = this.sectorOrigin.getValueDirect();
     }
-    
+
     // get sector position
     var sectorPosition = this.sectorPosition.getValueDirect();
-    
+
     // get world position
     var position = new Vector3D();
     position.x = sectorOrigin.x + sectorPosition.x;
     position.y = sectorOrigin.y + sectorPosition.y;
     position.z = sectorOrigin.z + sectorPosition.z;
-    
+
     // update position
     this.position.removeModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.position.setValueDirect(position.x, position.y, position.z);
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
-    
+
     // flag a position update
     this.updatePosition = true;
 }
@@ -491,7 +491,7 @@ ParentableMotionElement.prototype.synchronizeSectorPosition = function()
 {
     // synchronize sector position with position if necessary (don't sync if not necessary to avoid 
     // the circular dependency between position & sector position
-	
+
     // get sector origin (use [0, 0, 0] for parented objects)
     var sectorOrigin = new Vector3D;
     if (this.motionParent)
@@ -528,37 +528,38 @@ ParentableMotionElement.prototype.getDirectionVectors = function()
     var up = this.sectorTransformCompound.transform(0, 1, 0, 0);
     var right = this.sectorTransformCompound.transform(1, 0, 0, 0);
     var forward = this.sectorTransformCompound.transform(0, 0, 1, 0);
-    
+
     return {
-        up: up, 
-        right: right, 
+        up: up,
+        right: right,
         forward: forward
     };
 }
 
 ParentableMotionElement.prototype.setMotionParent = function(parent)
 {
-    if (parent == this) return;
-    
+    if (parent == this)
+        return;
+
     this.motionParent = parent;
-    
+
     // set sector position to account for parenting
-    this.synchronizeSectorPosition();       
+    this.synchronizeSectorPosition();
 }
 
 ParentableMotionElement.prototype.velocityModified = function()
 {
-	if (this.panVelocity.isZero() &&
-		this.linearVelocity.isZero() &&
-		this.angularVelocity.isZero() &&
-		this.scalarVelocity.isZero())
-	{
-		this.nonZeroVelocity = false;
-	}
-	else
-	{
-		this.nonZeroVelocity = true;
-	}
+    if (this.panVelocity.isZero() &&
+            this.linearVelocity.isZero() &&
+            this.angularVelocity.isZero() &&
+            this.scalarVelocity.isZero())
+    {
+        this.nonZeroVelocity = false;
+    }
+    else
+    {
+        this.nonZeroVelocity = true;
+    }
 }
 
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
@@ -606,8 +607,8 @@ function ParentableMotionElement_ParentModifiedCB(attribute, container)
 
 function ParentableMotionElement_VelocityModifiedCB(attribute, container)
 {
-	container.velocityModified();
-	container.incrementModificationCount();
+    container.velocityModified();
+    container.incrementModificationCount();
 }
 
 function ParentableMotionElement_InheritanceModifiedCB(attribute, container)

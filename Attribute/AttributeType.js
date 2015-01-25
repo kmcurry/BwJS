@@ -40,6 +40,11 @@ var eAttrType = {
     ViewVolumeAttr              :31,
     RenderableElementStyleAttr  :32,
     Bone                        :33,
+    SnapConnector               :34,
+    SnapConnectors              :35,
+    SocketConnector             :36,
+    PlugConnector               :37,
+    SphereAttr                  :38,
     
     Node                        :1000,
        
@@ -86,9 +91,9 @@ var eAttrType = {
     ArcballInspector            :1104,
     MapProjectionCalculator     :1105,
     ObjectInspector             :1106,
-    MultiTargetObserver			:1107,
-    ObjectMover	 				:1108,
-    AnimalMover					:1109, 
+    MultiTargetObserver		:1107,
+    ObjectMover	 		:1108,
+    AnimalMover			:1109, 
     WalkSimulator               :1110,
     MorphEffector               :1111,
     BoneEffector                :1112,
@@ -96,7 +101,7 @@ var eAttrType = {
 
     Node_End                    :1999,
 
-	Directive                   :2000,
+    Directive                   :2000,
     UpdateDirective             :2001,
     RenderDirective             :2002,
     RayPickDirective            :2003,
@@ -123,6 +128,7 @@ var eAttrType = {
     DisconnectAttributes        :3014,
     Export                      :3015,
     Morph                       :3016,
+    SnapTo                      :3017,
     Command_End                 :3999,
 
     DeviceHandler               :4000,

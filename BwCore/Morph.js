@@ -42,7 +42,6 @@ function MorphCommand_SourceModifiedCB(attribute, container)
     }
 }
 
-
 function MorphCommand_TargetModifiedCB(attribute, container)
 {
     var target = attribute.getValueDirect().join("");
