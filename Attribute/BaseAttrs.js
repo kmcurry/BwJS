@@ -1,4 +1,4 @@
-﻿BooleanAttr.prototype = new Attribute();
+BooleanAttr.prototype = new Attribute();
 BooleanAttr.prototype.constructor = BooleanAttr;
 
 function BooleanAttr(value)
@@ -290,6 +290,18 @@ StringAttr.prototype.setValue = function(values, params)
     
     // call base-class implementation
     Attribute.prototype.setValue.call(this, values, params);
+}
+
+StringAttrAllocator.prototype = new Allocator();
+StringAttrAllocator.prototype.constructor = StringAttrAllocator;
+
+function StringAttrAllocator()
+{
+}
+
+StringAttrAllocator.prototype.allocate = function()
+{
+    return new StringAttr();
 }
 
 TernaryAttr.prototype = new NumberAttr();

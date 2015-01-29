@@ -63,6 +63,7 @@ function Model()
     this.disableOnDissolve = new BooleanAttr(true);
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
+    this.physicalProperties = new PhysicalPropertiesAttr();
     
     this.show.addTarget(this.enabled);
     
@@ -142,6 +143,7 @@ function Model()
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
+    this.registerAttribute(this.physicalProperties, "physicalProperties");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
