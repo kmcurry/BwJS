@@ -1,4 +1,4 @@
-﻿AttributeVector.prototype = new AttributeContainer();
+AttributeVector.prototype = new AttributeContainer();
 AttributeVector.prototype.constructor = AttributeVector;
 
 function AttributeVector(allocator) // TODO: not sure if allocator is needed

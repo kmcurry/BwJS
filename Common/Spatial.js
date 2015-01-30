@@ -1,4 +1,4 @@
-﻿function RayIntersectRecord()
+function RayIntersectRecord()
 {
     this.distance = Infinity;
     this.pointModel = new Vector3D();
@@ -44,6 +44,17 @@ function Sphere()
     this.radius = 0;
     this.xcenter = new Vector3D(); // transformed center
     this.xradius = 0;              // transformed (scaled) radius
+}
+
+Sphere.prototype.setTransform = function(matrix)
+{
+    var result = matrix.transform(this.center.x, this.center.y, this.center.z, 1);
+    this.xcenter.x = result.x;
+    this.xcenter.y = result.y;
+    this.xcenter.z = result.z;
+    
+    var scale = matrix.getScalingFactors();
+    this.xradius = this.radius * max3(scale.x, scale.y, scale.z);
 }
 
 Sphere.prototype.intersects = function(sphere)
@@ -343,13 +354,7 @@ SphereTree.prototype.setTransform = function(matrix)
 
 SphereTree.prototype.transformNode = function(matrix, node)
 {
-    var result = matrix.transform(node.sphere.center.x, node.sphere.center.y, node.sphere.center.z, 1);
-    node.sphere.xcenter.x = result.x;
-    node.sphere.xcenter.y = result.y;
-    node.sphere.xcenter.z = result.z;
-    
-    var scale = matrix.getScalingFactors();
-    node.sphere.xradius = node.sphere.radius * max3(scale.x, scale.y, scale.z);
+    node.sphere.setTransform(matrix);
     
     // recurse on node children
     for (var i = 0; i < node.children.length; i++)

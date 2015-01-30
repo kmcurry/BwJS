@@ -1,4 +1,4 @@
-﻿function XMLParser(factory, registry, contentDir)
+function XMLParser(factory, registry, contentDir)
 {
     this.factory = factory;
     this.registry = registry;

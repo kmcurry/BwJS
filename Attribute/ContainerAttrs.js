@@ -1,4 +1,4 @@
-﻿KeyframeAttr.prototype = new AttributeContainer();
+KeyframeAttr.prototype = new AttributeContainer();
 KeyframeAttr.prototype.constructor = KeyframeAttr;
 
 function KeyframeAttr()
@@ -6,26 +6,34 @@ function KeyframeAttr()
     AttributeContainer.call(this);
     this.className = "KeyframeAttr";
     this.attrType = eAttrType.KeyframeAttr;
-    
+
     this.time = new NumberAttr();
     this.value = new NumberAttr();
     this.shape = new NumberAttr();
     this.params = new AttributeVector();
-    
-    for (var i=0; i < 6; i++)
+
+    for (var i = 0; i < 6; i++)
     {
         this.params.push_back(new NumberAttr(0));
     }
-    
+
     this.registerAttribute(this.time, "time");
     this.registerAttribute(this.value, "value");
     this.registerAttribute(this.shape, "shape");
     this.registerAttribute(this.params, "params");
-    
-    this.getTime = function() { return this.time.getValueDirect(); }
-    this.getValue = function() { return this.value.getValueDirect(); }
-    this.getShape = function() { return this.shape.getValueDirect(); }
-    this.getParams = function(i) { return this.params.getAt(i).getValueDirect(); }
+
+    this.getTime = function () {
+        return this.time.getValueDirect();
+    }
+    this.getValue = function () {
+        return this.value.getValueDirect();
+    }
+    this.getShape = function () {
+        return this.shape.getValueDirect();
+    }
+    this.getParams = function (i) {
+        return this.params.getAt(i).getValueDirect();
+    }
 }
 
 KeyframesAttr.prototype = new AttributeVector();
@@ -37,7 +45,7 @@ function KeyframesAttr()
     this.className = "KeyframesAttr";
     this.attrType = eAttrType.KeyframesAttr;
 }
-    
+
 BBoxAttr.prototype = new AttributeContainer();
 BBoxAttr.prototype.constructor = BBoxAttr;
 
@@ -46,15 +54,15 @@ function BBoxAttr()
     AttributeContainer.call(this);
     this.className = "BBoxAttr";
     this.attrType = eAttrType.BBoxAttr;
-    
+
     this.min = new Vector3DAttr();
     this.max = new Vector3DAttr();
-    
+
     this.registerAttribute(this.min, "min");
     this.registerAttribute(this.max, "max");
 }
 
-BBoxAttr.prototype.setValueDirect = function(min, max)
+BBoxAttr.prototype.setValueDirect = function (min, max)
 {
     this.min.setValueDirect(min.x, min.y, min.z);
     this.max.setValueDirect(max.x, max.y, max.z);
@@ -74,12 +82,12 @@ function ImageAttr()
     this.byteAlignment = new NumberAttr(0);
     this.pixelFormat = new NumberAttr(ePixelFormat.Unknown);
     this.pixels = new NumberArrayAttr();
-    
+
     this.registerAttribute(this.width, "width");
     this.registerAttribute(this.height, "height");
     this.registerAttribute(this.byteAlignment, "byteAlignment");
     this.registerAttribute(this.pixelFormat, "pixelFormat");
-    this.registerAttribute(this.pixels, "pixels");    
+    this.registerAttribute(this.pixels, "pixels");
 }
 
 RectAttr.prototype = new AttributeContainer();
@@ -102,7 +110,7 @@ function RectAttr()
     this.registerAttribute(this.bottom, "bottom");
 }
 
-RectAttr.prototype.getValueDirect = function()
+RectAttr.prototype.getValueDirect = function ()
 {
     var rect = new Rect();
     rect.left = this.left.getValueDirect();
@@ -112,7 +120,7 @@ RectAttr.prototype.getValueDirect = function()
     return rect;
 }
 
-RectAttr.prototype.setValueDirect = function(rect)
+RectAttr.prototype.setValueDirect = function (rect)
 {
     this.left.setValueDirect(rect.left);
     this.top.setValueDirect(rect.top);
@@ -120,12 +128,12 @@ RectAttr.prototype.setValueDirect = function(rect)
     this.bottom.setValueDirect(rect.bottom);
 }
 
-RectAttr.prototype.containsPoint = function(x, y)
+RectAttr.prototype.containsPoint = function (x, y)
 {
     if (x >= this.left.getValueDirect() &&
-        y >= this.top.getValueDirect() &&
-        x <= this.right.getValueDirect() &&
-        y <= this.bottom.getValueDirect())
+            y >= this.top.getValueDirect() &&
+            x <= this.right.getValueDirect() &&
+            y <= this.bottom.getValueDirect())
         return true;
 
     return false;
@@ -161,7 +169,7 @@ function FontStyleAttr()
     this.registerAttribute(this.style, "style");
 }
 
-FontStyleAttr.prototype.updateStyle = function(style)
+FontStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -171,49 +179,49 @@ FontStyleAttr.prototype.updateStyle = function(style)
         this.antialiasType.copyValue(style.antialiasType, setOp);
     }
 
-	// borderColor
+    // borderColor
     if (style.getAttributeModificationCount(style.borderColor))
     {
         this.borderColor.copyValue(style.borderColor, setOp);
     }
 
-	// borderWidth
+    // borderWidth
     if (style.getAttributeModificationCount(style.borderWidth))
     {
         this.borderWidth.copyValue(style.borderWidth, setOp);
     }
 
-	// color
+    // color
     if (style.getAttributeModificationCount(style.color))
     {
         this.color.copyValue(style.color, setOp);
     }
-	
-	// effects
+
+    // effects
     if (style.getAttributeModificationCount(style.effects))
     {
         this.effects.copyValue(style.effects, setOp);
     }
 
-	// font
+    // font
     if (style.getAttributeModificationCount(style.font))
     {
         this.font.copyValue(style.font, setOp);
     }
 
-	// opacity
+    // opacity
     if (style.getAttributeModificationCount(style.opacity))
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
-	// size
+    // size
     if (style.getAttributeModificationCount(style.size))
     {
         this.size.copyValue(style.size, setOp);
     }
 
-	// style
+    // style
     if (style.getAttributeModificationCount(style.style))
     {
         this.style.copyValue(style.style, setOp);
@@ -254,7 +262,7 @@ function LabelStyleAttr()
     this.registerAttribute(this.width, "width");
 }
 
-LabelStyleAttr.prototype.updateStyle = function(style)
+LabelStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -344,7 +352,7 @@ function IconStyleAttr()
     this.registerAttribute(this.url, "url");
 }
 
-IconStyleAttr.prototype.updateStyle = function(style)
+IconStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -387,7 +395,7 @@ function HTMLLabelStyleAttr()
     StyleAttr.call(this);
     this.className = "HTMLLabelStyleAttr";
     this.attrType = eAttrType.HTMLLabelStyleAttr;
-    
+
     this.bgColor = new ColorAttr(1, 1, 1, 1); // white
     this.height = new NumberAttr(0); // 0 (auto-calculate)
     this.html = new StringAttr(); // empty string
@@ -396,7 +404,7 @@ function HTMLLabelStyleAttr()
     this.top = new NumberAttr(0);
     this.url = new StringAttr(); // empty string
     this.width = new NumberAttr(0); // 0 (auto-calculate)
-    
+
     this.registerAttribute(this.bgColor, "bgColor");
     this.registerAttribute(this.height, "height");
     this.registerAttribute(this.html, "html");
@@ -416,23 +424,23 @@ function BalloonTipLabelStyleAttr()
     StyleAttr.call(this);
     this.className = "BalloonTipLabelStyleAttr";
     this.attrType = eAttrType.BalloonTipLabelStyleAttr;
-    
+
     this.balloonOffset = new NumberAttr(100);
     this.bgColor = new ColorAttr(1, 1, 1, 1);
     this.displayMode = new StringAttr("default");
     this.htmlLabelStyle = new HTMLLabelStyleAttr();
     this.text = new StringAttr();
     this.textColor = new ColorAttr(0, 0, 0, 1);
-	
-	this.registerAttribute(this.balloonOffset, "balloonOffset");
-	this.registerAttribute(this.bgColor, "bgColor");
-	this.registerAttribute(this.displayMode, "displayMode");
-	this.registerAttribute(this.htmlLabelStyle, "htmlLabelStyle");
-	this.registerAttribute(this.text, "text");
-	this.registerAttribute(this.textColor, "textColor");
+
+    this.registerAttribute(this.balloonOffset, "balloonOffset");
+    this.registerAttribute(this.bgColor, "bgColor");
+    this.registerAttribute(this.displayMode, "displayMode");
+    this.registerAttribute(this.htmlLabelStyle, "htmlLabelStyle");
+    this.registerAttribute(this.text, "text");
+    this.registerAttribute(this.textColor, "textColor");
 }
 
-BalloonTipLabelStyleAttr.prototype.updateStyle = function(style)
+BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -486,7 +494,7 @@ function RenderableElementStyleAttr()
     this.registerAttribute(this.selected, "selected");
 }
 
-RenderableElementStyleAttr.prototype.updateStyle = function(style)
+RenderableElementStyleAttr.prototype.updateStyle = function (style)
 {
     var setOp = style.setOp.getValueDirect();
 
@@ -521,7 +529,7 @@ function PlaneAttr()
     this.registerAttribute(this.dot, "dot");
 }
 
-PlaneAttr.prototype.getValueDirect = function()
+PlaneAttr.prototype.getValueDirect = function ()
 {
     var point = this.point.getValueDirect();
     var normal = this.normal.getValueDirect();
@@ -529,7 +537,7 @@ PlaneAttr.prototype.getValueDirect = function()
     return plane;
 }
 
-PlaneAttr.prototype.setValueDirect = function(plane)
+PlaneAttr.prototype.setValueDirect = function (plane)
 {
     this.point.setValueDirect(plane.point.x, plane.point.y, plane.point.z);
     this.normal.setValueDirect(plane.normal.x, plane.normal.y, plane.normal.z);
@@ -560,7 +568,7 @@ function ViewVolumeAttr()
     this.registerAttribute(this.far, "far");
 }
 
-ViewVolumeAttr.prototype.setValueDirect = function(left, right, top, bottom, near, far)
+ViewVolumeAttr.prototype.setValueDirect = function (left, right, top, bottom, near, far)
 {
     this.left.setValueDirect(left);
     this.right.setValueDirect(right);
@@ -568,4 +576,35 @@ ViewVolumeAttr.prototype.setValueDirect = function(left, right, top, bottom, nea
     this.bottom.setValueDirect(bottom);
     this.near.setValueDirect(near);
     this.far.setValueDirect(far);
+}
+
+SphereAttr.prototype = new AttributeContainer();
+SphereAttr.prototype.constructor = SphereAttr;
+
+function SphereAttr()
+{
+    AttributeContainer.call(this);
+    this.className = "SphereAttr";
+    this.attrType = eAttrType.SphereAttr;
+
+    this.sphere = new Sphere();
+
+    this.center = new Vector3DAttr(0, 0, 0);
+    this.radius = new NumberAttr(0);
+
+    this.center.addModifiedCB(SphereAttr_CenterModifiedCB, this);
+    this.radius.addModifiedCB(SphereAttr_RadiusModifiedCB, this);
+    
+    this.registerAttribute(this.center, "center");
+    this.registerAttribute(this.radius, "radius");
+}
+
+function SphereAttr_CenterModifiedCB(attribute, container)
+{
+    container.sphere.center = attribute.getValueDirect();
+}
+
+function SphereAttr_RadiusModifiedCB(attribute, container)
+{
+    container.sphere.radius = attribute.getValueDirect();
 }

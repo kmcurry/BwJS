@@ -42,7 +42,7 @@ Group.prototype.addChild = function(child)
     SGNode.prototype.addChild.call(this, child);
 }
 
-Group.prototype.insertChild = function(child, before)
+Group.prototype.insertChild = function(child, at)
 {
     if (this.proxyChildAttrs.getValueDirect() == true)
     {
@@ -61,7 +61,7 @@ Group.prototype.insertChild = function(child, before)
 	}
 
     // call base-class implementation
-    SGNode.prototype.insertChild.call(this, child, before);
+    SGNode.prototype.insertChild.call(this, child, at);
 }
     
 Group.prototype.removeChild = function(child)

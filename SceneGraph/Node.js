@@ -205,9 +205,9 @@ Node.prototype.addChild = function(child)
     child.addParent(this);
 }
 
-Node.prototype.insertChild = function(child, before)
+Node.prototype.insertChild = function(child, at)
 {
-    this.children.splice(before, 0, child);
+    this.children.splice(at, 0, child);
     
     this.incrementModificationCount();
     

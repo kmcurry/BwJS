@@ -6,43 +6,44 @@ function addInspectionGroup(node, factory)
 {
 
     // ensure that rotation group has not already been added
-	var rotGroup = getInspectionGroup(node);
-	
-    if (rotGroup) return;
-		
-	var pGrp        = new Group();
+    var rotGroup = getInspectionGroup(node);
+
+    if (rotGroup)
+        return;
+
+    var pGrp = new Group();
     pGrp.setGraphMgr(factory.graphMgr);
-    var pTranslate  = new Translate();
+    var pTranslate = new Translate();
     pTranslate.setGraphMgr(factory.graphMgr);
-    var pScaleInv   = new Scale();
+    var pScaleInv = new Scale();
     pScaleInv.setGraphMgr(factory.graphMgr);
-    var pQuat       = new QuaternionRotate();
+    var pQuat = new QuaternionRotate();
     pQuat.setGraphMgr(factory.graphMgr);
-    var pTransBack  = new Translate();
+    var pTransBack = new Translate();
     pTransBack.setGraphMgr(factory.graphMgr);
-    var pScale      = new Scale();
+    var pScale = new Scale();
     pScale.setGraphMgr(factory.graphMgr);
-    
+
     pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
 
     pGrp.name.setValueDirect("InspectionGroup");
-	pTranslate.name.setValueDirect("Translate");
+    pTranslate.name.setValueDirect("Translate");
     pScaleInv.name.setValueDirect("ScaleInverse");
-	pQuat.name.setValueDirect("Quaternion");
-	pTransBack.name.setValueDirect("TranslateBack");			
+    pQuat.name.setValueDirect("Quaternion");
+    pTransBack.name.setValueDirect("TranslateBack");
     pScale.name.setValueDirect("Scale");
 
-	pGrp.addChild(pTranslate); // child 0
+    pGrp.addChild(pTranslate); // child 0
     pGrp.addChild(pScaleInv);  // child 1
-	pGrp.addChild(pQuat);      // child 2
+    pGrp.addChild(pQuat);      // child 2
     pGrp.addChild(pScale);     // child 3
-	pGrp.addChild(pTransBack); // child 4
+    pGrp.addChild(pTransBack); // child 4
 
-	var pChildZero = node.getChild(0);
-	if (pChildZero)
-	{
-		pChildZero.insertChild(pGrp, 0);
-	}
+    var pChildZero = node.getChild(0);
+    if (pChildZero)
+    {
+        pChildZero.insertChild(pGrp, 0);
+    }
 
     node.registerAttribute(pTranslate.translation, "inspectionGroup_translate");
     node.registerAttribute(pScaleInv.scale, "inspectionGroup_scaleInverse");
@@ -58,14 +59,14 @@ function addInspectionGroup(node, factory)
     pScale.scale.setContainer(node);
     pTransBack.translation.setContainer(node);
 
-	return;
+    return;
 }
 
 function deleteInspectionGroup(node)
 {
-	var rotGroup = getInspectionGroup(node);
-	if (rotGroup)
-	{
+    var rotGroup = getInspectionGroup(node);
+    if (rotGroup)
+    {
         rotGroup.getChild(0).getAttribute("translation").setContainer(rotGroup.getChild(0));
         rotGroup.getChild(1).getAttribute("scale").setContainer(rotGroup.getChild(1));
         rotGroup.getChild(2).getAttribute("rotationQuat").setContainer(rotGroup.getChild(2));
@@ -82,69 +83,69 @@ function deleteInspectionGroup(node)
 
         node.removeChild(rotGroup);
 
-	}
+    }
 
-	return;
+    return;
 }
 
 function getInspectionGroup(moveableNode)
 {
     var group = null;
-    
-	var childZero = moveableNode.getChild(0);
-	if (childZero)
-	{
-		group = childZero.getNamedChild("InspectionGroup")
-	}
 
-	return group;
+    var childZero = moveableNode.getChild(0);
+    if (childZero)
+    {
+        group = childZero.getNamedChild("InspectionGroup")
+    }
+
+    return group;
 }
 
 function setInspectionGroupActivationState(node, enable)
 {
-	var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
-		var pQuat = pRotGroup.getChild(2);
-		if (pQuat)
-		{
-			pQuat.enabled.setValueDirect(enable);
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
+        var pQuat = pRotGroup.getChild(2);
+        if (pQuat)
+        {
+            pQuat.enabled.setValueDirect(enable);
 
-			if (!enable)
-			{
-				var quat = new Quaternion();
-				quat.loadIdentity();
+            if (!enable)
+            {
+                var quat = new Quaternion();
+                quat.loadIdentity();
 
-				var quatAttr = pQuat.rotationQuat;
-				quatAttr.setValueDirect(quat);
-			}
-		}
-		
-		var pPos = node.getAttribute("position");
-		if (enable)
-		{
-			if (!(node in g_objPosMap))
-			{
-				g_objPosMap[node] = pPos.getValueDirect();
-			}
-		}
-		else // !enable
-		{
-			var pos = g_objPosMap[node];
-			pPos.setValueDirect(pos);
-		}
-		
-	}
+                var quatAttr = pQuat.rotationQuat;
+                quatAttr.setValueDirect(quat);
+            }
+        }
 
-	return;
+        var pPos = node.getAttribute("position");
+        if (enable)
+        {
+            if (!(node in g_objPosMap))
+            {
+                g_objPosMap[node] = pPos.getValueDirect();
+            }
+        }
+        else // !enable
+        {
+            var pos = g_objPosMap[node];
+            pPos.setValueDirect(pos);
+        }
+
+    }
+
+    return;
 }
 
 function setInspectionGroupContainer(node)
 {
 
-	var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
         node.unregisterAttribute(node.getAttribute("inspectionGroup_translate"));
         node.unregisterAttribute(node.getAttribute("inspectionGroup_scaleInverse"));
         node.unregisterAttribute(node.getAttribute("inspectionGroup_rotationQuat"));
@@ -171,22 +172,20 @@ function setInspectionGroupContainer(node)
     return;
 }
 
-
-// Isn't called. Commented out in RenderAgent.cpp
 function zeroInspectionGroup(node)
 {
-   var pRotGroup = getInspectionGroup(node);
-	if (pRotGroup)
-	{	
-		var pQuat = pRotGroup.getChild(2);
-		if (pQuat)
-		{
-			var quat = new Quaternion();
-			quat.loadIdentity();
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
+        var pQuat = pRotGroup.getChild(2);
+        if (pQuat)
+        {
+            var quat = new Quaternion();
+            quat.loadIdentity();
 
-			var quatAttr = pQuat.rotationQuat;
-			quatAttr.setValueDirect(quat);
-		}
+            var quatAttr = pQuat.rotationQuat;
+            quatAttr.setValueDirect(quat);
+        }
     }
 
     return;
@@ -194,20 +193,20 @@ function zeroInspectionGroup(node)
 
 function clearObjectPositionMap()
 {
-	g_objPosMap = {};
+    g_objPosMap = {};
 
-	return;
+    return;
 }
 
 // Doesn't do anything.
 function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
 {
     /* 
-    CQuaternionf q;
-	CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
-	if (quat)
-	{
-		quat.getValueDirect(q);
-	}
-    */
+     CQuaternionf q;
+     CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
+     if (quat)
+     {
+     quat.getValueDirect(q);
+     }
+     */
 }

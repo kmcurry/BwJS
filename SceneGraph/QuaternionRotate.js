@@ -47,7 +47,32 @@ QuaternionRotate.prototype.apply = function(directive, params, visitChildren)
         Transform.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-
+    /*
+    switch (directive)
+    {
+        case "render":
+        {
+        }
+        break;
+         
+        case "rayPick":
+        {
+            
+        }
+        break;
+        
+        case "bbox":
+        {
+            
+        }
+        break;
+        
+        case "collide":
+        {
+        }
+        break;
+    }
+    */
     // call base-class implementation
     Transform.prototype.apply.call(this, directive, params, visitChildren);
 }
