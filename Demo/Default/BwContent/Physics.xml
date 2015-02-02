@@ -7,7 +7,7 @@
         <Isolator name="Root" isolateTransforms="true">
             <Selector name="Cameras">
                 <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
-                    <position x="0" y="3.75" z="-12"/>
+                    <position x="0" y="3.75" z="-15"/>
                     <rotation x="13.5" y="0" z="0"/>
                 </PerspectiveCamera>
                 <!--<OrthographicCamera name="OrthoCam" nearDistance=".25" farDistance="4000" width="6">
@@ -57,7 +57,7 @@
                     </Model>
                     <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="-0.45" y="8" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
+                        <rotation x="0" y="45" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
                             <mass>5</mass>
@@ -65,7 +65,7 @@
                     </Model>
                     <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y="10" z="0.45"/>
-                        <rotation x="0" y="0" z="0"/>
+                        <rotation x="0" y="45" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
                             <mass>5</mass>
@@ -124,6 +124,7 @@
     </Set>
     <?bwinclude url="SendMessage.xml"?>
     <PhysicsSimulator name="PhysicsSimulator" evalute="true">
+        <groundHalfExtents x="5" y="0.1" z="5"/>
         <bodies>
             <body>UV_BoxG</body>
             <body>UV_BoxG2</body>

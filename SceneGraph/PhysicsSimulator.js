@@ -10,19 +10,23 @@ function PhysicsSimulator()
     this.world = null;
     this.physicsBodies = [];
     this.bodyModels = [];
+    this.updateWorld = false;
     this.updateBodies = false;
 
     this.timeIncrement = new NumberAttr(0);
-    this.gravity = new Vector3DAttr(0, -1.8, 0);
+    this.gravity = new Vector3DAttr(0, -9.8, 0);
+    this.groundHalfExtents = new Vector3DAttr(0, 0, 0);
     this.bodies = new AttributeVector(new StringAttrAllocator());
 
     this.bodies.getAttribute("appendParsedElements").setValueDirect(true);
 
     this.gravity.addModifiedCB(PhysicsSimulator_GravityModifiedCB, this);
+    this.groundHalfExtents.addModifiedCB(PhysicsSimulator_GroundHalfExtentsCB, this);
     this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
 
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.gravity, "gravity");
+    this.registerAttribute(this.groundHalfExtents, "groundHalfExtents");
     this.registerAttribute(this.bodies, "bodies");
 
     this.initPhysics();
@@ -30,6 +34,12 @@ function PhysicsSimulator()
 
 PhysicsSimulator.prototype.evaluate = function()
 {
+    if (this.updateWorld)
+    {
+        this.updateWorld = false;
+        this.initPhysics();
+    }
+    
     if (this.updateBodies)
     {
         this.updateBodies = false;
@@ -84,7 +94,12 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
 
         var position = body.getAttribute("sectorPosition").getValueDirect();
         startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
-        // TODO: rotation, scale
+        
+        var rotation = body.getAttribute("rotation").getValueDirect();
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        // TODO: scale
         
         var isDynamic = (mass != 0);
         var localInertia = new Ammo.btVector3(0, 0, 0);
@@ -107,13 +122,16 @@ PhysicsSimulator.prototype.initPhysics = function()
     var overlappingPairCache = new Ammo.btDbvtBroadphase();
     var solver = new Ammo.btSequentialImpulseConstraintSolver();
     this.world = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-    this.world.setGravity(new Ammo.btVector3(0, -9.8, 0));
+    
+    var gravity = this.gravity.getValueDirect();
+    this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
 
-    var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(50, 0.1, 50));
+    var groundHalfExtents = this.groundHalfExtents.getValueDirect();
+    var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(groundHalfExtents.x, groundHalfExtents.y, groundHalfExtents.z));
 
     var groundTransform = new Ammo.btTransform();
     groundTransform.setIdentity();
-    groundTransform.setOrigin(new Ammo.btVector3(0, -0.1, 0));
+    groundTransform.setOrigin(new Ammo.btVector3(0, -groundHalfExtents.y, 0));
 
     var mass = 0;
     var isDynamic = mass !== 0;
@@ -131,8 +149,12 @@ PhysicsSimulator.prototype.initPhysics = function()
 
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
-    var gravity = attribute.getValueDirect();
-    container.world.gravity.set(gravity.x, gravity.y, gravity.z);
+    container.updateWorld = true;
+}
+
+function PhysicsSimulator_GroundHalfExtentsCB(attribute, container)
+{
+    container.updateWorld = true;
 }
 
 function PhysicsSimulator_BodiesModifiedCB(attribute, container)
