@@ -37,16 +37,20 @@ PhysicsSimulator.prototype.evaluate = function()
     }
 
     var timeIncrement = this.timeIncrement.getValueDirect();
-    this.world.step(timeIncrement);
+    this.world.stepSimulation(timeIncrement, 10);
 
+    var trans = new Ammo.btTransform();
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        var position = this.physicsBodies[i].position;
-        var quaternion = this.physicsBodies[i].quaternion;
+        this.physicsBodies[i].getMotionState().getWorldTransform(trans);
+        var position = new Vector3D(trans.getOrigin().x().toFixed(2), trans.getOrigin().y().toFixed(2), trans.getOrigin().z().toFixed(2));
+        
+        var rot = trans.getRotation();
+        var quat = new Quaternion();
+        quat.load(rot.w(), rot.x(), rot.y(), rot.z());
 
-        //meshes[i].position.copy(bodies[i].position);
-        //meshes[i].quaternion.copy(bodies[i].quaternion);
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+        this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
     }
 }
 
@@ -68,57 +72,61 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         var physicalProperties = body.getAttribute("physicalProperties");
         var mass = physicalProperties.getAttribute("mass").getValueDirect();
 
-        var physicsBody = new CANNON.Body({mass: mass});
-        this.physicsBodies.push(physicsBody);
-        
-        var tris = [];
-        for (var i = 0; i < body.geometry.length; i++)
+        var colShape = new Ammo.btConvexHullShape();
+        var verts = body.getAttribute("vertices").getValueDirect();
+        for (var i = 0; i < verts.length; i += 3)
         {
-            tris = tris.concat(body.geometry[i].getTriangles());
-        }
-
-        var verts = [];
-        var faces = [];
-        for (var i = 0, j = 0; i < tris.length; i++, j+=3)
-        {
-            var tri = tris[i];
-            verts.push(new CANNON.Vec3(tri.v0.x, tri.v0.y, tri.v0.z));
-            verts.push(new CANNON.Vec3(tri.v1.x, tri.v1.y, tri.v1.z));
-            verts.push(new CANNON.Vec3(tri.v2.x, tri.v2.y, tri.v2.z));
-            
-            faces.push([j, j+1, j+2]);    
+            colShape.addPoint(new Ammo.btVector3(verts[i], verts[i + 1], verts[i + 2]));
         }       
-        var poly = new CANNON.Box(new CANNON.Vec3(0.25,0.25,0.25));//new CANNON.ConvexPolyhedron(verts, faces);
-        var position = body.getAttribute("sectorPosition").getValueDirect();
-        physicsBody.position.set(position.x, position.y, position.z);
-        // TODO: rotation
-        physicsBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
-        //var z180 = new CANNON.Quaternion();
-        //z180.setFromAxisAngle(new CANNON.Vec3(0,0,1),Math.PI);
-        //physicsBody.quaternion = z180.mult(physicsBody.quaternion);
-        physicsBody.addShape(poly);
         
-        this.world.add(physicsBody);
+        var startTransform = new Ammo.btTransform();
+        startTransform.setIdentity();
+
+        var position = body.getAttribute("sectorPosition").getValueDirect();
+        startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        // TODO: rotation, scale
+        
+        var isDynamic = (mass != 0);
+        var localInertia = new Ammo.btVector3(0, 0, 0);
+        if (isDynamic)
+            colShape.calculateLocalInertia(mass, localInertia);
+        
+        var motionState = new Ammo.btDefaultMotionState(startTransform);
+        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        var body = new Ammo.btRigidBody(rbInfo);
+
+        this.world.addRigidBody(body);
+        this.physicsBodies.push(body);
     }
 }
 
 PhysicsSimulator.prototype.initPhysics = function()
 {
-    this.world = new CANNON.World();
+    var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+    var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+    var overlappingPairCache = new Ammo.btDbvtBroadphase();
+    var solver = new Ammo.btSequentialImpulseConstraintSolver();
+    this.world = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+    this.world.setGravity(new Ammo.btVector3(0, -9.8, 0));
 
-    this.world.quatNormalizeSkip = 0;
-    this.world.quatNormalizeFast = false;
+    var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(50, 0.1, 50));
 
-    var gravity = this.gravity.getValueDirect();
-    this.world.gravity.set(gravity.x, gravity.y, gravity.z);
+    var groundTransform = new Ammo.btTransform();
+    groundTransform.setIdentity();
+    groundTransform.setOrigin(new Ammo.btVector3(0, -0.1, 0));
 
-    this.world.broadphase = new CANNON.NaiveBroadphase();
+    var mass = 0;
+    var isDynamic = mass !== 0;
+    var localInertia = new Ammo.btVector3(0, 0, 0);
 
-    var groundShape = new CANNON.Plane();
-    var groundBody = new CANNON.Body({mass: 0});
-    groundBody.addShape(groundShape);
-    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-    this.world.add(groundBody);
+    if (isDynamic)
+        groundShape.calculateLocalInertia(mass, localInertia);
+
+    var motionState = new Ammo.btDefaultMotionState(groundTransform);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, groundShape, localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
+
+    this.world.addRigidBody(body);
 }
 
 function PhysicsSimulator_GravityModifiedCB(attribute, container)

@@ -7,7 +7,7 @@
         <Isolator name="Root" isolateTransforms="true">
             <Selector name="Cameras">
                 <PerspectiveCamera name="Camera" zoom="3.2" nearDistance=".25" farDistance="4000">
-                    <position x="0" y="3.75" z="-9"/>
+                    <position x="0" y="3.75" z="-12"/>
                     <rotation x="13.5" y="0" z="0"/>
                 </PerspectiveCamera>
                 <!--<OrthographicCamera name="OrthoCam" nearDistance=".25" farDistance="4000" width="6">
@@ -39,7 +39,7 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="2" y="2" z="2"/>
                     </Model>
-                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
                         <position x="0" y="4" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -57,6 +57,22 @@
                     </Model>
                     <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="-0.45" y="8" z="0"/>
+                        <rotation x="0" y="0" z="0"/>
+                        <scale x="1" y="1" z="1"/>
+                        <physicalProperties>
+                            <mass>5</mass>
+                        </physicalProperties>                      
+                    </Model>
+                    <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                        <position x="0" y="10" z="0.45"/>
+                        <rotation x="0" y="0" z="0"/>
+                        <scale x="1" y="1" z="1"/>
+                        <physicalProperties>
+                            <mass>5</mass>
+                        </physicalProperties>                  
+                    </Model>
+                    <Model name="UV_BoxG5" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                        <position x="0" y="10" z="-0.45"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
@@ -112,6 +128,12 @@
             <body>UV_BoxG</body>
             <body>UV_BoxG2</body>
             <body>UV_BoxG3</body>
+            <body>UV_BoxG4</body>
+            <body>UV_BoxG5</body>
+            <body>UV_BoxG6</body>
+            <body>UV_BoxG7</body>
+            <body>UV_BoxG8</body>
+            <body>UV_BoxG9</body>
         </bodies>
     </PhysicsSimulator>
 </Session>
