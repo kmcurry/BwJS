@@ -45,6 +45,7 @@ var eAttrType = {
     SocketConnector             :36,
     PlugConnector               :37,
     SphereAttr                  :38,
+    PhysicalPropertiesAttr      :39,
     
     Node                        :1000,
        
@@ -97,6 +98,7 @@ var eAttrType = {
     WalkSimulator               :1110,
     MorphEffector               :1111,
     BoneEffector                :1112,
+    PhysicsSimulator            :1113,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,

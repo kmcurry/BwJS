@@ -1,4 +1,4 @@
-﻿SceneInspector.prototype = new Evaluator();
+SceneInspector.prototype = new Evaluator();
 SceneInspector.prototype.constructor = SceneInspector;
 
 function SceneInspector()

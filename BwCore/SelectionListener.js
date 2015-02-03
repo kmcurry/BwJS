@@ -86,6 +86,17 @@ SelectionListener.prototype.eventPerformed = function(event)
                 return;        
         }
         break;
+        
+        case eEventType.MouseLeftUp:
+        case eEventType.MouseMiddleUp:
+        case eEventType.MouseRightUp:
+        case eEventType.MouseBothUp:
+        {
+            // TODO: allow for multi-select (clear if Ctrl is not pressed)
+            this.clearSelections();
+            return;
+        }
+        break;
     }
     
     // TODO: allow for multi-select (clear if Ctrl is not pressed)

@@ -1,5 +1,5 @@
-﻿ParentableMotionElement.prototype = new RenderableElement();
-        ParentableMotionElement.prototype.constructor = ParentableMotionElement;
+ParentableMotionElement.prototype = new RenderableElement();
+ParentableMotionElement.prototype.constructor = ParentableMotionElement;
 
 function ParentableMotionElement()
 {
@@ -12,17 +12,19 @@ function ParentableMotionElement()
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
     this.scaleMatrix = new Matrix4x4();                 // matrix representing this element's scale transformation
     this.pivotMatrix = new Matrix4x4();                 // matrix representing this element's pivot translation
-    this.sectorTranslationMatrix = new Matrix4x4();		// matrix representing this element's sector position translation
+    this.sectorTranslationMatrix = new Matrix4x4();	// matrix representing this element's sector position translation
     this.stackMatrix = new Matrix4x4();                 // current matrix from the scene graph matrix stack (GcTransform nodes)
     this.transformSimple = new Matrix4x4();             // after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot)
     this.transformCompound = new Matrix4x4();           // after Update(), contains this element's transformations combined with 
     // parent's transformations (if any)
-    this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
+    this.sectorTransformSimple = new Matrix4x4();	// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
     // parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
+    this.updateRotation = false;
+    this.updateQuaternion = false;
     this.updateScale = false;
     this.updatePivot = false;
     this.updateSectorPosition = false;
@@ -36,6 +38,7 @@ function ParentableMotionElement()
 
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
+    this.quaternion = new QuaternionAttr(1, 0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
     this.pivot = new Vector3DAttr(0, 0, 0);
     this.center = new Vector3DAttr(0, 0, 0);
@@ -78,6 +81,7 @@ function ParentableMotionElement()
 
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
+    this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
     this.scale.addModifiedCB(ParentableMotionElement_ScaleModifiedCB, this);
     this.pivot.addModifiedCB(ParentableMotionElement_PivotModifiedCB, this);
     this.sectorOrigin.addModifiedCB(ParentableMotionElement_SectorOriginModifiedCB, this);
@@ -102,6 +106,7 @@ function ParentableMotionElement()
 
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
+    this.registerAttribute(this.quaternion, "quaternion");
     this.registerAttribute(this.scale, "scale");
     this.registerAttribute(this.pivot, "pivot");
     this.registerAttribute(this.center, "center");
@@ -340,6 +345,17 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             modified = true;
         }
 
+        if (this.updateQuaternion)
+        {
+            this.updateQuaternion = false;
+
+            values = this.quaternion.getValueDirect();
+            this.rotationQuat.load(values.w, values.x, values.y, values.z);
+            this.rotationMatrix = this.rotationQuat.getMatrix();
+
+            modified = true;
+        }
+        
         if (this.updateScale)
         {
             this.updateScale = false;
@@ -572,6 +588,12 @@ function ParentableMotionElement_PositionModifiedCB(attribute, container)
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
+    container.incrementModificationCount();
+}
+
+function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
+{
+    container.updateQuaternion = true;
     container.incrementModificationCount();
 }
 

@@ -608,3 +608,19 @@ function SphereAttr_RadiusModifiedCB(attribute, container)
 {
     container.sphere.radius = attribute.getValueDirect();
 }
+
+PhysicalPropertiesAttr.prototype = new AttributeContainer();
+PhysicalPropertiesAttr.prototype.constructor = PhysicalPropertiesAttr;
+
+function PhysicalPropertiesAttr()
+{
+    AttributeContainer.call(this);
+    this.className = "PhysicalPropertiesAttr";
+    this.attrType = eAttrType.PhysicalPropertiesAttr;
+
+    this.mass = new NumberAttr(0);
+    this.radius = new NumberAttr(0);
+
+    this.registerAttribute(this.mass, "mass");
+    this.registerAttribute(this.radius, "radius");
+}

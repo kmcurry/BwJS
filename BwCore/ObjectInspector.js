@@ -303,7 +303,7 @@ ObjectInspector.prototype.rotationNowModified = function()
 }
 
 ObjectInspector.prototype.runSelectionOccurred = function()
-{
+{       
     var selector =  this.registry.find("Selector");
     var vpMgr = this.registry.find("ViewportMgr");
 
@@ -354,6 +354,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         for (var j=0; j < this.selectedObjects.length; j++)
         {
             pSelected = this.selectedObjects[j];
+            pSelected.getAttribute("selected").setValueDirect(1);
 
             pRotGroup = getInspectionGroup(pSelected);
             //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
@@ -370,7 +371,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 
                 pRotQuatAttr = pQuat.rotationQuat;
 
-                pResultQuat.addTarget(pRotQuatAttr);
+                pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
 				
                 var prq = pRotQuatAttr.getValueDirect();
                 pQuatAtMouseDown.setValueDirect(prq);
@@ -423,6 +424,10 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        this.selectedObjects[i].getAttribute("selected").setValueDirect(0);
+    }
     this.selectedObjects = [];
 }
 
