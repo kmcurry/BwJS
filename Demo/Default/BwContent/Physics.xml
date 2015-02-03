@@ -28,78 +28,71 @@
             </Group>
             <Group name="Effects"/>
             <Group name="Models">
-                <Isolator name="ProjectorIsolator" isolateTextures="true">
-                    <PerspectiveProjector name="PerspectiveProjector" zoom="3.2" nearDistance=".00001" farDistance="4000">
-                        <position x="0" y="0" z="0"/>
-                        <rotation p="0" h="0" r="0"/>
-                        <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
-                    </PerspectiveProjector>
-                    <Model name="grid" url="/objects/GridG.lwo">
-                        <position x="0" y="0" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="2" y="2" z="2"/>
-                    </Model>
-                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
-                        <position x="0" y="4" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <physicalProperties>
-                            <mass>5</mass>
-                        </physicalProperties>                      
-                    </Model>
-                    <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="0.45" y="6" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <physicalProperties>
-                            <mass>5</mass>
-                        </physicalProperties>                      
-                    </Model>
-                    <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="-0.45" y="8" z="0"/>
-                        <rotation x="0" y="45" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <physicalProperties>
-                            <mass>5</mass>
-                        </physicalProperties>                      
-                    </Model>
-                    <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="0" y="10" z="0.45"/>
-                        <rotation x="0" y="45" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <physicalProperties>
-                            <mass>5</mass>
-                        </physicalProperties>                  
-                    </Model>
-                    <Model name="UV_BoxG5" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="0" y="10" z="-0.45"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <physicalProperties>
-                            <mass>5</mass>
-                        </physicalProperties>                      
-                    </Model>
-                    <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
-                        <position x="2" y=".26" z="0"/>
-                        <rotation x="90" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                    </Model>-->
-                    <!--<Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
-                         <position x="-2" y=".26" z="0"/>
-                         <rotation x="0" y="0" z="0"/>
-                         <scale x="1" y="1" z="1"/>
-                    </Model>
-                    <Model name="sphereBack" url="/objects/UV_SphereG.lwo">
-                         <position x="0" y=".25" z="2"/>
-                         <rotation x="0" y="0" z="0"/>
-                         <scale x="1" y="1" z="1"/>
-                    </Model>
-                    <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
-                         <position x="0" y=".25" z="-2"/>
-                         <rotation x="0" y="0" z="0"/>
-                         <scale x="1" y="1" z="1"/>
-                    </Model>-->
-                </Isolator>
+                <Model name="grid" url="/objects/GridG.lwo" moveable="false">
+                    <position x="0" y="0" z="0"/>
+                    <rotation x="0" y="0" z="0"/>
+                    <scale x="2" y="2" z="2"/>
+                </Model>
+                <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                    <position x="0" y="4" z="0"/>
+                    <rotation x="0" y="0" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>                      
+                </Model>
+                <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <position x="0.45" y="6" z="0"/>
+                    <rotation x="0" y="0" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>                      
+                </Model>
+                <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <position x="-0.45" y="8" z="0"/>
+                    <rotation x="0" y="45" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>                      
+                </Model>
+                <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <position x="0" y="10" z="0.45"/>
+                    <rotation x="0" y="45" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>                  
+                </Model>
+                <Model name="UV_BoxG5" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <position x="0" y="10" z="-0.45"/>
+                    <rotation x="0" y="0" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>                      
+                </Model>
+                <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
+                    <position x="2" y=".26" z="0"/>
+                    <rotation x="90" y="0" z="0"/>
+                    <scale x="1" y="1" z="1"/>
+                </Model>-->
+                <!--<Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
+                     <position x="-2" y=".26" z="0"/>
+                     <rotation x="0" y="0" z="0"/>
+                     <scale x="1" y="1" z="1"/>
+                </Model>
+                <Model name="sphereBack" url="/objects/UV_SphereG.lwo">
+                     <position x="0" y=".25" z="2"/>
+                     <rotation x="0" y="0" z="0"/>
+                     <scale x="1" y="1" z="1"/>
+                </Model>
+                <Model name="sphereFront" url="/objects/UV_SphereG.lwo" enableSharing="false">
+                     <position x="0" y=".25" z="-2"/>
+                     <rotation x="0" y="0" z="0"/>
+                     <scale x="1" y="1" z="1"/>
+                </Model>-->
             </Group>
         </Isolator>
         <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>
