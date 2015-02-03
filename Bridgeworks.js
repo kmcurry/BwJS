@@ -4919,6 +4919,7 @@ var eAttrType = {
     SocketConnector             :36,
     PlugConnector               :37,
     SphereAttr                  :38,
+    PhysicalPropertiesAttr      :39,
     
     Node                        :1000,
        
@@ -4971,6 +4972,7 @@ var eAttrType = {
     WalkSimulator               :1110,
     MorphEffector               :1111,
     BoneEffector                :1112,
+    PhysicsSimulator            :1113,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -6339,6 +6341,18 @@ StringAttr.prototype.setValue = function(values, params)
     Attribute.prototype.setValue.call(this, values, params);
 }
 
+StringAttrAllocator.prototype = new Allocator();
+StringAttrAllocator.prototype.constructor = StringAttrAllocator;
+
+function StringAttrAllocator()
+{
+}
+
+StringAttrAllocator.prototype.allocate = function()
+{
+    return new StringAttr();
+}
+
 TernaryAttr.prototype = new NumberAttr();
 TernaryAttr.prototype.constructor = TernaryAttr;
 
@@ -7546,6 +7560,23 @@ function SphereAttr_RadiusModifiedCB(attribute, container)
 {
     container.sphere.radius = attribute.getValueDirect();
 }
+
+PhysicalPropertiesAttr.prototype = new AttributeContainer();
+PhysicalPropertiesAttr.prototype.constructor = PhysicalPropertiesAttr;
+
+function PhysicalPropertiesAttr()
+{
+    AttributeContainer.call(this);
+    this.className = "PhysicalPropertiesAttr";
+    this.attrType = eAttrType.PhysicalPropertiesAttr;
+
+    this.mass = new NumberAttr(0);
+    this.radius = new NumberAttr(0);
+
+    this.registerAttribute(this.mass, "mass");
+    this.registerAttribute(this.radius, "radius");
+}
+
 function setAttributeValue(attribute, value)
 {
     switch (attribute.attrType)
@@ -14420,7 +14451,7 @@ RenderableElement.prototype.apply = function(directive, params, visitChildren)
 }
 
 ParentableMotionElement.prototype = new RenderableElement();
-        ParentableMotionElement.prototype.constructor = ParentableMotionElement;
+ParentableMotionElement.prototype.constructor = ParentableMotionElement;
 
 function ParentableMotionElement()
 {
@@ -14433,17 +14464,19 @@ function ParentableMotionElement()
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
     this.scaleMatrix = new Matrix4x4();                 // matrix representing this element's scale transformation
     this.pivotMatrix = new Matrix4x4();                 // matrix representing this element's pivot translation
-    this.sectorTranslationMatrix = new Matrix4x4();		// matrix representing this element's sector position translation
+    this.sectorTranslationMatrix = new Matrix4x4();	// matrix representing this element's sector position translation
     this.stackMatrix = new Matrix4x4();                 // current matrix from the scene graph matrix stack (GcTransform nodes)
     this.transformSimple = new Matrix4x4();             // after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot)
     this.transformCompound = new Matrix4x4();           // after Update(), contains this element's transformations combined with 
     // parent's transformations (if any)
-    this.sectorTransformSimple = new Matrix4x4();		// after Update(), contains this element's transformations (translation/
+    this.sectorTransformSimple = new Matrix4x4();	// after Update(), contains this element's transformations (translation/
     // rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
     // parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
+    this.updateRotation = false;
+    this.updateQuaternion = false;
     this.updateScale = false;
     this.updatePivot = false;
     this.updateSectorPosition = false;
@@ -14457,6 +14490,7 @@ function ParentableMotionElement()
 
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
+    this.quaternion = new QuaternionAttr(1, 0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
     this.pivot = new Vector3DAttr(0, 0, 0);
     this.center = new Vector3DAttr(0, 0, 0);
@@ -14499,6 +14533,7 @@ function ParentableMotionElement()
 
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
+    this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
     this.scale.addModifiedCB(ParentableMotionElement_ScaleModifiedCB, this);
     this.pivot.addModifiedCB(ParentableMotionElement_PivotModifiedCB, this);
     this.sectorOrigin.addModifiedCB(ParentableMotionElement_SectorOriginModifiedCB, this);
@@ -14523,6 +14558,7 @@ function ParentableMotionElement()
 
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
+    this.registerAttribute(this.quaternion, "quaternion");
     this.registerAttribute(this.scale, "scale");
     this.registerAttribute(this.pivot, "pivot");
     this.registerAttribute(this.center, "center");
@@ -14761,6 +14797,17 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             modified = true;
         }
 
+        if (this.updateQuaternion)
+        {
+            this.updateQuaternion = false;
+
+            values = this.quaternion.getValueDirect();
+            this.rotationQuat.load(values.w, values.x, values.y, values.z);
+            this.rotationMatrix = this.rotationQuat.getMatrix();
+
+            modified = true;
+        }
+        
         if (this.updateScale)
         {
             this.updateScale = false;
@@ -14993,6 +15040,12 @@ function ParentableMotionElement_PositionModifiedCB(attribute, container)
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
+    container.incrementModificationCount();
+}
+
+function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
+{
+    container.updateQuaternion = true;
     container.incrementModificationCount();
 }
 
@@ -18312,6 +18365,7 @@ function Model()
     this.disableOnDissolve = new BooleanAttr(true);
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
+    this.physicalProperties = new PhysicalPropertiesAttr();
     
     this.show.addTarget(this.enabled);
     
@@ -18391,6 +18445,7 @@ function Model()
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
+    this.registerAttribute(this.physicalProperties, "physicalProperties");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -23597,21 +23652,21 @@ function HighlightDirective_HighlightColorModifiedCB(attribute, container)
     container.highlightColorModified();
 }
 
-var OBJECTMOTION_PAN_BIT		= 0x001;
-var OBJECTMOTION_LINEAR_BIT     = 0x002;
-var OBJECTMOTION_ANGULAR_BIT    = 0x004;
-var OBJECTMOTION_SCALAR_BIT     = 0x008;
-var OBJECTMOTION_ALL_BITS		= 0x00F;
+var OBJECTMOTION_PAN_BIT     = 0x001;
+var OBJECTMOTION_LINEAR_BIT  = 0x002;
+var OBJECTMOTION_ANGULAR_BIT = 0x004;
+var OBJECTMOTION_SCALAR_BIT  = 0x008;
+var OBJECTMOTION_ALL_BITS    = 0x00F;
 
 function ObjectMotionDesc()
 {
-	this.validMembersMask = OBJECTMOTION_ALL_BITS;
-	this.panVelocity = new Vector3D(0, 0, 0);
-	this.linearVelocity = new Vector3D(0, 0, 0);
-	this.angularVelocity = new Vector3D(0, 0, 0);
-	this.scalarVelocity = new Vector3D(0, 0, 0);
-	this.duration = 0; // seconds
-	this.stopOnCollision = true;
+    this.validMembersMask = OBJECTMOTION_ALL_BITS;
+    this.panVelocity = new Vector3D(0, 0, 0);
+    this.linearVelocity = new Vector3D(0, 0, 0);
+    this.angularVelocity = new Vector3D(0, 0, 0);
+    this.scalarVelocity = new Vector3D(0, 0, 0);
+    this.duration = 0; // seconds
+    this.stopOnCollision = true;
 }
 
 ObjectMotionDesc.prototype.assign = function(rhs)
@@ -23621,7 +23676,7 @@ ObjectMotionDesc.prototype.assign = function(rhs)
     this.linearVelocity = rhs.linearVelocity;
     this.angularVelocity = rhs.angularVelocity;
     this.scalarVelocity = rhs.scalarVelocity;
-    this.duration = rhs.duration;   
+    this.duration = rhs.duration;
 }
 
 ObjectMover.prototype = new Evaluator();
@@ -23668,9 +23723,9 @@ ObjectMover.prototype.onUnregister = function()
 
 ObjectMover.prototype.evaluate = function()
 {
-	// time
+    // time
     var timeIncrement = this.timeIncrement.getValueDirect();
-    
+
     this.updateActiveMotion(timeIncrement);
 
     this.setMotion(this.activeMotion);
@@ -23680,64 +23735,64 @@ ObjectMover.prototype.setMotion = function(motion)
 {
     if (motion.validMembersMask & OBJECTMOTION_PAN_BIT)
     {
-        this.panVelocity.setValueDirect(motion.panVelocity.x, 
-                                        motion.panVelocity.y, 
-                                        motion.panVelocity.z);
+        this.panVelocity.setValueDirect(motion.panVelocity.x,
+                motion.panVelocity.y,
+                motion.panVelocity.z);
     }
-    
+
     if (motion.validMembersMask & OBJECTMOTION_LINEAR_BIT)
-    {                       
-        this.linearVelocity.setValueDirect(motion.linearVelocity.x, 
-                                           motion.linearVelocity.y, 
-                                           motion.linearVelocity.z);
+    {
+        this.linearVelocity.setValueDirect(motion.linearVelocity.x,
+                motion.linearVelocity.y,
+                motion.linearVelocity.z);
     }
-        
+
     if (motion.validMembersMask & OBJECTMOTION_ANGULAR_BIT)
-    {                              
-        this.angularVelocity.setValueDirect(motion.angularVelocity.x, 
-                                            motion.angularVelocity.y, 
-                                            motion.angularVelocity.z);
+    {
+        this.angularVelocity.setValueDirect(motion.angularVelocity.x,
+                motion.angularVelocity.y,
+                motion.angularVelocity.z);
     }
-        
+
     if (motion.validMembersMask & OBJECTMOTION_SCALAR_BIT)
-    {                               
-        this.scalarVelocity.setValueDirect(motion.scalarVelocity.x, 
-                                           motion.scalarVelocity.y, 
-                                           motion.scalarVelocity.z);
+    {
+        this.scalarVelocity.setValueDirect(motion.scalarVelocity.x,
+                motion.scalarVelocity.y,
+                motion.scalarVelocity.z);
     }
 }
 
 ObjectMover.prototype.updateActiveMotion = function(timeIncrement)
 {
-	if (!this.activeMotion ||
-		 this.activeDuration >= this.activeMotion.duration)
+    if (!this.activeMotion ||
+            this.activeDuration >= this.activeMotion.duration)
     {
-       	this.activeDuration = 0;
-    	this.activeMotion = this.motionQueue.front() || new ObjectMotionDesc();
-    	this.motionQueue.pop();
-    }  
-     
+        this.activeDuration = 0;
+        this.activeMotion = this.motionQueue.front() || new ObjectMotionDesc();
+        this.motionQueue.pop();
+    }
+
     this.activeDuration += timeIncrement;
 }
 
 ObjectMover.prototype.connectTarget = function(target)
 {
-	this.panVelocity.removeAllTargets();
-	this.linearVelocity.removeAllTargets();
-	this.angularVelocity.removeAllTargets();
-	this.scalarVelocity.removeAllTargets();
-	
-	if (target)
-	{
-		this.panVelocity.addTarget(target.getAttribute("panVelocity"));
-		this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
-		this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
-		this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));	
-		target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
-		target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);
-	}
-	
-	this.targetObject = target;
+    this.panVelocity.removeAllTargets();
+    this.linearVelocity.removeAllTargets();
+    this.angularVelocity.removeAllTargets();
+    this.scalarVelocity.removeAllTargets();
+
+    if (target)
+    {
+        this.panVelocity.addTarget(target.getAttribute("panVelocity"));
+        this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
+        this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
+        this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));
+        target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
+        target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);
+    }
+
+    this.targetObject = target;
 }
 
 ObjectMover.prototype.collisionDetected = function(collisionList)
@@ -23763,11 +23818,11 @@ function ObjectMover_EnabledModifiedCB(attribute, container)
 
 function ObjectMover_TargetModifiedCB(attribute, container)
 {
-	var target = attribute.getValueDirect().join("");
+    var target = attribute.getValueDirect().join("");
     var resource = container.registry.find(target);
     if (resource)
     {
-    	container.connectTarget(resource);
+        container.connectTarget(resource);
     }
 }
 
@@ -25171,6 +25226,297 @@ PlugConnectorAllocator.prototype.allocate = function ()
 
 
 
+PhysicsSimulator.prototype = new Evaluator();
+PhysicsSimulator.prototype.constructor = PhysicsSimulator;
+
+function PhysicsSimulator()
+{
+    Evaluator.call(this);
+    this.className = "PhysicsSimulator";
+    this.attrType = eAttrType.PhysicsSimulator;
+
+    this.world = null;
+    this.physicsBodies = [];
+    this.physicsShapes = [];
+    this.bodyAdded = [];
+    this.bodyModels = [];
+    this.updateWorld = false;
+    this.updateBodies = false;
+
+    this.timeIncrement = new NumberAttr(0);
+    this.gravity = new Vector3DAttr(0, -9.8, 0);
+    this.bodies = new AttributeVector(new StringAttrAllocator());
+
+    this.bodies.getAttribute("appendParsedElements").setValueDirect(true);
+
+    this.gravity.addModifiedCB(PhysicsSimulator_GravityModifiedCB, this);
+    this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+
+    this.registerAttribute(this.timeIncrement, "timeIncrement");
+    this.registerAttribute(this.gravity, "gravity");
+    this.registerAttribute(this.bodies, "bodies");
+
+    this.initPhysics();
+}
+
+PhysicsSimulator.prototype.evaluate = function()
+{
+    if (this.updateWorld)
+    {
+        this.updateWorld = false;
+        this.initPhysics();
+    }
+
+    if (this.updateBodies)
+    {
+        this.updateBodies = false;
+        this.updatePhysicsBodies();
+    }
+
+    // add/remove bodies based on selection state (allows for object inspection)
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        switch (this.bodyModels[i].getAttribute("selected").getValueDirect())
+        {
+            case 0: // unselected
+                {
+                    // if not added, restore
+                    if (!this.bodyAdded[i])
+                    {
+                        this.restorePhysicsBody(i);
+                        this.bodyAdded[i] = true;
+                    }
+                }
+                break;
+
+            case 1: // selected
+                {
+                    // if added, remove
+                    if (this.bodyAdded[i])
+                    {
+                        this.world.removeRigidBody(this.physicsBodies[i]);
+                        this.bodyAdded[i] = false;
+                    }
+                }
+                break;
+        }
+    }
+
+    var timeIncrement = this.timeIncrement.getValueDirect();
+    this.world.stepSimulation(timeIncrement, 10);
+
+    var trans = new Ammo.btTransform();
+    for (var i = 0; i < this.physicsBodies.length; i++)
+    {
+        if (!this.bodyAdded[i]) continue;
+        
+        this.physicsBodies[i].getMotionState().getWorldTransform(trans);
+        var origin = trans.getOrigin();
+        var position = new Vector3D(origin.x(), origin.y(), origin.z());
+
+        var rot = trans.getRotation();
+        var quat = new Quaternion();
+        quat.load(rot.w(), rot.x(), rot.y(), rot.z());
+
+        this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+        this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
+    }
+}
+
+PhysicsSimulator.prototype.updatePhysicsBodies = function()
+{
+    // reset bodies
+    this.initPhysics();
+    this.physicsBodies = [];
+    this.physicsShapes = [];
+    this.bodyAdded = [];
+    this.bodyModels = [];
+
+    // add bodies to world
+    for (var b = 0; b < this.bodies.Size(); b++)
+    {
+        var body = this.registry.find(this.bodies.getAt(b).getValueDirect().join(""));
+        if (!body) continue;
+
+        // watch for changes in scale
+        body.getAttribute("scale").addModifiedCB(PhysicsSimulator_BodyScaleModifiedCB, this);
+        
+        // scale vertices
+        var scaleMatrix = new Matrix4x4();
+        var scale = body.getAttribute("scale").getValueDirect();
+        scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+        
+        var physicsShape = new Ammo.btConvexHullShape();
+        var verts = body.getAttribute("vertices").getValueDirect();
+        for (var i = 0; i < verts.length; i += 3)
+        {
+            var scaledVerts = scaleMatrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+            physicsShape.addPoint(new Ammo.btVector3(scaledVerts.x, scaledVerts.y, scaledVerts.z));
+        }
+
+        var physicalProperties = body.getAttribute("physicalProperties");
+        var mass = physicalProperties.getAttribute("mass").getValueDirect();
+        
+        var startTransform = new Ammo.btTransform();
+        startTransform.setIdentity();
+
+        var position = body.getAttribute("sectorPosition").getValueDirect();
+        // temporary fix to remove y-axis padding between static and dynamic objects
+        if (mass == 0)
+        {
+            position.y -= 0.075;
+        }
+        startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+
+        var rotation = body.getAttribute("rotation").getValueDirect();
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+
+        var isDynamic = (mass != 0);
+        var localInertia = new Ammo.btVector3(0, 0, 0);
+        if (isDynamic)
+        {
+            physicsShape.calculateLocalInertia(mass, localInertia);
+        }
+        
+        var motionState = new Ammo.btDefaultMotionState(startTransform);
+        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
+        var physicsBody = new Ammo.btRigidBody(rbInfo);
+
+        this.world.addRigidBody(physicsBody);
+        if (isDynamic)
+        {
+            this.bodyModels.push(body);
+            this.physicsShapes.push(physicsShape);
+            this.physicsBodies.push(physicsBody);
+            this.bodyAdded.push(true);
+        }
+    }
+}
+
+PhysicsSimulator.prototype.updatePhysicsShape = function(body)
+{
+    // locate array position of body
+    var n = -1;
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == body)
+        {
+            n = i;
+            break;
+        }
+    }
+    if (n == -1) return;
+    
+    // scale vertices
+    var scaleMatrix = new Matrix4x4();
+    var scale = body.getAttribute("scale").getValueDirect();
+    scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+
+    var physicsShape = new Ammo.btConvexHullShape();
+    var verts = body.getAttribute("vertices").getValueDirect();
+    for (var i = 0; i < verts.length; i += 3)
+    {
+        var scaledVerts = scaleMatrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        physicsShape.addPoint(new Ammo.btVector3(scaledVerts.x, scaledVerts.y, scaledVerts.z));
+    }
+
+    var physicalProperties = body.getAttribute("physicalProperties");
+    var mass = physicalProperties.getAttribute("mass").getValueDirect();
+        
+    var isDynamic = (mass != 0);
+    var localInertia = new Ammo.btVector3(0, 0, 0);
+    if (isDynamic)
+    {
+        physicsShape.calculateLocalInertia(mass, localInertia);
+    }
+    
+    var motionState = this.physicsBodies[n].getMotionState();
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
+    var physicsBody = new Ammo.btRigidBody(rbInfo);
+
+    this.world.removeRigidBody(this.physicsBodies[n]); // remove previous
+    this.world.addRigidBody(physicsBody);
+    this.physicsBodies[n] = physicsBody;
+    this.physicsShapes[n] = physicsShape;
+}
+
+PhysicsSimulator.prototype.restorePhysicsBody = function(n)
+{
+    var body = this.bodyModels[n];
+    var physicsShape = this.physicsShapes[n];
+    
+    var startTransform = new Ammo.btTransform();
+    startTransform.setIdentity();
+
+    var position = body.getAttribute("sectorPosition").getValueDirect();
+    startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+
+    // update rotation to include rotation caused by object inspection
+    var rotationGroup = getInspectionGroup(body);
+    if (rotationGroup)
+    {
+        var rotQuat = rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect();
+        var quat1 = new Quaternion();
+        quat1.load(rotQuat.w, rotQuat.x, rotQuat.y, rotQuat.z);
+        
+        var bodyQuat = body.getAttribute("quaternion").getValueDirect();
+        var quat2 = new Quaternion();
+        quat2.load(bodyQuat.w, bodyQuat.x, bodyQuat.y, bodyQuat.z);
+        
+        var quat = quat2.multiply(quat1);
+        
+        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+                    
+        // clear inspection group's rotation
+        rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+    }
+
+    var physicalProperties = body.getAttribute("physicalProperties");
+    var mass = physicalProperties.getAttribute("mass").getValueDirect();
+        
+    var isDynamic = (mass != 0);
+    var localInertia = new Ammo.btVector3(0, 0, 0);
+    if (isDynamic)
+    {
+        physicsShape.calculateLocalInertia(mass, localInertia);
+    }
+
+    var motionState = new Ammo.btDefaultMotionState(startTransform);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
+    var physicsBody = new Ammo.btRigidBody(rbInfo);
+
+    this.world.addRigidBody(physicsBody);
+    this.physicsBodies[n] = physicsBody;
+}
+
+PhysicsSimulator.prototype.initPhysics = function()
+{
+    var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+    var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+    var overlappingPairCache = new Ammo.btDbvtBroadphase();
+    var solver = new Ammo.btSequentialImpulseConstraintSolver();
+    this.world = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+    var gravity = this.gravity.getValueDirect();
+    this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
+}
+
+function PhysicsSimulator_GravityModifiedCB(attribute, container)
+{
+    container.updateWorld = true;
+}
+
+function PhysicsSimulator_BodiesModifiedCB(attribute, container)
+{
+    container.updateBodies = true;
+}
+
+function PhysicsSimulator_BodyScaleModifiedCB(attribute, container)
+{
+    container.updatePhysicsShape(attribute.getContainer());
+}
 var eEventType = {
     Unknown                     :-1,
     
@@ -28627,7 +28973,7 @@ ObjectInspector.prototype.rotationNowModified = function()
 }
 
 ObjectInspector.prototype.runSelectionOccurred = function()
-{
+{       
     var selector =  this.registry.find("Selector");
     var vpMgr = this.registry.find("ViewportMgr");
 
@@ -28678,6 +29024,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         for (var j=0; j < this.selectedObjects.length; j++)
         {
             pSelected = this.selectedObjects[j];
+            pSelected.getAttribute("selected").setValueDirect(1);
 
             pRotGroup = getInspectionGroup(pSelected);
             //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
@@ -28694,7 +29041,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 
                 pRotQuatAttr = pQuat.rotationQuat;
 
-                pResultQuat.addTarget(pRotQuatAttr);
+                pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
 				
                 var prq = pRotQuatAttr.getValueDirect();
                 pQuatAtMouseDown.setValueDirect(prq);
@@ -28747,6 +29094,10 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        this.selectedObjects[i].getAttribute("selected").setValueDirect(0);
+    }
     this.selectedObjects = [];
 }
 
@@ -29072,6 +29423,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
             
             case "ObjectMover":
             case "AnimalMover":
+            case "PhysicsSimulator":
             {
             	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
             }
@@ -29461,6 +29813,17 @@ SelectionListener.prototype.eventPerformed = function(event)
                 event.inputId & MOUSEEVENT_MIDDLE_BUTTON ||
                 event.inputId & MOUSEEVENT_RIGHT_BUTTON)
                 return;        
+        }
+        break;
+        
+        case eEventType.MouseLeftUp:
+        case eEventType.MouseMiddleUp:
+        case eEventType.MouseRightUp:
+        case eEventType.MouseBothUp:
+        {
+            // TODO: allow for multi-select (clear if Ctrl is not pressed)
+            this.clearSelections();
+            return;
         }
         break;
     }
@@ -34281,6 +34644,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function ()
     this.newResourceProcs["WalkSimulator"] = newWalkSimulator;
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
     this.newResourceProcs["BoneEffector"] = newBoneEffector;
+    this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -34731,6 +35095,15 @@ function newMorphEffector(name, factory)
 function newBoneEffector(name, factory)
 {
     var resource = new BoneEffector();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newPhysicsSimulator(name, factory)
+{
+    var resource = new PhysicsSimulator();
 
     registerEvaluatorAttributes(resource, factory);
 
@@ -35225,9 +35598,13 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseLeftUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseMiddleUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseRightUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseBothUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseHover, this.selector);
     //this.eventMgr.addListener(eMOUSE_MOVE, this.selector);
 

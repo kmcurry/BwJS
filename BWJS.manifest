@@ -116,6 +116,7 @@ SceneGraph/MorphEffector.js
 SceneGraph/Bone.js
 SceneGraph/BoneEffector.js
 SceneGraph/SnapConnector.js
+SceneGraph/PhysicsSimulator.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 
@@ -168,3 +169,4 @@ Libs/jquery/jquery.bgiframe.min.js
 Libs/jquery/bt/jquery.bt.min.js
 Libs/three.js/three.js
 Libs/JSModeler/build/jsmodeler.js
+Libs/ammo.js/ammo.js
