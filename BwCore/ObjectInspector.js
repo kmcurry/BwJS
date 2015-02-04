@@ -217,7 +217,7 @@ ObjectInspector.prototype.translationDeltaModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
         if (!pme)
         {
             continue;
@@ -243,7 +243,7 @@ ObjectInspector.prototype.rotationDeltaModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
         if (!pme)
         {
             continue;
@@ -280,7 +280,7 @@ ObjectInspector.prototype.rotationNowModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
 		
         var moveable = pme.moveable.getValueDirect();
         if (moveable)
@@ -350,73 +350,69 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         pMouseDown.setValueDirect(clickPoint.x, clickPoint.y);
         pMouseNow.setValueDirect(clickPoint.x, clickPoint.y);
 
-        // for each selected moveable, attach it's Quat to the Inspector
-        for (var j=0; j < this.selectedObjects.length; j++)
+        pSelected = this.getInspectionObject(this.selectedObjects[i]);
+
+        pRotGroup = getInspectionGroup(pSelected);
+        //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
+        if (pRotGroup && (pQuat = pRotGroup.getChild(2)))
         {
-            pSelected = this.selectedObjects[j];
+            // see notes in BwObjectInspector.cpp
+            var values = [true];
+            var params = new AttributeSetParams(-1, -1, eAttrSetOp.Replace, true, true);
+            // it would seem easier to setValueDirect(true) here given params are
+            // created with all default values but params are reused throughout this
+            // function and setting the intended params values, per the notes in .cpp,
+            // triggers a bug elsewhere. 
+            pQuat.enabled.setValue(values, params);
 
-            pRotGroup = getInspectionGroup(pSelected);
-            //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
-            if (pRotGroup && (pQuat = pRotGroup.getChild(2)))
+            pRotQuatAttr = pQuat.rotationQuat;
+
+            pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
+
+            var prq = pRotQuatAttr.getValueDirect();
+            pQuatAtMouseDown.setValueDirect(prq);
+
+            var box = pSelected.bbox;
+            var min = box.min.getValueDirect();
+            var max = box.max.getValueDirect();
+            center = new Vector3D(min.x, min.y, min.z);
+            center.addVector(max);
+            center.multiplyScalar(0.5);
+
+            var pivot = pSelected.pivot.getValueDirect();
+            if (pSelected.pivotAboutGeometricCenter.getValueDirect())
             {
-                // see notes in BwObjectInspector.cpp
-                var values = [true];
-                var params = new AttributeSetParams(-1, -1, eAttrSetOp.Replace, true, true);
-                // it would seem easier to setValueDirect(true) here given params are
-                // created with all default values but params are reused throughout this
-                // function and setting the intended params values, per the notes in .cpp,
-                // triggers a bug elsewhere. 
-                pQuat.enabled.setValue(values, params);
+                pivot = center;
+            }				
+            var pivotNeg = new Vector3D(pivot.x, pivot.y, pivot.z);
+            pivotNeg.multiplyScalar(-1);
 
-                pRotQuatAttr = pQuat.rotationQuat;
+            // translate to pivot before applying quaternion rotation
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            values = [pivot.x, pivot.y, pivot.z];
+            pRotGroup.getChild(0).translation.setValue(values, params);
 
-                pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
-				
-                var prq = pRotQuatAttr.getValueDirect();
-                pQuatAtMouseDown.setValueDirect(prq);
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            var scale = pSelected.worldScale.getValueDirect();
+            var scaleInv = new Vector3D(1 / scale.x,
+                1 / scale.y,
+                1 / scale.z);
+            values[0] = scaleInv.x;
+            values[1] = scaleInv.y;
+            values[2] = scaleInv.z;
+            pRotGroup.getChild(1).scale.setValue(values, params);
 
-                var box = pSelected.bbox;
-                var min = box.min.getValueDirect();
-                var max = box.max.getValueDirect();
-                center = new Vector3D(min.x, min.y, min.z);
-                center.addVector(max);
-                center.multiplyScalar(0.5);
-	
-                var pivot = pSelected.pivot.getValueDirect();
-                if (pSelected.pivotAboutGeometricCenter.getValueDirect())
-                {
-                    pivot = center;
-                }				
-                var pivotNeg = new Vector3D(pivot.x, pivot.y, pivot.z);
-                pivotNeg.multiplyScalar(-1);
+            values[0] = scale.x;
+            values[1] = scale.y;
+            values[2] = scale.z;
+            pRotGroup.getChild(3).scale.setValue(values, params);
 
-                // translate to pivot before applying quaternion rotation
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                values = [pivot.x, pivot.y, pivot.z];
-                pRotGroup.getChild(0).translation.setValue(values, params);
-
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                var scale = pSelected.worldScale.getValueDirect();
-                var scaleInv = new Vector3D(1 / scale.x,
-                    1 / scale.y,
-                    1 / scale.z);
-                values[0] = scaleInv.x;
-                values[1] = scaleInv.y;
-                values[2] = scaleInv.z;
-                pRotGroup.getChild(1).scale.setValue(values, params);
-                
-                values[0] = scale.x;
-                values[1] = scale.y;
-                values[2] = scale.z;
-                pRotGroup.getChild(3).scale.setValue(values, params);
-            
-                // translate back from pivot after applying quaternion rotation
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                values[0] = pivotNeg.x;
-                values[1] = pivotNeg.y;
-                values[2] = pivotNeg.z;
-                pRotGroup.getChild(4).translation.setValue(values, params);
-            }
+            // translate back from pivot after applying quaternion rotation
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            values[0] = pivotNeg.x;
+            values[1] = pivotNeg.y;
+            values[2] = pivotNeg.z;
+            pRotGroup.getChild(4).translation.setValue(values, params);
         }
     }   
 }
@@ -424,6 +420,26 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 ObjectInspector.prototype.runSelectionCleared = function()
 {
     this.selectedObjects = [];
+}
+
+ObjectInspector.prototype.getInspectionObject = function(selected)
+{
+    var plugs = selected.getAttribute("plugConnectors");
+    for (var i = 0; i < plugs.Size(); i++)
+    {
+        var plug = plugs.getAt(i);
+        if (plug.getAttribute("connected").getValueDirect())
+        {
+            // recurse
+            if (selected.motionParent)
+            {
+                return this.getInspectionObject(selected.motionParent);
+            }
+            break;
+        }
+    }
+    
+    return selected;
 }
 
 function ObjectInspector_TranslationDeltaModifiedCB(attribute, container)

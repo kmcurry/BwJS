@@ -15,13 +15,13 @@ function ParentableMotionElement()
     this.sectorTranslationMatrix = new Matrix4x4();	// matrix representing this element's sector position translation
     this.stackMatrix = new Matrix4x4();                 // current matrix from the scene graph matrix stack (GcTransform nodes)
     this.transformSimple = new Matrix4x4();             // after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot)
+    							// rotation/scale/pivot)
     this.transformCompound = new Matrix4x4();           // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any)
+    							// parent's transformations (if any)
     this.sectorTransformSimple = new Matrix4x4();	// after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot) for the current sector
+    							// rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any) for the current sector                                        
+    							// parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
     this.updateRotation = false;
     this.updateQuaternion = false;
@@ -412,10 +412,19 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
 
     if (this.motionParent)
     {
+        // account for parent's object-inspected rotation
+        var inspectionRotationMatrix = new Matrix4x4();
+        var inspectionGroup = getInspectionGroup(this.motionParent);
+        if (inspectionGroup)
+        {
+            var quaternionRotate = inspectionGroup.getChild(2);
+            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+        }
+        
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
         {
-            this.transformCompound.loadMatrix(this.transformCompound.multiply(this.motionParent.transformCompound));
-            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(this.motionParent.sectorTransformCompound));
+            this.transformCompound.loadMatrix(this.transformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.transformCompound)));
+            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.sectorTransformCompound)));
         }
         else // !m_inheritsPosition || !m_inheritsRotation || !m_inheritsScale || !m_inheritsPivot
         {
