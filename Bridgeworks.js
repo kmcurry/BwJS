@@ -29024,7 +29024,6 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         for (var j=0; j < this.selectedObjects.length; j++)
         {
             pSelected = this.selectedObjects[j];
-            pSelected.getAttribute("selected").setValueDirect(1);
 
             pRotGroup = getInspectionGroup(pSelected);
             //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
@@ -29094,10 +29093,6 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
-    for (var i = 0; i < this.selectedObjects.length; i++)
-    {
-        this.selectedObjects[i].getAttribute("selected").setValueDirect(0);
-    }
     this.selectedObjects = [];
 }
 
@@ -29815,17 +29810,6 @@ SelectionListener.prototype.eventPerformed = function(event)
                 return;        
         }
         break;
-        
-        case eEventType.MouseLeftUp:
-        case eEventType.MouseMiddleUp:
-        case eEventType.MouseRightUp:
-        case eEventType.MouseBothUp:
-        {
-            // TODO: allow for multi-select (clear if Ctrl is not pressed)
-            this.clearSelections();
-            return;
-        }
-        break;
     }
     
     // TODO: allow for multi-select (clear if Ctrl is not pressed)
@@ -29840,6 +29824,11 @@ SelectionListener.prototype.registerSelection = function(node, element)
     if (this.selected) return;
     
     this.selected = node;
+    var selected = node.getAttribute("selected");
+    if (selected)
+    {
+        selected.setValueDirect(1);
+    }
     
     // registering an attribute that has a NULL container (Get/SetContainer()) will set
     // the calling object as the container; don't want this behavior here
@@ -29866,9 +29855,15 @@ SelectionListener.prototype.clearSelections = function()
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
+        var selected = this.selected.getAttribute("selected");
+        if (selected)
+        {
+            selected.setValueDirect(0);
+        }
+    
     	if (this.selected.getAttribute("selectedElement"))
     	{
-        	this.selected.unregisterAttribute(this.selectedElement);
+            this.selected.unregisterAttribute(this.selectedElement);
         }
         
         this.selectedName.setValueDirect("");
@@ -35598,13 +35593,9 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseLeftUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseMiddleUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseRightUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseBothUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseHover, this.selector);
     //this.eventMgr.addListener(eMOUSE_MOVE, this.selector);
 

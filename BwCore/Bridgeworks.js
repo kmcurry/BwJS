@@ -137,13 +137,9 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseLeftUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseMiddleUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseRightUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseBothUp, this.selector);
     this.eventMgr.addListener(eEventType.MouseHover, this.selector);
     //this.eventMgr.addListener(eMOUSE_MOVE, this.selector);
 

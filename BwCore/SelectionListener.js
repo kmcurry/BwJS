@@ -86,17 +86,6 @@ SelectionListener.prototype.eventPerformed = function(event)
                 return;        
         }
         break;
-        
-        case eEventType.MouseLeftUp:
-        case eEventType.MouseMiddleUp:
-        case eEventType.MouseRightUp:
-        case eEventType.MouseBothUp:
-        {
-            // TODO: allow for multi-select (clear if Ctrl is not pressed)
-            this.clearSelections();
-            return;
-        }
-        break;
     }
     
     // TODO: allow for multi-select (clear if Ctrl is not pressed)
@@ -111,6 +100,11 @@ SelectionListener.prototype.registerSelection = function(node, element)
     if (this.selected) return;
     
     this.selected = node;
+    var selected = node.getAttribute("selected");
+    if (selected)
+    {
+        selected.setValueDirect(1);
+    }
     
     // registering an attribute that has a NULL container (Get/SetContainer()) will set
     // the calling object as the container; don't want this behavior here
@@ -137,9 +131,15 @@ SelectionListener.prototype.clearSelections = function()
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
+        var selected = this.selected.getAttribute("selected");
+        if (selected)
+        {
+            selected.setValueDirect(0);
+        }
+    
     	if (this.selected.getAttribute("selectedElement"))
     	{
-        	this.selected.unregisterAttribute(this.selectedElement);
+            this.selected.unregisterAttribute(this.selectedElement);
         }
         
         this.selectedName.setValueDirect("");
