@@ -424,19 +424,9 @@ ObjectInspector.prototype.runSelectionCleared = function()
 
 ObjectInspector.prototype.getInspectionObject = function(selected)
 {
-    var plugs = selected.getAttribute("plugConnectors");
-    for (var i = 0; i < plugs.Size(); i++)
+    if (selected.motionParent)
     {
-        var plug = plugs.getAt(i);
-        if (plug.getAttribute("connected").getValueDirect())
-        {
-            // recurse
-            if (selected.motionParent)
-            {
-                return this.getInspectionObject(selected.motionParent);
-            }
-            break;
-        }
+        return selected.motionParent;
     }
     
     return selected;

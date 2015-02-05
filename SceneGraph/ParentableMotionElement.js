@@ -35,6 +35,7 @@ function ParentableMotionElement()
     this.inheritsPivot = true;
     this.nonZeroVelocity = false;
     this.motionParent = null;
+    this.motionChildren = [];
 
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
@@ -566,7 +567,21 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     if (parent == this)
         return;
 
+    if (this.motionParent)
+    {
+        for (var i = 0; i < this.motionParent.motionChildren.length; i++)
+        {
+            if (this.motionParent.motionChildren[i] == this)
+            {
+                
+                this.motionParent.motionChildren.splice(i, 1);
+                break;
+            }
+        }
+    }
+    
     this.motionParent = parent;
+    parent.motionChildren.push(this);
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();

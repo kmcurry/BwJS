@@ -70,7 +70,7 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
                 delete this.attrNameMap[i][j];
-                this.attrNameMap[i].splice(j,1);
+                this.attrNameMap[i].splice(j, 1);
                 break;
             }
         }
