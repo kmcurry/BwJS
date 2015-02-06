@@ -29001,8 +29001,8 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     selected.sectorPosition.setValue(attrSetVals, attrSetParams);
 
     var sPos = selected.sectorPosition.getValueDirect();
-    console.debug("selected.sectorPosition: " + sPos.x + ", " + 
-        sPos.y + ", " + sPos.z);
+    //console.debug("selected.sectorPosition: " + sPos.x + ", " + 
+    //    sPos.y + ", " + sPos.z);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
@@ -31063,7 +31063,7 @@ SerializeCommand.prototype.serializeScene = function()
     // root element close tag
     this.serialized += "</Session>";
     serializedScene += this.serialized;
-    console.log(this.serialized);
+    //console.log(this.serialized);
 
     return;
 }

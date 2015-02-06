@@ -208,8 +208,8 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     selected.sectorPosition.setValue(attrSetVals, attrSetParams);
 
     var sPos = selected.sectorPosition.getValueDirect();
-    console.debug("selected.sectorPosition: " + sPos.x + ", " + 
-        sPos.y + ", " + sPos.z);
+    //console.debug("selected.sectorPosition: " + sPos.x + ", " + 
+    //    sPos.y + ", " + sPos.z);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
