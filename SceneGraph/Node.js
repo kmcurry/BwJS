@@ -6,18 +6,18 @@ function Node()
     AttributeContainer.call(this);
     this.className = "Node";
     this.attrType = eAttrType.Node;
-    
+
     this.children = [];
     this.parents = [];
     this.modificationCount = 0;
     this.thisModified = false;
     this.childModified = false;
     this.childrenModified = [];
-    
+
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
     this.orphan = new BooleanAttr(false);
-    
+
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.enabled, "enabled");
     this.registerAttribute(this.orphan, "orphan");
@@ -28,7 +28,7 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     var clonedByThis = false;
     if (!clone)
     {
-        if (!(clone = new Node()))
+        if (!( clone = new Node()))
         {
             return -1;
         }
@@ -44,13 +44,13 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     pathSrc.push(this);
 
     // add clone to path
-   // pathClone.AddNode(clone);
+    // pathClone.AddNode(clone);
     pathClone.push(this);
 
     // if requested, clone children
     if (cloneChildren)
     {
-      //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
+        //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
 
         var pos;
         for (var i in this.children)
@@ -59,24 +59,28 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
             pos = i - this.children.start();
 
             var childClone = null;
-            if(!(i.getCreatedByParent()))
+            if (!(i.getCreatedByParent()))
             {
-                if (i.copyNode(childClone, cloneChildren, pathSrc, pathClone)) {
-                    if (clonedByThis) {
+                if (i.copyNode(childClone, cloneChildren, pathSrc, pathClone))
+                {
+                    if (clonedByThis)
+                    {
                     }
                     return -1;
                 }
 
-                if (clone.getChildCount() > pos) {
+                if (clone.getChildCount() > pos)
+                {
                     clone.insertChild(childClone, pos);
                 }
-                else {
+                else
+                {
                     clone.addChild(childClone);
                 }
 
                 i.postCloneChild(childClone, pathSrc, pathClone);
             }
-        else // created by parent -- clone child's children without allocating child
+            else// created by parent -- clone child's children without allocating child
             {
                 //childClone = clone.getChild(i - m_children.begin());
                 childClone = clone.getChild(i - this.children.start());
@@ -97,19 +101,20 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     this.postClone(clone, pathSrc, pathClone);
 
 }
-Node.prototype.searchTree = function(name,type,searchName,searchType,searchPredecessors,skipChild,skipParent,stopAt,matches)
+Node.prototype.searchTree = function(name, type, searchName, searchType, searchPredecessors, skipChild, skipParent, stopAt, matches)
 {
     var names = [];
     var types = [];
 
-    if (!(names.push(name))) return;
-    if (!(types.push(type))) return;
+    if (!(names.push(name)))
+        return;
+    if (!(types.push(type)))
+        return;
 
-    this.searchesTree(names, types, searchName, searchType, searchPredecessors, skipChild, skipParent,
-        stopAt, matches);
+    this.searchesTree(names, types, searchName, searchType, searchPredecessors, skipChild, skipParent, stopAt, matches);
 }
 
-Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searchPredecessors,skipChild,skipParent,stopAt,matches)
+Node.prototype.searchesTree = function(names, types, searchNames, searchTypes, searchPredecessors, skipChild, skipParent, stopAt, matches)
 {
     // if this node matches any of the names and/or types, add it to the list
     var match = false;
@@ -117,7 +122,7 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     var typeMatch = false;
     if (searchNames)
     {
-        for (var i=0; i < names.size(); i++)
+        for (var i = 0; i < names.size(); i++)
         {
             if (!(this.name == names[i]))
             {
@@ -128,7 +133,7 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     }
     if (searchTypes)
     {
-        for (var i=0; i < types.size(); i++)
+        for (var i = 0; i < types.size(); i++)
         {
             if (this.attrType == types[i])
             {
@@ -141,17 +146,19 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     {
         match = nameMatch && typeMatch;
     }
-    else if (searchNames)
+    else
+    if (searchNames)
     {
         match = nameMatch;
     }
-    else // searchTypes
+    else// searchTypes
     {
         match = typeMatch;
     }
     if (match)
     {
-        if (!(matches.push(this))) return;
+        if (!(matches.push(this)))
+            return;
     }
 
     if (this == stopAt)
@@ -162,23 +169,21 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     // recurse on parent(s) if requested (with this set to skipChild)
     if (searchPredecessors)
     {
-        for (var i=0; i < this.parents.size(); i++)
+        for (var i = 0; i < this.parents.size(); i++)
         {
             if (this.parents[i] != skipParent)
             {
-                this.parents[i].searchesTree(names, types, searchNames, searchTypes, searchPredecessors,
-                    this, null, stopAt, matches);
+                this.parents[i].searchesTree(names, types, searchNames, searchTypes, searchPredecessors, this, null, stopAt, matches);
             }
         }
     }
 
     // recurse on children (with searchPredecessors set to false)
-    for (var i=0; i < this.children.size(); i++)
+    for (var i = 0; i < this.children.size(); i++)
     {
         if (this.children[i] != skipChild)
         {
-            this.children[i].searchesTree(names, types, searchNames, searchTypes, false,
-                null, null, stopAt, matches);
+            this.children[i].searchesTree(names, types, searchNames, searchTypes, false, null, null, stopAt, matches);
         }
     }
 }
@@ -199,27 +204,27 @@ Node.prototype.isNode = function()
 Node.prototype.addChild = function(child)
 {
     this.children.push(child);
-    
+
     this.incrementModificationCount();
-    
+
     child.addParent(this);
 }
 
 Node.prototype.insertChild = function(child, at)
 {
     this.children.splice(at, 0, child);
-    
+
     this.incrementModificationCount();
-    
+
     child.addParent(this);
 }
 
 Node.prototype.removeChild = function(child)
 {
     this.children.splice(this.children.indexOf(child), 1);
-    
+
     this.incrementModificationCount();
-    
+
     child.removeParent(this);
 }
 
@@ -236,20 +241,20 @@ Node.prototype.getChild = function(n)
     {
         return this.children[n];
     }
-    
+
     return null;
 }
 
 Node.prototype.getNamedChild = function(name)
 {
-    for (var i=0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
     {
         if (this.children[i].name.getValueDirect().join("") == name)
         {
             return this.children[i];
         }
     }
-    
+
     return null;
 }
 
@@ -264,7 +269,7 @@ Node.prototype.getParent = function(n)
     {
         return this.parents[n];
     }
-    
+
     return null;
 }
 
@@ -293,18 +298,18 @@ Node.prototype.update = function(params, visitChildren)
         params.visited.push(this);
         return;
     }
-    
+
     params.visited.push(this);
-    
+
     if (visitChildren)
     {
         // call for all children
-        for (var i=0; i < this.children.length; i++)
+        for (var i = 0; i < this.children.length; i++)
         {
             this.children[i].update(params, visitChildren);
         }
     }
-    
+
     this.childModified = this.isChildModified();
 }
 
@@ -313,46 +318,46 @@ Node.prototype.apply = function(directive, params, visitChildren)
     // commented this out because if an evaluator (e.g., WalkSimulator)
     // happens to be the root node of a subtree and is currently disabled, its subtree will not be visited.
     /*
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
-    {
-        if (directive != "serialize")
-        {
-            return;
-        }
-    }
-    */
+     var enabled = this.enabled.getValueDirect();
+     if (!enabled)
+     {
+     if (directive != "serialize")
+     {
+     return;
+     }
+     }
+     */
     switch (directive)
     {
         case "serialize":
-        {          
-            var context = new Context();
-            context.attribute = this;
-
-            var factory = this.registry.find("AttributeFactory");
-            var serializer = factory.create("Serializer");
-            var xmlSerializer = new XMLSerializer();
-            
-            // added required format setting - need to revisit to reduce number of required steps
-            serializer.getAttribute("format").setValueDirect("xml");
-            // set minimum flag so that only the minimum required for recreation is serialized
-            serializer.getAttribute("serializeMinimum").setValueDirect(true);
-            // set children flag so that child nodes are serialized
-            serializer.getAttribute("serializeChildren").setValueDirect(true);
-            // serialize
-            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-            var serialized = xmlSerializer.serializeToString(serializer.DOM);
-            if (serialized != "<__InitialRoot/>")
             {
-            	params.serialized += serialized;
-            }
+                var context = new Context();
+                context.attribute = this;
 
-            // do not visit children, as they were serialized by this
-            visitChildren = false;
-        }
-        break;
+                var factory = this.registry.find("AttributeFactory");
+                var serializer = factory.create("Serializer");
+                var xmlSerializer = new XMLSerializer();
+
+                // added required format setting - need to revisit to reduce number of required steps
+                serializer.getAttribute("format").setValueDirect("xml");
+                // set minimum flag so that only the minimum required for recreation is serialized
+                serializer.getAttribute("serializeMinimum").setValueDirect(true);
+                // set children flag so that child nodes are serialized
+                serializer.getAttribute("serializeChildren").setValueDirect(true);
+                // serialize
+                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized != "<__InitialRoot/>")
+                {
+                    params.serialized += serialized;
+                }
+
+                // do not visit children, as they were serialized by this
+                visitChildren = false;
+            }
+            break;
     }
-    
+
     if (visitChildren)
     {
         if (params.path)
@@ -360,7 +365,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
             // call for next node in path if next node in path is a child of this node
             if (params.path.length > params.pathIndex)
             {
-                for (var i=0; i < this.children.length; i++)
+                for (var i = 0; i < this.children.length; i++)
                 {
                     var next = params.path[params.pathIndex];
 
@@ -375,7 +380,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
         else
         {
             // call for all children
-            for (var i=0; i < this.children.length; i++)
+            for (var i = 0; i < this.children.length; i++)
             {
                 this.children[i].apply(directive, params, visitChildren);
             }
@@ -399,7 +404,7 @@ Node.prototype.setModified = function()
 Node.prototype.incrementModificationCount = function()
 {
     this.modificationCount++;
-    
+
     this.setModified();
 }
 
@@ -407,14 +412,15 @@ Node.prototype.setChildModified = function(modified, recurse)
 {
     // set on parent(s) of this; recurse if specified
     var parent = null;
-    for (var i=0; i < this.parents.length; i++)
+    for (var i = 0; i < this.parents.length; i++)
     {
         parent = this.parents[i];
         if (parent)
         {
             parent.childrenModified[this.name.getValueDirect().join("")] = modified;
             parent.childModified = modified ? true : parent.isChildModified();
-            if (recurse) parent.setChildModified(modified, recurse);
+            if (recurse)
+                parent.setChildModified(modified, recurse);
         }
     }
 }
@@ -423,7 +429,8 @@ Node.prototype.isChildModified = function()
 {
     for (var i in this.childrenModified)
     {
-        if (this.childrenModified[i] == true) return true;
+        if (this.childrenModified[i] == true)
+            return true;
     }
 
     return false;
@@ -432,7 +439,7 @@ Node.prototype.isChildModified = function()
 Node.prototype.onRemove = function()
 {
     // recurse on children
-    for (var i=0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
     {
         this.children[i].onRemove();
     }

@@ -15,13 +15,13 @@ function ParentableMotionElement()
     this.sectorTranslationMatrix = new Matrix4x4();	// matrix representing this element's sector position translation
     this.stackMatrix = new Matrix4x4();                 // current matrix from the scene graph matrix stack (GcTransform nodes)
     this.transformSimple = new Matrix4x4();             // after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot)
+    							// rotation/scale/pivot)
     this.transformCompound = new Matrix4x4();           // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any)
+    							// parent's transformations (if any)
     this.sectorTransformSimple = new Matrix4x4();	// after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot) for the current sector
+    							// rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any) for the current sector                                        
+    							// parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
     this.updateRotation = false;
     this.updateQuaternion = false;
@@ -35,6 +35,7 @@ function ParentableMotionElement()
     this.inheritsPivot = true;
     this.nonZeroVelocity = false;
     this.motionParent = null;
+    this.motionChildren = [];
 
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
@@ -412,10 +413,19 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
 
     if (this.motionParent)
     {
+        // account for parent's object-inspected rotation
+        var inspectionRotationMatrix = new Matrix4x4();
+        var inspectionGroup = getInspectionGroup(this.motionParent);
+        if (inspectionGroup)
+        {
+            var quaternionRotate = inspectionGroup.getChild(2);
+            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+        }
+        
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
         {
-            this.transformCompound.loadMatrix(this.transformCompound.multiply(this.motionParent.transformCompound));
-            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(this.motionParent.sectorTransformCompound));
+            this.transformCompound.loadMatrix(this.transformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.transformCompound)));
+            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.sectorTransformCompound)));
         }
         else // !m_inheritsPosition || !m_inheritsRotation || !m_inheritsScale || !m_inheritsPivot
         {
@@ -557,7 +567,29 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     if (parent == this)
         return;
 
+    if (this.motionParent)
+    {
+        for (var i = 0; i < this.motionParent.motionChildren.length; i++)
+        {
+            if (this.motionParent.motionChildren[i] == this)
+            {
+                
+                this.motionParent.motionChildren.splice(i, 1);
+                break;
+            }
+        }
+    }
+    
     this.motionParent = parent;
+    
+    if (parent)
+    {
+        parent.motionChildren.push(this);
+        // make sure this' parent attribute is updated (would not be if this method is called directly); don't invoke modified CB
+        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+        this.parent.copyValue(parent.name);
+        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();

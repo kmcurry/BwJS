@@ -44,15 +44,15 @@
                         <mass>5</mass>
                     </physicalProperties>                 
                 </Model>
-                <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                    <position x="0.45" y="6" z="0"/>
+                <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true" parent="UV_SphereG">
+                    <position x="0.45" y="0.25" z="0"/>
                     <rotation x="0" y="0" z="0"/>
                     <scale x="1" y="1" z="1"/>
                     <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>                      
                 </Model>
-                <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                <!--<Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                     <position x="-0.45" y="8" z="0"/>
                     <rotation x="0" y="45" z="0"/>
                     <scale x="2" y="2" z="2"/>
@@ -75,7 +75,7 @@
                     <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>                      
-                </Model>
+                </Model>-->
                 <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                     <position x="2" y=".26" z="0"/>
                     <rotation x="90" y="0" z="0"/>
