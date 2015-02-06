@@ -117,8 +117,8 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
     // clear modified CBs
     for (var i = 0; i < this.bodyModels.length; i++)
     {
-        model.getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
-        model.getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+        this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
+        this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
     }
 
     // reset bodies
@@ -147,10 +147,10 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         var shape = this.getCompoundShape(model);        
         
         var physicalProperties = model.getAttribute("physicalProperties");
-        var mass = physicalProperties.getAttribute("mass").getValueDirect();
+        var mass = physicalProperties.getAttribute("mass").getValueDirect(); // TODO: should parent models add children's mass?'
 
-        var startTransform = new Ammo.btTransform();
-        startTransform.setIdentity();
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
         
         var position = model.getAttribute("sectorPosition").getValueDirect();
         // temporary fix to remove y-axis padding between static and dynamic objects
@@ -158,12 +158,12 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         {
             position.y -= 0.075;
         }
-        startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
 
         var rotation = model.getAttribute("rotation").getValueDirect();
         var quat = new Quaternion();
         quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         
         var isDynamic = (mass != 0);
         var localInertia = new Ammo.btVector3(0, 0, 0);
@@ -172,16 +172,16 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
             shape.calculateLocalInertia(mass, localInertia);
         }
 
-        var motionState = new Ammo.btDefaultMotionState(startTransform);
+        var motionState = new Ammo.btDefaultMotionState(transform);
         var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        var physicsBody = new Ammo.btRigidBody(rbInfo);
+        var body = new Ammo.btRigidBody(rbInfo);
 
-        this.world.addRigidBody(physicsBody);
+        this.world.addRigidBody(body);
         if (isDynamic)
         {
             this.bodyModels.push(model);
             this.physicsShapes.push(shape);
-            this.physicsBodies.push(physicsBody);
+            this.physicsBodies.push(body);
             this.bodyAdded.push(true);
         }
     }
@@ -241,27 +241,26 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     }
     
     var matrix = new Matrix4x4();
-    matrix.loadMatrix(pivotMatrix.multiply(rotationMatrix.multiply(translationMatrix)));
+    matrix.loadMatrix(scaleMatrix.leftMultiply(pivotMatrix.multiply(rotationMatrix.multiply(translationMatrix))));
     
     var shape = new Ammo.btConvexHullShape();
     var verts = model.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        var scaledVerts = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        var xformedVerts = scaleMatrix.transform(scaledVerts.x, scaledVerts.y, scaledVerts.z, 1);
-        shape.addPoint(new Ammo.btVector3(xformedVerts.x, xformedVerts.y, xformedVerts.z));
+        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        shape.addPoint(new Ammo.btVector3(vert.x, vert.y, vert.z));
     }
     
     return shape;
 }
 
-PhysicsSimulator.prototype.updatePhysicsShape = function(body)
+PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 {
     // locate array position of body
     var n = -1;
     for (var i = 0; i < this.bodyModels.length; i++)
     {
-        if (this.bodyModels[i] == body)
+        if (this.bodyModels[i] == model)
         {
             n = i;
             break;
@@ -270,87 +269,76 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(body)
     if (n == -1)
         return;
 
-    // scale vertices
-    var scaleMatrix = new Matrix4x4();
-    var scale = body.getAttribute("scale").getValueDirect();
-    scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+    var shape = this.getCompoundShape(model);
 
-    var physicsShape = new Ammo.btConvexHullShape();
-    var verts = body.getAttribute("vertices").getValueDirect();
-    for (var i = 0; i < verts.length; i += 3)
-    {
-        var scaledVerts = scaleMatrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        physicsShape.addPoint(new Ammo.btVector3(scaledVerts.x, scaledVerts.y, scaledVerts.z));
-    }
-
-    var physicalProperties = body.getAttribute("physicalProperties");
+    var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect();
 
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        physicsShape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(mass, localInertia);
     }
 
     var motionState = this.physicsBodies[n].getMotionState();
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
-    var physicsBody = new Ammo.btRigidBody(rbInfo);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
 
+    // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
-    // remove previous
-    this.world.addRigidBody(physicsBody);
-    this.physicsBodies[n] = physicsBody;
-    this.physicsShapes[n] = physicsShape;
+    this.world.addRigidBody(body);
+    this.physicsBodies[n] = body;
+    this.physicsShapes[n] = shape;
 }
 
 PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
-    var body = this.bodyModels[n];
-    var physicsShape = this.physicsShapes[n];
+    var model = this.bodyModels[n];
+    var shape = this.physicsShapes[n];
 
-    var startTransform = new Ammo.btTransform();
-    startTransform.setIdentity();
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();
 
-    var position = body.getAttribute("sectorPosition").getValueDirect();
-    startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+    var position = model.getAttribute("sectorPosition").getValueDirect();
+    transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
 
     // update rotation to include rotation caused by object inspection
-    var rotationGroup = getInspectionGroup(body);
+    var rotationGroup = getInspectionGroup(model);
     if (rotationGroup)
     {
         var rotQuat = rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect();
         var quat1 = new Quaternion();
         quat1.load(rotQuat.w, rotQuat.x, rotQuat.y, rotQuat.z);
 
-        var bodyQuat = body.getAttribute("quaternion").getValueDirect();
+        var bodyQuat = model.getAttribute("quaternion").getValueDirect();
         var quat2 = new Quaternion();
         quat2.load(bodyQuat.w, bodyQuat.x, bodyQuat.y, bodyQuat.z);
 
         var quat = quat2.multiply(quat1);
 
-        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
 
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
     }
 
-    var physicalProperties = body.getAttribute("physicalProperties");
+    var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect();
 
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        physicsShape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(mass, localInertia);
     }
 
-    var motionState = new Ammo.btDefaultMotionState(startTransform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
-    var physicsBody = new Ammo.btRigidBody(rbInfo);
+    var motionState = new Ammo.btDefaultMotionState(transform);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
 
-    this.world.addRigidBody(physicsBody);
-    this.physicsBodies[n] = physicsBody;
+    this.world.addRigidBody(body);
+    this.physicsBodies[n] = body;
 }
 
 PhysicsSimulator.prototype.initPhysics = function()
@@ -365,31 +353,6 @@ PhysicsSimulator.prototype.initPhysics = function()
     this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
 }
 
-PhysicsSimulator.prototype.addSocketConnectorsModifiedCBs = function(model)
-{
-    var socketConnectors = model.getAttribute("socketConnectors");
-    if (socketConnectors)
-    {
-        for (var i = 0; i < socketConnectors.Size(); i++)
-        {
-            var socketConnector = socketConnectors.getAt(i);
-            socketConnector.getAttribute("connected").addModifiedCB(PhysicsSimulator_ModelSocketConnectorModifiedCB, this);
-        }
-    }
-}
-
-PhysicsSimulator.prototype.removeSocketConnectorsModifiedCBs = function(model)
-{
-    var socketConnectors = model.getAttribute("socketConnectors");
-    if (socketConnectors)
-    {
-        for (var i = 0; i < socketConnectors.Size(); i++)
-        {
-            var socketConnector = socketConnectors.getAt(i);
-            socketConnector.getAttribute("connected").removeModifiedCB(PhysicsSimulator_ModelSocketConnectorModifiedCB, this);
-        }
-    }
-}
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     container.updateWorld = true;

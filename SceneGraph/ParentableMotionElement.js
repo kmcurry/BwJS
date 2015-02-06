@@ -581,7 +581,15 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     }
     
     this.motionParent = parent;
-    parent.motionChildren.push(this);
+    
+    if (parent)
+    {
+        parent.motionChildren.push(this);
+        // make sure this' parent attribute is updated (would not be if this method is called directly); don't invoke modified CB
+        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+        this.parent.copyValue(parent.name);
+        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
