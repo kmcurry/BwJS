@@ -5606,7 +5606,7 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
                 delete this.attrNameMap[i][j];
-                this.attrNameMap[i].splice(j,1);
+                this.attrNameMap[i].splice(j, 1);
                 break;
             }
         }
@@ -13689,18 +13689,18 @@ function Node()
     AttributeContainer.call(this);
     this.className = "Node";
     this.attrType = eAttrType.Node;
-    
+
     this.children = [];
     this.parents = [];
     this.modificationCount = 0;
     this.thisModified = false;
     this.childModified = false;
     this.childrenModified = [];
-    
+
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
     this.orphan = new BooleanAttr(false);
-    
+
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.enabled, "enabled");
     this.registerAttribute(this.orphan, "orphan");
@@ -13711,7 +13711,7 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     var clonedByThis = false;
     if (!clone)
     {
-        if (!(clone = new Node()))
+        if (!( clone = new Node()))
         {
             return -1;
         }
@@ -13727,13 +13727,13 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     pathSrc.push(this);
 
     // add clone to path
-   // pathClone.AddNode(clone);
+    // pathClone.AddNode(clone);
     pathClone.push(this);
 
     // if requested, clone children
     if (cloneChildren)
     {
-      //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
+        //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
 
         var pos;
         for (var i in this.children)
@@ -13742,24 +13742,28 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
             pos = i - this.children.start();
 
             var childClone = null;
-            if(!(i.getCreatedByParent()))
+            if (!(i.getCreatedByParent()))
             {
-                if (i.copyNode(childClone, cloneChildren, pathSrc, pathClone)) {
-                    if (clonedByThis) {
+                if (i.copyNode(childClone, cloneChildren, pathSrc, pathClone))
+                {
+                    if (clonedByThis)
+                    {
                     }
                     return -1;
                 }
 
-                if (clone.getChildCount() > pos) {
+                if (clone.getChildCount() > pos)
+                {
                     clone.insertChild(childClone, pos);
                 }
-                else {
+                else
+                {
                     clone.addChild(childClone);
                 }
 
                 i.postCloneChild(childClone, pathSrc, pathClone);
             }
-        else // created by parent -- clone child's children without allocating child
+            else// created by parent -- clone child's children without allocating child
             {
                 //childClone = clone.getChild(i - m_children.begin());
                 childClone = clone.getChild(i - this.children.start());
@@ -13780,19 +13784,20 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     this.postClone(clone, pathSrc, pathClone);
 
 }
-Node.prototype.searchTree = function(name,type,searchName,searchType,searchPredecessors,skipChild,skipParent,stopAt,matches)
+Node.prototype.searchTree = function(name, type, searchName, searchType, searchPredecessors, skipChild, skipParent, stopAt, matches)
 {
     var names = [];
     var types = [];
 
-    if (!(names.push(name))) return;
-    if (!(types.push(type))) return;
+    if (!(names.push(name)))
+        return;
+    if (!(types.push(type)))
+        return;
 
-    this.searchesTree(names, types, searchName, searchType, searchPredecessors, skipChild, skipParent,
-        stopAt, matches);
+    this.searchesTree(names, types, searchName, searchType, searchPredecessors, skipChild, skipParent, stopAt, matches);
 }
 
-Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searchPredecessors,skipChild,skipParent,stopAt,matches)
+Node.prototype.searchesTree = function(names, types, searchNames, searchTypes, searchPredecessors, skipChild, skipParent, stopAt, matches)
 {
     // if this node matches any of the names and/or types, add it to the list
     var match = false;
@@ -13800,7 +13805,7 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     var typeMatch = false;
     if (searchNames)
     {
-        for (var i=0; i < names.size(); i++)
+        for (var i = 0; i < names.size(); i++)
         {
             if (!(this.name == names[i]))
             {
@@ -13811,7 +13816,7 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     }
     if (searchTypes)
     {
-        for (var i=0; i < types.size(); i++)
+        for (var i = 0; i < types.size(); i++)
         {
             if (this.attrType == types[i])
             {
@@ -13824,17 +13829,19 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     {
         match = nameMatch && typeMatch;
     }
-    else if (searchNames)
+    else
+    if (searchNames)
     {
         match = nameMatch;
     }
-    else // searchTypes
+    else// searchTypes
     {
         match = typeMatch;
     }
     if (match)
     {
-        if (!(matches.push(this))) return;
+        if (!(matches.push(this)))
+            return;
     }
 
     if (this == stopAt)
@@ -13845,23 +13852,21 @@ Node.prototype.searchesTree = function(names,types,searchNames,searchTypes,searc
     // recurse on parent(s) if requested (with this set to skipChild)
     if (searchPredecessors)
     {
-        for (var i=0; i < this.parents.size(); i++)
+        for (var i = 0; i < this.parents.size(); i++)
         {
             if (this.parents[i] != skipParent)
             {
-                this.parents[i].searchesTree(names, types, searchNames, searchTypes, searchPredecessors,
-                    this, null, stopAt, matches);
+                this.parents[i].searchesTree(names, types, searchNames, searchTypes, searchPredecessors, this, null, stopAt, matches);
             }
         }
     }
 
     // recurse on children (with searchPredecessors set to false)
-    for (var i=0; i < this.children.size(); i++)
+    for (var i = 0; i < this.children.size(); i++)
     {
         if (this.children[i] != skipChild)
         {
-            this.children[i].searchesTree(names, types, searchNames, searchTypes, false,
-                null, null, stopAt, matches);
+            this.children[i].searchesTree(names, types, searchNames, searchTypes, false, null, null, stopAt, matches);
         }
     }
 }
@@ -13882,27 +13887,27 @@ Node.prototype.isNode = function()
 Node.prototype.addChild = function(child)
 {
     this.children.push(child);
-    
+
     this.incrementModificationCount();
-    
+
     child.addParent(this);
 }
 
 Node.prototype.insertChild = function(child, at)
 {
     this.children.splice(at, 0, child);
-    
+
     this.incrementModificationCount();
-    
+
     child.addParent(this);
 }
 
 Node.prototype.removeChild = function(child)
 {
     this.children.splice(this.children.indexOf(child), 1);
-    
+
     this.incrementModificationCount();
-    
+
     child.removeParent(this);
 }
 
@@ -13919,20 +13924,20 @@ Node.prototype.getChild = function(n)
     {
         return this.children[n];
     }
-    
+
     return null;
 }
 
 Node.prototype.getNamedChild = function(name)
 {
-    for (var i=0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
     {
         if (this.children[i].name.getValueDirect().join("") == name)
         {
             return this.children[i];
         }
     }
-    
+
     return null;
 }
 
@@ -13947,7 +13952,7 @@ Node.prototype.getParent = function(n)
     {
         return this.parents[n];
     }
-    
+
     return null;
 }
 
@@ -13976,18 +13981,18 @@ Node.prototype.update = function(params, visitChildren)
         params.visited.push(this);
         return;
     }
-    
+
     params.visited.push(this);
-    
+
     if (visitChildren)
     {
         // call for all children
-        for (var i=0; i < this.children.length; i++)
+        for (var i = 0; i < this.children.length; i++)
         {
             this.children[i].update(params, visitChildren);
         }
     }
-    
+
     this.childModified = this.isChildModified();
 }
 
@@ -13996,46 +14001,46 @@ Node.prototype.apply = function(directive, params, visitChildren)
     // commented this out because if an evaluator (e.g., WalkSimulator)
     // happens to be the root node of a subtree and is currently disabled, its subtree will not be visited.
     /*
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
-    {
-        if (directive != "serialize")
-        {
-            return;
-        }
-    }
-    */
+     var enabled = this.enabled.getValueDirect();
+     if (!enabled)
+     {
+     if (directive != "serialize")
+     {
+     return;
+     }
+     }
+     */
     switch (directive)
     {
         case "serialize":
-        {          
-            var context = new Context();
-            context.attribute = this;
-
-            var factory = this.registry.find("AttributeFactory");
-            var serializer = factory.create("Serializer");
-            var xmlSerializer = new XMLSerializer();
-            
-            // added required format setting - need to revisit to reduce number of required steps
-            serializer.getAttribute("format").setValueDirect("xml");
-            // set minimum flag so that only the minimum required for recreation is serialized
-            serializer.getAttribute("serializeMinimum").setValueDirect(true);
-            // set children flag so that child nodes are serialized
-            serializer.getAttribute("serializeChildren").setValueDirect(true);
-            // serialize
-            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-            var serialized = xmlSerializer.serializeToString(serializer.DOM);
-            if (serialized != "<__InitialRoot/>")
             {
-            	params.serialized += serialized;
-            }
+                var context = new Context();
+                context.attribute = this;
 
-            // do not visit children, as they were serialized by this
-            visitChildren = false;
-        }
-        break;
+                var factory = this.registry.find("AttributeFactory");
+                var serializer = factory.create("Serializer");
+                var xmlSerializer = new XMLSerializer();
+
+                // added required format setting - need to revisit to reduce number of required steps
+                serializer.getAttribute("format").setValueDirect("xml");
+                // set minimum flag so that only the minimum required for recreation is serialized
+                serializer.getAttribute("serializeMinimum").setValueDirect(true);
+                // set children flag so that child nodes are serialized
+                serializer.getAttribute("serializeChildren").setValueDirect(true);
+                // serialize
+                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+                var serialized = xmlSerializer.serializeToString(serializer.DOM);
+                if (serialized != "<__InitialRoot/>")
+                {
+                    params.serialized += serialized;
+                }
+
+                // do not visit children, as they were serialized by this
+                visitChildren = false;
+            }
+            break;
     }
-    
+
     if (visitChildren)
     {
         if (params.path)
@@ -14043,7 +14048,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
             // call for next node in path if next node in path is a child of this node
             if (params.path.length > params.pathIndex)
             {
-                for (var i=0; i < this.children.length; i++)
+                for (var i = 0; i < this.children.length; i++)
                 {
                     var next = params.path[params.pathIndex];
 
@@ -14058,7 +14063,7 @@ Node.prototype.apply = function(directive, params, visitChildren)
         else
         {
             // call for all children
-            for (var i=0; i < this.children.length; i++)
+            for (var i = 0; i < this.children.length; i++)
             {
                 this.children[i].apply(directive, params, visitChildren);
             }
@@ -14082,7 +14087,7 @@ Node.prototype.setModified = function()
 Node.prototype.incrementModificationCount = function()
 {
     this.modificationCount++;
-    
+
     this.setModified();
 }
 
@@ -14090,14 +14095,15 @@ Node.prototype.setChildModified = function(modified, recurse)
 {
     // set on parent(s) of this; recurse if specified
     var parent = null;
-    for (var i=0; i < this.parents.length; i++)
+    for (var i = 0; i < this.parents.length; i++)
     {
         parent = this.parents[i];
         if (parent)
         {
             parent.childrenModified[this.name.getValueDirect().join("")] = modified;
             parent.childModified = modified ? true : parent.isChildModified();
-            if (recurse) parent.setChildModified(modified, recurse);
+            if (recurse)
+                parent.setChildModified(modified, recurse);
         }
     }
 }
@@ -14106,7 +14112,8 @@ Node.prototype.isChildModified = function()
 {
     for (var i in this.childrenModified)
     {
-        if (this.childrenModified[i] == true) return true;
+        if (this.childrenModified[i] == true)
+            return true;
     }
 
     return false;
@@ -14115,7 +14122,7 @@ Node.prototype.isChildModified = function()
 Node.prototype.onRemove = function()
 {
     // recurse on children
-    for (var i=0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
     {
         this.children[i].onRemove();
     }
@@ -14467,13 +14474,13 @@ function ParentableMotionElement()
     this.sectorTranslationMatrix = new Matrix4x4();	// matrix representing this element's sector position translation
     this.stackMatrix = new Matrix4x4();                 // current matrix from the scene graph matrix stack (GcTransform nodes)
     this.transformSimple = new Matrix4x4();             // after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot)
+    							// rotation/scale/pivot)
     this.transformCompound = new Matrix4x4();           // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any)
+    							// parent's transformations (if any)
     this.sectorTransformSimple = new Matrix4x4();	// after Update(), contains this element's transformations (translation/
-    // rotation/scale/pivot) for the current sector
+    							// rotation/scale/pivot) for the current sector
     this.sectorTransformCompound = new Matrix4x4();     // after Update(), contains this element's transformations combined with 
-    // parent's transformations (if any) for the current sector                                        
+    							// parent's transformations (if any) for the current sector                                        
     this.updatePosition = false;
     this.updateRotation = false;
     this.updateQuaternion = false;
@@ -14487,6 +14494,7 @@ function ParentableMotionElement()
     this.inheritsPivot = true;
     this.nonZeroVelocity = false;
     this.motionParent = null;
+    this.motionChildren = [];
 
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
@@ -14864,10 +14872,19 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
 
     if (this.motionParent)
     {
+        // account for parent's object-inspected rotation
+        var inspectionRotationMatrix = new Matrix4x4();
+        var inspectionGroup = getInspectionGroup(this.motionParent);
+        if (inspectionGroup)
+        {
+            var quaternionRotate = inspectionGroup.getChild(2);
+            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+        }
+        
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
         {
-            this.transformCompound.loadMatrix(this.transformCompound.multiply(this.motionParent.transformCompound));
-            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(this.motionParent.sectorTransformCompound));
+            this.transformCompound.loadMatrix(this.transformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.transformCompound)));
+            this.sectorTransformCompound.loadMatrix(this.sectorTransformCompound.multiply(inspectionRotationMatrix.multiply(this.motionParent.sectorTransformCompound)));
         }
         else // !m_inheritsPosition || !m_inheritsRotation || !m_inheritsScale || !m_inheritsPivot
         {
@@ -15009,7 +15026,29 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     if (parent == this)
         return;
 
+    if (this.motionParent)
+    {
+        for (var i = 0; i < this.motionParent.motionChildren.length; i++)
+        {
+            if (this.motionParent.motionChildren[i] == this)
+            {
+                
+                this.motionParent.motionChildren.splice(i, 1);
+                break;
+            }
+        }
+    }
+    
     this.motionParent = parent;
+    
+    if (parent)
+    {
+        parent.motionChildren.push(this);
+        // make sure this' parent attribute is updated (would not be if this method is called directly); don't invoke modified CB
+        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+        this.parent.copyValue(parent.name);
+        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
@@ -25276,9 +25315,10 @@ PhysicsSimulator.prototype.evaluate = function()
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
-        switch (this.bodyModels[i].getAttribute("selected").getValueDirect())
+        switch (this.isSelected(this.bodyModels[i]))
         {
-            case 0: // unselected
+            case 0:
+                // unselected
                 {
                     // if not added, restore
                     if (!this.bodyAdded[i])
@@ -25289,7 +25329,8 @@ PhysicsSimulator.prototype.evaluate = function()
                 }
                 break;
 
-            case 1: // selected
+            case 1:
+                // selected
                 {
                     // if added, remove
                     if (this.bodyAdded[i])
@@ -25308,8 +25349,9 @@ PhysicsSimulator.prototype.evaluate = function()
     var trans = new Ammo.btTransform();
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        if (!this.bodyAdded[i]) continue;
-        
+        if (!this.bodyAdded[i])
+            continue;
+
         this.physicsBodies[i].getMotionState().getWorldTransform(trans);
         var origin = trans.getOrigin();
         var position = new Vector3D(origin.x(), origin.y(), origin.z());
@@ -25323,8 +25365,29 @@ PhysicsSimulator.prototype.evaluate = function()
     }
 }
 
+PhysicsSimulator.prototype.isSelected = function(model)
+{
+    var selected = model.getAttribute("selected").getValueDirect();
+    if (!selected)
+    {
+        for (var i = 0; i < model.motionChildren.length && !selected; i++)
+        {
+            selected = this.isSelected(model.motionChildren[i]);
+        }
+    } 
+    
+    return selected;   
+}
+
 PhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
+    // clear modified CBs
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
+        this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+    }
+
     // reset bodies
     this.initPhysics();
     this.physicsBodies = [];
@@ -25333,162 +25396,216 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
     this.bodyModels = [];
 
     // add bodies to world
-    for (var b = 0; b < this.bodies.Size(); b++)
+    for (var i = 0; i < this.bodies.Size(); i++)
     {
-        var body = this.registry.find(this.bodies.getAt(b).getValueDirect().join(""));
-        if (!body) continue;
+        var model = this.registry.find(this.bodies.getAt(i).getValueDirect().join(""));
+        if (!model)
+            continue;
 
         // watch for changes in scale
-        body.getAttribute("scale").addModifiedCB(PhysicsSimulator_BodyScaleModifiedCB, this);
+        model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
+        // watch for changes in parent
+        model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
         
-        // scale vertices
-        var scaleMatrix = new Matrix4x4();
-        var scale = body.getAttribute("scale").getValueDirect();
-        scaleMatrix.loadScale(scale.x, scale.y, scale.z);
-        
-        var physicsShape = new Ammo.btConvexHullShape();
-        var verts = body.getAttribute("vertices").getValueDirect();
-        for (var i = 0; i < verts.length; i += 3)
-        {
-            var scaledVerts = scaleMatrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-            physicsShape.addPoint(new Ammo.btVector3(scaledVerts.x, scaledVerts.y, scaledVerts.z));
-        }
+        // if model is parented, don't add here; it will be added as a shape to the parent model's body
+        if (model.motionParent)
+            continue;
 
-        var physicalProperties = body.getAttribute("physicalProperties");
-        var mass = physicalProperties.getAttribute("mass").getValueDirect();
+        var shape = this.getCompoundShape(model);        
         
-        var startTransform = new Ammo.btTransform();
-        startTransform.setIdentity();
+        var physicalProperties = model.getAttribute("physicalProperties");
+        var mass = physicalProperties.getAttribute("mass").getValueDirect(); // TODO: should parent models add children's mass?'
 
-        var position = body.getAttribute("sectorPosition").getValueDirect();
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        
+        var position = model.getAttribute("sectorPosition").getValueDirect();
         // temporary fix to remove y-axis padding between static and dynamic objects
         if (mass == 0)
         {
             position.y -= 0.075;
         }
-        startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
 
-        var rotation = body.getAttribute("rotation").getValueDirect();
+        var rotation = model.getAttribute("rotation").getValueDirect();
         var quat = new Quaternion();
         quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
-
+        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        
         var isDynamic = (mass != 0);
         var localInertia = new Ammo.btVector3(0, 0, 0);
         if (isDynamic)
         {
-            physicsShape.calculateLocalInertia(mass, localInertia);
+            shape.calculateLocalInertia(mass, localInertia);
         }
-        
-        var motionState = new Ammo.btDefaultMotionState(startTransform);
-        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
-        var physicsBody = new Ammo.btRigidBody(rbInfo);
 
-        this.world.addRigidBody(physicsBody);
+        var motionState = new Ammo.btDefaultMotionState(transform);
+        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+        var body = new Ammo.btRigidBody(rbInfo);
+
+        this.world.addRigidBody(body);
         if (isDynamic)
         {
-            this.bodyModels.push(body);
-            this.physicsShapes.push(physicsShape);
-            this.physicsBodies.push(physicsBody);
+            this.bodyModels.push(model);
+            this.physicsShapes.push(shape);
+            this.physicsBodies.push(body);
             this.bodyAdded.push(true);
         }
     }
 }
 
-PhysicsSimulator.prototype.updatePhysicsShape = function(body)
+PhysicsSimulator.prototype.getCompoundShape = function(model)
+{
+    var compoundShape = new Ammo.btCompoundShape();
+    
+    this.addCollisionShape(model, model.getAttribute("scale").getValueDirect(), compoundShape);
+
+    return compoundShape;
+}
+
+PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundShape)
+{
+    var shape = this.getCollisionShape(model, scale);
+    
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();   
+    
+    compoundShape.addChildShape(transform, shape);
+    
+    // recurse on motion children
+    for (var i = 0; i < model.motionChildren.length; i++)
+    {
+        var child = model.motionChildren[i];
+        var childScale = child.getAttribute("scale").getValueDirect();
+        childScale.x *= scale.x;
+        childScale.y *= scale.y;
+        childScale.z *= scale.z;
+        
+        this.addCollisionShape(child, childScale, compoundShape);
+    }
+}
+
+PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
+{
+    // scale vertices
+    var scaleMatrix = new Matrix4x4();
+    scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+
+    // set local transform for motion children
+    var translationMatrix = new Matrix4x4();
+    var rotationMatrix = new Matrix4x4();
+    var pivotMatrix = new Matrix4x4();    
+    if (model.motionParent)
+    {
+        var position = model.getAttribute("sectorPosition").getValueDirect();
+        translationMatrix.loadTranslation(position.x, position.y, position.z);
+    
+        var rotation = model.getAttribute("rotation").getValueDirect();
+        rotationMatrix.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);  
+        
+        var pivot = model.getAttribute("pivot").getValueDirect();
+        pivotMatrix.loadTranslation(-pivot.x, -pivot.y, -pivot.z);
+    }
+    
+    var matrix = new Matrix4x4();
+    matrix.loadMatrix(scaleMatrix.leftMultiply(pivotMatrix.multiply(rotationMatrix.multiply(translationMatrix))));
+    
+    var shape = new Ammo.btConvexHullShape();
+    var verts = model.getAttribute("vertices").getValueDirect();
+    for (var i = 0; i < verts.length; i += 3)
+    {
+        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        shape.addPoint(new Ammo.btVector3(vert.x, vert.y, vert.z));
+    }
+    
+    return shape;
+}
+
+PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 {
     // locate array position of body
     var n = -1;
     for (var i = 0; i < this.bodyModels.length; i++)
     {
-        if (this.bodyModels[i] == body)
+        if (this.bodyModels[i] == model)
         {
             n = i;
             break;
         }
     }
-    if (n == -1) return;
-    
-    // scale vertices
-    var scaleMatrix = new Matrix4x4();
-    var scale = body.getAttribute("scale").getValueDirect();
-    scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+    if (n == -1)
+        return;
 
-    var physicsShape = new Ammo.btConvexHullShape();
-    var verts = body.getAttribute("vertices").getValueDirect();
-    for (var i = 0; i < verts.length; i += 3)
-    {
-        var scaledVerts = scaleMatrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        physicsShape.addPoint(new Ammo.btVector3(scaledVerts.x, scaledVerts.y, scaledVerts.z));
-    }
+    var shape = this.getCompoundShape(model);
 
-    var physicalProperties = body.getAttribute("physicalProperties");
+    var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect();
-        
+
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        physicsShape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(mass, localInertia);
     }
-    
-    var motionState = this.physicsBodies[n].getMotionState();
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
-    var physicsBody = new Ammo.btRigidBody(rbInfo);
 
-    this.world.removeRigidBody(this.physicsBodies[n]); // remove previous
-    this.world.addRigidBody(physicsBody);
-    this.physicsBodies[n] = physicsBody;
-    this.physicsShapes[n] = physicsShape;
+    var motionState = this.physicsBodies[n].getMotionState();
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
+
+    // remove previous before adding
+    this.world.removeRigidBody(this.physicsBodies[n]);
+    this.world.addRigidBody(body);
+    this.physicsBodies[n] = body;
+    this.physicsShapes[n] = shape;
 }
 
 PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
-    var body = this.bodyModels[n];
-    var physicsShape = this.physicsShapes[n];
-    
-    var startTransform = new Ammo.btTransform();
-    startTransform.setIdentity();
+    var model = this.bodyModels[n];
+    var shape = this.physicsShapes[n];
 
-    var position = body.getAttribute("sectorPosition").getValueDirect();
-    startTransform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();
+
+    var position = model.getAttribute("sectorPosition").getValueDirect();
+    transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
 
     // update rotation to include rotation caused by object inspection
-    var rotationGroup = getInspectionGroup(body);
+    var rotationGroup = getInspectionGroup(model);
     if (rotationGroup)
     {
         var rotQuat = rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect();
         var quat1 = new Quaternion();
         quat1.load(rotQuat.w, rotQuat.x, rotQuat.y, rotQuat.z);
-        
-        var bodyQuat = body.getAttribute("quaternion").getValueDirect();
+
+        var bodyQuat = model.getAttribute("quaternion").getValueDirect();
         var quat2 = new Quaternion();
         quat2.load(bodyQuat.w, bodyQuat.x, bodyQuat.y, bodyQuat.z);
-        
+
         var quat = quat2.multiply(quat1);
-        
-        startTransform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
-                    
+
+        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
     }
 
-    var physicalProperties = body.getAttribute("physicalProperties");
+    var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect();
-        
+
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        physicsShape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(mass, localInertia);
     }
 
-    var motionState = new Ammo.btDefaultMotionState(startTransform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
-    var physicsBody = new Ammo.btRigidBody(rbInfo);
+    var motionState = new Ammo.btDefaultMotionState(transform);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
 
-    this.world.addRigidBody(physicsBody);
-    this.physicsBodies[n] = physicsBody;
+    this.world.addRigidBody(body);
+    this.physicsBodies[n] = body;
 }
 
 PhysicsSimulator.prototype.initPhysics = function()
@@ -25513,10 +25630,16 @@ function PhysicsSimulator_BodiesModifiedCB(attribute, container)
     container.updateBodies = true;
 }
 
-function PhysicsSimulator_BodyScaleModifiedCB(attribute, container)
+function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
 }
+
+function PhysicsSimulator_ModelParentModifiedCB(attribute, container)
+{
+    container.updateBodies = true;
+}
+
 var eEventType = {
     Unknown                     :-1,
     
@@ -28887,7 +29010,7 @@ ObjectInspector.prototype.translationDeltaModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
         if (!pme)
         {
             continue;
@@ -28913,7 +29036,7 @@ ObjectInspector.prototype.rotationDeltaModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
         if (!pme)
         {
             continue;
@@ -28950,7 +29073,7 @@ ObjectInspector.prototype.rotationNowModified = function()
     var pme = null;
     for (var i=0; i < this.selectedObjects.length; i++)
     {
-        pme = this.selectedObjects[i];
+        pme = this.getInspectionObject(this.selectedObjects[i]);
 		
         var moveable = pme.moveable.getValueDirect();
         if (moveable)
@@ -29020,73 +29143,69 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         pMouseDown.setValueDirect(clickPoint.x, clickPoint.y);
         pMouseNow.setValueDirect(clickPoint.x, clickPoint.y);
 
-        // for each selected moveable, attach it's Quat to the Inspector
-        for (var j=0; j < this.selectedObjects.length; j++)
+        pSelected = this.getInspectionObject(this.selectedObjects[i]);
+
+        pRotGroup = getInspectionGroup(pSelected);
+        //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
+        if (pRotGroup && (pQuat = pRotGroup.getChild(2)))
         {
-            pSelected = this.selectedObjects[j];
+            // see notes in BwObjectInspector.cpp
+            var values = [true];
+            var params = new AttributeSetParams(-1, -1, eAttrSetOp.Replace, true, true);
+            // it would seem easier to setValueDirect(true) here given params are
+            // created with all default values but params are reused throughout this
+            // function and setting the intended params values, per the notes in .cpp,
+            // triggers a bug elsewhere. 
+            pQuat.enabled.setValue(values, params);
 
-            pRotGroup = getInspectionGroup(pSelected);
-            //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
-            if (pRotGroup && (pQuat = pRotGroup.getChild(2)))
+            pRotQuatAttr = pQuat.rotationQuat;
+
+            pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
+
+            var prq = pRotQuatAttr.getValueDirect();
+            pQuatAtMouseDown.setValueDirect(prq);
+
+            var box = pSelected.bbox;
+            var min = box.min.getValueDirect();
+            var max = box.max.getValueDirect();
+            center = new Vector3D(min.x, min.y, min.z);
+            center.addVector(max);
+            center.multiplyScalar(0.5);
+
+            var pivot = pSelected.pivot.getValueDirect();
+            if (pSelected.pivotAboutGeometricCenter.getValueDirect())
             {
-                // see notes in BwObjectInspector.cpp
-                var values = [true];
-                var params = new AttributeSetParams(-1, -1, eAttrSetOp.Replace, true, true);
-                // it would seem easier to setValueDirect(true) here given params are
-                // created with all default values but params are reused throughout this
-                // function and setting the intended params values, per the notes in .cpp,
-                // triggers a bug elsewhere. 
-                pQuat.enabled.setValue(values, params);
+                pivot = center;
+            }				
+            var pivotNeg = new Vector3D(pivot.x, pivot.y, pivot.z);
+            pivotNeg.multiplyScalar(-1);
 
-                pRotQuatAttr = pQuat.rotationQuat;
+            // translate to pivot before applying quaternion rotation
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            values = [pivot.x, pivot.y, pivot.z];
+            pRotGroup.getChild(0).translation.setValue(values, params);
 
-                pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
-				
-                var prq = pRotQuatAttr.getValueDirect();
-                pQuatAtMouseDown.setValueDirect(prq);
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            var scale = pSelected.worldScale.getValueDirect();
+            var scaleInv = new Vector3D(1 / scale.x,
+                1 / scale.y,
+                1 / scale.z);
+            values[0] = scaleInv.x;
+            values[1] = scaleInv.y;
+            values[2] = scaleInv.z;
+            pRotGroup.getChild(1).scale.setValue(values, params);
 
-                var box = pSelected.bbox;
-                var min = box.min.getValueDirect();
-                var max = box.max.getValueDirect();
-                center = new Vector3D(min.x, min.y, min.z);
-                center.addVector(max);
-                center.multiplyScalar(0.5);
-	
-                var pivot = pSelected.pivot.getValueDirect();
-                if (pSelected.pivotAboutGeometricCenter.getValueDirect())
-                {
-                    pivot = center;
-                }				
-                var pivotNeg = new Vector3D(pivot.x, pivot.y, pivot.z);
-                pivotNeg.multiplyScalar(-1);
+            values[0] = scale.x;
+            values[1] = scale.y;
+            values[2] = scale.z;
+            pRotGroup.getChild(3).scale.setValue(values, params);
 
-                // translate to pivot before applying quaternion rotation
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                values = [pivot.x, pivot.y, pivot.z];
-                pRotGroup.getChild(0).translation.setValue(values, params);
-
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                var scale = pSelected.worldScale.getValueDirect();
-                var scaleInv = new Vector3D(1 / scale.x,
-                    1 / scale.y,
-                    1 / scale.z);
-                values[0] = scaleInv.x;
-                values[1] = scaleInv.y;
-                values[2] = scaleInv.z;
-                pRotGroup.getChild(1).scale.setValue(values, params);
-                
-                values[0] = scale.x;
-                values[1] = scale.y;
-                values[2] = scale.z;
-                pRotGroup.getChild(3).scale.setValue(values, params);
-            
-                // translate back from pivot after applying quaternion rotation
-                // don't alert modified sinks here because this will cause antialiasing to reset
-                values[0] = pivotNeg.x;
-                values[1] = pivotNeg.y;
-                values[2] = pivotNeg.z;
-                pRotGroup.getChild(4).translation.setValue(values, params);
-            }
+            // translate back from pivot after applying quaternion rotation
+            // don't alert modified sinks here because this will cause antialiasing to reset
+            values[0] = pivotNeg.x;
+            values[1] = pivotNeg.y;
+            values[2] = pivotNeg.z;
+            pRotGroup.getChild(4).translation.setValue(values, params);
         }
     }   
 }
@@ -29094,6 +29213,16 @@ ObjectInspector.prototype.runSelectionOccurred = function()
 ObjectInspector.prototype.runSelectionCleared = function()
 {
     this.selectedObjects = [];
+}
+
+ObjectInspector.prototype.getInspectionObject = function(selected)
+{
+    if (selected.motionParent)
+    {
+        return selected.motionParent;
+    }
+    
+    return selected;
 }
 
 function ObjectInspector_TranslationDeltaModifiedCB(attribute, container)
