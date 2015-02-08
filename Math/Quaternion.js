@@ -1,9 +1,9 @@
-﻿function Quaternion()
+﻿function Quaternion(w, x, y, z)
 {
-    this.w = 1;
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
+    this.w = w || 1;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.z = z || 0;
 }
 
 Quaternion.prototype.load = function(w, x, y, z)
@@ -172,3 +172,24 @@ Quaternion.prototype.getMatrix = function()
     
     return matrix;
 }
+
+Quaternion.prototype.getRotationAngles = function()
+{
+    var x2 = this.x * this.x;
+    var y2 = this.y * this.y;
+    var z2 = this.z * this.z;
+    var xy = this.x * this.y;
+    var xz = this.x * this.z
+    var yz = this.y * this.z;
+    var wx = this.w * this.x;
+    var wy = this.w * this.y;
+    var wz = this.w * this.z;   
+    var yz = this.y * this.z;
+    
+    var x = Math.atan2(2 * (wx + yz), 1 - 2 * (x2 + y2));
+    var y = Math.asin(2 * (wy - xz));
+    var z = Math.atan2(2 * (wz + xy), 1 - 2 * (y2 + z2));
+    
+    return { x: toDegrees(x), y: toDegrees(y), z: toDegrees(z) }
+}
+

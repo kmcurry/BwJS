@@ -36,17 +36,17 @@
                         <mass>0</mass>
                     </physicalProperties>
                 </Model>
-                <Model name="UV_SphereG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                <!--<Model name="UV_SphereG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
                     <position x="0" y="4" z="0"/>
                     <rotation x="0" y="0" z="0"/>
                     <scale x="3" y="3" z="3"/>
                     <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>                 
-                </Model>
-                <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true" parent="UV_SphereG">
-                    <position x="0.45" y="0.25" z="0"/>
-                    <rotation x="0" y="0" z="0"/>
+             </Model>-->
+                <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true" parent="">
+                    <position x="0.45" y="10" z="0"/>
+                    <rotation x="30" y="20" z="0"/>
                     <scale x="1" y="1" z="1"/>
                     <physicalProperties>
                         <mass>5</mass>
@@ -119,7 +119,7 @@
         </intersectees>
     </Set>
     <?bwinclude url="SendMessage.xml"?>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
+    <PhysicsSimulator name="PhysicsSimulator" timeScale="1" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>UV_SphereG</body>
