@@ -22,7 +22,7 @@ function Model()
     this.moveable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
     this.show = new BooleanAttr(true);
-    this.approximationLevels = new NumberAttr(2);
+    this.approximationLevels = new NumberAttr(1);
     this.showApproximationLevel = new NumberAttr(-1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
@@ -55,6 +55,7 @@ function Model()
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
+    this.stopOnCollision = new BooleanAttr(true);
     this.obstructionDetected = new BooleanAttr(false);
     this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
@@ -135,6 +136,7 @@ function Model()
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
+    this.registerAttribute(this.stopOnCollision, "stopOnCollision");
     this.registerAttribute(this.obstructionDetected, "obstructionDetected");
     this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");
@@ -337,7 +339,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
                     params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree, params.worldMatrix);
-                    this.collisionDetected.setValueDirect(false);
                 }
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
@@ -544,6 +545,20 @@ Model.prototype.autoDisplayListModified = function()
     
 }
 
+Model.prototype.collisionDetectedModified = function()
+{
+    var collisionDetected = this.collisionDetected.getValueDirect();
+    if (collisionDetected)
+    {
+        var stopOnCollision = this.stopOnCollision.getValueDirect();
+        if (stopOnCollision)
+        {
+            this.position.setValueDirect(this.lastPosition.x, this.lastPosition.y, this.lastPosition.z);
+            this.sectorPosition.setValueDirect(this.lastSectorPosition.x, this.lastSectorPosition.y, this.lastSectorPosition.z);
+        }
+    }
+}
+
 function Model_AutoDisplayListModifiedCB(attribute, container)
 {
     container.autoDisplayListModified();
@@ -638,6 +653,7 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
+    container.collisionDetectedModified();
 }
 
 function Model_VerticesModifiedCB(attribute, container)

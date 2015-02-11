@@ -35,18 +35,9 @@ function PhysicsSimulator()
 
 PhysicsSimulator.prototype.evaluate = function()
 {
-    if (this.updateWorld)
-    {
-        this.updateWorld = false;
-        this.initPhysics();
-    }
-
-    if (this.updateBodies)
-    {
-        this.updateBodies = false;
-        this.updatePhysicsBodies();
-    }
-
+    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
+    this.stepSimulation(timeIncrement, 10);
+    
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -59,7 +50,6 @@ PhysicsSimulator.prototype.evaluate = function()
                     if (!this.bodyAdded[i])
                     {
                         this.restorePhysicsBody(i);
-                        this.bodyAdded[i] = true;
                     }
                 }
                 break;
@@ -70,16 +60,12 @@ PhysicsSimulator.prototype.evaluate = function()
                     // if added, remove
                     if (this.bodyAdded[i])
                     {
-                        this.world.removeRigidBody(this.physicsBodies[i]);
-                        this.bodyAdded[i] = false;
+                        this.removePhysicsBody(i);
                     }
                 }
                 break;
         }
     }
-
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.world.stepSimulation(timeIncrement, 10);
 
     var trans = new Ammo.btTransform();
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -98,6 +84,80 @@ PhysicsSimulator.prototype.evaluate = function()
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
     }
+}
+
+PhysicsSimulator.prototype.update = function()
+{
+    if (this.updateWorld)
+    {
+        this.updateWorld = false;
+        this.initPhysics();
+    }
+
+    if (this.updateBodies)
+    {
+        this.updateBodies = false;
+        this.updatePhysicsBodies();
+    }
+}
+
+PhysicsSimulator.prototype.stepSimulation = function(timeIncrement)
+{
+    this.update();
+    this.world.stepSimulation(timeIncrement, 10);
+}
+
+PhysicsSimulator.prototype.getColliders = function(model)
+{
+    var colliders = [];
+    
+    // find physics body corresponding to model
+    var physicsBody = this.getPhysicsBody(model);
+    
+    var numManifolds = this.world.getDispatcher().getNumManifolds();
+    for (var i = 0; i < numManifolds; i++)
+    {
+        var contactManifold =  this.world.getDispatcher().getManifoldByIndexInternal(i);
+        var body0 = contactManifold.getBody0();
+        var body1 = contactManifold.getBody1();
+        
+        if (body0.ptr == physicsBody.ptr)
+        {
+            colliders.push(this.getBodyModel(body1));
+        }
+        else if (body1.ptr == physicsBody.ptr)
+        {
+            colliders.push(this.getBodyModel(body0));
+        }
+    }
+
+    return colliders;    
+}
+
+PhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
+{
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == bodyModel)
+        {
+            return this.physicsBodies[i];
+        }
+    }
+    
+    return null;
+}
+
+PhysicsSimulator.prototype.getBodyModel = function(physicsBody)
+{
+    for (var i = 0; i < this.physicsBodies.length; i++)
+    {
+        if (this.physicsBodies[i].ptr == physicsBody.ptr)
+        {
+            return this.bodyModels[i];
+        }
+    }
+    
+    return null;
 }
 
 PhysicsSimulator.prototype.isSelected = function(model)
@@ -133,7 +193,8 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
     // add bodies to world
     for (var i = 0; i < this.bodies.Size(); i++)
     {
-        var model = this.registry.find(this.bodies.getAt(i).getValueDirect().join(""));
+        var name = this.bodies.getAt(i);
+        var model = this.registry.find(name.getValueDirect().join(""));
         if (!model)
             continue;
 
@@ -178,7 +239,7 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         var body = new Ammo.btRigidBody(rbInfo);
 
         this.world.addRigidBody(body);
-        if (isDynamic)
+        //if (isDynamic)
         {
             this.bodyModels.push(model);
             this.physicsShapes.push(shape);
@@ -311,10 +372,24 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     this.physicsShapes[n] = shape;
 }
 
+PhysicsSimulator.prototype.updatePhysicsBody = function(n)
+{
+    this.removePhysicsBody(n);
+    this.restorePhysicsBody(n);
+}
+
+PhysicsSimulator.prototype.removePhysicsBody = function(n)
+{
+    var body = this.physicsBodies[n]; if (!body) return;
+    
+    this.world.removeRigidBody(body);
+    this.bodyAdded[n] = false;
+}
+
 PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
-    var model = this.bodyModels[n];
-    var shape = this.physicsShapes[n];
+    var model = this.bodyModels[n]; if (!model) return;
+    var shape = this.physicsShapes[n]; if (!shape) return;
 
     var transform = new Ammo.btTransform();
     transform.setIdentity();
@@ -357,6 +432,7 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
+    this.bodyAdded[n] = true;
 }
 
 PhysicsSimulator.prototype.initPhysics = function()

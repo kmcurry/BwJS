@@ -7,6 +7,8 @@ function ParentableMotionElement()
     this.className = "ParentableMotionElement";
     this.attrType = eAttrType.ParentableMotionElement;
 
+    this.lastPosition = new Vector3D(0, 0, 0);          // position from the last render
+    this.lastSectorPosition = new Vector3D(0, 0, 0);    // sector position from the last render
     this.translationMatrix = new Matrix4x4();           // matrix representing this element's position translation
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
     this.scaleMatrix = new Matrix4x4();                 // matrix representing this element's scale transformation
@@ -219,6 +221,8 @@ ParentableMotionElement.prototype.apply = function(directive, params, visitChild
                 var screen = toScreenSpace(this.sectorWorldPosition.getValueDirect(),
                         params.viewMatrix, params.projMatrix, params.viewport);
                 this.screenPosition.setValueDirect(screen.x, screen.y, screen.z);
+                this.lastPosition = this.position.getValueDirect();
+                this.lastSectorPosition = this.sectorPosition.getValueDirect();
             }
             break;
     }
@@ -341,7 +345,6 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             values = this.rotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            //this.rotationMatrix = rotationQuat.getMatrix();
             this.quaternion.setValueDirect(quat);
 
             modified = true;

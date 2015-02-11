@@ -30,7 +30,18 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
 
+    this.physicsSim = new PhysicsSimulator();
+    this.physicsSim.getAttribute("gravity").setValueDirect(0, 0, 0);
+    
     this.name.setValueDirect("CollideDirective");
+}
+
+CollideDirective.prototype.setRegistry = function(registry)
+{
+    this.physicsSim.setRegistry(registry);
+    
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);    
 }
 
 CollideDirective.prototype.execute = function(root)
@@ -55,35 +66,51 @@ CollideDirective.prototype.execute = function(root)
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
+    // synchronize models with physics simulator
     var models = [];
-    var trees = [];
-    var collisions = [];
-    
+    var bodies = new AttributeVector();
     for (var i in collideRecs)
     {
-        models.push(collideRecs[i].model);
-        trees.push(collideRecs[i].tree);
-        collisions.push(false);
-
-        collideRecs[i].model.getAttribute("collisionList").clear();
-    }
-
-    for (var i = 0; i < trees.length; i++)
-    {
-        for (var j = i+1; j < trees.length; j++)
-        {
-            if (trees[i].collides(trees[j]))
-            {
-                models[i].getAttribute("collisionList").push_back(models[j]);                
-                models[j].getAttribute("collisionList").push_back(models[i]);
-                collisions[i] = collisions[j] = true;
-            }
-        }
-    }
+        var model = collideRecs[i].model;
+        
+        models.push(model);
+        model.getAttribute("collisionList").clear();
+        bodies.push_back(model.getAttribute("name"));
+    }    
+    this.physicsSim.getAttribute("bodies").synchronize(bodies);
     
-    for (var i = 0; i < collisions.length; i++)
+    // update positions of models (retain inspection group's rotation)
+    for (var i = 0; i < models.length; i++)
     {
-        models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
+        var rotationGroup = getInspectionGroup(model);
+        var rotationQuat = rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect();
+        
+        this.physicsSim.updatePhysicsBody(i);
+        
+        rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
+    }
+
+    // update physics simulation
+    this.physicsSim.stepSimulation(1);
+    
+    // get collisions
+    for (var i = 0; i < models.length; i++)
+    {
+        var model = models[i];
+  
+        var colliders = this.physicsSim.getColliders(model);
+        if (colliders.length > 0)
+        {            
+            for (var j = 0; j < colliders.length; j++)
+            {
+                model.getAttribute("collisionList").push_back(colliders[j]);
+            }
+            model.getAttribute("collisionDetected").setValueDirect(true);
+        }
+        else // no colliders
+        {
+            model.getAttribute("collisionDetected").setValueDirect(false);
+        }
     }
 }
 
