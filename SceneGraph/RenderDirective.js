@@ -60,9 +60,7 @@ function RenderDirective()
     this.resetDisplayLists = false;
     
     this.distanceSortAgent = new DistanceSortAgent();
-    
-    this.collideDirective = new CollideDirective();
-    
+       
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
     
@@ -81,7 +79,6 @@ RenderDirective.prototype.setRegistry = function(registry)
 {
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
-    this.collideDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
@@ -95,7 +92,6 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
 {
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
-    this.collideDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
     this.backgroundScreen.setGraphMgr(graphMgr);
     this.backgroundTexture.setGraphMgr(graphMgr);
@@ -112,17 +108,7 @@ RenderDirective.prototype.execute = function(root)
     
     root = root || this.rootNode.getValueDirect();
 
-    // update; combined CUpdateParams & GtUpdateParams in this version
-    var params = new UpdateParams();
-    params.directive = this.updateDirective;
-    params.disableDisplayLists = this.resetDisplayLists;
-     
-    var visited = this.updateDirective.execute(root, params);
-
-    // detect collisions
-    params = new CollideParams();
-    params.directive = this.collideDirective;
-    this.collideDirective.execute(root, params);
+    var visited = this.updateDirective.execute(root);
     
     // render
     params = new RenderParams();
@@ -171,10 +157,7 @@ RenderDirective.prototype.drawBackground = function()
     if (!this.backgroundImageSet) return;
     
     // update
-    var params = new UpdateParams();
-    params.directive = this.updateDirective;
-
-    var visited = this.updateDirective.execute(this.backgroundScreen, params);
+    var visited = this.updateDirective.execute(this.backgroundScreen, false);
     
     // render
     params = new RenderParams();

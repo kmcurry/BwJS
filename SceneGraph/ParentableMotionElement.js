@@ -8,7 +8,6 @@ function ParentableMotionElement()
     this.attrType = eAttrType.ParentableMotionElement;
 
     this.translationMatrix = new Matrix4x4();           // matrix representing this element's position translation
-    this.rotationQuat = new Quaternion();               // quaternion for calculating rotation
     this.rotationMatrix = new Matrix4x4();              // matrix representing this element's rotation
     this.scaleMatrix = new Matrix4x4();                 // matrix representing this element's scale transformation
     this.pivotMatrix = new Matrix4x4();                 // matrix representing this element's pivot translation
@@ -321,7 +320,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 {
     var modified = false;
 
-    if (this.updatePosition || this.updateRotation || this.updateScale || this.updatePivot)
+    if (this.updatePosition || this.updateRotation || this.updateQuaternion || this.updateScale || this.updatePivot)
     {
         var values;
 
@@ -340,8 +339,9 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateRotation = false;
 
             values = this.rotation.getValueDirect();
-            this.rotationQuat.loadXYZAxisRotation(values.x, values.y, values.z);
-            this.rotationMatrix = this.rotationQuat.getMatrix();
+            var quat = new Quaternion();
+            quat.loadXYZAxisRotation(values.x, values.y, values.z);
+            this.quaternion.setValueDirect(quat);
 
             modified = true;
         }
@@ -349,10 +349,9 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
         if (this.updateQuaternion)
         {
             this.updateQuaternion = false;
-
-            values = this.quaternion.getValueDirect();
-            this.rotationQuat.load(values.w, values.x, values.y, values.z);
-            this.rotationMatrix = this.rotationQuat.getMatrix();
+            
+            var quat = this.quaternion.getValueDirect();
+            this.rotationMatrix = quat.getMatrix();     
 
             modified = true;
         }

@@ -1,4 +1,4 @@
-var MAX_SEE_AHEAD   = 2;
+var MAX_SEE_AHEAD = 2;
 
 CollideParams.prototype = new DirectiveParams();
 CollideParams.prototype.constructor = CollideParams();
@@ -30,7 +30,18 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
 
+    this.physicsSim = new PhysicsSimulator();
+    this.physicsSim.getAttribute("gravity").setValueDirect(0, 0, 0);
+
     this.name.setValueDirect("CollideDirective");
+}
+
+CollideDirective.prototype.setRegistry = function(registry)
+{
+    this.physicsSim.setRegistry(registry);
+
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);
 }
 
 CollideDirective.prototype.execute = function(root)
@@ -42,48 +53,79 @@ CollideDirective.prototype.execute = function(root)
 
     // get list of models for collision detection
     root.apply("collide", params, true);
-    
+
     // detect collisions
     this.detectCollisions(params.detectCollisions);
-    
+
     // detect obstructions
     this.detectObstructions(params.detectCollisions);
-    
+
     // detect snap-to connections
     this.detectSnapConnections(params.detectCollisions);
 }
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
+    // synchronize models with physics simulator
     var models = [];
-    var trees = [];
-    var collisions = [];
-    
+    var bodies = new AttributeVector();
     for (var i in collideRecs)
     {
-        models.push(collideRecs[i].model);
-        trees.push(collideRecs[i].tree);
-        collisions.push(false);
+        var model = collideRecs[i].model;
 
-        collideRecs[i].model.getAttribute("collisionList").clear();
+        model.getAttribute("collisionDetected").setValueDirect(false);
+        model.getAttribute("collisionList").clear();
+
+        if (model.motionParent)
+            continue;
+        // physics simulator uses parents for child models
+
+        models.push(model);
+        bodies.push_back(model.getAttribute("name"));
+    }
+    this.physicsSim.getAttribute("bodies").synchronize(bodies);
+
+    // update positions of models (retain inspection group's rotation)
+    for (var i = 0; i < models.length; i++)
+    {
+        var model = models[i];
+
+        var rotationGroup = getInspectionGroup(model);
+        var rotationQuat = rotationGroup ? rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect() : new Quaternion();
+
+        this.physicsSim.updatePhysicsBody(i);
+
+        if (rotationGroup) rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
     }
 
-    for (var i = 0; i < trees.length; i++)
+    // update physics simulation
+    this.physicsSim.stepSimulation(0.1);
+
+    // get collisions
+    for (var i = 0; i < models.length; i++)
     {
-        for (var j = i+1; j < trees.length; j++)
+        var model = models[i];
+
+        var colliders = this.physicsSim.getColliders(model);
+        if (colliders.length > 0)
         {
-            if (trees[i].collides(trees[j]))
+            // TODO: should parent's collision be propagated to child models?
+            for (var j = 0; j < colliders.length; j++)
             {
-                models[i].getAttribute("collisionList").push_back(models[j]);                
-                models[j].getAttribute("collisionList").push_back(models[i]);
-                collisions[i] = collisions[j] = true;
+                model.getAttribute("collisionList").push_back(colliders[j]);
+            }
+            model.getAttribute("collisionDetected").setValueDirect(true);
+
+            // if model is set to stop on collision, update its position from the physics simulator
+            if (model.getAttribute("stopOnCollision").getValueDirect())
+            {
+                var trans = new Ammo.btTransform();
+                this.physicsSim.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
+                var origin = trans.getOrigin();
+                var position = new Vector3D(origin.x(), origin.y(), origin.z());
+                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
             }
         }
-    }
-    
-    for (var i = 0; i < collisions.length; i++)
-    {
-        models[i].getAttribute("collisionDetected").setValueDirect(collisions[i]);
     }
 }
 
@@ -92,14 +134,14 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
     var models = [];
     var trees = [];
     var obstructions = [];
-    
+
     for (var i in collideRecs)
     {
         models.push(collideRecs[i].model);
         trees.push(collideRecs[i].tree);
         obstructions.push(false);
 
-        collideRecs[i].model.getAttribute("obstructionList").clear();        
+        collideRecs[i].model.getAttribute("obstructionList").clear();
     }
 
     var distance = 0;
@@ -110,13 +152,13 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
         directionVectors.forward.x *= MAX_SEE_AHEAD;
         directionVectors.forward.y *= MAX_SEE_AHEAD;
         directionVectors.forward.z *= MAX_SEE_AHEAD;
-        
+
         for (var j = 0; j < trees.length; j++)
         {
-            if (i == j) continue;
-            
-            if ((distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 &&
-                 distance < minDistance)
+            if (i == j)
+                continue;
+
+            if (( distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 && distance < minDistance)
             {
                 models[i].getAttribute("obstructionList").clear();
                 models[i].getAttribute("obstructionList").push_back(models[j]);
@@ -125,7 +167,7 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
             }
         }
     }
-    
+
     for (var i = 0; i < obstructions.length; i++)
     {
         models[i].getAttribute("obstructionDetected").setValueDirect(obstructions[i]);
@@ -136,12 +178,12 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
     var sockets = [];
     var plugs = [];
-    
+
     // get disconnected sockets/plugs
     for (var i in collideRecs)
     {
         var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
-        for (var j=0; j < socketConnectors.Size(); j++)
+        for (var j = 0; j < socketConnectors.Size(); j++)
         {
             var socketConnector = socketConnectors.getAt(j);
             if (socketConnector.getAttribute("connected").getValueDirect() == false)
@@ -149,9 +191,9 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 sockets.push(new Pair(socketConnector, collideRecs[i]));
             }
         }
-        
+
         var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
-        for (var j=0; j < plugConnectors.Size(); j++)
+        for (var j = 0; j < plugConnectors.Size(); j++)
         {
             var plugConnector = plugConnectors.getAt(j);
             if (plugConnector.getAttribute("connected").getValueDirect() == false)
@@ -160,17 +202,18 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             }
         }
     }
-    
+
     // test plugs for collision with sockets
-    for (var i=0; i < plugs.length; i++)
+    for (var i = 0; i < plugs.length; i++)
     {
         var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
-        
-        for (var j=0; j < sockets.length; j++)
+
+        for (var j = 0; j < sockets.length; j++)
         {
             var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
-            if (plugType != socketType) continue;
-            
+            if (plugType != socketType)
+                continue;
+
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
@@ -185,11 +228,11 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
                 snapTo.getAttribute("slot").setValueDirect(connection);
                 snapTo.execute();
-    
+
                 // flag plug/socket as connected
-                plugs[i].first.getAttribute("connected").setValueDirect(true);             
+                plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
-                
+
                 // make plug model unmoveable
                 plugs[i].second.model.getAttribute("moveable").setValueDirect(false);
             }

@@ -27,35 +27,49 @@ function UpdateDirective()
     this.timeIncrement = new NumberAttr(0);
     
     this.registerAttribute(this.timeIncrement, "timeIncrement");
+    
+    this.collideDirective = new CollideDirective();
 }
 
-UpdateDirective.prototype.execute = function(root, params)
+UpdateDirective.prototype.setRegistry = function(registry)
+{
+    this.collideDirective.setRegistry(registry);
+    
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);    
+}
+
+UpdateDirective.prototype.setGraphMgr = function(graphMgr)
+{
+    this.collideDirective.setGraphMgr(graphMgr);
+    
+    // call base-class implementation
+    SGDirective.prototype.setGraphMgr.call(this, graphMgr);
+}
+
+UpdateDirective.prototype.execute = function(root, detectCollision)
 {
     root = root || this.rootNode.getValueDirect();
+    if (detectCollision == undefined) detectCollision = true;
     
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+    params.disableDisplayLists = this.resetDisplayLists; 
     params.timeIncrement = this.timeIncrement.getValueDirect();
     
     // update (perform first pass)
     root.update(params, true);
-    
-    // update (perform subsequent passes while nextPass vector is not empty)
-    while (params.nextPass.length > 0)
+
+    if (detectCollision)
     {
-        params.pass++;
+        // detect collisions
+        collideParams = new CollideParams();
+        collideParams.directive = this.collideDirective;
+        this.collideDirective.execute(root, collideParams);
         
-        // get nodes to visit this pass
-        var nodes = [];
-        for (var i=0; i < params.nextPass.length; i++)
-        {
-            nodes[i] = params.nextPass[i];
-        }
-        params.nextPass.length = 0;
-          
-        for (var i=0; i < nodes.length; i++)
-        {
-            nodes[i].update(params, false);
-        }
+        // update (second pass)
+        root.update(params, true);
     }
-    
+
     return params.visited;
 }

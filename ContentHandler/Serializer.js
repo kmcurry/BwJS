@@ -68,13 +68,18 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
         else if (attribute.attrType == eAttrType.PerspectiveCamera)
         {
             var ctr = attribute;
-            this.serializeAttributeContainer(ctr)
+            this.serializeAttributeContainer(ctr);
         }
         else if (attribute.attrType > eAttrType.Command &&
                  attribute.attrType < eAttrType.Command_End)
         {
             var cmd = attribute;
             this.serializeCommand(cmd);
+        }
+        else if (attribute.isCollection())
+        {
+            var ctr = attribute;
+            this.serializeAttributeCollection(ctr, attrName);
         }
         else if (attribute.isContainer())
         {
@@ -453,6 +458,10 @@ Serializer.prototype.serializeAttributeContainer = function(container)
         {
         	pcszType = "SceneInspector";
         }
+        else if (pcszType == "PhysicalPropertiesAttr") // TODO: is this the right way to do this?
+        {
+            pcszType = "physicalProperties";
+        }
 
         var bstr = pcszType;
         if (bstr)
@@ -502,12 +511,12 @@ Serializer.prototype.serializeAttributeContainer = function(container)
     // 3. create the end tag.
 }
 
-Serializer.prototype.serializeAttributeCollection = function(collection)
+Serializer.prototype.serializeAttributeCollection = function(collection, name)
 {
     if (collection && this.DOM)
     {
         var element = null;
-        var pcszType = collection.className;
+        var pcszType = name;//collection.className;
 
         var bstr = pcszType;
         if (bstr)
@@ -523,15 +532,15 @@ Serializer.prototype.serializeAttributeCollection = function(collection)
                     var elementName;
                     var baseName = attrVec.baseName.getValueDirect().join("");
 
-                    var size = attrVec.length;
+                    var size = attrVec.Size();
                     for (var i=0; i < size; i++)
                     {
-                        elementName = baseName[0];
-                        elementName += "[";
+                        elementName = baseName;
+                        //elementName += "[";
                         elementName += i.toString();
-                        elementName += "]";
+                        //elementName += "]";
 
-                        this.serializeAttribute(attrVec[i], 0, elementName);
+                        this.serializeAttribute(attrVec.getAt(i), 0, elementName);
                     }
                 }
 
