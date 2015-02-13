@@ -34,7 +34,7 @@
                         <rotation p="0" h="0" r="0"/>
                         <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
                     </PerspectiveProjector>
-                    <Model name="grid" url="/objects/GridG.lwo">
+                    <Model name="grid" url="/objects/GridG.lwo" detectCollision="true">
                         <position x="0" y="0" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
