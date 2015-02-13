@@ -413,20 +413,28 @@ ObjectInspector.prototype.runSelectionOccurred = function()
             values[1] = pivotNeg.y;
             values[2] = pivotNeg.z;
             pRotGroup.getChild(4).translation.setValue(values, params);
+            
+            // stop on collision
+            pSelected.getAttribute("stopOnCollision").setValueDirect(true);
         }
     }   
 }
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        this.getInspectionObject(this.selectedObjects[i]).getAttribute("stopOnCollision").setValueDirect(false);    
+    }
+    
     this.selectedObjects = [];
 }
 
 ObjectInspector.prototype.getInspectionObject = function(selected)
 {
-    if (selected.motionParent)
+    while (selected.motionParent)
     {
-        return selected.motionParent;
+        selected = selected.motionParent;
     }
     
     return selected;

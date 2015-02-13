@@ -28,7 +28,7 @@
             </Group>
             <Group name="Effects"/>
             <Group name="Models">
-                <Model name="grid" url="/objects/GridG.lwo" moveable="false">
+                <Model name="grid" url="/objects/GridG.lwo" moveable="true" detectCollision="true">
                     <position x="0" y="0" z="0"/>
                     <rotation x="0" y="0" z="0"/>
                     <scale x="2.5" y="2.5" z="2.5"/>
@@ -36,22 +36,22 @@
                         <mass>0</mass>
                     </physicalProperties>
                 </Model>
-                <!--<Model name="UV_SphereG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
-                    <position x="0" y="4" z="0"/>
+                <Model name="UV_SphereG" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                    <position x="0" y="1" z="0"/>
                     <rotation x="0" y="0" z="0"/>
-                    <scale x="3" y="3" z="3"/>
+                    <scale x="1" y="1" z="1"/>
                     <physicalProperties>
-                        <mass>5</mass>
+                        <mass>1</mass>
                     </physicalProperties>                 
-             </Model>-->
+            	</Model>
                 <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true" parent="">
-                    <position x="0.45" y="10" z="0"/>
+                    <position x="0.45" y="1" z="0"/>
                     <rotation x="30" y="20" z="0"/>
                     <scale x="1" y="1" z="1"/>
                     <physicalProperties>
-                        <mass>5</mass>
+                        <mass>1</mass>
                     </physicalProperties>                      
-                </Model>
+             	</Model>
                 <!--<Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                     <position x="-0.45" y="8" z="0"/>
                     <rotation x="0" y="45" z="0"/>
@@ -129,4 +129,7 @@
             <body>UV_BoxG5</body>
         </bodies>
     </PhysicsSimulator>
+    <Set target="SceneInspector" evaluate="false"/>
+    <Set target="ObjectInspector" evaluate="true"/>
+    <Serialize target="Root"/>
 </Session>

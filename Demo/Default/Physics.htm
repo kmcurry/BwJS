@@ -192,9 +192,9 @@
             var bridgeworks = null;
             var xml = "";
 
-            function rotate()
+            function doAction()
             {
-                var xml = "<Set target='UV_BoxG2'><rotation x='30' y='30' z='0'/></Set>";
+                var xml = "<Remove target='grid'/>";
                 bridgeworks.updateScene(xml);
             }
         </script>
@@ -210,7 +210,7 @@
             <!--<button onclick="bridgeworks.renderController.rewind();">RW</button>-->
             <button onclick="bridgeworks.renderController.pause();">Pause</button>
             <button onclick="bridgeworks.renderController.play();">Play</button>
-            <button onclick="rotate();">Rotate</button>
+            <button onclick="doAction();">Remove Grid</button>
             <!--<button onclick="bridgeworks.renderController.stop();">Stop</button>-->
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             <!--Object: <input id="objectname"/>

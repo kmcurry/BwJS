@@ -55,7 +55,7 @@ function Model()
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
-    this.stopOnCollision = new BooleanAttr(true);
+    this.stopOnCollision = new BooleanAttr(false);
     this.obstructionDetected = new BooleanAttr(false);
     this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
@@ -379,6 +379,28 @@ Model.prototype.apply = function(directive, params, visitChildren)
     }
 }
 
+Model.prototype.onRemove = function()
+{
+    var name = this.name.getValueDirect().join("");
+    
+    // remove from any physics simulators
+    var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
+    for (var i = 0; i < physicsSimulators.length; i++)
+    {
+        var bodies = physicsSimulators[i].getAttribute("bodies");
+        for (var j = 0; j < bodies.Size(); j++)
+        {
+            if (bodies.getAt(j).getValueDirect().join("") == name)
+            {
+                bodies.removeElement(j);
+            }
+        }
+    }
+    
+    // call base-class implementation
+    ParentableMotionElement.prototype.onRemove.call(this);
+}
+
 Model.prototype.pushMatrix = function()
 {
     this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
@@ -547,16 +569,6 @@ Model.prototype.autoDisplayListModified = function()
 
 Model.prototype.collisionDetectedModified = function()
 {
-    var collisionDetected = this.collisionDetected.getValueDirect();
-    if (collisionDetected)
-    {
-        var stopOnCollision = this.stopOnCollision.getValueDirect();
-        if (stopOnCollision)
-        {
-            this.position.setValueDirect(this.lastPosition.x, this.lastPosition.y, this.lastPosition.z);
-            this.sectorPosition.setValueDirect(this.lastSectorPosition.x, this.lastSectorPosition.y, this.lastSectorPosition.z);
-        }
-    }
 }
 
 function Model_AutoDisplayListModifiedCB(attribute, container)
