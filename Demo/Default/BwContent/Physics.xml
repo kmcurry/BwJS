@@ -129,7 +129,7 @@
             <body>UV_BoxG5</body>
         </bodies>
     </PhysicsSimulator>
-    <Set target="SceneInspector" evaluate="false"/>
-    <Set target="ObjectInspector" evaluate="true"/>
+    <Set target="SceneInspector" enabled="false"/>
+    <Set target="ObjectInspector" enabled="true"/>
     <Serialize target="Root"/>
 </Session>

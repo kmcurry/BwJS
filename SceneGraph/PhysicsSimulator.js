@@ -18,6 +18,7 @@ function PhysicsSimulator()
     this.timeIncrement = new NumberAttr(0);
     this.timeScale = new NumberAttr(1);
     this.gravity = new Vector3DAttr(0, -9.8, 0);
+    this.worldHalfExtents = new Vector3DAttr(10000, 10000, 10000); // TODO: does this need to be configurable? 
     this.bodies = new AttributeVector(new StringAttrAllocator());
 
     this.bodies.getAttribute("appendParsedElements").setValueDirect(true);
@@ -28,6 +29,7 @@ function PhysicsSimulator()
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.timeScale, "timeScale");
     this.registerAttribute(this.gravity, "gravity");
+    this.registerAttribute(this.worldHalfExtents, "worldHalfExtents");
     this.registerAttribute(this.bodies, "bodies");
 
     this.initPhysics();
@@ -70,6 +72,8 @@ PhysicsSimulator.prototype.evaluate = function()
     }
     
     var trans = new Ammo.btTransform();
+    var worldHalfExtents = this.worldHalfExtents.getValueDirect();
+    var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
         if (!this.bodyAdded[i])
@@ -85,6 +89,20 @@ PhysicsSimulator.prototype.evaluate = function()
 
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
+        
+        // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
+        if (position.x < -worldHalfExtents.x || position.x > worldHalfExtents.x ||
+            position.y < -worldHalfExtents.y || position.y > worldHalfExtents.y ||
+            position.z < -worldHalfExtents.z || position.z > worldHalfExtents.z)
+        {
+            modelsOutOfBounds.push(this.bodyModels[i]);      
+        }
+    }
+    
+    // remove any models that have moved outside of the world boundary (memory errors occur when positions become too large)
+    for (var i = 0; i < modelsOutOfBounds.length; i++)
+    {
+        this.remove(modelsOutOfBounds[i]);
     }
 }
 
@@ -477,6 +495,26 @@ PhysicsSimulator.prototype.initPhysics = function()
     var gravity = this.gravity.getValueDirect();
     this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
 }
+
+PhysicsSimulator.prototype.remove = function(model)
+{
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == model)
+        {
+            this.world.removeRigidBody(this.physicsBodies[i]);
+            // don't notify modified CB
+            this.bodies.removeModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+            this.physicsBodies.splice(i, 1);
+            this.physicsShapes.splice(i, 1);
+            this.bodyModels.splice(i, 1);
+            this.bodyAdded.splice(i, 1);
+            this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+            return;
+        }
+    }
+}
+
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     container.updateWorld = true;
