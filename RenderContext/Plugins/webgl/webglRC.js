@@ -13,8 +13,6 @@ function gl_LightSourceParameters()
     var quadraticAttenuation;
 }
 
-var gl_MaxLights = 8;
-
 function gl_MaterialParameters()
 {
     var ambient;
@@ -24,7 +22,9 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
+var gl_MaxLights = 8;
 var gl_MaxTextureStages = 2;
+var gl_MaxClipPlanes = 8;
 
 webglRC.prototype = new RenderContext();
 webglRC.prototype.constructor = webglRC;
@@ -52,7 +52,7 @@ function webglRC(canvas, background)
     gl.cullFace(gl.BACK);
    
     // create shaders
-    var shaders = getShaders(gl, eShaderType.VertexLighting);
+    var shaders = getShaders(gl, eShaderType.FragmentLighting);
     if (!shaders.vertex || !shaders.fragment) return;
 
     // create program
@@ -63,9 +63,12 @@ function webglRC(canvas, background)
     this.valid = true;
 
     // misc private members
-    var vLightDescs = [];
+    var vLights = [];
     var vLightMatrices = [];
     var vLightEnabledStates = [];
+    var vClipPlanes = [];
+    var vClipPlaneMatrices = [];
+    var vClipPlaneEnabledStates = [];
     
     //
     // methods
@@ -200,6 +203,15 @@ function webglRC(canvas, background)
                 break;
         }
     }
+    
+    this.enableClipPlane = function(index, enable)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableClipPlane, [index, enable]);
+        
+        gl.uniform1i(program.clipPlaneEnabled[index], enable);
+
+        vClipPlaneEnabledStates[index] = enable;
+    }
 
     this.enabled = function(cap)
     {
@@ -236,7 +248,7 @@ function webglRC(canvas, background)
 
         return e;
     }
-
+    
     this.enableLight = function(index, enable)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableLight, [index, enable]);
@@ -260,6 +272,30 @@ function webglRC(canvas, background)
         gl.finish();
     }
 
+    this.getClipPlane = function(index)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetClipPlane, [index]);
+        
+        return { equation: vClipPlanes[index], matrix: vClipPlaneMatrices[index] };
+    }
+    
+    this.getEnabledClipPlanes = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetEnabledClipPlanes, null);
+        
+        var indices = [];
+
+        for (var i = 0; i < vClipPlaneEnabledStates.length; i++)
+        {
+            if (vClipPlaneEnabledStates[i])
+            {
+                indices.push(i);
+            }
+        }
+
+        return indices;
+    }
+    
     this.getEnabledLights = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetEnabledLights, null);
@@ -290,7 +326,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetLight, [index]);
         
-        return { desc: vLightDescs[index], matrix: vLightMatrices[index] };
+        return { desc: vLights[index], matrix: vLightMatrices[index] };
     }
     
     this.getMaxLightCount = function()
@@ -399,6 +435,21 @@ function webglRC(canvas, background)
         gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
     }
 
+    this.setClipPlane = function(index, equation)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetClipPlane, [index, equation]);
+        
+        // get current modelView transform
+        var modelViewMatrix = this.modelViewMatrixStack.top();
+
+        var values = [ equation[0], equation[1], equation[2], equation[3] ];
+        
+        gl.uniform4fv(program.textureColorMask, new Float32Array(values));
+        
+        vClipPlanes[index] = equation;
+        vClipPlaneMatrices[index] = modelViewMatrix;          
+    }
+    
     this.setDepthFunc = function(func)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetDepthFunc, [func]);
@@ -418,6 +469,26 @@ function webglRC(canvas, background)
         
         gl.depthFunc(gl_DepthFunc);
            
+    }
+    
+    this.setEnabledClipPlanes = function(indices)
+    {
+        if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledClipPlanes, [indices]);
+        
+        // disable all previously enabled clip planes
+        for (var i = 0; i < vClipPlaneEnabledStates.length; i++)
+        {
+            if (vClipPlaneEnabledStates[i])
+            {
+                this.enableClipPlane(i, false);
+            }
+        }
+
+        // enable specified clip planes
+        for (var i = 0; i < indices.length; i++)
+        {
+            this.enableClipPlane(indices[i], true);
+        }
     }
     
     this.setEnabledLights = function(indices)
@@ -614,7 +685,7 @@ function webglRC(canvas, background)
             // TODO
         }
 
-        vLightDescs[index] = desc;
+        vLights[index] = desc;
         vLightMatrices[index] = modelViewMatrix;
     }
 
@@ -836,10 +907,15 @@ function getProgram(gl, vShader, fShader)
     program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
     program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
     
-    // TEMP
-    var v = [ 2, 2, 2, 2 ];
-    gl.uniform4fv(program.textureColorMask, new Float32Array(v));
-        
+    // clip planes
+    program.clipPlane = new Array(gl_MaxClipPlanes);
+    program.clipPlaneEnabled = new Array(gl_MaxClipPlanes);
+    for (var i=0; i < gl_MaxClipPlanes; i++)
+    {
+        program.clipPlane[i] = gl.getUniformLocation(program, "uClipPlane[" + i + "]");
+        program.clipPlaneEnabled[i] = gl.getUniformLocation(program, "uClipPlaneEnabled[" + i + "]");
+    }
+            
     // enabled
     program.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
     program.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");

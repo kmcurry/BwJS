@@ -1,3 +1,4 @@
+var Module = { ALLOW_MEMORY_GROWTH };
 
 // This is ammo.js, a port of Bullet Physics to JavaScript. zlib licensed.
 var Ammo = (function() {

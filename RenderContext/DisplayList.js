@@ -12,48 +12,53 @@ var eRenderContextMethod =
     CreateTextureObject 					: 8,
     Disable     							: 9,
     Enable  								: 10,
-    Enabled	    							: 11,
-    EnableLight								: 12,
-    EnableTextureStage						: 13,
-    Finish  								: 14,
-    GetEnabledLights						: 15,
-    GetGlobalIllumination					: 16,
-    GetLight            					: 17,
-    GetMaxLightCount    					: 18,
-    GetMaxTextureStages						: 19,
-    PerspectiveMatrixLH						: 20,
-    OrthographicMatrixLH					: 21,
-    SetBlendColor                           : 22,
-    SetBlendFactor							: 23,
-    SetDepthFunc                            : 24,
-    SetEnabledLights						: 25,
-    SetFrontMaterial						: 26,
-    SetGlobalIllumination					: 27,
-    SetLight 			                    : 28,
-    SetShadeModel                           : 29,
-    SetStencilFunc                          : 30,
-    SetStencilMask                          : 31,
-    SetStencilOp                            : 32,
-    SetTextureBlendFactor					: 33,
-    SetTextureBlendOp						: 34,
-    SetTextureColorMask                     : 35,
-    SetViewport						        : 36,
-    VB_SetPrimitiveType                     : 37,
-    VB_SetVertices                          : 38,
-    VB_SetNormals                           : 39,
-    VB_SetColors                            : 40,
-    VB_SetUVCoords                          : 41,
-    VB_SetTextureStage                      : 42,
-    VB_Draw                                 : 43,
-    TO_SetImage                             : 44,
-    TO_SetImageData                         : 45,
-    TO_SetVideo                             : 46,
-    SetMatrixMode							: 47,
-    PushMatrix								: 48,
-    PopMatrix								: 49,
-    LoadMatrix								: 50,
-    LeftMultMatrix							: 51,
-    RightMultMatrix							: 52
+    EnableClipPlane                         : 11,
+    Enabled	    							: 12,
+    EnableLight								: 13,
+    EnableTextureStage						: 14,
+    Finish  								: 15,
+    GetClipPlane                            : 16,
+    GetEnabledClipPlanes                    : 17,
+    GetEnabledLights						: 18,
+    GetGlobalIllumination					: 19,
+    GetLight            					: 20,
+    GetMaxLightCount    					: 21,
+    GetMaxTextureStages						: 22,
+    PerspectiveMatrixLH						: 23,
+    OrthographicMatrixLH					: 24,
+    SetBlendColor                           : 25,
+    SetBlendFactor							: 26,
+    SetClipPlane                            : 27,
+    SetDepthFunc                            : 28,
+    SetEnabledClipPlanes                    : 29,
+    SetEnabledLights						: 30,
+    SetFrontMaterial						: 31,
+    SetGlobalIllumination					: 32,
+    SetLight 			                    : 33,
+    SetShadeModel                           : 34,
+    SetStencilFunc                          : 35,
+    SetStencilMask                          : 36,
+    SetStencilOp                            : 37,
+    SetTextureBlendFactor					: 38,
+    SetTextureBlendOp						: 39,
+    SetTextureColorMask                     : 40,
+    SetViewport						        : 41,
+    VB_SetPrimitiveType                     : 42,
+    VB_SetVertices                          : 43,
+    VB_SetNormals                           : 44,
+    VB_SetColors                            : 45,
+    VB_SetUVCoords                          : 46,
+    VB_SetTextureStage                      : 47,
+    VB_Draw                                 : 48,
+    TO_SetImage                             : 49,
+    TO_SetImageData                         : 50,
+    TO_SetVideo                             : 51,
+    SetMatrixMode							: 52,
+    PushMatrix								: 53,
+    PopMatrix								: 54,
+    LoadMatrix								: 55,
+    LeftMultMatrix							: 56,
+    RightMultMatrix							: 57
 }
 
 function RenderContextMethodDesc(method, params)
@@ -161,6 +166,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         }
         break;
         
+        case eRenderContextMethod.EnableClipPlane:
+        {
+            this.renderContext.enableClipPlane(desc.params[0], desc.params[1]);    
+        }
+        break;
+        
         case eRenderContextMethod.Enabled:
         {
             return this.renderContext.enabled(desc.params[0]);    
@@ -182,6 +193,18 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         case eRenderContextMethod.Finish:
         {
             this.renderContext.finish();        
+        }
+        break;
+        
+        case eRenderContextMethod.GetClipPlane:
+        {
+            return this.renderContext.getClipPlane(desc.params[0]);    
+        }
+        break;
+        
+        case eRenderContextMethod.GetEnabledClipPlanes:
+        {
+            return this.renderContext.getEnabledClipPlanes();    
         }
         break;
         
@@ -241,9 +264,21 @@ DisplayListObj.prototype.invokeMethod = function(desc)
         }
         break;
 
+        case eRenderContextMethod.SetClipPlane:
+        {
+            this.renderContext.setClipPlane(desc.params[0]);
+        }
+        break;
+        
         case eRenderContextMethod.SetDepthFunc:
         {
             this.renderContext.setDepthFunc(desc.params[0]);
+        }
+        break;
+        
+        case eRenderContextMethod.SetEnabledClipPlanes:
+        {
+            this.renderContext.setEnabledClipPlanes(desc.params[0]);
         }
         break;
         
