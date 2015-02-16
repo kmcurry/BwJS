@@ -1,4 +1,4 @@
-﻿RenderParams.prototype = new DirectiveParams();
+RenderParams.prototype = new DirectiveParams();
 RenderParams.prototype.constructor = RenderParams();
 
 function RenderParams()
@@ -31,6 +31,7 @@ function RenderDirective()
 
     this.backgroundImageSet = false;
     
+    this.program = null;
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
     this.backgroundImageFilename = new StringAttr("");
@@ -97,12 +98,18 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundTexture.setGraphMgr(graphMgr);
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
+    // create shader program
+    this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
 
 RenderDirective.prototype.execute = function(root)
 {  
+    // set shader program
+    this.graphMgr.renderContext.useProgram(this.program.getGLProgram());
+    
     // draw background
     this.drawBackground();
     

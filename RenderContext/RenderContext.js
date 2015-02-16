@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * enable caps 
  */
 var eRenderMode =
