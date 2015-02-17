@@ -33,8 +33,6 @@ AttributeVector.prototype.allocatesElements = function() // TODO: necessary (?)
 AttributeVector.prototype.push_back = function(item)
 {
     this.addElement(this.vector.length, item);
-
-    this.size.setValueDirect(this.vector.length);
 }
 
 AttributeVector.prototype.resize = function(size)
@@ -96,11 +94,13 @@ AttributeVector.prototype.next = function(element)
 AttributeVector.prototype.addElement = function(index, element)
 {
     this.vector.splice(index, 0, element);
+    this.size.setValueDirect(this.vector.length);
 }
 
 AttributeVector.prototype.removeElement = function(index)
 {
     this.vector.splice(index, 1);
+    this.size.setValueDirect(this.vector.length);
 }
 
 AttributeVector.prototype.Size = function()
@@ -124,14 +124,27 @@ AttributeVector.prototype.setElementName = function(element, name)
 
 AttributeVector.prototype.synchronize = function(src, syncValues)
 {
-    // call base-class implementation
-    AttributeContainer.prototype.synchronize.call(this, src, syncValues);
-
-    // copy elements
-    this.clear();
-    for (var i = 0; i < src.vector.length; i++)
+    var length = this.Size();
+    var srcLength = src.Size();
+    
+    while (srcLength > length)
     {
-        this.push_back(src.vector[i]);
+        this.push_back(src.getAt(length));
+        length++;
+    }
+    
+    while (srcLength < length)
+    {
+        this.removeElement(length-1);
+        length--;
+    }
+    
+    for (var i = 0; i < length; i++)
+    {
+        if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+        {
+            this.getAt(i).copyValue(src.getAt(i));
+        }
     }
 }
 

@@ -34,10 +34,13 @@
                         <rotation p="0" h="0" r="0"/>
                         <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
                     </PerspectiveProjector>
-                    <Model name="grid" url="/objects/GridG.lwo">
+                    <Model name="grid" url="/objects/GridG.lwo" detectCollision="true">
                         <position x="0" y="0" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
+                        <physicalProperties>
+                        <mass>0</mass>
+                    </physicalProperties>  
                     </Model>
                     <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y=".26" z="0"/>
@@ -56,6 +59,9 @@
                                 </slot2>
                             </socketConnector>
                         </socketConnectors>
+                        <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>  
                     </Model>
                     <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
@@ -74,6 +80,9 @@
                                 </pin2>
                             </plugConnector>
                         </plugConnectors>
+                        <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>  
                     </Model>
                     <!--<Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
                          <position x="-2" y=".26" z="0"/>
@@ -116,4 +125,11 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
+    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
+        <bodies>
+            <body>grid</body>
+            <body>UV_BoxG</body>
+            <body>cylinderRight</body>
+        </bodies>
+    </PhysicsSimulator>
 </Session>

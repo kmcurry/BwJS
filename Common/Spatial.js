@@ -288,8 +288,9 @@ Region.prototype.containsTriangle = function(tri)
     return false;
 }
 
-function SphereTreeNode()
+function SphereTreeNode(tree)
 {
+    this.tree = tree;
     this.sphere = new Sphere();
     this.level = 0;
     this.parent = null;
@@ -313,6 +314,45 @@ SphereTreeNode.prototype.intersects = function(sphereTreeNode)
     return (this.sphere.intersects(sphereTreeNode.sphere));    
 }
 
+SphereTreeNode.prototype.trisIntersect = function(sphereTreeNode)
+{
+    return true;
+    /*
+    var triVerts1 = [];
+    for (var i = 0; i < this.triIndices.length; i++)
+    {
+        var index = this.triIndices[i];
+        var tri = this.tree.tris[index];
+        
+        triVerts1.push(this.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
+        triVerts1.push(this.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
+        triVerts1.push(this.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
+    }   
+     
+    var triVerts2 = [];
+    for (var i = 0; i < sphereTreeNode.triIndices.length; i++)
+    {
+        var index = sphereTreeNode.triIndices[i];
+        var tri = sphereTreeNode.tree.tris[index];
+        
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
+    } 
+    
+    for (var i = 0; i < triVerts1.length; i += 3)
+    {
+        for (var j = 0; j < triVerts2.length; j += 3)
+        {
+            if (triangleTriangleIntersection(triVerts1[i], triVerts1[i+1], triVerts1[i+2],
+                                             triVerts2[j], triVerts2[j+1], triVerts2[j+2]))
+                return true;
+        }    
+    }
+    
+    return false;*/ 
+}
+
 function SphereHitRec()
 {
     this.target = null;
@@ -325,7 +365,8 @@ function BoundingTree()
     this.min = new Vector3D();
     this.max = new Vector3D();
     this.tris = [];
-    this.visited = [];    
+    this.visited = [];
+    this.xform = new Matrix4x4();    
 }
 
 BoundingTree.prototype.setTriangles = function(tris, min, max)
@@ -337,6 +378,7 @@ BoundingTree.prototype.setTriangles = function(tris, min, max)
 
 BoundingTree.prototype.setTransform = function(matrix)
 {
+    this.xform.loadMatrix(matrix);
 }
 
 SphereTree.prototype = new BoundingTree();
@@ -350,6 +392,9 @@ function SphereTree()
 SphereTree.prototype.setTransform = function(matrix)
 {
     if (this.root) this.transformNode(matrix, this.root);
+    
+    // call base-class implementation
+    BoundingTree.prototype.setTransform.call(this, matrix);
 }
 
 SphereTree.prototype.transformNode = function(matrix, node)
@@ -373,10 +418,10 @@ SphereTree.prototype.collides = function(tree)
     // check root nodes for collision
     if (this.nodesCollide(this.root, tree.root))
     {
-        // if both root nodes are leaves, return true
+        // if both root nodes are leaves, and node's triangle(s) intersect, return true
         if (this.root.isLeaf() && tree.root.isLeaf())
         {
-            return true;
+            return this.root.trisIntersect(tree.root);
         }
 
         // recursively check child nodes
@@ -467,7 +512,7 @@ SphereTree.prototype.testSphereHit = function(sphereHit, sphereHits)
             // check for leaf collision
             if (sphereHit.target.isLeaf() && sphereHit.testList[i].isLeaf())
             {
-                return true;
+                return sphereHit.target.trisIntersect(sphereHit.testList[i]);
             }
         }
     }
@@ -649,7 +694,7 @@ Octree.prototype.buildTree = function(levels)
     if (levels < 0) return;
     
     // define root sphere
-    var root = new SphereTreeNode();
+    var root = new SphereTreeNode(this);
     
     // sphere center is the midpoint of min/max extents
     root.sphere.center.copy(midpoint(this.min, this.max));
@@ -677,7 +722,7 @@ Octree.prototype.buildTree = function(levels)
 
 Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
 {
-    if (root.level == levels)
+    if (root.level == levels || triIndices.length == 1)
     {
         // requested levels have been generated
         return;
@@ -707,7 +752,7 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
         if (triIndicesContainedByRegion.length > 0)
         {
             // create sphere node
-            var node = new SphereTreeNode();
+            var node = new SphereTreeNode(this);
           
             // set level
             node.level = root.level + 1;

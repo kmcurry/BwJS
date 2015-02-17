@@ -233,6 +233,34 @@ function triangleOnPositiveSideOfPlane(v0, v1, v2, plane)
 }
 
 /**
+ * Determine if a triangle lies on the positive side of the plane (the side in the direction of
+ * the plane normal).
+ * @param v0    - first vertex of triangle.
+ * @param v1    - second vertex of triangle.
+ * @param v2    - third vertex of triangle.
+ * @return bool - true if the triangle lies on the positive side of the plane, false if not.
+ */
+function triangleOnNegativeSideOfPlane(v0, v1, v2, plane)
+{
+    return pointOnNegativeSideOfPlane(v0, plane) &&
+           pointOnNegativeSideOfPlane(v1, plane) &&
+           pointOnNegativeSideOfPlane(v2, plane);
+}
+
+/**
+ * Determine if a triangle spans the plane.
+ * @param v0    - first vertex of triangle.
+ * @param v1    - second vertex of triangle.
+ * @param v2    - third vertex of triangle.
+ * @return bool - true if the triangle spans the plane, false if not.
+ */
+function triangleSpansPlane(v0, v1, v2, plane)
+{
+    return !triangleOnPositiveSideOfPlane(v0, v1, v2, plane) &&
+           !triangleOnNegativeSideOfPlane(v0, v1, v2, plane);
+}
+
+/**
  * Determine if the line segment intersects the triangle.  If so, find the point
  * of intersection.
  * @param a       - one endpoint of the line segment.
@@ -249,7 +277,7 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
     var result = lineSegmentPlaneIntersection(a, b, new Plane2(v0, v1, v2));
     if (result.count == 0)
     {
-        return { result: false };
+        return { result: false, point: null };
     }
 
     // check that point is within triangle bounding box
@@ -260,7 +288,7 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
         result.point.y > max3(v0.y, v1.y, v2.y) ||
         result.point.z > max3(v0.z, v1.z, v2.z))
     {
-        return { result: false };
+        return { result: false, point: null };
     }
 
     // check that point is within triangle
@@ -269,7 +297,40 @@ function lineSegmentTriangleIntersection(a, b, v0, v1, v2)
         return { result: true, point: result.point };
     }
     
-    return { result: false };
+    return { result: false, point: null };
+}
+
+/**
+ * Determine if two triangles intersect.
+ * @param t1v0  - first triangle's first vertex. 
+ * @param t1v1  - first triangle's second vertex.
+ * @param t1v2  - first triangle's third vertex.
+ * @param t2v0  - second triangle's first vertex. 
+ * @param t2v1  - second triangle's second vertex.
+ * @param t2v2  - second triangle's third vertex.
+ * @return bool - true if the triangles intersect, false if not.
+ */
+function triangleTriangleIntersection(t1v0, t1v1, t1v2,
+                                      t2v0, t2v1, t2v2)
+{
+    if (!triangleSpansPlane(t1v0, t1v1, t1v2, new Plane(t2v0, t2v1, t2v2)) ||
+        !triangleSpansPlane(t2v0, t2v1, t2v2, new Plane(t1v0, t1v1, t1v2)))
+    {
+        return false;
+    }
+ 
+    if (lineSegmentTriangleIntersection(t1v0, t1v1, t2v0, t2v1, t2v2).result ||
+        lineSegmentTriangleIntersection(t1v1, t1v2, t2v0, t2v1, t2v2).result ||
+        lineSegmentTriangleIntersection(t1v2, t1v0, t2v0, t2v1, t2v2).result ||
+
+        lineSegmentTriangleIntersection(t2v0, t2v1, t1v0, t1v1, t1v2).result ||
+        lineSegmentTriangleIntersection(t2v1, t2v2, t1v0, t1v1, t1v2).result ||
+        lineSegmentTriangleIntersection(t2v2, t2v0, t1v0, t1v1, t1v2).result)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 function planeProject(v, plane)

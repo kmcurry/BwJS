@@ -22,7 +22,7 @@ function Model()
     this.moveable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
     this.show = new BooleanAttr(true);
-    this.approximationLevels = new NumberAttr(2);
+    this.approximationLevels = new NumberAttr(1);
     this.showApproximationLevel = new NumberAttr(-1);
     this.sortPolygons = new BooleanAttr(false);
     this.flipPolygons = new BooleanAttr(false);
@@ -55,6 +55,7 @@ function Model()
     this.detectCollision = new BooleanAttr(false);
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
+    this.stopOnCollision = new BooleanAttr(false);
     this.obstructionDetected = new BooleanAttr(false);
     this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
@@ -63,6 +64,7 @@ function Model()
     this.disableOnDissolve = new BooleanAttr(true);
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
+    this.physicalProperties = new PhysicalPropertiesAttr();
     
     this.show.addTarget(this.enabled);
     
@@ -134,6 +136,7 @@ function Model()
     this.registerAttribute(this.detectCollision, "detectCollision");
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
+    this.registerAttribute(this.stopOnCollision, "stopOnCollision");
     this.registerAttribute(this.obstructionDetected, "obstructionDetected");
     this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");
@@ -142,6 +145,7 @@ function Model()
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
+    this.registerAttribute(this.physicalProperties, "physicalProperties");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -335,7 +339,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 {
                     this.boundingTree.setTransform(params.worldMatrix);
                     params.detectCollisions[this.name.getValueDirect().join("")] = new CollideRec(this, this.boundingTree, params.worldMatrix);
-                    this.collisionDetected.setValueDirect(false);
                 }
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
@@ -374,6 +377,21 @@ Model.prototype.apply = function(directive, params, visitChildren)
             }
             break;
     }
+}
+
+Model.prototype.onRemove = function()
+{
+    var name = this.name.getValueDirect().join("");
+    
+    // remove from any physics simulators
+    var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
+    for (var i = 0; i < physicsSimulators.length; i++)
+    {
+        physicsSimulators[i].remove(this);
+    }
+    
+    // call base-class implementation
+    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 Model.prototype.pushMatrix = function()
@@ -542,6 +560,10 @@ Model.prototype.autoDisplayListModified = function()
     
 }
 
+Model.prototype.collisionDetectedModified = function()
+{
+}
+
 function Model_AutoDisplayListModifiedCB(attribute, container)
 {
     container.autoDisplayListModified();
@@ -636,6 +658,7 @@ function Model_DetectCollisionModifiedCB(attribute, container)
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
 {
+    container.collisionDetectedModified();
 }
 
 function Model_VerticesModifiedCB(attribute, container)

@@ -7,10 +7,15 @@ function Evaluator()
     this.className = "Evaluator";
     this.attrType = eAttrType.Evaluator;
     
+    this.evaluate_ = new BooleanAttr(true);
     this.expired = new BooleanAttr(false);
     
     this.registerAttribute(this.expired, "expired");
-    this.registerAttribute(this.enabled, "evaluate");
+    this.registerAttribute(this.evaluate_, "evaluate");
+    
+    // evaluate/enabled are interchangeable
+    this.evaluate_.addTarget(this.enabled);
+    this.enabled.addTarget(this.evaluate_);
 }
 
 Evaluator.prototype.evaluate = function()
