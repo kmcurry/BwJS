@@ -119,18 +119,6 @@ RenderDirective.prototype.execute = function(root)
     
     // render
     params = new RenderParams();
-    /*
-    renderParams.path = NULL;//m_path;
-    renderParams.pathIndex = 1;
-    renderParams.viewport = m_currentViewport;
-    renderParams.jitterAmt = m_currentJitterAmt + jitterAmt; // RenderDirective jitter + AA jitter
-    renderParams.distanceSortAgent = m_distanceSortAgent;
-    renderParams.polygonSortAgent = m_polygonSortAgent;
-    renderParams.renderSequenceAgent = m_renderSequenceAgent;
-    renderParams.shadowRenderAgent = m_shadowRenderAgent;
-    renderParams.drawTextures = m_texturesEnabled->GetValueDirect();
-    renderParams.userData = m_userData->GetValueDirect();
-     */
     params.directive = this;
     params.path = null;
     params.pathIndex = 1;
@@ -138,7 +126,7 @@ RenderDirective.prototype.execute = function(root)
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-	// if resetting display lists, set the disableDisplayLists renderParams flag this render
+    // if resetting display lists, set the disableDisplayLists renderParams flag this render
     if (this.resetDisplayLists)
     {
     	params.resetDisplayLists = true;

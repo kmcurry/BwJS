@@ -1,4 +1,4 @@
-﻿VertexGeometry.prototype = new Geometry();
+VertexGeometry.prototype = new Geometry();
 VertexGeometry.prototype.constructor = VertexGeometry;
 
 function VertexGeometry()
@@ -12,6 +12,7 @@ function VertexGeometry()
     this.updateUVCoords = [];
     this.uvCoords = [];
     this.vertexBuffer = null;
+    this.lines = []; // used to calculate edges of geometry
     
     this.vertices = new NumberArrayAttr();
     this.colors = new NumberArrayAttr();
@@ -74,7 +75,6 @@ VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
     //GcSGNode::Post_Clone_Child(childClone, pathSrc, pathClone); Not being used right now. Maybe used in the futrue.
 }
 
-
 VertexGeometry.prototype.getUVCoords = function(texture)
 {
     for (var i=0; i < this.uvCoords.length; i++)
@@ -116,6 +116,7 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.updateBoundingTree = true;
         
         this.calculateBBox();
+        this.updateLines();
     }
     
     if (this.updateColors)
@@ -529,6 +530,10 @@ VertexGeometry.prototype.calculateBBox = function()
 
     this.bbox.getAttribute("min").setValueDirect(min.x, min.y, min.z);
     this.bbox.getAttribute("max").setValueDirect(max.x, max.y, max.z);
+}
+
+VertexGeometry.prototype.updateLines = function()
+{
 }
 
 function VertexGeometry_VerticesModifiedCB(attribute, container)
