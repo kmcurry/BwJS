@@ -23415,6 +23415,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 var trans = new Ammo.btTransform();
                 this.physicsSim.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
                 var origin = trans.getOrigin();
+                Ammo.destroy(trans);
                 var position = new Vector3D(origin.x(), origin.y(), origin.z());
                 model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
             }
@@ -25488,6 +25489,10 @@ function PhysicsSimulator()
     this.className = "PhysicsSimulator";
     this.attrType = eAttrType.PhysicsSimulator;
 
+    this.collisionConfiguration = null;
+    this.dispatcher = null;
+    this.overlappingPairCache = null;
+    this.solver = null;
     this.world = null;
     this.physicsBodies = [];
     this.physicsShapes = [];
@@ -25519,7 +25524,7 @@ function PhysicsSimulator()
 PhysicsSimulator.prototype.evaluate = function()
 {
     var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement, 10);
+    this.stepSimulation(timeIncrement);
 
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
@@ -25579,8 +25584,9 @@ PhysicsSimulator.prototype.evaluate = function()
             modelsOutOfBounds.push(this.bodyModels[i]);      
         }
     }
+    Ammo.destroy(trans);
     
-    // remove any models that have moved outside of the world boundary (memory errors occur when positions become too large)
+    // remove any models that have moved outside of the world boundary
     for (var i = 0; i < modelsOutOfBounds.length; i++)
     {
         this.remove(modelsOutOfBounds[i]);
@@ -25759,8 +25765,11 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         }
 
         var motionState = new Ammo.btDefaultMotionState(transform);
+        Ammo.destroy(transform);
         var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+        Ammo.destroy(localInertia);
         var body = new Ammo.btRigidBody(rbInfo);
+        Ammo.destroy(rbInfo);
 
         this.world.addRigidBody(body);
         //if (isDynamic)
@@ -25790,6 +25799,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundSh
     transform.setIdentity();
 
     compoundShape.addChildShape(transform, shape);
+    Ammo.destroy(transform);
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -25887,10 +25897,15 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var motionState = this.physicsBodies[n].getMotionState();
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    Ammo.destroy(localInteria);
     var body = new Ammo.btRigidBody(rbInfo);
+    Ammo.destroy(rbInfo);
 
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
+    Ammo.destroy(this.physicsBodies[n].getMotionState());
+    Ammo.destroy(this.physicsBodies[n]);
+
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
     this.physicsShapes[n] = shape;
@@ -25909,6 +25924,8 @@ PhysicsSimulator.prototype.removePhysicsBody = function(n)
         return;
 
     this.world.removeRigidBody(body);
+    Ammo.destroy(body.getMotionState());
+    Ammo.destroy(body);
     this.bodyAdded[n] = false;
 }
 
@@ -25925,7 +25942,9 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
     transform.setIdentity();
 
     var position = model.getAttribute("sectorPosition").getValueDirect();
-    transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+    var vector = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(vector);
+    Ammo.destroy(vector);
 
     // update rotation to include rotation caused by object inspection
     var rotationGroup = getInspectionGroup(model);
@@ -25941,7 +25960,9 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 
         var quat = quat2.multiply(quat1);
 
-        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
 
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
@@ -25957,8 +25978,11 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
     }
 
     var motionState = new Ammo.btDefaultMotionState(transform);
+    Ammo.destroy(transform);
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
+    Ammo.destroy(rbInfo);
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
@@ -25967,11 +25991,17 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.initPhysics = function()
 {
-    var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-    var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
-    var overlappingPairCache = new Ammo.btDbvtBroadphase();
-    var solver = new Ammo.btSequentialImpulseConstraintSolver();
-    this.world = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+    if (this.collisionConfiguration) Ammo.destroy(this.collisionConfiguration);
+    if (this.dispatcher) Ammo.destroy(this.dispatcher);
+    if (this.overlappingPairCache) Ammo.destroy(this.overlappingPairCache);
+    if (this.solver) Ammo.destroy(this.solver);
+    //if (this.world) Ammo.destroy(this.world);
+    
+    this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+    this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
+    this.overlappingPairCache = new Ammo.btDbvtBroadphase();
+    this.solver = new Ammo.btSequentialImpulseConstraintSolver();
+    this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
 
     var gravity = this.gravity.getValueDirect();
     this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
@@ -25984,6 +26014,9 @@ PhysicsSimulator.prototype.remove = function(model)
         if (this.bodyModels[i] == model)
         {
             this.world.removeRigidBody(this.physicsBodies[i]);
+            Ammo.destroy(this.physicsShapes[i]);
+            Ammo.destroy(this.physicsBodies[i].getMotionState());
+            Ammo.destroy(this.physicsBodies[i]);          
             // don't notify modified CB
             this.bodies.removeModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
             this.physicsBodies.splice(i, 1);
