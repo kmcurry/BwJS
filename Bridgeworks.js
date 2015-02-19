@@ -23504,6 +23504,10 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 
         for (var j = 0; j < sockets.length; j++)
         {
+            // only test sockets/plugs between different models
+            if (plugs[i].second.model == sockets[j].second.model)
+                continue;
+            
             var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
             if (plugType != socketType)
                 continue;
