@@ -12,7 +12,6 @@ function VertexGeometry()
     this.updateUVCoords = [];
     this.uvCoords = [];
     this.vertexBuffer = null;
-    this.lines = []; // used to calculate edges of geometry
     
     this.vertices = new NumberArrayAttr();
     this.colors = new NumberArrayAttr();
@@ -111,12 +110,13 @@ VertexGeometry.prototype.update = function(params, visitChildren)
     {
         this.updateVertices = false;
         
-        this.vertexBuffer.setVertices(this.vertices.getValueDirect());
+        var vertices = this.vertices.getValueDirect();
+        this.vertexBuffer.setVertices(vertices);
+        this.shadowVolume.setVertices(vertices);
         
         this.updateBoundingTree = true;
         
         this.calculateBBox();
-        this.updateLines();
     }
     
     if (this.updateColors)
@@ -530,10 +530,6 @@ VertexGeometry.prototype.calculateBBox = function()
 
     this.bbox.getAttribute("min").setValueDirect(min.x, min.y, min.z);
     this.bbox.getAttribute("max").setValueDirect(max.x, max.y, max.z);
-}
-
-VertexGeometry.prototype.updateLines = function()
-{
 }
 
 function VertexGeometry_VerticesModifiedCB(attribute, container)

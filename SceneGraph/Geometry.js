@@ -1,4 +1,4 @@
-﻿Geometry.prototype = new RenderableElement();
+Geometry.prototype = new RenderableElement();
 Geometry.prototype.constructor = Geometry;
 
 function Geometry()
@@ -9,6 +9,7 @@ function Geometry()
 
     this.boundingTree = new Octree();
     this.updateBoundingTree = false;
+    this.shadowVolume = new ShadowVolume();
 
     this.selectable = new BooleanAttr(true);
     this.cullable = new BooleanAttr(true);
@@ -33,6 +34,14 @@ function Geometry()
     this.registerAttribute(this.shadowCaster, "shadowCaster");
     this.registerAttribute(this.shadowTarget, "shadowTarget");
     this.registerAttribute(this.highlight, "highlight");
+}
+
+Geometry.prototype.setGraphMgr = function(graphMgr)
+{
+    // call base-class implementation
+    RenderableElement.prototype.setGraphMgr.call(this, graphMgr);
+    
+    this.shadowVolume.setRenderContext(this.graphMgr.renderContext);
 }
 
 Geometry.prototype.update = function(params, visitChildren)
