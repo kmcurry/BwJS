@@ -96,6 +96,8 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 {
                     this.draw(dissolve);
                 }
+                
+                this.shadowVolume.update(params.lights, params.worldMatrix);
             }
             break;       
 

@@ -25,4 +25,15 @@ ShadowVolume.prototype.setVertices = function(vertices)
     }
 }
 
+ShadowVolume.prototype.update = function(lights, worldMatrix)
+{
+    for (var i = 0; i < lights.length; i++)
+    {
+        if (lights[i].getAttribute("shadowCaster").getValueDirect())
+        {
+            
+        }
+    }
+}
+
 

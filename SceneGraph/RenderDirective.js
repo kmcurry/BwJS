@@ -16,6 +16,7 @@ function RenderParams()
     this.displayListObj = null;
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
+    this.lights = [];
 }
 
 RenderDirective.prototype = new SGDirective();

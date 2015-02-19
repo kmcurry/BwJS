@@ -283,6 +283,11 @@ Model.prototype.apply = function(directive, params, visitChildren)
                     return;
                 }
 
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);              
+
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                
                 this.pushMatrix();
 
                 this.applyTransform();
@@ -291,6 +296,8 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 this.popMatrix();
+                
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
             break;
 
@@ -329,7 +336,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);              
 
-                //params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
   
                 // call base-class implementation
