@@ -545,10 +545,6 @@ PhysicsSimulator.prototype.deleteModel = function(model)
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
-            // remove from bodies; don't notify modified CB
-            this.bodies.removeModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
-            this.bodies.removeElement(i);
-            this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
             return;
         }
     }
