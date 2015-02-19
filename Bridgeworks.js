@@ -18873,7 +18873,7 @@ Model.prototype.onRemove = function()
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
     for (var i = 0; i < physicsSimulators.length; i++)
     {
-        physicsSimulators[i].remove(this);
+        physicsSimulators[i].deleteModel(this);
     }
     
     // call base-class implementation
@@ -25589,7 +25589,7 @@ PhysicsSimulator.prototype.evaluate = function()
     // remove any models that have moved outside of the world boundary
     for (var i = 0; i < modelsOutOfBounds.length; i++)
     {
-        this.remove(modelsOutOfBounds[i]);
+        this.deleteModel(modelsOutOfBounds[i]);
     }
 }
 
@@ -25598,6 +25598,7 @@ PhysicsSimulator.prototype.update = function()
     if (this.updateWorld)
     {
         this.updateWorld = false;
+        this.updateBodies = true;
         this.initPhysics();
     }
 
@@ -25712,13 +25713,12 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
         this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
     }
-
-    // reset bodies
-    this.initPhysics();
-    this.physicsBodies = [];
-    this.physicsShapes = [];
-    this.bodyAdded = [];
-    this.bodyModels = [];
+    
+    // remove existing bodies
+    while (this.bodyModels.length > 0)
+    {
+        this.deleteModel(this.bodyModels[0]);
+    }
 
     // add bodies to world
     for (var i = 0; i < this.bodies.Size(); i++)
@@ -25750,12 +25750,16 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         {
             position.y -= 0.075;
         }
-        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        var vector = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(vector);
+        Ammo.destroy(vector);
 
         var rotation = model.getAttribute("rotation").getValueDirect();
         var quat = new Quaternion();
         quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
 
         var isDynamic = (mass != 0);
         var localInertia = new Ammo.btVector3(0, 0, 0);
@@ -25844,7 +25848,9 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     for (var i = 0; i < verts.length; i += 3)
     {
         var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        shape.addPoint(new Ammo.btVector3(vert.x, vert.y, vert.z));
+        var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
+        shape.addPoint(point);
+        Ammo.destroy(point);
     }
 
     return shape;
@@ -26007,7 +26013,7 @@ PhysicsSimulator.prototype.initPhysics = function()
     this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
 }
 
-PhysicsSimulator.prototype.remove = function(model)
+PhysicsSimulator.prototype.deleteModel = function(model)
 {
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -26016,13 +26022,14 @@ PhysicsSimulator.prototype.remove = function(model)
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());
-            Ammo.destroy(this.physicsBodies[i]);          
-            // don't notify modified CB
-            this.bodies.removeModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+            Ammo.destroy(this.physicsBodies[i]);                  
             this.physicsBodies.splice(i, 1);
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
+            // remove from bodies; don't notify modified CB
+            this.bodies.removeModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+            this.bodies.removeElement(i);
             this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
             return;
         }
