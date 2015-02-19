@@ -23530,9 +23530,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
-
-                // make plug model unmoveable
-                plugs[i].second.model.getAttribute("moveable").setValueDirect(false);
             }
         }
     }
