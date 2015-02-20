@@ -126,6 +126,11 @@ function webglRC(canvas, background)
         return new webglProgram(this, gl, vs, fs);
     }
     
+    this.createShadowFramebufferObject = function()
+    {
+        return new webglShadowFBO(this, gl);
+    }
+    
     this.createTextureObject = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateTextureObject, null);

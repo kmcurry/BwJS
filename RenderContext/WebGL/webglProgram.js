@@ -109,6 +109,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
         program.textureSamplerAlpha[i] = gl.getUniformLocation(program, "uTextureSamplerAlpha[" + i + "]");
         program.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
     }
+    program.textureSamplerShadowMap = gl.getUniformLocation(program, "uTextureSamplerShadowMap");
     program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
     program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
 

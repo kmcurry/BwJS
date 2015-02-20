@@ -168,6 +168,16 @@ var RC_BLEND                        = 0x004;
 var RC_DECAL                        = 0x008;
 
 /*
+ * texture unit
+ */
+var eTextureUnit =
+{
+    Color0                          : 0,
+    Color1                          : 1,
+    ShadowMap                       : 2
+}
+
+/*
  * texture coordinate source
  */
 var eTextureCoordSrc = 

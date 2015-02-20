@@ -33,6 +33,7 @@ function RenderDirective()
     this.backgroundImageSet = false;
     
     this.program = null;
+    this.shadowFBO = null;
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
     this.backgroundImageFilename = new StringAttr("");
@@ -101,6 +102,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     
     // create shader program
     this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    this.shadowFBO = graphMgr.renderContext.createShadowFramebufferObject();
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
