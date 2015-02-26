@@ -37,54 +37,67 @@ function webglRC(canvas, background)
     
     RenderContext.call(this, canvas, background);
     
-    var gl = getWebGLContext(canvas, false /*set to true for debug context*/);
-    if (!gl) return;
+    var _gl = getWebGLContext(canvas, false /*set to true for debug context*/);
+    if (!_gl) return;
 
-    gl.clearColor(0, 0, 0, background ? 0 : 1);
-    gl.clearDepth(1);
-    gl.clearStencil(0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.disable(gl.STENCIL_TEST);
-    gl.frontFace(gl.CW);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
+    _gl.clearColor(0, 0, 0, background ? 0 : 1);
+    _gl.clearDepth(1);
+    _gl.clearStencil(0);
+    _gl.enable(_gl.DEPTH_TEST);
+    _gl.depthFunc(_gl.LEQUAL);
+    _gl.disable(_gl.STENCIL_TEST);
+    _gl.frontFace(_gl.CW);
+    _gl.viewport(0, 0, canvas.width, canvas.height);
+    _gl.enable(_gl.CULL_FACE);
+    _gl.cullFace(_gl.BACK);
    
+    var OES_standard_derivatives_extension = _gl.getExtension('OES_standard_derivatives');
+    var FRAGMENT_SHADER_DERIVATIVE_HINT_OES = 0x8B8B;
+    _gl.hint(FRAGMENT_SHADER_DERIVATIVE_HINT_OES, _gl.NICEST);
+    
     // set valid flag
     this.valid = true;
 
     // private members
-    var program = null;
-    var vLights = [];
-    var vLightMatrices = [];
-    var vLightEnabledStates = [];
-    var vClipPlanes = [];
-    var vClipPlaneMatrices = [];
-    var vClipPlaneEnabledStates = [];
+    var _program = null;
+    var _vLights = [];
+    var _vLightMatrices = [];
+    var _vLightEnabledStates = [];
+    var _vClipPlanes = [];
+    var _vClipPlaneMatrices = [];
+    var _vClipPlaneEnabledStates = [];
+    var _viewport = new Viewport(0, 0, canvas.width, canvas.height);
+    var _clearColor = new Color(0, 0, 0, background ? 0 : 1);
     
     //
     // methods
     //
     
-    this.applyModelViewTransform = function()
-    {
-        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyModelViewTransform, null);
-        
-        gl.uniformMatrix4fv(program.modelViewMatrix, false, new Float32Array(this.modelViewMatrixStack.top().flatten()));
-
-        var normalMatrix = new Matrix4x4();
-        normalMatrix.loadMatrix(this.modelViewMatrixStack.top());
-        normalMatrix.invert();
-        normalMatrix.transpose();
-        gl.uniformMatrix4fv(program.normalMatrix, false, new Float32Array(normalMatrix.flatten()));
-    }
-    
     this.applyProjectionTransform = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyProjectionTransform, null);
         
-        gl.uniformMatrix4fv(program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
+        _gl.uniformMatrix4fv(_program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
+    }
+    
+    this.applyViewTransform = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyViewTransform, null);
+        
+        _gl.uniformMatrix4fv(_program.viewMatrix, false, new Float32Array(this.viewMatrixStack.top().flatten()));
+    }
+    
+    this.applyWorldTransform = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyWorldTransform, null);
+        
+        _gl.uniformMatrix4fv(_program.worldMatrix, false, new Float32Array(this.worldMatrixStack.top().flatten()));
+
+        var normalMatrix = new Matrix4x4();
+        normalMatrix.loadMatrix(this.worldMatrixStack.top());
+        normalMatrix.invert();
+        normalMatrix.transpose();
+        _gl.uniformMatrix4fv(_program.normalMatrix, false, new Float32Array(normalMatrix.flatten()));
     }
     
     this.clear = function(mask)
@@ -93,57 +106,75 @@ function webglRC(canvas, background)
         
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, [mask]);
         
-        gl.clear((mask & RC_COLOR_BUFFER_BIT   ? gl.COLOR_BUFFER_BIT   : 0) |
-                 (mask & RC_DEPTH_BUFFER_BIT   ? gl.DEPTH_BUFFER_BIT   : 0) |
-                 (mask & RC_STENCIL_BUFFER_BIT ? gl.STENCIL_BUFFER_BIT : 0));
+        _gl.clear((mask & RC_COLOR_BUFFER_BIT   ? _gl.COLOR_BUFFER_BIT   : 0) |
+                  (mask & RC_DEPTH_BUFFER_BIT   ? _gl.DEPTH_BUFFER_BIT   : 0) |
+                  (mask & RC_STENCIL_BUFFER_BIT ? _gl.STENCIL_BUFFER_BIT : 0));
     }
 
     this.clearColor = function(r, g, b, a)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearColor, [r, g, b, a]);
         
-        gl.clearColor(r, g, b, a);
+        _gl.clearColor(r, g, b, a);
+        _clearColor.load(r, g, b, a);
     }
     
     this.clearDepth = function(d)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearDepth, [d]);
         
-        gl.clearDepth(d);
+        _gl.clearDepth(d);
     }
     
     this.clearStencil = function(s)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearStencil, [s]);
         
-        gl.clearStencil(s);  
+        _gl.clearStencil(s);  
     }
     
     this.createProgram = function(vs, fs)
     {
         //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.createProgram, [vs, fs]);
         
-        return new webglProgram(this, gl, vs, fs);
+        return new webglProgram(this, _gl, vs, fs);
     }
     
     this.createShadowFramebufferObject = function()
     {
-        return new webglShadowFBO(this, gl);
+        return new webglShadowFBO(this, _gl);
     }
     
     this.createTextureObject = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateTextureObject, null);
         
-        return new webglTO(this, gl);
+        return new webglTO(this, _gl);
     }
     
     this.createVertexBuffer = function(numVerticesPerPrimitive)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateVertexBuffer, [numVerticesPerPrimitive]);
         
-        return new webglVB(this, gl, numVerticesPerPrimitive);
+        return new webglVB(this, _gl, numVerticesPerPrimitive);
     }
+    
+    this.cullFace = function(face)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CullFace, [face]);
+        
+        switch (face)
+        {
+            case RC_FRONT:
+                _gl.cullFace(_gl.FRONT);
+                break;
+                
+            case RC_BACK:
+                _gl.cullFace(_gl.BACK);
+                break;
+        }
+    }
+    
     this.disable = function(cap)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Disable, [cap]);
@@ -151,27 +182,27 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                gl.disable(gl.BLEND);
+                _gl.disable(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                gl.disable(gl.CULL_FACE);
+                _gl.disable(_gl.CULL_FACE);
                 break;
 
             case eRenderMode.DepthBufferWrite:
-                gl.depthMask(false);
+                _gl.depthMask(false);
                 break;
 
             case eRenderMode.DepthTest:
-                gl.disable(gl.DEPTH_TEST);
+                _gl.disable(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                gl.uniform1i(program.lightingEnabled, false); 
+                _gl.uniform1i(_program.lightingEnabled, false); 
                 break;
                 
             case eRenderMode.StencilTest:
-                gl.disable(gl.STENCIL_TEST);
+                _gl.disable(_gl.STENCIL_TEST);
                 break;
         }
     }
@@ -183,27 +214,27 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                gl.enable(gl.BLEND);
+                _gl.enable(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                gl.enable(gl.CULL_FACE);
+                _gl.enable(_gl.CULL_FACE);
                 break;
 
             case eRenderMode.DepthBufferWrite:
-                gl.depthMask(true);
+                _gl.depthMask(true);
                 break;
 
             case eRenderMode.DepthTest:
-                gl.enable(gl.DEPTH_TEST);
+                _gl.enable(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                gl.uniform1i(program.lightingEnabled, true);
+                _gl.uniform1i(_program.lightingEnabled, true);
                 break;
                 
             case eRenderMode.StencilTest:
-                gl.enable(gl.STENCIL_TEST);
+                _gl.enable(_gl.STENCIL_TEST);
                 break;
         }
     }
@@ -212,9 +243,9 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableClipPlane, [index, enable]);
         
-        gl.uniform1i(program.clipPlaneEnabled[index], enable);
+        _gl.uniform1i(_program.clipPlaneEnabled[index], enable);
 
-        vClipPlaneEnabledStates[index] = enable;
+        _vClipPlaneEnabledStates[index] = enable;
     }
 
     this.enabled = function(cap)
@@ -226,27 +257,27 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                e = gl.getParameter(gl.BLEND);
+                e = _gl.getParameter(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                e = gl.getParameter(gl.CULL_FACE);
+                e = _gl.getParameter(_gl.CULL_FACE);
                 break;
                 
             case eRenderMode.DepthBufferWrite:
-                e = gl.getParameter(gl.DEPTH_WRITEMASK);
+                e = _gl.getParameter(_gl.DEPTH_WRITEMASK);
                 break;
 
             case eRenderMode.DepthTest:
-                e = gl.getParameter(gl.DEPTH_TEST);
+                e = _gl.getParameter(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                e = gl.getUniform(program, program.lightingEnabled);
+                e = _gl.getUniform(_program, _program.lightingEnabled);
                 break;
                 
             case eRenderMode.StencilTest:
-                e = gl.getParameter(gl.STENCIL_TEST);
+                e = _gl.getParameter(_gl.STENCIL_TEST);
                 break;
         }
 
@@ -257,30 +288,35 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableLight, [index, enable]);
         
-        gl.uniform1i(program.lightSource[index].enabled, enable);
+        _gl.uniform1i(_program.lightSource[index].enabled, enable);
 
-        vLightEnabledStates[index] = enable;
+        _vLightEnabledStates[index] = enable;
     }
     
     this.enableTextureStage = function(stage, enable)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableTextureStage, [stage, enable]);
         
-        gl.uniform1i(program.textureStageEnabled[stage], enable);
+        _gl.uniform1i(_program.textureStageEnabled[stage], enable);
     }
     
     this.finish = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Finish, null);
         
-        gl.finish();
+        _gl.finish();
     }
-
+    
+    this.getClearColor = function()
+    {
+        return _clearColor;
+    }
+    
     this.getClipPlane = function(index)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetClipPlane, [index]);
         
-        return { equation: vClipPlanes[index], matrix: vClipPlaneMatrices[index] };
+        return { equation: _vClipPlanes[index], matrix: _vClipPlaneMatrices[index] };
     }
     
     this.getEnabledClipPlanes = function()
@@ -289,9 +325,9 @@ function webglRC(canvas, background)
         
         var indices = [];
 
-        for (var i = 0; i < vClipPlaneEnabledStates.length; i++)
+        for (var i = 0; i < _vClipPlaneEnabledStates.length; i++)
         {
-            if (vClipPlaneEnabledStates[i])
+            if (_vClipPlaneEnabledStates[i])
             {
                 indices.push(i);
             }
@@ -306,9 +342,9 @@ function webglRC(canvas, background)
         
         var indices = [];
 
-        for (var i = 0; i < vLightEnabledStates.length; i++)
+        for (var i = 0; i < _vLightEnabledStates.length; i++)
         {
-            if (vLightEnabledStates[i])
+            if (_vLightEnabledStates[i])
             {
                 indices.push(i);
             }
@@ -321,7 +357,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = gl.getUniform(program, program.globalAmbientLight);
+        var values = _gl.getUniform(_program, _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }
@@ -330,7 +366,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetLight, [index]);
         
-        return { desc: vLights[index], matrix: vLightMatrices[index] };
+        return { desc: _vLights[index], matrix: _vLightMatrices[index] };
     }
     
     this.getMaxLightCount = function()
@@ -351,7 +387,12 @@ function webglRC(canvas, background)
     {
         //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetProgram, null);
         
-        return program;
+        return _program;
+    }
+    
+    this.getViewport = function()
+    {
+        return _viewport;
     }
     
     this.perspectiveMatrixLH = function(left, right, top, bottom, near, far)
@@ -397,7 +438,7 @@ function webglRC(canvas, background)
     {
         var pixels = new Uint8Array(width * height * 4);
         
-        gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        _gl.readPixels(x, y, width, height, _gl.RGBA, _gl.UNSIGNED_BYTE, pixels);
         
         return pixels;
     }
@@ -406,7 +447,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendColor, [r, g, b, a]);
         
-        gl.blendColor(r, g, b, a);
+        _gl.blendColor(r, g, b, a);
     }
     
     this.setBlendFactor = function(sfactor, dfactor)
@@ -416,49 +457,49 @@ function webglRC(canvas, background)
         var gl_SrcFactor;
         switch (sfactor)
         {
-        case RC_ZERO:                   gl_SrcFactor = gl.ZERO; break;
-        case RC_ONE:                    gl_SrcFactor = gl.ONE; break;
-        case RC_SRC_COLOR:              gl_SrcFactor = gl.SRC_COLOR; break;
-        case RC_SRC_ALPHA:              gl_SrcFactor = gl.SRC_ALPHA; break;        
-        case RC_ONE_MINUS_SRC_COLOR:    gl_SrcFactor = gl.ONE_MINUS_SRC_COLOR; break;
-        case RC_ONE_MINUS_SRC_ALPHA:    gl_SrcFactor = gl.ONE_MINUS_SRC_ALPHA; break;
-        case RC_DEST_COLOR:             gl_SrcFactor = gl.DEST_COLOR; break;
-        case RC_DEST_ALPHA:             gl_SrcFactor = gl.DEST_ALPHA; break;        
-        case RC_ONE_MINUS_DEST_COLOR:   gl_SrcFactor = gl.ONE_MINUS_DEST_COLOR; break;
-        case RC_ONE_MINUS_DEST_ALPHA:   gl_SrcFactor = gl.ONE_MINUS_DEST_ALPHA; break;
+        case RC_ZERO:                   gl_SrcFactor = _gl.ZERO; break;
+        case RC_ONE:                    gl_SrcFactor = _gl.ONE; break;
+        case RC_SRC_COLOR:              gl_SrcFactor = _gl.SRC_COLOR; break;
+        case RC_SRC_ALPHA:              gl_SrcFactor = _gl.SRC_ALPHA; break;        
+        case RC_ONE_MINUS_SRC_COLOR:    gl_SrcFactor = _gl.ONE_MINUS_SRC_COLOR; break;
+        case RC_ONE_MINUS_SRC_ALPHA:    gl_SrcFactor = _gl.ONE_MINUS_SRC_ALPHA; break;
+        case RC_DEST_COLOR:             gl_SrcFactor = _gl.DEST_COLOR; break;
+        case RC_DEST_ALPHA:             gl_SrcFactor = _gl.DEST_ALPHA; break;        
+        case RC_ONE_MINUS_DEST_COLOR:   gl_SrcFactor = _gl.ONE_MINUS_DEST_COLOR; break;
+        case RC_ONE_MINUS_DEST_ALPHA:   gl_SrcFactor = _gl.ONE_MINUS_DEST_ALPHA; break;
         }     
         
         var gl_DestFactor;
         switch (dfactor)
         {
-        case RC_ZERO:                   gl_DestFactor = gl.ZERO; break;
-        case RC_ONE:                    gl_DestFactor = gl.ONE; break;
-        case RC_SRC_COLOR:              gl_DestFactor = gl.SRC_COLOR; break;
-        case RC_SRC_ALPHA:              gl_DestFactor = gl.SRC_ALPHA; break;        
-        case RC_ONE_MINUS_SRC_COLOR:    gl_DestFactor = gl.ONE_MINUS_SRC_COLOR; break;
-        case RC_ONE_MINUS_SRC_ALPHA:    gl_DestFactor = gl.ONE_MINUS_SRC_ALPHA; break;
-        case RC_DEST_COLOR:             gl_DestFactor = gl.DEST_COLOR; break;
-        case RC_DEST_ALPHA:             gl_DestFactor = gl.DEST_ALPHA; break;        
-        case RC_ONE_MINUS_DEST_COLOR:   gl_DestFactor = gl.ONE_MINUS_DEST_COLOR; break;
-        case RC_ONE_MINUS_DEST_ALPHA:   gl_DestFactor = gl.ONE_MINUS_DEST_ALPHA; break;
+        case RC_ZERO:                   gl_DestFactor = _gl.ZERO; break;
+        case RC_ONE:                    gl_DestFactor = _gl.ONE; break;
+        case RC_SRC_COLOR:              gl_DestFactor = _gl.SRC_COLOR; break;
+        case RC_SRC_ALPHA:              gl_DestFactor = _gl.SRC_ALPHA; break;        
+        case RC_ONE_MINUS_SRC_COLOR:    gl_DestFactor = _gl.ONE_MINUS_SRC_COLOR; break;
+        case RC_ONE_MINUS_SRC_ALPHA:    gl_DestFactor = _gl.ONE_MINUS_SRC_ALPHA; break;
+        case RC_DEST_COLOR:             gl_DestFactor = _gl.DEST_COLOR; break;
+        case RC_DEST_ALPHA:             gl_DestFactor = _gl.DEST_ALPHA; break;        
+        case RC_ONE_MINUS_DEST_COLOR:   gl_DestFactor = _gl.ONE_MINUS_DEST_COLOR; break;
+        case RC_ONE_MINUS_DEST_ALPHA:   gl_DestFactor = _gl.ONE_MINUS_DEST_ALPHA; break;
         }
         
-        gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
+        _gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
     }
 
     this.setClipPlane = function(index, equation)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetClipPlane, [index, equation]);
         
-        // get current modelView transform
-        var modelViewMatrix = this.modelViewMatrixStack.top();
+        // get current world transform
+        var worldMatrix = this.worldMatrixStack.top();
 
         var values = [ equation[0], equation[1], equation[2], equation[3] ];
         
-        gl.uniform4fv(program.textureColorMask, new Float32Array(values));
+        _gl.uniform4fv(_program.textureColorMask, new Float32Array(values));
         
-        vClipPlanes[index] = equation;
-        vClipPlaneMatrices[index] = modelViewMatrix;          
+        _vClipPlanes[index] = equation;
+        _vClipPlaneMatrices[index] = worldMatrix;          
     }
     
     this.setDepthFunc = function(func)
@@ -468,17 +509,17 @@ function webglRC(canvas, background)
         var gl_DepthFunc;
         switch (func)
         {
-        case eDepthFunc.Never:          gl_DepthFunc = gl.NEVER; break;
-        case eDepthFunc.Less:           gl_DepthFunc = gl.LESS; break;
-        case eDepthFunc.LessEqual:      gl_DepthFunc = gl.LEQUAL; break;
-        case eDepthFunc.Equal:          gl_DepthFunc = gl.EQUAL; break;
-        case eDepthFunc.NotEqual:       gl_DepthFunc = gl.NOTEQUAL; break;
-        case eDepthFunc.GreaterEqual:   gl_DepthFunc = gl.GEQUAL; break;
-        case eDepthFunc.Greater:        gl_DepthFunc = gl.GREATER; break;
-        case eDepthFunc.Always:         gl_DepthFunc = gl.ALWAYS; break;
+        case eDepthFunc.Never:          gl_DepthFunc = _gl.NEVER; break;
+        case eDepthFunc.Less:           gl_DepthFunc = _gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_DepthFunc = _gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_DepthFunc = _gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_DepthFunc = _gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_DepthFunc = _gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_DepthFunc = _gl.GREATER; break;
+        case eDepthFunc.Always:         gl_DepthFunc = _gl.ALWAYS; break;
         }
         
-        gl.depthFunc(gl_DepthFunc);
+        _gl.depthFunc(gl_DepthFunc);
            
     }
     
@@ -487,9 +528,9 @@ function webglRC(canvas, background)
         if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledClipPlanes, [indices]);
         
         // disable all previously enabled clip planes
-        for (var i = 0; i < vClipPlaneEnabledStates.length; i++)
+        for (var i = 0; i < _vClipPlaneEnabledStates.length; i++)
         {
-            if (vClipPlaneEnabledStates[i])
+            if (_vClipPlaneEnabledStates[i])
             {
                 this.enableClipPlane(i, false);
             }
@@ -507,9 +548,9 @@ function webglRC(canvas, background)
         if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledLights, [indices]);
         
         // disable all previously enabled lights
-        for (var i = 0; i < vLightEnabledStates.length; i++)
+        for (var i = 0; i < _vLightEnabledStates.length; i++)
         {
-            if (vLightEnabledStates[i])
+            if (_vLightEnabledStates[i])
             {
                 this.enableLight(i, false);
             }
@@ -529,7 +570,7 @@ function webglRC(canvas, background)
         // ambient
         if (desc.validMembersMask & MATERIALDESC_AMBIENT_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.ambient, new Float32Array(desc.ambient.v()));
+            _gl.uniform4fv(_program.frontMaterial.ambient, new Float32Array(desc.ambient.v()));
             
             this.frontMaterial.ambient = desc.ambient;
         }
@@ -537,7 +578,7 @@ function webglRC(canvas, background)
         // diffuse
         if (desc.validMembersMask & MATERIALDESC_DIFFUSE_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.diffuse, new Float32Array(desc.diffuse.v()));
+            _gl.uniform4fv(_program.frontMaterial.diffuse, new Float32Array(desc.diffuse.v()));
             
             this.frontMaterial.diffuse = desc.diffuse;
         }
@@ -545,7 +586,7 @@ function webglRC(canvas, background)
         // specular
         if (desc.validMembersMask & MATERIALDESC_SPECULAR_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.specular, new Float32Array(desc.specular.v()));
+            _gl.uniform4fv(_program.frontMaterial.specular, new Float32Array(desc.specular.v()));
             
             this.frontMaterial.specular = desc.specular;
         }
@@ -554,7 +595,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & MATERIALDESC_EMISSIVE_BIT)
         {
             // TODO
-            //gl.uniform4fv(program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
+            //_gl.uniform4fv(_program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
             
             this.frontMaterial.emissive = desc.emissive;
         }
@@ -564,7 +605,7 @@ function webglRC(canvas, background)
         {
             // glossiness - OpenGL accepts values in the range [0, 128].
             // use the range [5, 128], because values below 5 result in wash-out
-            gl.uniform1f(program.frontMaterial.shininess, clamp(desc.glossiness * 128, 5, 128));
+            _gl.uniform1f(_program.frontMaterial.shininess, clamp(desc.glossiness * 128, 5, 128));
             
             this.frontMaterial.glossiness = desc.glossiness;
         }
@@ -578,30 +619,30 @@ function webglRC(canvas, background)
         
         var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
-        gl.uniform4fv(program.globalAmbientLight, new Float32Array(values));
+        _gl.uniform4fv(_program.globalAmbientLight, new Float32Array(values));
     }
 
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
         
-        // get current modelView transform
-        var modelViewMatrix = this.modelViewMatrixStack.top();
+        // get current world transform
+        var worldMatrix = this.worldMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
             // transform to view space
-            var position = modelViewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var position = worldMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
             var values = [position.x, position.y, position.z, position.w];
-            gl.uniform4fv(program.lightSource[index].position, new Float32Array(values));
+            _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
             // transform to view space
-            var direction = modelViewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var direction = worldMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
             var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
@@ -613,13 +654,13 @@ function webglRC(canvas, background)
                         values[2] *= -1;
 
                         // OpenGL gets a directional light's direction from position member                
-                        gl.uniform4fv(program.lightSource[index].position, new Float32Array(values));
+                        _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
                     }
                     break;
 
                 case "spot":
                     {
-                        gl.uniform4fv(program.lightSource[index].spotDirection, new Float32Array(values));
+                        _gl.uniform4fv(_program.lightSource[index].spotDirection, new Float32Array(values));
                     }
                     break;
             }
@@ -628,44 +669,44 @@ function webglRC(canvas, background)
         // ambient
         if (desc.validMembersMask & LIGHTDESC_AMBIENT_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].ambient, new Float32Array(desc.ambient.v()));
+            _gl.uniform4fv(_program.lightSource[index].ambient, new Float32Array(desc.ambient.v()));
         }
 
         // diffuse
         if (desc.validMembersMask & LIGHTDESC_DIFFUSE_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].diffuse, new Float32Array(desc.diffuse.v()));
+            _gl.uniform4fv(_program.lightSource[index].diffuse, new Float32Array(desc.diffuse.v()));
         }
 
         // specular
         if (desc.validMembersMask & LIGHTDESC_SPECULAR_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].specular, new Float32Array(desc.specular.v()));
+            _gl.uniform4fv(_program.lightSource[index].specular, new Float32Array(desc.specular.v()));
         }
 
         // constant attenuation
         if (desc.validMembersMask & LIGHTDESC_CONSTANT_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].constantAttenuation, desc.constantAttenuation);
+            _gl.uniform1f(_program.lightSource[index].constantAttenuation, desc.constantAttenuation);
         }
 
         // linear attenuation
         if (desc.validMembersMask & LIGHTDESC_LINEAR_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].linearAttenuation, desc.linearAttenuation);
+            _gl.uniform1f(_program.lightSource[index].linearAttenuation, desc.linearAttenuation);
         }
 
         // quadratic attenuation
         if (desc.validMembersMask & LIGHTDESC_QUADRATIC_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].quadraticAttenuation, desc.quadraticAttenuation);
+            _gl.uniform1f(_program.lightSource[index].quadraticAttenuation, desc.quadraticAttenuation);
         }
 
         // range
         if (desc.validMembersMask & LIGHTDESC_RANGE_BIT)
         {
             // TODO
-            //gl.uniform1f(program.lightSource[index].range, desc.range);
+            //_gl.uniform1f(_program.lightSource[index].range, desc.range);
         }
 
         // outer cone angle
@@ -679,9 +720,9 @@ function webglRC(canvas, background)
                 outerConeDegrees = 180;
             }
 
-            gl.uniform1f(program.lightSource[index].spotCutoff, outerConeDegrees);
+            _gl.uniform1f(_program.lightSource[index].spotCutoff, outerConeDegrees);
 
-            gl.uniform1f(program.lightSource[index].spotExponent, 0);
+            _gl.uniform1f(_program.lightSource[index].spotExponent, 0);
         }
 
         // inner cone angle
@@ -696,8 +737,8 @@ function webglRC(canvas, background)
             // TODO
         }
 
-        vLights[index] = desc;
-        vLightMatrices[index] = modelViewMatrix;
+        _vLights[index] = desc;
+        _vLightMatrices[index] = worldMatrix;
     }
 
     this.setShadeModel = function(model)
@@ -707,6 +748,11 @@ function webglRC(canvas, background)
         // TODO
     }
     
+    this.setShadowCasterWorldPosition = function(x, y, z)
+    {
+        _gl.uniform3fv(_program.shadowCasterWorldPosition, new Float32Array([x, y, z]));
+    }
+    
     this.setStencilFunc = function(func, ref, mask)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilFunc, [func, ref, mask]);
@@ -714,24 +760,24 @@ function webglRC(canvas, background)
         var gl_StencilFunc;
         switch (func)
         {
-        case eDepthFunc.Never:          gl_StencilFunc = gl.NEVER; break;
-        case eDepthFunc.Less:           gl_StencilFunc = gl.LESS; break;
-        case eDepthFunc.LessEqual:      gl_StencilFunc = gl.LEQUAL; break;
-        case eDepthFunc.Equal:          gl_StencilFunc = gl.EQUAL; break;
-        case eDepthFunc.NotEqual:       gl_StencilFunc = gl.NOTEQUAL; break;
-        case eDepthFunc.GreaterEqual:   gl_StencilFunc = gl.GEQUAL; break;
-        case eDepthFunc.Greater:        gl_StencilFunc = gl.GREATER; break;
-        case eDepthFunc.Always:         gl_StencilFunc = gl.ALWAYS; break;
+        case eDepthFunc.Never:          gl_StencilFunc = _gl.NEVER; break;
+        case eDepthFunc.Less:           gl_StencilFunc = _gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_StencilFunc = _gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_StencilFunc = _gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_StencilFunc = _gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_StencilFunc = _gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_StencilFunc = _gl.GREATER; break;
+        case eDepthFunc.Always:         gl_StencilFunc = _gl.ALWAYS; break;
         }
         
-        gl.stencilFunc(gl_StencilFunc, ref, mask);
+        _gl.stencilFunc(gl_StencilFunc, ref, mask);
     }
             
     this.setStencilMask = function(mask)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilMask, [mask]);
         
-        gl.stencilMask(mask);
+        _gl.stencilMask(mask);
     } 
     
     this.setStencilOp = function(fail, zFail, zPass)
@@ -741,35 +787,35 @@ function webglRC(canvas, background)
         var gl_Fail;
         switch (fail)
         {
-        case eStencilOp.Keep:           gl_Fail = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_Fail = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_Fail = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_Fail = gl.DECR; break;
-        case eStencilOp.Invert:         gl_Fail = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_Fail = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_Fail = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_Fail = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_Fail = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_Fail = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_Fail = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_Fail = _gl.ZERO; break;
         }
         
         switch (zFail)
         {
-        case eStencilOp.Keep:           gl_ZFail = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_ZFail = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_ZFail = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_ZFail = gl.DECR; break;
-        case eStencilOp.Invert:         gl_ZFail = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_ZFail = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_ZFail = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZFail = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZFail = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZFail = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZFail = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZFail = _gl.ZERO; break;
         }
         
         switch (zPass)
         {
-        case eStencilOp.Keep:           gl_ZPass = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_ZPass = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_ZPass = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_ZPass = gl.DECR; break;
-        case eStencilOp.Invert:         gl_ZPass = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_ZPass = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_ZPass = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZPass = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZPass = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZPass = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZPass = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZPass = _gl.ZERO; break;
         }
         
-        gl.stencilOp(gl_Fail, gl_ZFail, gl_ZPass);
+        _gl.stencilOp(gl_Fail, gl_ZFail, gl_ZPass);
     }
     
     this.setTextureBlendFactor = function(factor)
@@ -778,14 +824,14 @@ function webglRC(canvas, background)
         
         // update material diffuse component alpha to blend factor
         var diffuse = [ this.frontMaterial.diffuse.r, this.frontMaterial.diffuse.g, this.frontMaterial.diffuse.b, factor ];
-        gl.uniform4fv(program.frontMaterial.diffuse, new Float32Array(diffuse));
+        _gl.uniform4fv(_program.frontMaterial.diffuse, new Float32Array(diffuse));
     }
     
     this.setTextureBlendOp = function(op)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureBlendOp, [op]);
         
-        gl.uniform1i(program.textureBlendOp, op);
+        _gl.uniform1i(_program.textureBlendOp, op);
     }
     
     this.setTextureColorMask = function(r, g, b, a)
@@ -794,47 +840,58 @@ function webglRC(canvas, background)
         
         var values = [ r, g, b, a ];
         
-        gl.uniform4fv(program.textureColorMask, new Float32Array(values));   
+        _gl.uniform4fv(_program.textureColorMask, new Float32Array(values));   
     }
     
     this.setViewport = function(x, y, width, height)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetViewport, [x, y, width, height]);
         
-        gl.viewport(x, y, width, height);
+        _gl.viewport(x, y, width, height);
+        _viewport.load(x, y, width, height);
     }
     
-    this.useProgram = function(glProgram)
+    this.useProgram = function(program)
     {
         //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.UseProgram, [_program]);
         
-        if (program != glProgram)
+        if (_program != program)
         {
-            gl.useProgram(glProgram);
-            program = glProgram;
+            if (_program)
+            {
+                _program.disableVertexAttribArrays();
+            }
+            
+            _gl.useProgram(program.getGLProgram());
+            _program = program;
+            
+            if (_program)
+            {
+                _program.enableVertexAttribArrays();
+            }
         }
     }
 }
 
 function getWebGLContext(canvas, debug) 
 {
-    var gl = null;
+    var _gl = null;
     try 
     {
         if (debug)
         {
-            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { stencil: true, antialias: false, preserveDrawingBuffer: true }));
+            _gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { stencil: true, antialias: false, preserveDrawingBuffer: true }));
         }
         else // !debug
         {
-            gl = (canvas.getContext("webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }) || 
+            _gl = (canvas.getContext("webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }) || 
                   canvas.getContext("experimental-webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }));
         }
     }    
     catch (e) 
     {
     }
-    if (!gl) 
+    if (!_gl) 
     {
         var div = document.createElement("div");
         div.innerHTML = "This demo requires a WebGL-enabled browser.";
@@ -842,7 +899,7 @@ function getWebGLContext(canvas, debug)
         canvasParent.replaceChild(div, canvas);
     }
 
-    var stencilBits = gl.getParameter(gl.STENCIL_BITS);
+    var stencilBits = _gl.getParameter(_gl.STENCIL_BITS);
 
-    return gl;
+    return _gl;
 }

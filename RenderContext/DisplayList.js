@@ -1,66 +1,68 @@
 var eRenderContextMethod =
 {
     Unknown:                        0,
-    ApplyModelViewTransform:        1,
-    ApplyProjectionTransform:       2,
-    Clear:                          3,
-    ClearColor:                     4,
-    ClearDepth:                     5,
-    ClearStencil:                   6,
-    CreateProgram:                  7,
-    CreateTextureObject:            8,
-    CreateVertexBuffer:             9,
-    Disable:                        10,
-    Enable:                         11,
-    EnableClipPlane:                12,
-    Enabled:                        13,
-    EnableLight:                    14,
-    EnableTextureStage:             15,
-    Finish:                         16,
-    GetClipPlane:                   17,
-    GetEnabledClipPlanes:           18,
-    GetEnabledLights:               19,
-    GetGlobalIllumination:          20,
-    GetLight:                       21,
-    GetMaxLightCount:               22,
-    GetMaxTextureStages:            23,
-    GetProgram:                     24,
-    PerspectiveMatrixLH:            25,
-    OrthographicMatrixLH:           26,
-    SetBlendColor:                  27,
-    SetBlendFactor:                 28,
-    SetClipPlane:                   29,
-    SetDepthFunc:                   30,
-    SetEnabledClipPlanes:           31,
-    SetEnabledLights:               32,
-    SetFrontMaterial:               33,
-    SetGlobalIllumination:          34,
-    SetLight:                       35,
-    SetShadeModel:                  36,
-    SetStencilFunc:                 37,
-    SetStencilMask:                 38,
-    SetStencilOp:                   39,
-    SetTextureBlendFactor:          40,
-    SetTextureBlendOp:              41,
-    SetTextureColorMask:            42,
-    SetViewport:                    43,
-    VB_SetPrimitiveType:            44,
-    VB_SetVertices:                 45,
-    VB_SetNormals:                  46,
-    VB_SetColors:                   47,
-    VB_SetUVCoords:                 48,
-    VB_SetTextureStage:             49,
-    VB_Draw:                        50,
-    TO_SetImage:                    51,
-    TO_SetImageData:                52,
-    TO_SetVideo:                    53,
-    SetMatrixMode:                  54,
-    PushMatrix:                     55,
-    PopMatrix:                      56,
-    LoadMatrix:                     57,
-    LeftMultMatrix:                 58,
-    RightMultMatrix:                59,
-    UseProgram:                     60
+    ApplyProjectionTransform:       1,
+    ApplyViewTransform:             2,
+    ApplyWorldTransform:            3,
+    Clear:                          4,
+    ClearColor:                     5,
+    ClearDepth:                     6,
+    ClearStencil:                   7,
+    CreateProgram:                  8,
+    CreateTextureObject:            9,
+    CreateVertexBuffer:             10,
+    CullFace:                       11,
+    Disable:                        12,
+    Enable:                         13,
+    EnableClipPlane:                14,
+    Enabled:                        15,
+    EnableLight:                    16,
+    EnableTextureStage:             17,
+    Finish:                         18,
+    GetClipPlane:                   19,
+    GetEnabledClipPlanes:           20,
+    GetEnabledLights:               21,
+    GetGlobalIllumination:          22,
+    GetLight:                       23,
+    GetMaxLightCount:               24,
+    GetMaxTextureStages:            25,
+    GetProgram:                     26,
+    PerspectiveMatrixLH:            27,
+    OrthographicMatrixLH:           28,
+    SetBlendColor:                  29,
+    SetBlendFactor:                 30,
+    SetClipPlane:                   31,
+    SetDepthFunc:                   32,
+    SetEnabledClipPlanes:           33,
+    SetEnabledLights:               34,
+    SetFrontMaterial:               35,
+    SetGlobalIllumination:          36,
+    SetLight:                       37,
+    SetShadeModel:                  38,
+    SetStencilFunc:                 39,
+    SetStencilMask:                 40,
+    SetStencilOp:                   41,
+    SetTextureBlendFactor:          42,
+    SetTextureBlendOp:              43,
+    SetTextureColorMask:            44,
+    SetViewport:                    45,
+    VB_SetPrimitiveType:            46,
+    VB_SetVertices:                 47,
+    VB_SetNormals:                  48,
+    VB_SetColors:                   49,
+    VB_SetUVCoords:                 50,
+    VB_SetTextureStage:             51,
+    VB_Draw:                        52,
+    TO_SetImage:                    53,
+    TO_SetImageData:                54,
+    TO_SetVideo:                    55,
+    SetMatrixMode:                  56,
+    PushMatrix:                     57,
+    PopMatrix:                      58,
+    LoadMatrix:                     59,
+    LeftMultMatrix:                 60,
+    RightMultMatrix:                61,
+    UseProgram:                     62
 }
 
 function RenderContextMethodDesc(method, params)
@@ -108,18 +110,24 @@ DisplayListObj.prototype.invokeMethod = function(desc)
 {
     switch (desc.method)
     {
-        case eRenderContextMethod.ApplyModelViewTransform:
-            {
-                this.renderContext.applyModelViewTransform();
-            }
-            break;
-
         case eRenderContextMethod.ApplyProjectionTransform:
             {
                 this.renderContext.applyProjectionTransform();
             }
             break;
 
+        case eRenderContextMethod.ApplyViewTransform:
+            {
+                this.renderContext.applyViewTransform();
+            }
+            break;
+            
+        case eRenderContextMethod.ApplyWorldTransform:
+            {
+                this.renderContext.applyWorldTransform();
+            }
+            break;
+            
         case eRenderContextMethod.Clear:
             {
                 return this.renderContext.clear(desc.params[0]);
@@ -162,6 +170,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
             }
             break;
 
+        case eRenderContextMethod.CullFace:
+            {
+                return this.renderContext.cullFace(desc.params[0]);
+            }
+            break;
+            
         case eRenderContextMethod.Disable:
             {
                 this.renderContext.disable(desc.params[0]);

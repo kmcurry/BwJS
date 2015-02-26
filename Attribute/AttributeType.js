@@ -111,6 +111,7 @@ var eAttrType = {
     SerializeDirective          :2005,
     CollideDirective            :2006,
     HighlightDirective          :2007,
+    ShadowDirective             :2008,
     Directive_End               :2999,
     
     Command                     :3000,

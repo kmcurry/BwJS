@@ -40,7 +40,7 @@ DistanceSortAgent.prototype.addGeometry = function(geometry, min, max, dissolve)
 
     // calculate distance from camera
     var worldViewMatrix = new Matrix4x4();
-    worldViewMatrix.loadMatrix(this.graphMgr.renderContext.modelViewMatrixStack.top());
+    worldViewMatrix.loadMatrix(this.graphMgr.renderContext.worldMatrixStack.top());
 
     // initialize
     rec.distance = FLT_MAX;

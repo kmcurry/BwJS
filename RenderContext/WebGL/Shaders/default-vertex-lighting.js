@@ -14,7 +14,8 @@ var default_vertex_lighting_vs = [
 "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
 "", 
 "uniform mat4 uProjectionMatrix;",
-"uniform mat4 uModelViewMatrix;",
+"uniform mat4 uViewMatrix;",
+"uniform mat4 uWorldMatrix;",
 "uniform mat4 uNormalMatrix;",
 "",
 "uniform vec4 uGlobalAmbientLight;",
@@ -118,12 +119,12 @@ var default_vertex_lighting_vs = [
 "   vec4 viewPosition;",
 "   vec4 viewDirection;",
 "",
-"   vVertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
+"   vVertexPosition = uWorldMatrix * vec4(aVertexPosition, 1);",
 "",
 "   if (uLightingEnabled != 0)",
 "   {",                    
 "       transformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
-"       viewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
+"       viewPosition = uViewMatrix * vec4(0, 0, 0, 1);",
 "       viewDirection = normalize(-viewPosition);",
 
 "       gAmbient = vec4(0, 0, 0, 0);",
@@ -168,7 +169,7 @@ var default_vertex_lighting_vs = [
 "",
 "   vTextureCoord[0] = aTextureCoord0;",
 "   vTextureCoord[1] = aTextureCoord1;",        
-"   gl_Position = uProjectionMatrix * vVertexPosition;",
+"   gl_Position = uProjectionMatrix * uViewMatrix * vVertexPosition;",
 "}"
 ].join("\n");
     

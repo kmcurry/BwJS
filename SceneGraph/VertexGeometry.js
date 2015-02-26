@@ -112,7 +112,6 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         
         var vertices = this.vertices.getValueDirect();
         this.vertexBuffer.setVertices(vertices);
-        this.shadowVolume.setVertices(vertices);
         
         this.updateBoundingTree = true;
         
@@ -160,6 +159,24 @@ VertexGeometry.prototype.apply = function(directive, params, visitChildren)
     {
         case "render":
             {
+            }
+            break;
+            
+        case "shadow":
+            {
+                var drawNow = true;
+                var dissolve = params.dissolve;
+                var opacity = params.opacity;
+                if (dissolve == 1)// || opacity == 0) // completely transparent objects can still reflect specularity
+                {
+                    // completely transparent, skip drawing
+                    drawNow = false;
+                }
+
+                if (drawNow)
+                {
+                    this.vertexBuffer.draw();
+                }
             }
             break;
     }

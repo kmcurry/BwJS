@@ -48,93 +48,122 @@ function webglProgram(rc, gl, source_vs, source_fs)
     gl.useProgram(program);
 
     // get attributes
-    program.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
-    gl.enableVertexAttribArray(program.vertexPositionAttribute);
-    program.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
-    gl.enableVertexAttribArray(program.vertexNormalAttribute);
-    program.vertexColorAttribute = gl.getAttribLocation(program, "aVertexColor");
-    gl.enableVertexAttribArray(program.vertexColorAttribute);
-    program.textureCoordAttribute = new Array(gl_MaxTextureStages);
+    var _attributeCount = 0;
+    this.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+    if (this.vertexPositionAttribute >= 0) _attributeCount++;
+    this.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
+    if (this.vertexNormalAttribute >= 0) _attributeCount++;
+    this.vertexColorAttribute = gl.getAttribLocation(program, "aVertexColor");
+    if (this.vertexColorAttribute >= 0) _attributeCount++;
+    this.textureCoordAttribute = new Array(gl_MaxTextureStages);
     for (var i = 0; i < gl_MaxTextureStages; i++)
     {
-        program.textureCoordAttribute[i] = gl.getAttribLocation(program, "aTextureCoord" + i);
-        gl.enableVertexAttribArray(program.textureCoordAttribute[i]);
+        this.textureCoordAttribute[i] = gl.getAttribLocation(program, "aTextureCoord" + i);
+        if (this.textureCoordAttribute[i] >= 0) _attributeCount++;
     }
 
     // get uniforms
 
     // matrices
-    program.projectionMatrix = gl.getUniformLocation(program, "uProjectionMatrix");
-    program.modelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
-    program.normalMatrix = gl.getUniformLocation(program, "uNormalMatrix");
+    this.projectionMatrix = gl.getUniformLocation(program, "uProjectionMatrix");
+    this.viewMatrix = gl.getUniformLocation(program, "uViewMatrix");
+    this.worldMatrix = gl.getUniformLocation(program, "uWorldMatrix");
+    this.normalMatrix = gl.getUniformLocation(program, "uNormalMatrix");
 
     // lights
-    program.globalAmbientLight = gl.getUniformLocation(program, "uGlobalAmbientLight");
-    program.lightSource = new Array(gl_MaxLights);
+    this.globalAmbientLight = gl.getUniformLocation(program, "uGlobalAmbientLight");
+    this.lightSource = new Array(gl_MaxLights);
     for (var i = 0; i < gl_MaxLights; i++)
     {
-        program.lightSource[i] = new gl_LightSourceParameters();
+        this.lightSource[i] = new gl_LightSourceParameters();
 
-        program.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
-        program.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
-        program.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
-        program.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
-        program.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
-        program.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
-        program.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
-        program.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
-        program.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
-        program.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
-        program.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
+        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
+        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
+        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
+        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
+        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
+        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
+        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
+        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
+        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
+        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
 
         // set initially disabled
-        gl.uniform1i(program.lightSource[i].enabled, 0);
+        gl.uniform1i(this.lightSource[i].enabled, 0);
     }
 
     // materials
-    program.frontMaterial = new gl_MaterialParameters();
-    program.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
-    program.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
-    program.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
-    program.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
-    program.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
+    this.frontMaterial = new gl_MaterialParameters();
+    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
+    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
+    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
+    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
+    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
 
     // textures
-    program.textureSamplerColor = new Array(gl_MaxTextureStages);
-    program.textureSamplerAlpha = new Array(gl_MaxTextureStages);
-    program.textureStageEnabled = new Array(gl_MaxTextureStages)
+    this.textureSamplerColor = new Array(gl_MaxTextureStages);
+    this.textureSamplerAlpha = new Array(gl_MaxTextureStages);
+    this.textureStageEnabled = new Array(gl_MaxTextureStages)
     for (var i = 0; i < gl_MaxTextureStages; i++)
     {
-        program.textureSamplerColor[i] = gl.getUniformLocation(program, "uTextureSamplerColor[" + i + "]");
-        program.textureSamplerAlpha[i] = gl.getUniformLocation(program, "uTextureSamplerAlpha[" + i + "]");
-        program.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
+        this.textureSamplerColor[i] = gl.getUniformLocation(program, "uTextureSamplerColor[" + i + "]");
+        this.textureSamplerAlpha[i] = gl.getUniformLocation(program, "uTextureSamplerAlpha[" + i + "]");
+        this.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
     }
-    program.textureSamplerShadowMap = gl.getUniformLocation(program, "uTextureSamplerShadowMap");
-    program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
-    program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
+    this.textureSamplerShadowMap = gl.getUniformLocation(program, "uTextureSamplerShadowMap");
+    this.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
+    this.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
 
     // clip planes
-    program.clipPlane = new Array(gl_MaxClipPlanes);
-    program.clipPlaneEnabled = new Array(gl_MaxClipPlanes);
+    this.clipPlane = new Array(gl_MaxClipPlanes);
+    this.clipPlaneEnabled = new Array(gl_MaxClipPlanes);
     for (var i = 0; i < gl_MaxClipPlanes; i++)
     {
-        program.clipPlane[i] = gl.getUniformLocation(program, "uClipPlane[" + i + "]");
-        program.clipPlaneEnabled[i] = gl.getUniformLocation(program, "uClipPlaneEnabled[" + i + "]");
+        this.clipPlane[i] = gl.getUniformLocation(program, "uClipPlane[" + i + "]");
+        this.clipPlaneEnabled[i] = gl.getUniformLocation(program, "uClipPlaneEnabled[" + i + "]");
     }
 
     // enabled
-    program.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
-    program.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");
+    this.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
+    this.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");
 
+    // misc
+    this.shadowCasterWorldPosition = gl.getUniformLocation(program, "uShadowCasterWorldPosition");
+    
     // set initially enabled/disabled
-    gl.uniform1i(program.lightingEnabled, 1);
-    gl.uniform1i(program.texturesEnabled, 1);
-    gl.uniform1i(program.textureStageEnabled[0], 0);
-    gl.uniform1i(program.textureStageEnabled[1], 0);
+    gl.uniform1i(this.lightingEnabled, 1);
+    gl.uniform1i(this.texturesEnabled, 1);
+    gl.uniform1i(this.textureStageEnabled[0], 0);
+    gl.uniform1i(this.textureStageEnabled[1], 0);
     
     this.getGLProgram = function()
     {
         return program;
+    }
+    
+    this.enableVertexAttribArrays = function()
+    {
+        for (var i = 0; i < _attributeCount; i++)
+        {
+            gl.enableVertexAttribArray(i);
+        }
+    }
+    
+    this.disableVertexAttribArrays = function()
+    {
+        for (var i = 0; i < _attributeCount; i++)
+        {
+            gl.disableVertexAttribArray(i);
+        }
+    }
+    
+    this.vertexAttribPointer = function(index, size, type, normalized, stride, offset)
+    {
+        if (index >= 0)
+        {
+            gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
+        }
     }
 }
 

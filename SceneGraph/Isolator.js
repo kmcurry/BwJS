@@ -78,6 +78,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.pushIsolatedStates();
 
@@ -100,7 +101,9 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     // TEMP -- move to pushIsolatedStates
                     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
                     this.graphMgr.renderContext.pushMatrix();
-                    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
                     this.graphMgr.renderContext.pushMatrix();
                 }
 
@@ -174,6 +177,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.popIsolatedStates();
 
@@ -196,7 +200,9 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     // TEMP -- move to popIsolatedStates
                     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
                     this.graphMgr.renderContext.popMatrix();
-                    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
                     this.graphMgr.renderContext.popMatrix();
                 }
 

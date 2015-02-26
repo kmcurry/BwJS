@@ -59,6 +59,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
         {
             params.worldMatrix = this.matrixTransform.multiply(params.worldMatrix);
             this.applyTransform();
@@ -97,9 +98,9 @@ Transform.prototype.apply = function(directive, params, visitChildren)
 Transform.prototype.applyTransform = function()
 {
     // set transformation matrix
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.leftMultMatrix(this.matrixTransform);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
 }
 
 function Transform_MatrixModifiedCB(attribute, container)

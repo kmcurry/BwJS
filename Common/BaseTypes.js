@@ -1,4 +1,4 @@
-﻿function Color(r, g, b, a)
+function Color(r, g, b, a)
 {
     this.r = r || 0;
     this.g = g || 0;
@@ -61,12 +61,12 @@ Rect.prototype.loadRect = function(rect)
     this.bottom = rect.bottom;
 }
 
-function Viewport()
+function Viewport(x, y, width, height)
 {
-    this.x = 0;
-    this.y = 0;
-    this.width = 0;
-    this.height = 0;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.width = width || 0;
+    this.height = height || 0;
     
     this.equals = function(rhs)
     {

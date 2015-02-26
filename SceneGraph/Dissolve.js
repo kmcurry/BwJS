@@ -35,6 +35,7 @@ Dissolve.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 var dissolve = this.dissolve.getValueDirect();
                 this.lastDissolve = dissolve;

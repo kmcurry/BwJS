@@ -34,8 +34,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setPrimitiveType = function(type)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetPrimitiveType, [this, type]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetPrimitiveType, [this, type]);
 
         switch (type)
         {
@@ -65,8 +64,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setVertices = function(vertices)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetVertices, [this, vertices]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetVertices, [this, vertices]);
 
         if (vertices.length)
         {
@@ -89,8 +87,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setNormals = function(normals)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetNormals, [this, normals]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetNormals, [this, normals]);
 
         if (normals.length)
         {
@@ -107,8 +104,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setColors = function(colors)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetColors, [this, colors]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetColors, [this, colors]);
 
         if (colors.length)
         {
@@ -125,8 +121,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setUVCoords = function(texture, coords)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetUVCoords, [this, texture, coords]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetUVCoords, [this, texture, coords]);
 
         uvCoords[texture] = new webglVB_uvb(gl.createBuffer(), coords.slice());
 
@@ -139,8 +134,7 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.setTextureStage = function(stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients)
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetTextureStage, [this, stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetTextureStage, [this, stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients]);
 
         switch (stage)
         {
@@ -173,39 +167,46 @@ function webglVB(rc, gl, numVerticesPerPrimitive)
 
     this.draw = function()
     {
-        if (rc.displayListObj)
-            DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_Draw, [this]);
+        if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_Draw, [this]);
 
+        var program = rc.getProgram();
+        
         if (this.vertices.length)
         {
             // vertices
             gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-            gl.vertexAttribPointer(rc.getProgram().vertexPositionAttribute, this.numVerticesPerPrimitive, gl.FLOAT, false, 0, 0);
+            program.vertexAttribPointer(program.vertexPositionAttribute, this.numVerticesPerPrimitive, gl.FLOAT, false, 0, 0);
 
             // normals
             if (nb)
             {
                 gl.bindBuffer(gl.ARRAY_BUFFER, nb);
-                gl.vertexAttribPointer(rc.getProgram().vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+                program.vertexAttribPointer(program.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
             }
 
             // colors
-            if (cb)
-                gl.bindBuffer(gl.ARRAY_BUFFER, cb);
-            else
-                gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
-            gl.vertexAttribPointer(rc.getProgram().vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
+            if (program.vertexColorAttribute >= 0)
+            {
+                if (cb)
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cb);
+                else
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
+                program.vertexAttribPointer(program.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+            }
+            
             // texture coords
             // NOTE: vertex shader silently fails if nothing is specified for a given rc.getProgram() attribute, so if 
             // no texture coords are specified, use the vertex uv buffer.
             for (var i = 0; i < gl_MaxTextureStages; i++)
             {
-                if (uvb[i])
-                    gl.bindBuffer(gl.ARRAY_BUFFER, uvb[i]);
-                else
-                    gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
-                gl.vertexAttribPointer(rc.getProgram().textureCoordAttribute[i], 2, gl.FLOAT, false, 0, 0);
+                if (program.textureCoordAttribute[i] >= 0)
+                {
+                    if (uvb[i])
+                        gl.bindBuffer(gl.ARRAY_BUFFER, uvb[i]);
+                    else
+                        gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
+                    program.vertexAttribPointer(program.textureCoordAttribute[i], 2, gl.FLOAT, false, 0, 0);
+                }
             }
 
             gl.drawArrays(primitiveType, 0, this.vertexCount);

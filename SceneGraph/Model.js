@@ -274,6 +274,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 var show = this.show.getValueDirect();
                 if (!show)
@@ -402,15 +403,15 @@ Model.prototype.onRemove = function()
 
 Model.prototype.pushMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
 }
 
 Model.prototype.popMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();    
+    this.graphMgr.renderContext.applyWorldTransform();    
 }
 
 Model.prototype.addSurface = function(surface)
