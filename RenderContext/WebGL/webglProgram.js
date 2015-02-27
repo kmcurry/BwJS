@@ -130,6 +130,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
 
     // misc
     this.shadowCasterWorldPosition = gl.getUniformLocation(program, "uShadowCasterWorldPosition");
+    this.modelID = gl.getUniformLocation(program, "uModelID");
     
     // set initially enabled/disabled
     gl.uniform1i(this.lightingEnabled, 1);

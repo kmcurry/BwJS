@@ -51,6 +51,7 @@ function webglRC(canvas, background)
     _gl.enable(_gl.CULL_FACE);
     _gl.cullFace(_gl.BACK);
    
+    // extensions
     var OES_standard_derivatives_extension = _gl.getExtension('OES_standard_derivatives');
     var FRAGMENT_SHADER_DERIVATIVE_HINT_OES = 0x8B8B;
     _gl.hint(FRAGMENT_SHADER_DERIVATIVE_HINT_OES, _gl.NICEST);
@@ -741,6 +742,13 @@ function webglRC(canvas, background)
         _vLightMatrices[index] = worldMatrix;
     }
 
+    this.setModelID = function(id)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetModelID, [id]);
+        
+        _gl.uniform1i(_program.modelID, id);
+    }
+    
     this.setShadeModel = function(model)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetShadeModel, [model]);

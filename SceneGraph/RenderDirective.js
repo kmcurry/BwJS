@@ -17,6 +17,7 @@ function RenderParams()
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
     this.lights = [];
+    this.modelID = 0;
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -84,7 +85,7 @@ RenderDirective.prototype.setRegistry = function(registry)
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
-    this.shadowDirective.setRegistry(registry);
+    this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
     this.backgroundScreenRect.setRegistry(registry);

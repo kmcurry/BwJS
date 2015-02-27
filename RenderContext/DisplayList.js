@@ -62,7 +62,8 @@ var eRenderContextMethod =
     LoadMatrix:                     59,
     LeftMultMatrix:                 60,
     RightMultMatrix:                61,
-    UseProgram:                     62
+    UseProgram:                     62,
+    SetModelID:                     63
 }
 
 function RenderContextMethodDesc(method, params)
@@ -334,6 +335,12 @@ DisplayListObj.prototype.invokeMethod = function(desc)
             }
             break;
 
+        case eRenderContextMethod.SetModelID:
+            {
+                this.renderContext.setModelID(desc.params[0]);
+            }
+            break;
+            
         case eRenderContextMethod.SetShadeModel:
             {
                 this.renderContext.setShadeModel(desc.params[0]);

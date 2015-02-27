@@ -8,6 +8,7 @@ function ShadowParams()
     this.worldMatrix = new Matrix4x4();
     this.dissolve = 0;
     this.opacity = 1;
+    this.modelID = 0;
 }
 
 ShadowDirective.prototype = new SGDirective();
@@ -24,6 +25,10 @@ function ShadowDirective()
     this.displayListObj = null;
     
     this.name.setValueDirect("ShadowDirective");
+    
+    this.casterWorldPosition = new Vector3DAttr(0, 0, 0);
+    
+    this.registerAttribute(this.casterWorldPosition, "casterWorldPosition");
 }
 
 ShadowDirective.prototype.setGraphMgr = function(graphMgr)
@@ -55,9 +60,9 @@ ShadowDirective.prototype.execute = function(root)
     
     // set projection
     var fovyRadians = toRadians(90);
-    var height = 256;
-    var width = 256;
-    var near = 0.01;
+    var height = 1024;
+    var width = 1024;
+    var near = 1;
     var far = 100;
     
     var top = Math.tan(fovyRadians / 2) * near;
@@ -73,9 +78,8 @@ ShadowDirective.prototype.execute = function(root)
     this.graphMgr.renderContext.loadMatrix(projectionMatrix);
     this.graphMgr.renderContext.applyProjectionTransform();
     
-    // TEMPTEST
-    var worldPos = this.registry.find("UV_BoxG2").sectorWorldPosition.getValueDirect(); worldPos.y += 2;
-    worldPos = new Vector3D(0, 5, 0);
+    // TODO: make configurable
+    worldPos = this.casterWorldPosition.getValueDirect();
     this.graphMgr.renderContext.setShadowCasterWorldPosition(worldPos.x, worldPos.y, worldPos.z);
     
     // set view
@@ -150,8 +154,6 @@ ShadowDirective.prototype.execute = function(root)
     // restore last viewport and clear color
     this.graphMgr.renderContext.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     this.graphMgr.renderContext.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    
-    this.graphMgr.renderContext.cullFace(RC_BACK);
     
     // restore last shader program
     this.graphMgr.renderContext.useProgram(program);

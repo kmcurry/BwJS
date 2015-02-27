@@ -293,6 +293,8 @@ Model.prototype.apply = function(directive, params, visitChildren)
 
                 this.applyTransform();
 
+                this.graphMgr.renderContext.setModelID(params.modelID++);
+                
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
