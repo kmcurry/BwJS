@@ -410,12 +410,12 @@ Rect.prototype.loadRect = function(rect)
     this.bottom = rect.bottom;
 }
 
-function Viewport()
+function Viewport(x, y, width, height)
 {
-    this.x = 0;
-    this.y = 0;
-    this.width = 0;
-    this.height = 0;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.width = width || 0;
+    this.height = height || 0;
     
     this.equals = function(rhs)
     {
@@ -5067,6 +5067,7 @@ var eAttrType = {
     SerializeDirective          :2005,
     CollideDirective            :2006,
     HighlightDirective          :2007,
+    ShadowDirective             :2008,
     Directive_End               :2999,
     
     Command                     :3000,
@@ -8563,423 +8564,499 @@ Context.prototype.clear = function()
 }
 var eRenderContextMethod =
 {
-	Unknown									: 0,
-	
-	ApplyModelViewTransform    				: 1,
-    ApplyProjectionTransform				: 2,
-    Clear           						: 3,
-    ClearColor								: 4,
-    ClearDepth                              : 5,
-    ClearStencil                            : 6,
-    CreateVertexBuffer					    : 7,
-    CreateTextureObject 					: 8,
-    Disable     							: 9,
-    Enable  								: 10,
-    Enabled	    							: 11,
-    EnableLight								: 12,
-    EnableTextureStage						: 13,
-    Finish  								: 14,
-    GetEnabledLights						: 15,
-    GetGlobalIllumination					: 16,
-    GetLight            					: 17,
-    GetMaxLightCount    					: 18,
-    GetMaxTextureStages						: 19,
-    PerspectiveMatrixLH						: 20,
-    OrthographicMatrixLH					: 21,
-    SetBlendColor                           : 22,
-    SetBlendFactor							: 23,
-    SetDepthFunc                            : 24,
-    SetEnabledLights						: 25,
-    SetFrontMaterial						: 26,
-    SetGlobalIllumination					: 27,
-    SetLight 			                    : 28,
-    SetShadeModel                           : 29,
-    SetStencilFunc                          : 30,
-    SetStencilMask                          : 31,
-    SetStencilOp                            : 32,
-    SetTextureBlendFactor					: 33,
-    SetTextureBlendOp						: 34,
-    SetTextureColorMask                     : 35,
-    SetViewport						        : 36,
-    VB_SetPrimitiveType                     : 37,
-    VB_SetVertices                          : 38,
-    VB_SetNormals                           : 39,
-    VB_SetColors                            : 40,
-    VB_SetUVCoords                          : 41,
-    VB_SetTextureStage                      : 42,
-    VB_Draw                                 : 43,
-    TO_SetImage                             : 44,
-    TO_SetImageData                         : 45,
-    TO_SetVideo                             : 46,
-    SetMatrixMode							: 47,
-    PushMatrix								: 48,
-    PopMatrix								: 49,
-    LoadMatrix								: 50,
-    LeftMultMatrix							: 51,
-    RightMultMatrix							: 52
+    Unknown:                        0,
+    ApplyProjectionTransform:       1,
+    ApplyViewTransform:             2,
+    ApplyWorldTransform:            3,
+    Clear:                          4,
+    ClearColor:                     5,
+    ClearDepth:                     6,
+    ClearStencil:                   7,
+    CreateProgram:                  8,
+    CreateTextureObject:            9,
+    CreateVertexBuffer:             10,
+    CullFace:                       11,
+    Disable:                        12,
+    Enable:                         13,
+    EnableClipPlane:                14,
+    Enabled:                        15,
+    EnableLight:                    16,
+    EnableTextureStage:             17,
+    Finish:                         18,
+    GetClipPlane:                   19,
+    GetEnabledClipPlanes:           20,
+    GetEnabledLights:               21,
+    GetGlobalIllumination:          22,
+    GetLight:                       23,
+    GetMaxLightCount:               24,
+    GetMaxTextureStages:            25,
+    GetProgram:                     26,
+    PerspectiveMatrixLH:            27,
+    OrthographicMatrixLH:           28,
+    SetBlendColor:                  29,
+    SetBlendFactor:                 30,
+    SetClipPlane:                   31,
+    SetDepthFunc:                   32,
+    SetEnabledClipPlanes:           33,
+    SetEnabledLights:               34,
+    SetFrontMaterial:               35,
+    SetGlobalIllumination:          36,
+    SetLight:                       37,
+    SetShadeModel:                  38,
+    SetStencilFunc:                 39,
+    SetStencilMask:                 40,
+    SetStencilOp:                   41,
+    SetTextureBlendFactor:          42,
+    SetTextureBlendOp:              43,
+    SetTextureColorMask:            44,
+    SetViewport:                    45,
+    VB_SetPrimitiveType:            46,
+    VB_SetVertices:                 47,
+    VB_SetNormals:                  48,
+    VB_SetColors:                   49,
+    VB_SetUVCoords:                 50,
+    VB_SetTextureStage:             51,
+    VB_Draw:                        52,
+    TO_SetImage:                    53,
+    TO_SetImageData:                54,
+    TO_SetVideo:                    55,
+    SetMatrixMode:                  56,
+    PushMatrix:                     57,
+    PopMatrix:                      58,
+    LoadMatrix:                     59,
+    LeftMultMatrix:                 60,
+    RightMultMatrix:                61,
+    UseProgram:                     62,
+    SetModelID:                     63
 }
 
 function RenderContextMethodDesc(method, params)
 {
-	this.method = method;
-	this.params = params;
+    this.method = method;
+    this.params = params;
 }
 
 function DisplayListObj(renderContext)
 {
     this.renderContext = renderContext;
-    this.displayList = [];	
+    this.displayList = [];
 }
 
 DisplayListObj.prototype.record_begin = function()
 {
     this.clear();
-    this.renderContext.setDisplayList(this);    
+    this.renderContext.setDisplayList(this);
 }
 
 DisplayListObj.prototype.record_end = function()
 {
-    this.renderContext.setDisplayList(null);    
+    this.renderContext.setDisplayList(null);
 }
 
 DisplayListObj.prototype.play = function()
 {
-    for (var i=0; i < this.displayList.length; i++)
+    for (var i = 0; i < this.displayList.length; i++)
     {
         this.invokeMethod(this.displayList[i]);
-    }    
+    }
 }
 
 DisplayListObj.prototype.addMethodDesc = function(desc)
 {
-    this.displayList.push(desc);    
+    this.displayList.push(desc);
 }
 
 DisplayListObj.prototype.clear = function()
 {
-    this.displayList = [];    
+    this.displayList = [];
 }
 
 DisplayListObj.prototype.invokeMethod = function(desc)
-{  
+{
     switch (desc.method)
     {
-        case eRenderContextMethod.ApplyModelViewTransform:
-        {
-            this.renderContext.applyModelViewTransform();    
-        }   
-        break;
-        
         case eRenderContextMethod.ApplyProjectionTransform:
-        {
-            this.renderContext.applyProjectionTransform();
-        }   
-        break;
-        
-        case eRenderContextMethod.Clear:
-        {
-            return this.renderContext.clear(desc.params[0]);
-        }
-        break;
-        
-        case eRenderContextMethod.ClearColor:
-        {
-            this.renderContext.clearColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
-        }
-        break;
-        
-        case eRenderContextMethod.ClearDepth:
-        {
-            this.renderContext.clearDepth(desc.params[0]);
-        }
-        break;
-        
-        case eRenderContextMethod.ClearStencil:
-        {
-            this.renderContext.clearStencil(desc.params[0]);
-        }
-        break;
-        
-        case eRenderContextMethod.CreateVertexBuffer:
-        {
-            return this.renderContext.createVertexBuffer(desc.params[0]);            
-        }
-        break;
-        
-        case eRenderContextMethod.CreateTextureObject:
-        {
-            this.renderContext.createTextureObject();    
-        }
-        break;
-        
-        case eRenderContextMethod.Disable:
-        {
-            this.renderContext.disable(desc.params[0]);
-        }
-        break;
-        
-        case eRenderContextMethod.Enable:
-        {
-            this.renderContext.enable(desc.params[0]);    
-        }
-        break;
-        
-        case eRenderContextMethod.Enabled:
-        {
-            return this.renderContext.enabled(desc.params[0]);    
-        }
-        break;
-        
-        case eRenderContextMethod.EnableLight:
-        {
-            this.renderContext.enableLight(desc.params[0], desc.params[1]);    
-        }
-        break;
-        
-        case eRenderContextMethod.EnableTextureStage:
-        {
-            this.renderContext.enableTextureStage(desc.params[0], desc.params[1]);    
-        }
-        break;
-        
-        case eRenderContextMethod.Finish:
-        {
-            this.renderContext.finish();        
-        }
-        break;
-        
-        case eRenderContextMethod.GetEnabledLights:
-        {
-            return this.renderContext.getEnabledLights();    
-        }
-        break;
-        
-        case eRenderContextMethod.GetGlobalIllumination:
-        {
-            return this.renderContext.getGlobalIllumination();    
-        }
-        break;
-        
-        case eRenderContextMethod.GetLight:
-        {
-            return this.renderContext.getLight(desc.params[0]);   
-        }
-        break;
+            {
+                this.renderContext.applyProjectionTransform();
+            }
+            break;
+
+        case eRenderContextMethod.ApplyViewTransform:
+            {
+                this.renderContext.applyViewTransform();
+            }
+            break;
             
+        case eRenderContextMethod.ApplyWorldTransform:
+            {
+                this.renderContext.applyWorldTransform();
+            }
+            break;
+            
+        case eRenderContextMethod.Clear:
+            {
+                return this.renderContext.clear(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.ClearColor:
+            {
+                this.renderContext.clearColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
+            }
+            break;
+
+        case eRenderContextMethod.ClearDepth:
+            {
+                this.renderContext.clearDepth(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.ClearStencil:
+            {
+                this.renderContext.clearStencil(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.CreateProgram:
+            {
+                return this.renderContext.createProgram();
+            }
+            break;
+            
+        case eRenderContextMethod.CreateTextureObject:
+            {
+                return this.renderContext.createTextureObject();
+            }
+            break;
+            
+        case eRenderContextMethod.CreateVertexBuffer:
+            {
+                return this.renderContext.createVertexBuffer(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.CullFace:
+            {
+                return this.renderContext.cullFace(desc.params[0]);
+            }
+            break;
+            
+        case eRenderContextMethod.Disable:
+            {
+                this.renderContext.disable(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.Enable:
+            {
+                this.renderContext.enable(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.EnableClipPlane:
+            {
+                this.renderContext.enableClipPlane(desc.params[0], desc.params[1]);
+            }
+            break;
+
+        case eRenderContextMethod.Enabled:
+            {
+                return this.renderContext.enabled(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.EnableLight:
+            {
+                this.renderContext.enableLight(desc.params[0], desc.params[1]);
+            }
+            break;
+
+        case eRenderContextMethod.EnableTextureStage:
+            {
+                this.renderContext.enableTextureStage(desc.params[0], desc.params[1]);
+            }
+            break;
+
+        case eRenderContextMethod.Finish:
+            {
+                this.renderContext.finish();
+            }
+            break;
+
+        case eRenderContextMethod.GetClipPlane:
+            {
+                return this.renderContext.getClipPlane(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.GetEnabledClipPlanes:
+            {
+                return this.renderContext.getEnabledClipPlanes();
+            }
+            break;
+
+        case eRenderContextMethod.GetEnabledLights:
+            {
+                return this.renderContext.getEnabledLights();
+            }
+            break;
+
+        case eRenderContextMethod.GetGlobalIllumination:
+            {
+                return this.renderContext.getGlobalIllumination();
+            }
+            break;
+
+        case eRenderContextMethod.GetLight:
+            {
+                return this.renderContext.getLight(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.GetMaxLightCount:
-        {
-            return this.renderContext.getMaxLightCount();   
-        }
-        break;
-        
-        case eRenderContextMethod.getMaxTextureStages:
-        {
-            return this.renderContext.getMaxTextureStages();
-        }
-        break;
-        
+            {
+                return this.renderContext.getMaxLightCount();
+            }
+            break;
+
+        case eRenderContextMethod.GetMaxTextureStages:
+            {
+                return this.renderContext.getMaxTextureStages();
+            }
+            break;
+
+        case eRenderContextMethod.GetProgram:
+            {
+                return this.renderContext.getProgram();
+            }
+            break;
+            
         case eRenderContextMethod.PerspectiveMatrixLH:
-        {
-            this.renderContext.perspectiveMatrixLH(desc.params[0], desc.params[1], desc.params[2],
-                desc.params[3], desc.params[4], desc.params[5]);   
-        }
-        break;
-        
+            {
+                this.renderContext.perspectiveMatrixLH(desc.params[0], desc.params[1], desc.params[2],
+                        desc.params[3], desc.params[4], desc.params[5]);
+            }
+            break;
+
         case eRenderContextMethod.OrthographicMatrixLH:
-        {
-            this.renderContext.orthographicMatrixLH(desc.params[0], desc.params[1], desc.params[2],
-                desc.params[3], desc.params[4], desc.params[5]);
-        }
-        break;
-        
+            {
+                this.renderContext.orthographicMatrixLH(desc.params[0], desc.params[1], desc.params[2],
+                        desc.params[3], desc.params[4], desc.params[5]);
+            }
+            break;
+
         case eRenderContextMethod.SetBlendColor:
-        {
-            this.renderContext.setBlendColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setBlendColor(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
+            }
+            break;
+
         case eRenderContextMethod.SetBlendFactor:
-        {
-            this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);
-        }
-        break;
+            {
+                this.renderContext.setBlendFactor(desc.params[0], desc.params[1]);
+            }
+            break;
+
+        case eRenderContextMethod.SetClipPlane:
+            {
+                this.renderContext.setClipPlane(desc.params[0]);
+            }
+            break;
 
         case eRenderContextMethod.SetDepthFunc:
-        {
-            this.renderContext.setDepthFunc(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.setDepthFunc(desc.params[0]);
+            }
+            break;
+
+        case eRenderContextMethod.SetEnabledClipPlanes:
+            {
+                this.renderContext.setEnabledClipPlanes(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetEnabledLights:
-        {
-            this.renderContext.setEnabledLights(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.setEnabledLights(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetFrontMaterial:
-        {
-            this.renderContext.setFrontMaterial(desc.params[0]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setFrontMaterial(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetGlobalIllumination:
-        {
-            this.renderContext.setGlobalIllumination(desc.params[0]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setGlobalIllumination(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetLight:
-        {
-            this.renderContext.setLight(desc.params[0], desc.params[1]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setLight(desc.params[0], desc.params[1]);
+            }
+            break;
+
+        case eRenderContextMethod.SetModelID:
+            {
+                this.renderContext.setModelID(desc.params[0]);
+            }
+            break;
+            
         case eRenderContextMethod.SetShadeModel:
-        {
-            this.renderContext.setShadeModel(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.setShadeModel(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetStencilFunc:
-        {
-            this.renderContext.setStencilFunc(desc.params[0], desc.params[1], desc.params[2]);
-        }
-        break;
-                       
+            {
+                this.renderContext.setStencilFunc(desc.params[0], desc.params[1], desc.params[2]);
+            }
+            break;
+
         case eRenderContextMethod.SetStencilMask:
-        {
-            this.renderContext.setStencilMask(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.setStencilMask(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetStencilOp:
-        {
-            this.renderContext.setStencilOp(desc.params[0], desc.params[1], desc.params[2]);
-        }
-        break;
-        
+            {
+                this.renderContext.setStencilOp(desc.params[0], desc.params[1], desc.params[2]);
+            }
+            break;
+
         case eRenderContextMethod.SetTextureBlendFactor:
-        {
-            this.renderContext.setTextureBlendFactor(desc.params[0]);   
-        }
-        break;
-        
+            {
+                this.renderContext.setTextureBlendFactor(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetTextureBlendOp:
-        {
-            this.renderContext.setTextureBlendOp(desc.params[0]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setTextureBlendOp(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.SetTextureColorMask:
-        {
-            this.renderContext.setTextureColorMask(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setTextureColorMask(desc.params[0], desc.params[1], desc.params[2], desc.params[3]);
+            }
+            break;
+
         case eRenderContextMethod.SetViewport:
-        {
-            this.renderContext.setViewport(desc.params[0], desc.params[1], desc.params[2],
-                desc.params[3]);    
-        }
-        break;
-        
+            {
+                this.renderContext.setViewport(desc.params[0], desc.params[1], desc.params[2],
+                        desc.params[3]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetPrimitiveType:
-        {
-            desc.params[0].setPrimitiveType(desc.params[1]);
-        }
-        break;
-        
+            {
+                desc.params[0].setPrimitiveType(desc.params[1]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetVertices:
-        {
-            desc.params[0].setVertices(desc.params[1]);
-        }
-        break;
-        
+            {
+                desc.params[0].setVertices(desc.params[1]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetNormals:
-        {
-            desc.params[0].setNormals(desc.params[1]);
-        }
-        break;
-        
+            {
+                desc.params[0].setNormals(desc.params[1]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetColors:
-        {
-            desc.params[0].setColors(desc.params[1]);
-        }
-        break;
-        
+            {
+                desc.params[0].setColors(desc.params[1]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetUVCoords:
-        {
-            desc.params[0].setUVCoords(desc.params[1], desc.params[2]);
-        }
-        break;
-        
+            {
+                desc.params[0].setUVCoords(desc.params[1], desc.params[2]);
+            }
+            break;
+
         case eRenderContextMethod.VB_SetTextureStage:
-        {
-            desc.params[0].setTextureStage(desc.params[1], desc.params[2], desc.params[3],
-                desc.params[4], desc.params[5], desc.params[6]);
-        }
-        break;
-        
+            {
+                desc.params[0].setTextureStage(desc.params[1], desc.params[2], desc.params[3],
+                        desc.params[4], desc.params[5], desc.params[6]);
+            }
+            break;
+
         case eRenderContextMethod.VB_Draw:
-        {
-            desc.params[0].draw();
-        }
-        break;
-        
+            {
+                desc.params[0].draw();
+            }
+            break;
+
         case eRenderContextMethod.TO_SetImage:
-        {
-            desc.params[0].setImage(desc.params[1], desc.params[2], desc.params[3]);   
-        }
-        break;
-        
+            {
+                desc.params[0].setImage(desc.params[1], desc.params[2], desc.params[3]);
+            }
+            break;
+
         case eRenderContextMethod.TO_SetImageData:
-        {
-            desc.params[0].setImageData(desc.params[1], desc.params[2], desc.params[3], 
-                desc.params[4], desc.params[5]);
-        }
-        break;
-        
+            {
+                desc.params[0].setImageData(desc.params[1], desc.params[2], desc.params[3],
+                        desc.params[4], desc.params[5]);
+            }
+            break;
+
         case eRenderContextMethod.TO_SetVideo:
-        {
-            desc.params[0].setVideo(desc.params[1]);
-        }
-        break;
-        
+            {
+                desc.params[0].setVideo(desc.params[1]);
+            }
+            break;
+
         case eRenderContextMethod.SetMatrixMode:
-        {
-        	this.renderContext.setMatrixMode(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.setMatrixMode(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.PushMatrix:
-        {
-        	this.renderContext.pushMatrix();
-        }
-        break;
-        
+            {
+                this.renderContext.pushMatrix();
+            }
+            break;
+
         case eRenderContextMethod.PopMatrix:
-        {
-        	this.renderContext.popMatrix();
-        }
-        break;
-        
+            {
+                this.renderContext.popMatrix();
+            }
+            break;
+
         case eRenderContextMethod.LoadMatrix:
-        {
-        	this.renderContext.loadMatrix(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.loadMatrix(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.LeftMultMatrix:
-        {
-        	this.renderContext.leftMultMatrix(desc.params[0]);
-        }
-        break;
-        
+            {
+                this.renderContext.leftMultMatrix(desc.params[0]);
+            }
+            break;
+
         case eRenderContextMethod.RightMultMatrix:
-        {
-        	this.renderContext.rightMultMatrix(desc.params[0]);
-        }
-        break;
+            {
+                this.renderContext.rightMultMatrix(desc.params[0]);
+            }
+            break;
+            
+        case eRenderContextMethod.UseProgram:
+            {
+                this.renderContext.useProgram(desc.params[0]);
+            }
+            break;
     }
 }
 
@@ -8988,7 +9065,7 @@ function DL_ADD_METHOD_DESC(dlObj, method, params)
     if (dlObj)
     {
         dlObj.addMethodDesc(new RenderContextMethodDesc(method, params));
-    }    
+    }
 }
 
 /* 
@@ -9063,6 +9140,9 @@ var eShadeModel =
 
 var RC_BLEND            = 0x0001;
 var RC_CULL_FACE        = 0x0B44;
+
+var RC_FRONT            = 0x0010;
+var RC_BACK             = 0x0020;
 
 /*
  * light desc
@@ -9161,6 +9241,16 @@ var RC_BLEND                        = 0x004;
 var RC_DECAL                        = 0x008;
 
 /*
+ * texture unit
+ */
+var eTextureUnit =
+{
+    Color0                          : 0,
+    Color1                          : 1,
+    ShadowMap                       : 2
+}
+
+/*
  * texture coordinate source
  */
 var eTextureCoordSrc = 
@@ -9180,9 +9270,23 @@ var RC_MIRRORED_REPEAT             = 0x8370;
 /*
  * matrix mode
  */
-var RC_MODELVIEW				   = 0x001;
-var RC_PROJECTION				   = 0x002;
-var RC_TEXTURE					   = 0x004;
+var RC_WORLD			   = 0x001;
+var RC_VIEW                        = 0x002;
+var RC_PROJECTION		   = 0x004;
+var RC_TEXTURE                     = 0x008;
+
+/*
+ * cube map face
+ */
+var eCubeMapFace =
+{
+    Positive_X                      : 0,
+    Negative_X                      : 1,
+    Positive_Y                      : 2,
+    Negative_Y                      : 3,
+    Positive_Z                      : 4,
+    Negative_Z                      : 5
+}
 
 /*
  * render context
@@ -9195,8 +9299,9 @@ function RenderContext(canvas, background)
     this.background = background;
     
     this.projectionMatrixStack = new MatrixStack(new Matrix4x4());
-    this.modelViewMatrixStack = new MatrixStack(new Matrix4x4());
-    this.matrixMode = RC_MODELVIEW;
+    this.viewMatrixStack = new MatrixStack(new Matrix4x4());
+    this.worldMatrixStack = new MatrixStack(new Matrix4x4());
+    this.matrixMode = RC_WORLD;
     
     this.frontMaterial = new MaterialDesc();
     
@@ -9242,17 +9347,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.push();
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.push();
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.push();
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.push();
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.push();
+            }
+            break;
     	}	
     }
     
@@ -9262,17 +9373,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.pop();
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.pop();
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.pop();
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.pop();
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.pop();
+            }
+            break;
     	}
     }
     
@@ -9282,17 +9399,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.loadMatrix(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.loadMatrix(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.loadMatrix(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.loadMatrix(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.loadMatrix(matrix);
+            }
+            break;
     	}	
     }
     
@@ -9302,17 +9425,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.leftMultiply(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.leftMultiply(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.leftMultiply(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.leftMultiply(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.leftMultiply(matrix);
+            }
+            break;
     	}
     }
     
@@ -9322,17 +9451,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.rightMultiply(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.rightMultiply(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.rightMultiply(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.rightMultiply(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.rightMultiply(matrix);
+            }
+            break;
     	}	
     }
     
@@ -9371,12 +9506,13 @@ var RENDERSTATE_LIGHTING_BIT       = 0x002;
 var RENDERSTATE_MATERIAL_BIT       = 0x004;
 var RENDERSTATE_FOG_BIT            = 0x008;
 var RENDERSTATE_CLIP_PLANE_BIT     = 0x010;
-var RENDERSTATE_ZBUFFER_BIT		   = 0x020;
+var RENDERSTATE_ZBUFFER_BIT        = 0x020;
 var RENDERSTATE_ALL_BITS           = 0x03F;
 
 function RenderStateRec()
 {
     this.projMatrix = new Matrix4x4();
+    this.viewMatrix = new Matrix4x4();
     this.worldViewMatrix = new Matrix4x4();
     // TODO: textureMatrices
     this.lightIndices = [];
@@ -9421,7 +9557,8 @@ function RenderState(rc)
         if (mask & RENDERSTATE_TRANSFORM_BIT)
         {
             rec.projMatrix = this.renderContext.projectionMatrixStack.top();
-            rec.worldViewMatrix = this.renderContext.modelViewMatrixStack.top();
+            rec.viewMatrix = this.renderContext.viewMatrixStack.top();
+            rec.worldViewMatrix = this.renderContext.worldMatrixStack.top();
         }
 
         if (mask & RENDERSTATE_LIGHTING_BIT)
@@ -9464,8 +9601,10 @@ function RenderState(rc)
         {
             this.renderContext.projectionMatrixStack.loadMatrix(rec.projMatrix);
             this.renderContext.applyProjectionTransform();
-            this.renderContext.modelViewMatrixStack.loadMatrix(rec.worldViewMatrix);
-            this.renderContext.applyModelViewTransform();
+            this.renderContext.viewMatrixStack.loadMatrix(rec.viewMatrix);
+            this.renderContext.applyViewTransform();
+            this.renderContext.worldMatrixStack.loadMatrix(rec.worldViewMatrix);
+            this.renderContext.applyWorldTransform();
         }
 
         if (mask & RENDERSTATE_LIGHTING_BIT)
@@ -9473,9 +9612,9 @@ function RenderState(rc)
             // set light state for each set light within this state block
             for (var i = 0; i < rec.lightIndices.length; i++)
             {
-                this.renderContext.modelViewMatrixStack.push(rec.lightMatrices[i]);
+                this.renderContext.worldMatrixStack.push(rec.lightMatrices[i]);
                 this.renderContext.setLight(rec.lightIndices[i], rec.lightStates[i]);
-                this.renderContext.modelViewMatrixStack.pop();
+                this.renderContext.worldMatrixStack.pop();
             }
 
             // set light state to disabled for lights set outside this state block
@@ -9860,6 +9999,580 @@ return {
 }();
 
 
+(function() {
+  var checkColorBuffer, checkFloatLinear, checkSupport, checkTexture, createSourceCanvas, getExtension, getSupportedExtensions, name, shimExtensions, shimLookup, unshimExtensions, unshimLookup, _i, _len,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  createSourceCanvas = function() {
+    var canvas, ctx, imageData;
+    canvas = document.createElement('canvas');
+    canvas.width = 2;
+    canvas.height = 2;
+    ctx = canvas.getContext('2d');
+    imageData = ctx.getImageData(0, 0, 2, 2);
+    imageData.data.set(new Uint8ClampedArray([0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 255, 255, 255, 255]));
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  };
+
+  createSourceCanvas();
+
+  checkFloatLinear = function(gl, sourceType) {
+    var buffer, cleanup, fragmentShader, framebuffer, positionLoc, program, readBuffer, result, source, sourceCanvas, sourceLoc, target, vertexShader, vertices;
+    program = gl.createProgram();
+    vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.attachShader(program, vertexShader);
+    gl.shaderSource(vertexShader, 'attribute vec2 position;\nvoid main(){\n    gl_Position = vec4(position, 0.0, 1.0);\n}');
+    gl.compileShader(vertexShader);
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      throw gl.getShaderInfoLog(vertexShader);
+    }
+    fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.attachShader(program, fragmentShader);
+    gl.shaderSource(fragmentShader, 'uniform sampler2D source;\nvoid main(){\n    gl_FragColor = texture2D(source, vec2(1.0, 1.0));\n}');
+    gl.compileShader(fragmentShader);
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      throw gl.getShaderInfoLog(fragmentShader);
+    }
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw gl.getProgramInfoLog(program);
+    }
+    gl.useProgram(program);
+    cleanup = function() {
+      gl.deleteShader(fragmentShader);
+      gl.deleteShader(vertexShader);
+      gl.deleteProgram(program);
+      gl.deleteBuffer(buffer);
+      gl.deleteTexture(source);
+      gl.deleteTexture(target);
+      gl.deleteFramebuffer(framebuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.useProgram(null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      return gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    };
+    target = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, target);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target, 0);
+    sourceCanvas = createSourceCanvas();
+    source = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, source);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, sourceType, sourceCanvas);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    vertices = new Float32Array([1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1]);
+    buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    positionLoc = gl.getAttribLocation(program, 'position');
+    sourceLoc = gl.getUniformLocation(program, 'source');
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1i(sourceLoc, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    readBuffer = new Uint8Array(4 * 4);
+    gl.readPixels(0, 0, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, readBuffer);
+    result = Math.abs(readBuffer[0] - 127) < 10;
+    cleanup();
+    return result;
+  };
+
+  checkTexture = function(gl, targetType) {
+    var target;
+    target = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, target);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, targetType, null);
+    if (gl.getError() === 0) {
+      gl.deleteTexture(target);
+      return true;
+    } else {
+      gl.deleteTexture(target);
+      return false;
+    }
+  };
+
+  checkColorBuffer = function(gl, targetType) {
+    var check, framebuffer, target;
+    target = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, target);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, targetType, null);
+    framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target, 0);
+    check = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    gl.deleteTexture(target);
+    gl.deleteFramebuffer(framebuffer);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (check === gl.FRAMEBUFFER_COMPLETE) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  shimExtensions = [];
+
+  shimLookup = {};
+
+  unshimExtensions = [];
+
+  checkSupport = function() {
+    var canvas, extobj, gl, halfFloatExt, halfFloatTexturing, singleFloatExt, singleFloatTexturing;
+    canvas = document.createElement('canvas');
+    gl = null;
+    try {
+      gl = canvas.getContext('experimental-webgl');
+      if (gl === null) {
+        gl = canvas.getContext('webgl');
+      }
+    } catch (_error) {}
+    if (gl != null) {
+      singleFloatExt = gl.getExtension('OES_texture_float');
+      if (singleFloatExt === null) {
+        if (checkTexture(gl, gl.FLOAT)) {
+          singleFloatTexturing = true;
+          shimExtensions.push('OES_texture_float');
+          shimLookup.OES_texture_float = {
+            shim: true
+          };
+        } else {
+          singleFloatTexturing = false;
+          unshimExtensions.push('OES_texture_float');
+        }
+      } else {
+        if (checkTexture(gl, gl.FLOAT)) {
+          singleFloatTexturing = true;
+          shimExtensions.push('OES_texture_float');
+        } else {
+          singleFloatTexturing = false;
+          unshimExtensions.push('OES_texture_float');
+        }
+      }
+      if (singleFloatTexturing) {
+        extobj = gl.getExtension('WEBGL_color_buffer_float');
+        if (extobj === null) {
+          if (checkColorBuffer(gl, gl.FLOAT)) {
+            shimExtensions.push('WEBGL_color_buffer_float');
+            shimLookup.WEBGL_color_buffer_float = {
+              shim: true,
+              RGBA32F_EXT: 0x8814,
+              RGB32F_EXT: 0x8815,
+              FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: 0x8211,
+              UNSIGNED_NORMALIZED_EXT: 0x8C17
+            };
+          } else {
+            unshimExtensions.push('WEBGL_color_buffer_float');
+          }
+        } else {
+          if (checkColorBuffer(gl, gl.FLOAT)) {
+            shimExtensions.push('WEBGL_color_buffer_float');
+          } else {
+            unshimExtensions.push('WEBGL_color_buffer_float');
+          }
+        }
+        extobj = gl.getExtension('OES_texture_float_linear');
+        if (extobj === null) {
+          if (checkFloatLinear(gl, gl.FLOAT)) {
+            shimExtensions.push('OES_texture_float_linear');
+            shimLookup.OES_texture_float_linear = {
+              shim: true
+            };
+          } else {
+            unshimExtensions.push('OES_texture_float_linear');
+          }
+        } else {
+          if (checkFloatLinear(gl, gl.FLOAT)) {
+            shimExtensions.push('OES_texture_float_linear');
+          } else {
+            unshimExtensions.push('OES_texture_float_linear');
+          }
+        }
+      }
+      halfFloatExt = gl.getExtension('OES_texture_half_float');
+      if (halfFloatExt === null) {
+        if (checkTexture(gl, 0x8D61)) {
+          halfFloatTexturing = true;
+          shimExtensions.push('OES_texture_half_float');
+          halfFloatExt = shimLookup.OES_texture_half_float = {
+            HALF_FLOAT_OES: 0x8D61,
+            shim: true
+          };
+        } else {
+          halfFloatTexturing = false;
+          unshimExtensions.push('OES_texture_half_float');
+        }
+      } else {
+        if (checkTexture(gl, halfFloatExt.HALF_FLOAT_OES)) {
+          halfFloatTexturing = true;
+          shimExtensions.push('OES_texture_half_float');
+        } else {
+          halfFloatTexturing = false;
+          unshimExtensions.push('OES_texture_half_float');
+        }
+      }
+      if (halfFloatTexturing) {
+        extobj = gl.getExtension('EXT_color_buffer_half_float');
+        if (extobj === null) {
+          if (checkColorBuffer(gl, halfFloatExt.HALF_FLOAT_OES)) {
+            shimExtensions.push('EXT_color_buffer_half_float');
+            shimLookup.EXT_color_buffer_half_float = {
+              shim: true,
+              RGBA16F_EXT: 0x881A,
+              RGB16F_EXT: 0x881B,
+              FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: 0x8211,
+              UNSIGNED_NORMALIZED_EXT: 0x8C17
+            };
+          } else {
+            unshimExtensions.push('EXT_color_buffer_half_float');
+          }
+        } else {
+          if (checkColorBuffer(gl, halfFloatExt.HALF_FLOAT_OES)) {
+            shimExtensions.push('EXT_color_buffer_half_float');
+          } else {
+            unshimExtensions.push('EXT_color_buffer_half_float');
+          }
+        }
+        extobj = gl.getExtension('OES_texture_half_float_linear');
+        if (extobj === null) {
+          if (checkFloatLinear(gl, halfFloatExt.HALF_FLOAT_OES)) {
+            shimExtensions.push('OES_texture_half_float_linear');
+            return shimLookup.OES_texture_half_float_linear = {
+              shim: true
+            };
+          } else {
+            return unshimExtensions.push('OES_texture_half_float_linear');
+          }
+        } else {
+          if (checkFloatLinear(gl, halfFloatExt.HALF_FLOAT_OES)) {
+            return shimExtensions.push('OES_texture_half_float_linear');
+          } else {
+            return unshimExtensions.push('OES_texture_half_float_linear');
+          }
+        }
+      }
+    }
+  };
+
+  if (window.WebGLRenderingContext != null) {
+    checkSupport();
+    unshimLookup = {};
+    for (_i = 0, _len = unshimExtensions.length; _i < _len; _i++) {
+      name = unshimExtensions[_i];
+      unshimLookup[name] = true;
+    }
+    getExtension = WebGLRenderingContext.prototype.getExtension;
+    WebGLRenderingContext.prototype.getExtension = function(name) {
+      var extobj;
+      extobj = shimLookup[name];
+      if (extobj === void 0) {
+        if (unshimLookup[name]) {
+          return null;
+        } else {
+          return getExtension.call(this, name);
+        }
+      } else {
+        return extobj;
+      }
+    };
+    getSupportedExtensions = WebGLRenderingContext.prototype.getSupportedExtensions;
+    WebGLRenderingContext.prototype.getSupportedExtensions = function() {
+      var extension, result, supported, _j, _k, _len1, _len2;
+      supported = getSupportedExtensions.call(this);
+      result = [];
+      for (_j = 0, _len1 = supported.length; _j < _len1; _j++) {
+        extension = supported[_j];
+        if (unshimLookup[extension] === void 0) {
+          result.push(extension);
+        }
+      }
+      for (_k = 0, _len2 = shimExtensions.length; _k < _len2; _k++) {
+        extension = shimExtensions[_k];
+        if (__indexOf.call(result, extension) < 0) {
+          result.push(extension);
+        }
+      }
+      return result;
+    };
+    WebGLRenderingContext.prototype.getFloatExtension = function(spec) {
+      var candidate, candidates, half, halfFramebuffer, halfLinear, halfTexture, i, importance, preference, result, single, singleFramebuffer, singleLinear, singleTexture, use, _j, _k, _l, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      if ((_ref = spec.prefer) == null) {
+        spec.prefer = ['half'];
+      }
+      if ((_ref1 = spec.require) == null) {
+        spec.require = [];
+      }
+      if ((_ref2 = spec.throws) == null) {
+        spec.throws = true;
+      }
+      singleTexture = this.getExtension('OES_texture_float');
+      halfTexture = this.getExtension('OES_texture_half_float');
+      singleFramebuffer = this.getExtension('WEBGL_color_buffer_float');
+      halfFramebuffer = this.getExtension('EXT_color_buffer_half_float');
+      singleLinear = this.getExtension('OES_texture_float_linear');
+      halfLinear = this.getExtension('OES_texture_half_float_linear');
+      single = {
+        texture: singleTexture !== null,
+        filterable: singleLinear !== null,
+        renderable: singleFramebuffer !== null,
+        score: 0,
+        precision: 'single',
+        half: false,
+        single: true,
+        type: this.FLOAT
+      };
+      half = {
+        texture: halfTexture !== null,
+        filterable: halfLinear !== null,
+        renderable: halfFramebuffer !== null,
+        score: 0,
+        precision: 'half',
+        half: true,
+        single: false,
+        type: (_ref3 = halfTexture != null ? halfTexture.HALF_FLOAT_OES : void 0) != null ? _ref3 : null
+      };
+      candidates = [];
+      if (single.texture) {
+        candidates.push(single);
+      }
+      if (half.texture) {
+        candidates.push(half);
+      }
+      result = [];
+      for (_j = 0, _len1 = candidates.length; _j < _len1; _j++) {
+        candidate = candidates[_j];
+        use = true;
+        _ref4 = spec.require;
+        for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
+          name = _ref4[_k];
+          if (candidate[name] === false) {
+            use = false;
+          }
+        }
+        if (use) {
+          result.push(candidate);
+        }
+      }
+      for (_l = 0, _len3 = result.length; _l < _len3; _l++) {
+        candidate = result[_l];
+        _ref5 = spec.prefer;
+        for (i = _m = 0, _len4 = _ref5.length; _m < _len4; i = ++_m) {
+          preference = _ref5[i];
+          importance = Math.pow(2, spec.prefer.length - i - 1);
+          if (candidate[preference]) {
+            candidate.score += importance;
+          }
+        }
+      }
+      result.sort(function(a, b) {
+        if (a.score === b.score) {
+          return 0;
+        } else if (a.score < b.score) {
+          return 1;
+        } else if (a.score > b.score) {
+          return -1;
+        }
+      });
+      if (result.length === 0) {
+        if (spec.throws) {
+          throw 'No floating point texture support that is ' + spec.require.join(', ');
+        } else {
+          return null;
+        }
+      } else {
+        result = result[0];
+        return {
+          filterable: result.filterable,
+          renderable: result.renderable,
+          type: result.type,
+          precision: result.precision
+        };
+      }
+    };
+  }
+
+}).call(this);
+
+function webglProgram(rc, gl, source_vs, source_fs)
+{
+    var rc = rc;
+    var gl = gl;
+
+    // create vertex shader
+    var vs = gl.createShader(gl.VERTEX_SHADER);
+    if (vs)
+    {
+        gl.shaderSource(vs, source_vs);
+        gl.compileShader(vs);
+
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+        {
+            alert(gl.getShaderInfoLog(vs));
+            return;
+        }
+    }
+
+    // create fragment shader
+    var fs = gl.createShader(gl.FRAGMENT_SHADER);
+    if (fs)
+    {
+        gl.shaderSource(fs, source_fs);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+        {
+            alert(gl.getShaderInfoLog(fs));
+            return;
+        }
+    }
+
+    // create program
+    var program = gl.createProgram();
+    if (!program)
+        return;
+
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+    {
+        alert(gl.getProgramInfoLog(program));
+        return;
+    }
+    
+    gl.useProgram(program);
+
+    // get attributes
+    var _attributeCount = 0;
+    this.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+    if (this.vertexPositionAttribute >= 0) _attributeCount++;
+    this.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
+    if (this.vertexNormalAttribute >= 0) _attributeCount++;
+    this.vertexColorAttribute = gl.getAttribLocation(program, "aVertexColor");
+    if (this.vertexColorAttribute >= 0) _attributeCount++;
+    this.textureCoordAttribute = new Array(gl_MaxTextureStages);
+    for (var i = 0; i < gl_MaxTextureStages; i++)
+    {
+        this.textureCoordAttribute[i] = gl.getAttribLocation(program, "aTextureCoord" + i);
+        if (this.textureCoordAttribute[i] >= 0) _attributeCount++;
+    }
+
+    // get uniforms
+
+    // matrices
+    this.projectionMatrix = gl.getUniformLocation(program, "uProjectionMatrix");
+    this.viewMatrix = gl.getUniformLocation(program, "uViewMatrix");
+    this.worldMatrix = gl.getUniformLocation(program, "uWorldMatrix");
+    this.normalMatrix = gl.getUniformLocation(program, "uNormalMatrix");
+
+    // lights
+    this.globalAmbientLight = gl.getUniformLocation(program, "uGlobalAmbientLight");
+    this.lightSource = new Array(gl_MaxLights);
+    for (var i = 0; i < gl_MaxLights; i++)
+    {
+        this.lightSource[i] = new gl_LightSourceParameters();
+
+        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
+        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
+        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
+        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
+        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
+        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
+        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
+        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
+        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
+        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
+        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+
+        // set initially disabled
+        gl.uniform1i(this.lightSource[i].enabled, 0);
+    }
+
+    // materials
+    this.frontMaterial = new gl_MaterialParameters();
+    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
+    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
+    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
+    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
+    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
+
+    // textures
+    this.textureSamplerColor = new Array(gl_MaxTextureStages);
+    this.textureSamplerAlpha = new Array(gl_MaxTextureStages);
+    this.textureStageEnabled = new Array(gl_MaxTextureStages)
+    for (var i = 0; i < gl_MaxTextureStages; i++)
+    {
+        this.textureSamplerColor[i] = gl.getUniformLocation(program, "uTextureSamplerColor[" + i + "]");
+        this.textureSamplerAlpha[i] = gl.getUniformLocation(program, "uTextureSamplerAlpha[" + i + "]");
+        this.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
+    }
+    this.textureSamplerShadowMap = gl.getUniformLocation(program, "uTextureSamplerShadowMap");
+    this.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
+    this.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
+
+    // clip planes
+    this.clipPlane = new Array(gl_MaxClipPlanes);
+    this.clipPlaneEnabled = new Array(gl_MaxClipPlanes);
+    for (var i = 0; i < gl_MaxClipPlanes; i++)
+    {
+        this.clipPlane[i] = gl.getUniformLocation(program, "uClipPlane[" + i + "]");
+        this.clipPlaneEnabled[i] = gl.getUniformLocation(program, "uClipPlaneEnabled[" + i + "]");
+    }
+
+    // enabled
+    this.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
+    this.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");
+
+    // misc
+    this.shadowCasterWorldPosition = gl.getUniformLocation(program, "uShadowCasterWorldPosition");
+    this.modelID = gl.getUniformLocation(program, "uModelID");
+    
+    // set initially enabled/disabled
+    gl.uniform1i(this.lightingEnabled, 1);
+    gl.uniform1i(this.texturesEnabled, 1);
+    gl.uniform1i(this.textureStageEnabled[0], 0);
+    gl.uniform1i(this.textureStageEnabled[1], 0);
+    
+    this.getGLProgram = function()
+    {
+        return program;
+    }
+    
+    this.enableVertexAttribArrays = function()
+    {
+        for (var i = 0; i < _attributeCount; i++)
+        {
+            gl.enableVertexAttribArray(i);
+        }
+    }
+    
+    this.disableVertexAttribArrays = function()
+    {
+        for (var i = 0; i < _attributeCount; i++)
+        {
+            gl.disableVertexAttribArray(i);
+        }
+    }
+    
+    this.vertexAttribPointer = function(index, size, type, normalized, stride, offset)
+    {
+        if (index >= 0)
+        {
+            gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
+        }
+    }
+}
+
+
+
+
+
 function gl_LightSourceParameters()
 {
     var enabled;
@@ -9875,8 +10588,6 @@ function gl_LightSourceParameters()
     var quadraticAttenuation;
 }
 
-var gl_MaxLights = 8;
-
 function gl_MaterialParameters()
 {
     var ambient;
@@ -9886,7 +10597,9 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
+var gl_MaxLights = 8;
 var gl_MaxTextureStages = 2;
+var gl_MaxClipPlanes = 8;
 
 webglRC.prototype = new RenderContext();
 webglRC.prototype.constructor = webglRC;
@@ -9899,58 +10612,68 @@ function webglRC(canvas, background)
     
     RenderContext.call(this, canvas, background);
     
-    var gl = getWebGLContext(canvas, false /*set to true for debug context*/);
-    if (!gl) return;
+    var _gl = getWebGLContext(canvas, false /*set to true for debug context*/);
+    if (!_gl) return;
 
-    gl.clearColor(0, 0, 0, background ? 0 : 1);
-    gl.clearDepth(1);
-    gl.clearStencil(0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.disable(gl.STENCIL_TEST);
-    gl.frontFace(gl.CW);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
+    _gl.clearColor(0, 0, 0, background ? 0 : 1);
+    _gl.clearDepth(1);
+    _gl.clearStencil(0);
+    _gl.enable(_gl.DEPTH_TEST);
+    _gl.depthFunc(_gl.LEQUAL);
+    _gl.disable(_gl.STENCIL_TEST);
+    _gl.frontFace(_gl.CW);
+    _gl.viewport(0, 0, canvas.width, canvas.height);
+    _gl.enable(_gl.CULL_FACE);
+    _gl.cullFace(_gl.BACK);
    
-    // create shaders
-    var shaders = getShaders(gl, eShaderType.VertexLighting);
-    if (!shaders.vertex || !shaders.fragment) return;
-
-    // create program
-    var program = getProgram(gl, shaders.vertex, shaders.fragment);
-    if (!program) return;
-
+    // extensions
+    var OES_standard_derivatives_extension = _gl.getExtension('OES_standard_derivatives');
+    var FRAGMENT_SHADER_DERIVATIVE_HINT_OES = 0x8B8B;
+    _gl.hint(FRAGMENT_SHADER_DERIVATIVE_HINT_OES, _gl.NICEST);
+    
     // set valid flag
     this.valid = true;
 
-    // misc private members
-    var vLightDescs = [];
-    var vLightMatrices = [];
-    var vLightEnabledStates = [];
+    // private members
+    var _program = null;
+    var _vLights = [];
+    var _vLightMatrices = [];
+    var _vLightEnabledStates = [];
+    var _vClipPlanes = [];
+    var _vClipPlaneMatrices = [];
+    var _vClipPlaneEnabledStates = [];
+    var _viewport = new Viewport(0, 0, canvas.width, canvas.height);
+    var _clearColor = new Color(0, 0, 0, background ? 0 : 1);
     
     //
     // methods
     //
     
-    this.applyModelViewTransform = function()
-    {
-        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyModelViewTransform, null);
-        
-        gl.uniformMatrix4fv(program.modelViewMatrix, false, new Float32Array(this.modelViewMatrixStack.top().flatten()));
-
-        var normalMatrix = new Matrix4x4();
-        normalMatrix.loadMatrix(this.modelViewMatrixStack.top());
-        normalMatrix.invert();
-        normalMatrix.transpose();
-        gl.uniformMatrix4fv(program.normalMatrix, false, new Float32Array(normalMatrix.flatten()));
-    }
-    
     this.applyProjectionTransform = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyProjectionTransform, null);
         
-        gl.uniformMatrix4fv(program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
+        _gl.uniformMatrix4fv(_program.projectionMatrix, false, new Float32Array(this.projectionMatrixStack.top().flatten()));
+    }
+    
+    this.applyViewTransform = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyViewTransform, null);
+        
+        _gl.uniformMatrix4fv(_program.viewMatrix, false, new Float32Array(this.viewMatrixStack.top().flatten()));
+    }
+    
+    this.applyWorldTransform = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ApplyWorldTransform, null);
+        
+        _gl.uniformMatrix4fv(_program.worldMatrix, false, new Float32Array(this.worldMatrixStack.top().flatten()));
+
+        var normalMatrix = new Matrix4x4();
+        normalMatrix.loadMatrix(this.worldMatrixStack.top());
+        normalMatrix.invert();
+        normalMatrix.transpose();
+        _gl.uniformMatrix4fv(_program.normalMatrix, false, new Float32Array(normalMatrix.flatten()));
     }
     
     this.clear = function(mask)
@@ -9959,46 +10682,75 @@ function webglRC(canvas, background)
         
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Clear, [mask]);
         
-        gl.clear((mask & RC_COLOR_BUFFER_BIT   ? gl.COLOR_BUFFER_BIT   : 0) |
-                 (mask & RC_DEPTH_BUFFER_BIT   ? gl.DEPTH_BUFFER_BIT   : 0) |
-                 (mask & RC_STENCIL_BUFFER_BIT ? gl.STENCIL_BUFFER_BIT : 0));
+        _gl.clear((mask & RC_COLOR_BUFFER_BIT   ? _gl.COLOR_BUFFER_BIT   : 0) |
+                  (mask & RC_DEPTH_BUFFER_BIT   ? _gl.DEPTH_BUFFER_BIT   : 0) |
+                  (mask & RC_STENCIL_BUFFER_BIT ? _gl.STENCIL_BUFFER_BIT : 0));
     }
 
     this.clearColor = function(r, g, b, a)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearColor, [r, g, b, a]);
         
-        gl.clearColor(r, g, b, a);
+        _gl.clearColor(r, g, b, a);
+        _clearColor.load(r, g, b, a);
     }
     
     this.clearDepth = function(d)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearDepth, [d]);
         
-        gl.clearDepth(d);
+        _gl.clearDepth(d);
     }
     
     this.clearStencil = function(s)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.ClearStencil, [s]);
         
-        gl.clearStencil(s);  
+        _gl.clearStencil(s);  
     }
     
-    this.createVertexBuffer = function(numVerticesPerPrimitive)
+    this.createProgram = function(vs, fs)
     {
-        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateVertexBuffer, [numVerticesPerPrimitive]);
+        //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.createProgram, [vs, fs]);
         
-        return new webglVB(this, gl, program, numVerticesPerPrimitive);
+        return new webglProgram(this, _gl, vs, fs);
+    }
+    
+    this.createShadowFramebufferObject = function()
+    {
+        return new webglShadowFBO(this, _gl);
     }
     
     this.createTextureObject = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateTextureObject, null);
         
-        return new webglTO(this, gl, program);
+        return new webglTO(this, _gl);
     }
-
+    
+    this.createVertexBuffer = function(numVerticesPerPrimitive)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CreateVertexBuffer, [numVerticesPerPrimitive]);
+        
+        return new webglVB(this, _gl, numVerticesPerPrimitive);
+    }
+    
+    this.cullFace = function(face)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.CullFace, [face]);
+        
+        switch (face)
+        {
+            case RC_FRONT:
+                _gl.cullFace(_gl.FRONT);
+                break;
+                
+            case RC_BACK:
+                _gl.cullFace(_gl.BACK);
+                break;
+        }
+    }
+    
     this.disable = function(cap)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Disable, [cap]);
@@ -10006,27 +10758,27 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                gl.disable(gl.BLEND);
+                _gl.disable(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                gl.disable(gl.CULL_FACE);
+                _gl.disable(_gl.CULL_FACE);
                 break;
 
             case eRenderMode.DepthBufferWrite:
-                gl.depthMask(false);
+                _gl.depthMask(false);
                 break;
 
             case eRenderMode.DepthTest:
-                gl.disable(gl.DEPTH_TEST);
+                _gl.disable(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                gl.uniform1i(program.lightingEnabled, false); 
+                _gl.uniform1i(_program.lightingEnabled, false); 
                 break;
                 
             case eRenderMode.StencilTest:
-                gl.disable(gl.STENCIL_TEST);
+                _gl.disable(_gl.STENCIL_TEST);
                 break;
         }
     }
@@ -10038,29 +10790,38 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                gl.enable(gl.BLEND);
+                _gl.enable(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                gl.enable(gl.CULL_FACE);
+                _gl.enable(_gl.CULL_FACE);
                 break;
 
             case eRenderMode.DepthBufferWrite:
-                gl.depthMask(true);
+                _gl.depthMask(true);
                 break;
 
             case eRenderMode.DepthTest:
-                gl.enable(gl.DEPTH_TEST);
+                _gl.enable(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                gl.uniform1i(program.lightingEnabled, true);
+                _gl.uniform1i(_program.lightingEnabled, true);
                 break;
                 
             case eRenderMode.StencilTest:
-                gl.enable(gl.STENCIL_TEST);
+                _gl.enable(_gl.STENCIL_TEST);
                 break;
         }
+    }
+    
+    this.enableClipPlane = function(index, enable)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableClipPlane, [index, enable]);
+        
+        _gl.uniform1i(_program.clipPlaneEnabled[index], enable);
+
+        _vClipPlaneEnabledStates[index] = enable;
     }
 
     this.enabled = function(cap)
@@ -10072,65 +10833,94 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                e = gl.getParameter(gl.BLEND);
+                e = _gl.getParameter(_gl.BLEND);
                 break;
 
             case eRenderMode.CullBackFace:
-                e = gl.getParameter(gl.CULL_FACE);
+                e = _gl.getParameter(_gl.CULL_FACE);
                 break;
                 
             case eRenderMode.DepthBufferWrite:
-                e = gl.getParameter(gl.DEPTH_WRITEMASK);
+                e = _gl.getParameter(_gl.DEPTH_WRITEMASK);
                 break;
 
             case eRenderMode.DepthTest:
-                e = gl.getParameter(gl.DEPTH_TEST);
+                e = _gl.getParameter(_gl.DEPTH_TEST);
                 break;
 
             case eRenderMode.Lighting:
-                e = gl.getUniform(program, program.lightingEnabled);
+                e = _gl.getUniform(_program, _program.lightingEnabled);
                 break;
                 
             case eRenderMode.StencilTest:
-                e = gl.getParameter(gl.STENCIL_TEST);
+                e = _gl.getParameter(_gl.STENCIL_TEST);
                 break;
         }
 
         return e;
     }
-
+    
     this.enableLight = function(index, enable)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableLight, [index, enable]);
         
-        gl.uniform1i(program.lightSource[index].enabled, enable);
+        _gl.uniform1i(_program.lightSource[index].enabled, enable);
 
-        vLightEnabledStates[index] = enable;
+        _vLightEnabledStates[index] = enable;
     }
     
     this.enableTextureStage = function(stage, enable)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.EnableTextureStage, [stage, enable]);
         
-        gl.uniform1i(program.textureStageEnabled[stage], enable);
+        _gl.uniform1i(_program.textureStageEnabled[stage], enable);
     }
     
     this.finish = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.Finish, null);
         
-        gl.finish();
+        _gl.finish();
     }
+    
+    this.getClearColor = function()
+    {
+        return _clearColor;
+    }
+    
+    this.getClipPlane = function(index)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetClipPlane, [index]);
+        
+        return { equation: _vClipPlanes[index], matrix: _vClipPlaneMatrices[index] };
+    }
+    
+    this.getEnabledClipPlanes = function()
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetEnabledClipPlanes, null);
+        
+        var indices = [];
 
+        for (var i = 0; i < _vClipPlaneEnabledStates.length; i++)
+        {
+            if (_vClipPlaneEnabledStates[i])
+            {
+                indices.push(i);
+            }
+        }
+
+        return indices;
+    }
+    
     this.getEnabledLights = function()
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetEnabledLights, null);
         
         var indices = [];
 
-        for (var i = 0; i < vLightEnabledStates.length; i++)
+        for (var i = 0; i < _vLightEnabledStates.length; i++)
         {
-            if (vLightEnabledStates[i])
+            if (_vLightEnabledStates[i])
             {
                 indices.push(i);
             }
@@ -10143,7 +10933,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = gl.getUniform(program, program.globalAmbientLight);
+        var values = _gl.getUniform(_program, _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }
@@ -10152,7 +10942,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetLight, [index]);
         
-        return { desc: vLightDescs[index], matrix: vLightMatrices[index] };
+        return { desc: _vLights[index], matrix: _vLightMatrices[index] };
     }
     
     this.getMaxLightCount = function()
@@ -10167,6 +10957,18 @@ function webglRC(canvas, background)
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetMaxTextureStages, null);
         
         return gl_MaxTextureStages;
+    }
+    
+    this.getProgram = function()
+    {
+        //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetProgram, null);
+        
+        return _program;
+    }
+    
+    this.getViewport = function()
+    {
+        return _viewport;
     }
     
     this.perspectiveMatrixLH = function(left, right, top, bottom, near, far)
@@ -10212,7 +11014,7 @@ function webglRC(canvas, background)
     {
         var pixels = new Uint8Array(width * height * 4);
         
-        gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        _gl.readPixels(x, y, width, height, _gl.RGBA, _gl.UNSIGNED_BYTE, pixels);
         
         return pixels;
     }
@@ -10221,7 +11023,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetBlendColor, [r, g, b, a]);
         
-        gl.blendColor(r, g, b, a);
+        _gl.blendColor(r, g, b, a);
     }
     
     this.setBlendFactor = function(sfactor, dfactor)
@@ -10231,36 +11033,51 @@ function webglRC(canvas, background)
         var gl_SrcFactor;
         switch (sfactor)
         {
-        case RC_ZERO:                   gl_SrcFactor = gl.ZERO; break;
-        case RC_ONE:                    gl_SrcFactor = gl.ONE; break;
-        case RC_SRC_COLOR:              gl_SrcFactor = gl.SRC_COLOR; break;
-        case RC_SRC_ALPHA:              gl_SrcFactor = gl.SRC_ALPHA; break;        
-        case RC_ONE_MINUS_SRC_COLOR:    gl_SrcFactor = gl.ONE_MINUS_SRC_COLOR; break;
-        case RC_ONE_MINUS_SRC_ALPHA:    gl_SrcFactor = gl.ONE_MINUS_SRC_ALPHA; break;
-        case RC_DEST_COLOR:             gl_SrcFactor = gl.DEST_COLOR; break;
-        case RC_DEST_ALPHA:             gl_SrcFactor = gl.DEST_ALPHA; break;        
-        case RC_ONE_MINUS_DEST_COLOR:   gl_SrcFactor = gl.ONE_MINUS_DEST_COLOR; break;
-        case RC_ONE_MINUS_DEST_ALPHA:   gl_SrcFactor = gl.ONE_MINUS_DEST_ALPHA; break;
+        case RC_ZERO:                   gl_SrcFactor = _gl.ZERO; break;
+        case RC_ONE:                    gl_SrcFactor = _gl.ONE; break;
+        case RC_SRC_COLOR:              gl_SrcFactor = _gl.SRC_COLOR; break;
+        case RC_SRC_ALPHA:              gl_SrcFactor = _gl.SRC_ALPHA; break;        
+        case RC_ONE_MINUS_SRC_COLOR:    gl_SrcFactor = _gl.ONE_MINUS_SRC_COLOR; break;
+        case RC_ONE_MINUS_SRC_ALPHA:    gl_SrcFactor = _gl.ONE_MINUS_SRC_ALPHA; break;
+        case RC_DEST_COLOR:             gl_SrcFactor = _gl.DEST_COLOR; break;
+        case RC_DEST_ALPHA:             gl_SrcFactor = _gl.DEST_ALPHA; break;        
+        case RC_ONE_MINUS_DEST_COLOR:   gl_SrcFactor = _gl.ONE_MINUS_DEST_COLOR; break;
+        case RC_ONE_MINUS_DEST_ALPHA:   gl_SrcFactor = _gl.ONE_MINUS_DEST_ALPHA; break;
         }     
         
         var gl_DestFactor;
         switch (dfactor)
         {
-        case RC_ZERO:                   gl_DestFactor = gl.ZERO; break;
-        case RC_ONE:                    gl_DestFactor = gl.ONE; break;
-        case RC_SRC_COLOR:              gl_DestFactor = gl.SRC_COLOR; break;
-        case RC_SRC_ALPHA:              gl_DestFactor = gl.SRC_ALPHA; break;        
-        case RC_ONE_MINUS_SRC_COLOR:    gl_DestFactor = gl.ONE_MINUS_SRC_COLOR; break;
-        case RC_ONE_MINUS_SRC_ALPHA:    gl_DestFactor = gl.ONE_MINUS_SRC_ALPHA; break;
-        case RC_DEST_COLOR:             gl_DestFactor = gl.DEST_COLOR; break;
-        case RC_DEST_ALPHA:             gl_DestFactor = gl.DEST_ALPHA; break;        
-        case RC_ONE_MINUS_DEST_COLOR:   gl_DestFactor = gl.ONE_MINUS_DEST_COLOR; break;
-        case RC_ONE_MINUS_DEST_ALPHA:   gl_DestFactor = gl.ONE_MINUS_DEST_ALPHA; break;
+        case RC_ZERO:                   gl_DestFactor = _gl.ZERO; break;
+        case RC_ONE:                    gl_DestFactor = _gl.ONE; break;
+        case RC_SRC_COLOR:              gl_DestFactor = _gl.SRC_COLOR; break;
+        case RC_SRC_ALPHA:              gl_DestFactor = _gl.SRC_ALPHA; break;        
+        case RC_ONE_MINUS_SRC_COLOR:    gl_DestFactor = _gl.ONE_MINUS_SRC_COLOR; break;
+        case RC_ONE_MINUS_SRC_ALPHA:    gl_DestFactor = _gl.ONE_MINUS_SRC_ALPHA; break;
+        case RC_DEST_COLOR:             gl_DestFactor = _gl.DEST_COLOR; break;
+        case RC_DEST_ALPHA:             gl_DestFactor = _gl.DEST_ALPHA; break;        
+        case RC_ONE_MINUS_DEST_COLOR:   gl_DestFactor = _gl.ONE_MINUS_DEST_COLOR; break;
+        case RC_ONE_MINUS_DEST_ALPHA:   gl_DestFactor = _gl.ONE_MINUS_DEST_ALPHA; break;
         }
         
-        gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
+        _gl.blendFunc(gl_SrcFactor, gl_DestFactor);  
     }
 
+    this.setClipPlane = function(index, equation)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetClipPlane, [index, equation]);
+        
+        // get current world transform
+        var worldMatrix = this.worldMatrixStack.top();
+
+        var values = [ equation[0], equation[1], equation[2], equation[3] ];
+        
+        _gl.uniform4fv(_program.textureColorMask, new Float32Array(values));
+        
+        _vClipPlanes[index] = equation;
+        _vClipPlaneMatrices[index] = worldMatrix;          
+    }
+    
     this.setDepthFunc = function(func)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetDepthFunc, [func]);
@@ -10268,18 +11085,38 @@ function webglRC(canvas, background)
         var gl_DepthFunc;
         switch (func)
         {
-        case eDepthFunc.Never:          gl_DepthFunc = gl.NEVER; break;
-        case eDepthFunc.Less:           gl_DepthFunc = gl.LESS; break;
-        case eDepthFunc.LessEqual:      gl_DepthFunc = gl.LEQUAL; break;
-        case eDepthFunc.Equal:          gl_DepthFunc = gl.EQUAL; break;
-        case eDepthFunc.NotEqual:       gl_DepthFunc = gl.NOTEQUAL; break;
-        case eDepthFunc.GreaterEqual:   gl_DepthFunc = gl.GEQUAL; break;
-        case eDepthFunc.Greater:        gl_DepthFunc = gl.GREATER; break;
-        case eDepthFunc.Always:         gl_DepthFunc = gl.ALWAYS; break;
+        case eDepthFunc.Never:          gl_DepthFunc = _gl.NEVER; break;
+        case eDepthFunc.Less:           gl_DepthFunc = _gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_DepthFunc = _gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_DepthFunc = _gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_DepthFunc = _gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_DepthFunc = _gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_DepthFunc = _gl.GREATER; break;
+        case eDepthFunc.Always:         gl_DepthFunc = _gl.ALWAYS; break;
         }
         
-        gl.depthFunc(gl_DepthFunc);
+        _gl.depthFunc(gl_DepthFunc);
            
+    }
+    
+    this.setEnabledClipPlanes = function(indices)
+    {
+        if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledClipPlanes, [indices]);
+        
+        // disable all previously enabled clip planes
+        for (var i = 0; i < _vClipPlaneEnabledStates.length; i++)
+        {
+            if (_vClipPlaneEnabledStates[i])
+            {
+                this.enableClipPlane(i, false);
+            }
+        }
+
+        // enable specified clip planes
+        for (var i = 0; i < indices.length; i++)
+        {
+            this.enableClipPlane(indices[i], true);
+        }
     }
     
     this.setEnabledLights = function(indices)
@@ -10287,9 +11124,9 @@ function webglRC(canvas, background)
         if (this.displayListObj) if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetEnabledLights, [indices]);
         
         // disable all previously enabled lights
-        for (var i = 0; i < vLightEnabledStates.length; i++)
+        for (var i = 0; i < _vLightEnabledStates.length; i++)
         {
-            if (vLightEnabledStates[i])
+            if (_vLightEnabledStates[i])
             {
                 this.enableLight(i, false);
             }
@@ -10309,7 +11146,7 @@ function webglRC(canvas, background)
         // ambient
         if (desc.validMembersMask & MATERIALDESC_AMBIENT_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.ambient, new Float32Array(desc.ambient.v()));
+            _gl.uniform4fv(_program.frontMaterial.ambient, new Float32Array(desc.ambient.v()));
             
             this.frontMaterial.ambient = desc.ambient;
         }
@@ -10317,7 +11154,7 @@ function webglRC(canvas, background)
         // diffuse
         if (desc.validMembersMask & MATERIALDESC_DIFFUSE_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.diffuse, new Float32Array(desc.diffuse.v()));
+            _gl.uniform4fv(_program.frontMaterial.diffuse, new Float32Array(desc.diffuse.v()));
             
             this.frontMaterial.diffuse = desc.diffuse;
         }
@@ -10325,7 +11162,7 @@ function webglRC(canvas, background)
         // specular
         if (desc.validMembersMask & MATERIALDESC_SPECULAR_BIT)
         {
-            gl.uniform4fv(program.frontMaterial.specular, new Float32Array(desc.specular.v()));
+            _gl.uniform4fv(_program.frontMaterial.specular, new Float32Array(desc.specular.v()));
             
             this.frontMaterial.specular = desc.specular;
         }
@@ -10334,7 +11171,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & MATERIALDESC_EMISSIVE_BIT)
         {
             // TODO
-            //gl.uniform4fv(program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
+            //_gl.uniform4fv(_program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
             
             this.frontMaterial.emissive = desc.emissive;
         }
@@ -10344,7 +11181,7 @@ function webglRC(canvas, background)
         {
             // glossiness - OpenGL accepts values in the range [0, 128].
             // use the range [5, 128], because values below 5 result in wash-out
-            gl.uniform1f(program.frontMaterial.shininess, clamp(desc.glossiness * 128, 5, 128));
+            _gl.uniform1f(_program.frontMaterial.shininess, clamp(desc.glossiness * 128, 5, 128));
             
             this.frontMaterial.glossiness = desc.glossiness;
         }
@@ -10358,30 +11195,30 @@ function webglRC(canvas, background)
         
         var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
-        gl.uniform4fv(program.globalAmbientLight, new Float32Array(values));
+        _gl.uniform4fv(_program.globalAmbientLight, new Float32Array(values));
     }
 
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
         
-        // get current modelView transform
-        var modelViewMatrix = this.modelViewMatrixStack.top();
+        // get current world transform
+        var worldMatrix = this.worldMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
             // transform to view space
-            var position = modelViewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var position = worldMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
             var values = [position.x, position.y, position.z, position.w];
-            gl.uniform4fv(program.lightSource[index].position, new Float32Array(values));
+            _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
             // transform to view space
-            var direction = modelViewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var direction = worldMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
             var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
@@ -10393,13 +11230,13 @@ function webglRC(canvas, background)
                         values[2] *= -1;
 
                         // OpenGL gets a directional light's direction from position member                
-                        gl.uniform4fv(program.lightSource[index].position, new Float32Array(values));
+                        _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
                     }
                     break;
 
                 case "spot":
                     {
-                        gl.uniform4fv(program.lightSource[index].spotDirection, new Float32Array(values));
+                        _gl.uniform4fv(_program.lightSource[index].spotDirection, new Float32Array(values));
                     }
                     break;
             }
@@ -10408,44 +11245,44 @@ function webglRC(canvas, background)
         // ambient
         if (desc.validMembersMask & LIGHTDESC_AMBIENT_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].ambient, new Float32Array(desc.ambient.v()));
+            _gl.uniform4fv(_program.lightSource[index].ambient, new Float32Array(desc.ambient.v()));
         }
 
         // diffuse
         if (desc.validMembersMask & LIGHTDESC_DIFFUSE_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].diffuse, new Float32Array(desc.diffuse.v()));
+            _gl.uniform4fv(_program.lightSource[index].diffuse, new Float32Array(desc.diffuse.v()));
         }
 
         // specular
         if (desc.validMembersMask & LIGHTDESC_SPECULAR_BIT)
         {
-            gl.uniform4fv(program.lightSource[index].specular, new Float32Array(desc.specular.v()));
+            _gl.uniform4fv(_program.lightSource[index].specular, new Float32Array(desc.specular.v()));
         }
 
         // constant attenuation
         if (desc.validMembersMask & LIGHTDESC_CONSTANT_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].constantAttenuation, desc.constantAttenuation);
+            _gl.uniform1f(_program.lightSource[index].constantAttenuation, desc.constantAttenuation);
         }
 
         // linear attenuation
         if (desc.validMembersMask & LIGHTDESC_LINEAR_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].linearAttenuation, desc.linearAttenuation);
+            _gl.uniform1f(_program.lightSource[index].linearAttenuation, desc.linearAttenuation);
         }
 
         // quadratic attenuation
         if (desc.validMembersMask & LIGHTDESC_QUADRATIC_ATT_BIT)
         {
-            gl.uniform1f(program.lightSource[index].quadraticAttenuation, desc.quadraticAttenuation);
+            _gl.uniform1f(_program.lightSource[index].quadraticAttenuation, desc.quadraticAttenuation);
         }
 
         // range
         if (desc.validMembersMask & LIGHTDESC_RANGE_BIT)
         {
             // TODO
-            //gl.uniform1f(program.lightSource[index].range, desc.range);
+            //_gl.uniform1f(_program.lightSource[index].range, desc.range);
         }
 
         // outer cone angle
@@ -10459,9 +11296,9 @@ function webglRC(canvas, background)
                 outerConeDegrees = 180;
             }
 
-            gl.uniform1f(program.lightSource[index].spotCutoff, outerConeDegrees);
+            _gl.uniform1f(_program.lightSource[index].spotCutoff, outerConeDegrees);
 
-            gl.uniform1f(program.lightSource[index].spotExponent, 0);
+            _gl.uniform1f(_program.lightSource[index].spotExponent, 0);
         }
 
         // inner cone angle
@@ -10476,15 +11313,27 @@ function webglRC(canvas, background)
             // TODO
         }
 
-        vLightDescs[index] = desc;
-        vLightMatrices[index] = modelViewMatrix;
+        _vLights[index] = desc;
+        _vLightMatrices[index] = worldMatrix;
     }
 
+    this.setModelID = function(id)
+    {
+        if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetModelID, [id]);
+        
+        _gl.uniform1i(_program.modelID, id);
+    }
+    
     this.setShadeModel = function(model)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetShadeModel, [model]);
         
         // TODO
+    }
+    
+    this.setShadowCasterWorldPosition = function(x, y, z)
+    {
+        _gl.uniform3fv(_program.shadowCasterWorldPosition, new Float32Array([x, y, z]));
     }
     
     this.setStencilFunc = function(func, ref, mask)
@@ -10494,24 +11343,24 @@ function webglRC(canvas, background)
         var gl_StencilFunc;
         switch (func)
         {
-        case eDepthFunc.Never:          gl_StencilFunc = gl.NEVER; break;
-        case eDepthFunc.Less:           gl_StencilFunc = gl.LESS; break;
-        case eDepthFunc.LessEqual:      gl_StencilFunc = gl.LEQUAL; break;
-        case eDepthFunc.Equal:          gl_StencilFunc = gl.EQUAL; break;
-        case eDepthFunc.NotEqual:       gl_StencilFunc = gl.NOTEQUAL; break;
-        case eDepthFunc.GreaterEqual:   gl_StencilFunc = gl.GEQUAL; break;
-        case eDepthFunc.Greater:        gl_StencilFunc = gl.GREATER; break;
-        case eDepthFunc.Always:         gl_StencilFunc = gl.ALWAYS; break;
+        case eDepthFunc.Never:          gl_StencilFunc = _gl.NEVER; break;
+        case eDepthFunc.Less:           gl_StencilFunc = _gl.LESS; break;
+        case eDepthFunc.LessEqual:      gl_StencilFunc = _gl.LEQUAL; break;
+        case eDepthFunc.Equal:          gl_StencilFunc = _gl.EQUAL; break;
+        case eDepthFunc.NotEqual:       gl_StencilFunc = _gl.NOTEQUAL; break;
+        case eDepthFunc.GreaterEqual:   gl_StencilFunc = _gl.GEQUAL; break;
+        case eDepthFunc.Greater:        gl_StencilFunc = _gl.GREATER; break;
+        case eDepthFunc.Always:         gl_StencilFunc = _gl.ALWAYS; break;
         }
         
-        gl.stencilFunc(gl_StencilFunc, ref, mask);
+        _gl.stencilFunc(gl_StencilFunc, ref, mask);
     }
             
     this.setStencilMask = function(mask)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetStencilMask, [mask]);
         
-        gl.stencilMask(mask);
+        _gl.stencilMask(mask);
     } 
     
     this.setStencilOp = function(fail, zFail, zPass)
@@ -10521,35 +11370,35 @@ function webglRC(canvas, background)
         var gl_Fail;
         switch (fail)
         {
-        case eStencilOp.Keep:           gl_Fail = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_Fail = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_Fail = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_Fail = gl.DECR; break;
-        case eStencilOp.Invert:         gl_Fail = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_Fail = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_Fail = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_Fail = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_Fail = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_Fail = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_Fail = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_Fail = _gl.ZERO; break;
         }
         
         switch (zFail)
         {
-        case eStencilOp.Keep:           gl_ZFail = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_ZFail = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_ZFail = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_ZFail = gl.DECR; break;
-        case eStencilOp.Invert:         gl_ZFail = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_ZFail = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_ZFail = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZFail = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZFail = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZFail = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZFail = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZFail = _gl.ZERO; break;
         }
         
         switch (zPass)
         {
-        case eStencilOp.Keep:           gl_ZPass = gl.KEEP; break;
-        case eStencilOp.Replace:        gl_ZPass = gl.REPLACE; break;
-        case eStencilOp.Increment:      gl_ZPass = gl.INCR; break;
-        case eStencilOp.Decrement:      gl_ZPass = gl.DECR; break;
-        case eStencilOp.Invert:         gl_ZPass = gl.INVERT; break;
-        case eStencilOp.Zero:           gl_ZPass = gl.ZERO; break;
+        case eStencilOp.Keep:           gl_ZPass = _gl.KEEP; break;
+        case eStencilOp.Replace:        gl_ZPass = _gl.REPLACE; break;
+        case eStencilOp.Increment:      gl_ZPass = _gl.INCR; break;
+        case eStencilOp.Decrement:      gl_ZPass = _gl.DECR; break;
+        case eStencilOp.Invert:         gl_ZPass = _gl.INVERT; break;
+        case eStencilOp.Zero:           gl_ZPass = _gl.ZERO; break;
         }
         
-        gl.stencilOp(gl_Fail, gl_ZFail, gl_ZPass);
+        _gl.stencilOp(gl_Fail, gl_ZFail, gl_ZPass);
     }
     
     this.setTextureBlendFactor = function(factor)
@@ -10558,14 +11407,14 @@ function webglRC(canvas, background)
         
         // update material diffuse component alpha to blend factor
         var diffuse = [ this.frontMaterial.diffuse.r, this.frontMaterial.diffuse.g, this.frontMaterial.diffuse.b, factor ];
-        gl.uniform4fv(program.frontMaterial.diffuse, new Float32Array(diffuse));
+        _gl.uniform4fv(_program.frontMaterial.diffuse, new Float32Array(diffuse));
     }
     
     this.setTextureBlendOp = function(op)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetTextureBlendOp, [op]);
         
-        gl.uniform1i(program.textureBlendOp, op);
+        _gl.uniform1i(_program.textureBlendOp, op);
     }
     
     this.setTextureColorMask = function(r, g, b, a)
@@ -10574,36 +11423,58 @@ function webglRC(canvas, background)
         
         var values = [ r, g, b, a ];
         
-        gl.uniform4fv(program.textureColorMask, new Float32Array(values));   
+        _gl.uniform4fv(_program.textureColorMask, new Float32Array(values));   
     }
     
     this.setViewport = function(x, y, width, height)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetViewport, [x, y, width, height]);
         
-        gl.viewport(x, y, width, height);
+        _gl.viewport(x, y, width, height);
+        _viewport.load(x, y, width, height);
+    }
+    
+    this.useProgram = function(program)
+    {
+        //if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.UseProgram, [_program]);
+        
+        if (_program != program)
+        {
+            if (_program)
+            {
+                _program.disableVertexAttribArrays();
+            }
+            
+            _gl.useProgram(program.getGLProgram());
+            _program = program;
+            
+            if (_program)
+            {
+                _program.enableVertexAttribArrays();
+            }
+        }
     }
 }
 
 function getWebGLContext(canvas, debug) 
 {
-    var gl = null;
+    var _gl = null;
     try 
     {
         if (debug)
         {
-            gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { stencil: true, antialias: false, preserveDrawingBuffer: true }));
+            _gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("experimental-webgl", { stencil: true, antialias: false, preserveDrawingBuffer: true }));
         }
         else // !debug
         {
-            gl = (canvas.getContext("webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }) || 
+            _gl = (canvas.getContext("webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }) || 
                   canvas.getContext("experimental-webgl", { stencil: true, antialias: true, preserveDrawingBuffer: true }));
         }
     }    
     catch (e) 
     {
     }
-    if (!gl) 
+    if (!_gl) 
     {
         var div = document.createElement("div");
         div.innerHTML = "This demo requires a WebGL-enabled browser.";
@@ -10611,108 +11482,9 @@ function getWebGLContext(canvas, debug)
         canvasParent.replaceChild(div, canvas);
     }
 
-    var stencilBits = gl.getParameter(gl.STENCIL_BITS);
+    var stencilBits = _gl.getParameter(_gl.STENCIL_BITS);
 
-    return gl;
-}
-
-function getProgram(gl, vShader, fShader)
-{
-    var program = gl.createProgram();
-    if (!program) return null;
-    
-    gl.attachShader(program, vShader);
-    gl.attachShader(program, fShader);
-    gl.linkProgram(program);
-    
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-    {
-        alert(gl.getProgramInfoLog(program));
-        return null;
-    }
-    
-    gl.useProgram(program);
-    
-    // get attributes
-    program.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
-    gl.enableVertexAttribArray(program.vertexPositionAttribute);
-    program.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
-    gl.enableVertexAttribArray(program.vertexNormalAttribute);
-    program.vertexColorAttribute = gl.getAttribLocation(program, "aVertexColor");
-    gl.enableVertexAttribArray(program.vertexColorAttribute);
-    program.textureCoordAttribute = new Array(gl_MaxTextureStages);
-    for (var i=0; i < gl_MaxTextureStages; i++)
-    {
-        program.textureCoordAttribute[i] = gl.getAttribLocation(program, "aTextureCoord" + i);
-        gl.enableVertexAttribArray(program.textureCoordAttribute[i]);
-    }
-    
-    // get uniforms
-    
-    // matrices
-    program.projectionMatrix = gl.getUniformLocation(program, "uProjectionMatrix");
-    program.modelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
-    program.normalMatrix = gl.getUniformLocation(program, "uNormalMatrix");
-
-    // lights
-    program.globalAmbientLight = gl.getUniformLocation(program, "uGlobalAmbientLight");
-    program.lightSource = new Array(gl_MaxLights);
-    for (var i=0; i < gl_MaxLights; i++)
-    {
-        program.lightSource[i] = new gl_LightSourceParameters();
-      
-        program.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
-        program.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]"); 
-        program.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
-        program.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
-        program.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
-        program.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
-        program.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
-        program.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
-        program.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
-        program.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
-        program.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
-        
-        // set initially disabled
-        gl.uniform1i(program.lightSource[i].enabled, 0);
-    }
-    
-    // materials
-    program.frontMaterial = new gl_MaterialParameters();
-    program.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
-    program.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
-    program.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
-    program.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
-    program.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
-     
-    // textures
-    program.textureSamplerColor = new Array(gl_MaxTextureStages);
-    program.textureSamplerAlpha = new Array(gl_MaxTextureStages);
-    program.textureStageEnabled = new Array(gl_MaxTextureStages)
-    for (var i=0; i < gl_MaxTextureStages; i++)
-    {
-        program.textureSamplerColor[i] = gl.getUniformLocation(program, "uTextureSamplerColor[" + i + "]");
-        program.textureSamplerAlpha[i] = gl.getUniformLocation(program, "uTextureSamplerAlpha[" + i + "]");
-        program.textureStageEnabled[i] = gl.getUniformLocation(program, "uTextureStageEnabled[" + i + "]");
-    }
-    program.textureBlendOp = gl.getUniformLocation(program, "uTextureBlendOp");
-    program.textureColorMask = gl.getUniformLocation(program, "uTextureColorMask");
-    
-    // TEMP
-    var v = [ 2, 2, 2, 2 ];
-    gl.uniform4fv(program.textureColorMask, new Float32Array(v));
-        
-    // enabled
-    program.lightingEnabled = gl.getUniformLocation(program, "uLightingEnabled");
-    program.texturesEnabled = gl.getUniformLocation(program, "uTexturesEnabled");
-    
-    // set initially enabled/disabled
-    gl.uniform1i(program.lightingEnabled, 1);
-    gl.uniform1i(program.texturesEnabled, 1); 
-    gl.uniform1i(program.textureStageEnabled[0], 0); 
-    gl.uniform1i(program.textureStageEnabled[1], 0);
-    
-    return program;
+    return _gl;
 }
 
 function webglVB_uvb(buffer, coords)
@@ -10724,19 +11496,18 @@ function webglVB_uvb(buffer, coords)
 webglVB.prototype = new VertexBuffer();
 webglVB.prototype.constructor = webglVB;
 
-function webglVB(rc, gl, program, numVerticesPerPrimitive)
+function webglVB(rc, gl, numVerticesPerPrimitive)
 {
     //
     // initialization
     //
-    
+
     VertexBuffer.call(this);
-    
+
     this.numVerticesPerPrimitive = numVerticesPerPrimitive;
-    
+
     var rc = rc;
     var gl = gl;
-    var program = program;
     var vb = gl.createBuffer();
     var nb = null;
     var cb = null;
@@ -10745,54 +11516,68 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
     var uvEmpty = gl.createBuffer(); // for VBs with no texture coordinates (see below)
     var uvCoords = []; // indexed by texture
     var primitiveType = 0;
-    
+
     //
     // methods
     //
-    
+
     this.setPrimitiveType = function(type)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetPrimitiveType, [this, type]);
-        
+
         switch (type)
         {
-        case RC_POINTS:         primitiveType = gl.POINTS; break;
-        case RC_LINES:          primitiveType = gl.LINES; break;
-        case RC_LINE_LOOP:      primitiveType = gl.LINE_LOOP; break;
-        case RC_LINE_STRIP:     primitiveType = gl.LINE_STRIP; break;
-        case RC_TRIANGLES:      primitiveType = gl.TRIANGLES; break;
-        case RC_TRIANGLE_STRIP: primitiveType = gl.TRIANGLE_STRIP; break;
-        case RC_TRIANGLE_FAN:   primitiveType = gl.TRIANGLE_FAN; break;
+            case RC_POINTS:
+                primitiveType = gl.POINTS;
+                break;
+            case RC_LINES:
+                primitiveType = gl.LINES;
+                break;
+            case RC_LINE_LOOP:
+                primitiveType = gl.LINE_LOOP;
+                break;
+            case RC_LINE_STRIP:
+                primitiveType = gl.LINE_STRIP;
+                break;
+            case RC_TRIANGLES:
+                primitiveType = gl.TRIANGLES;
+                break;
+            case RC_TRIANGLE_STRIP:
+                primitiveType = gl.TRIANGLE_STRIP;
+                break;
+            case RC_TRIANGLE_FAN:
+                primitiveType = gl.TRIANGLE_FAN;
+                break;
         }
     }
-    
+
     this.setVertices = function(vertices)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetVertices, [this, vertices]);
-        
+
         if (vertices.length)
         {
             gl.bindBuffer(gl.ARRAY_BUFFER, vb);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-            
+
             this.vertexCount = vertices.length / this.numVerticesPerPrimitive;
-            
+
             // create empty color array for vb's with no colors specified (see below)
             gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexCount * 4), gl.STATIC_DRAW);
-            
+
             // create empty texture coordinate arrays for vb's with no textures (see below)
             gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(new Array(this.vertexCount * 2)), gl.STATIC_DRAW);           
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(new Array(this.vertexCount * 2)), gl.STATIC_DRAW);
         }
-        
+
         this.vertices = vertices;
     }
-    
+
     this.setNormals = function(normals)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetNormals, [this, normals]);
-        
+
         if (normals.length)
         {
             if (nb == null)
@@ -10802,14 +11587,14 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
             gl.bindBuffer(gl.ARRAY_BUFFER, nb);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
         }
-        
+
         this.normals = normals;
     }
 
     this.setColors = function(colors)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetColors, [this, colors]);
-        
+
         if (colors.length)
         {
             if (cb == null)
@@ -10819,14 +11604,14 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
             gl.bindBuffer(gl.ARRAY_BUFFER, cb);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         }
-        
+
         this.colors = colors;
     }
-    
+
     this.setUVCoords = function(texture, coords)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetUVCoords, [this, texture, coords]);
-        
+
         uvCoords[texture] = new webglVB_uvb(gl.createBuffer(), coords.slice());
 
         // flip y
@@ -10835,66 +11620,84 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
             uvCoords[texture].coords[i] = 1 - uvCoords[texture].coords[i];
         }
     }
-    
+
     this.setTextureStage = function(stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients)
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_SetTextureStage, [this, stage, textureObj, widthWrap, heightWrap, textureCoordSrc, planeCoefficients]);
-        
+
         switch (stage)
         {
-        case 0: gl.activeTexture(gl.TEXTURE0); break;       
-        case 1: gl.activeTexture(gl.TEXTURE1); break;
+            case 0:
+                {
+                    gl.activeTexture(gl.TEXTURE0 + eTextureUnit.Color0);
+                    gl.uniform1i(rc.getProgram().textureSamplerColor[stage], eTextureUnit.Color0);
+                }
+                break;
+
+            case 1:
+                {
+                    gl.activeTexture(gl.TEXTURE0 + eTextureUnit.Color1);
+                    gl.uniform1i(rc.getProgram().textureSamplerColor[stage], eTextureUnit.Color1);
+                }
+                break;
         }
 
-        gl.bindTexture(gl.TEXTURE_2D, textureObj.texture);
-        gl.uniform1i(program.textureSamplerColor[stage], stage);
+        gl.bindTexture(gl.TEXTURE_2D, textureObj.texture);     
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, widthWrap);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, heightWrap);
-                
+
         if (uvCoords[textureObj])
         {
             gl.bindBuffer(gl.ARRAY_BUFFER, uvCoords[textureObj].buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvCoords[textureObj].coords), gl.STATIC_DRAW);  
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvCoords[textureObj].coords), gl.STATIC_DRAW);
             uvb[stage] = uvCoords[textureObj].buffer;
-        }            
+        }
     }
-    
+
     this.draw = function()
     {
         if (rc.displayListObj) DL_ADD_METHOD_DESC(rc.displayListObj, eRenderContextMethod.VB_Draw, [this]);
 
+        var program = rc.getProgram();
+        
         if (this.vertices.length)
         {
             // vertices
             gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-            gl.vertexAttribPointer(program.vertexPositionAttribute, this.numVerticesPerPrimitive, gl.FLOAT, false, 0, 0);
+            program.vertexAttribPointer(program.vertexPositionAttribute, this.numVerticesPerPrimitive, gl.FLOAT, false, 0, 0);
 
             // normals
             if (nb)
             {
                 gl.bindBuffer(gl.ARRAY_BUFFER, nb);
-                gl.vertexAttribPointer(program.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+                program.vertexAttribPointer(program.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
             }
-            
+
             // colors
-            if (cb)
-                gl.bindBuffer(gl.ARRAY_BUFFER, cb);    
-            else
-                gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
-            gl.vertexAttribPointer(program.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+            if (program.vertexColorAttribute >= 0)
+            {
+                if (cb)
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cb);
+                else
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cEmpty);
+                program.vertexAttribPointer(program.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+            }
             
             // texture coords
-            // NOTE: vertex shader silently fails if nothing is specified for a given program attribute, so if 
+            // NOTE: vertex shader silently fails if nothing is specified for a given rc.getProgram() attribute, so if 
             // no texture coords are specified, use the vertex uv buffer.
-            for (var i=0; i < gl_MaxTextureStages; i++)
+            for (var i = 0; i < gl_MaxTextureStages; i++)
             {
-                if (uvb[i]) 
-                    gl.bindBuffer(gl.ARRAY_BUFFER, uvb[i]);
-                else 
-                    gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
-                gl.vertexAttribPointer(program.textureCoordAttribute[i], 2, gl.FLOAT, false, 0, 0);
+                if (program.textureCoordAttribute[i] >= 0)
+                {
+                    if (uvb[i])
+                        gl.bindBuffer(gl.ARRAY_BUFFER, uvb[i]);
+                    else
+                        gl.bindBuffer(gl.ARRAY_BUFFER, uvEmpty);
+                    program.vertexAttribPointer(program.textureCoordAttribute[i], 2, gl.FLOAT, false, 0, 0);
+                }
             }
-            
+
             gl.drawArrays(primitiveType, 0, this.vertexCount);
         }
     }
@@ -10902,7 +11705,7 @@ function webglVB(rc, gl, program, numVerticesPerPrimitive)
 webglTO.prototype = new TextureObject();
 webglTO.prototype.constructor = webglTO;
 
-function webglTO(rc, gl, program)
+function webglTO(rc, gl)
 {
     //
     // initialization
@@ -10912,7 +11715,6 @@ function webglTO(rc, gl, program)
     
     var rc = rc;
     var gl = gl;
-    var program = program;
     
     this.texture = gl.createTexture();
     
@@ -11152,562 +11954,421 @@ function nextHighestPowerOfTwo(x)
     }
     return x + 1;
 }
-var eShaderType =
+function webglShadowFBO(rc, gl)
 {
-    VertexLighting: 0,
-    FragmentLighting: 1
-};
-
-function getShaders(gl, type)
-{
-    var source_vs = null;
-    var source_fs = null;
+    var rc = rc;
+    var gl = gl;
+    var width = 1024;
+    var height = 1024;
     
-    switch (type)
+    // create frame buffer
+    var fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    
+    // create depth texture
+    var depth = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depth);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
+   
+    var floatExt = gl.getFloatExtension({
+        require: ['renderable'],
+        prefer:  ['filterable', 'half']
+    });
+    
+    // create shadow map
+    var shadowMap = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, shadowMap);
+    for (var i = 0; i < 6; i++)
     {
-        case eShaderType.VertexLighting:
-            {
-                source_vs = [
-                    "#ifdef GL_ES",
-                    "precision highp float;",
-                    "#endif",
-                    "",
-                    "vec4 gAmbient;",
-                    "vec4 gDiffuse;",
-                    "vec4 gSpecular;",
-                    "",
-                    "attribute vec3 aVertexPosition;",
-                    "attribute vec3 aVertexNormal;",
-                    "attribute vec4 aVertexColor;",
-                    "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
-                    "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
-                    "", 
-                    "uniform mat4 uProjectionMatrix;",
-                    "uniform mat4 uModelViewMatrix;",
-                    "uniform mat4 uNormalMatrix;",
-                    "",
-                    "uniform vec4 uGlobalAmbientLight;",
-                    "",
-                    "uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-                    "",
-                    "uniform vec4 uFrontMaterial_ambient;",
-                    "uniform vec4 uFrontMaterial_diffuse;",
-                    "uniform vec4 uFrontMaterial_specular;",
-                    "uniform vec4 uFrontMaterial_emission;",
-                    "uniform float uFrontMaterial_shininess;",
-                    "",
-                    "uniform int uLightingEnabled;",
-                    "",
-                    "varying vec4 vLightingFactor;",
-                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-                    "",
-                    "void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
-                    "{",
-                    "   vec3 lightDir;",
-                    "   float nDotL;",      // normal . light direction
-                    "   float nDotHV;",     // normal . half-vector
-                    "   float pf;",         // power factor
-                    "",
-                    "   lightDir = normalize(vec3(position));",
-                    "",	
-                    "   nDotL = max(dot(normal, lightDir), 0.0);",
-                    "   if (nDotL == 0.0)",
-                    "   {",
-                    "       pf = 0.0;",
-                    "   }",
-                    "   else",
-                    "   {",
-                    "       nDotHV = max(0.0, dot(normal, halfVector));",
-                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-                    "   }",
-                    "",
-                    "   gAmbient  += ambient * uFrontMaterial_ambient;",
-                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-                    "   gSpecular += specular * uFrontMaterial_specular * pf;",
-                    "}",
-                    "",
-                    "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
-                    "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
-                    "{",
-                    "   float nDotL;",      // normal . light direction
-                    "   float nDotHV;",     // normal . light half vector
-                    "   float pf;",         // power factor
-                    "   float attenuation;",// computed attenuation factor
-                    "   float d;",          // distance from surface to light source
-                    "   vec3  L;",          // direction from surface to light position
-                    "   vec3  halfVector;", //
-                    "",
-                    "", // Compute vector from surface to light position
-                    "   L = vec3(position) - vPosition;",
-                    "",
-                    "", // Compute distance between surface and light position
-                    "   d = length(L);",
-                    "",
-                    "", // Normalize the vector from surface to light position,
-                    "   L = normalize(L);",
-                    "",
-                    "", // Compute attenuation,
-                    "   attenuation = 1.0 / (constantAttenuation +",
-                    "      linearAttenuation * d +",
-                    "      quadraticAttenuation * d * d);",
-                    "",
-                    "   nDotL = max(0.0, dot(normal, L));",
-                    "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
-                    "",
-                    "   if (nDotL == 0.0)",
-                    "   {",
-                    "       pf = 0.0;",
-                    "   }",
-                    "   else",
-                    "   {",
-                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-                    "   }",
-                    "",    
-                    "   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-                    "   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
-                    "}",
-                    "",
-                    "void main()",
-                    "{",
-                    "   vec4 vertexPosition;",
-                    "   vec4 transformedNormal;",
-                    "   vec4 viewPosition;",
-                    "   vec4 viewDirection;",
-                    "",
-                    "   vertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
-                    "",
-                    "   if (uLightingEnabled != 0)",
-                    "   {",                    
-                    "       transformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
-                    "       viewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
-                    "       viewDirection = normalize(-viewPosition);",
-                    
-                    "       gAmbient = vec4(0, 0, 0, 0);",
-                    "       gDiffuse = vec4(0, 0, 0, 0);",
-                    "       gSpecular = vec4(0, 0, 0, 0);",
-                    "",
-                    "       for (int i=0; i < " + gl_MaxLights + "; i++)",
-                    "       {",
-                    "           if (uLightSource_enabled[i] != 0)",
-                    "           {",
-                    "               if (uLightSource_position[i][3] == 0.0)", // directional light
-                    "               {",
-                    "                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-                    "                       uLightSource_diffuse[i], uLightSource_specular[i],",
-                    "                       normalize(vec3(transformedNormal)),",
-                    "                       normalize(vec3(viewDirection) + vec3(uLightSource_position[i])));",
-                    "               }",
-                    "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
-                    "               {",
-                    "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-                    "                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
-                    "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
-                    "                       normalize(vec3(transformedNormal)),",
-                    "                       vec3(viewDirection), vec3(vertexPosition));",
-                    "               }",
-                    "               else", // spotlight
-                    "               {",
-                    "               }",   
-                    "           }",
-                    "       }",
-                    "",
-                    "       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
-                    "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-                    "       vLightingFactor.a = uFrontMaterial_ambient.a / 3.0 + ",
-                    "                           uFrontMaterial_diffuse.a / 3.0 + ",
-                    "                           uFrontMaterial_specular.a / 3.0;",
-                    "   }",
-                    "   else", // uLightingEnabled == 0
-                    "   {",  
-                    "       vLightingFactor = aVertexColor;",
-                    "   }",
-                    "",
-                    "   vTextureCoord[0] = aTextureCoord0;",
-                    "   vTextureCoord[1] = aTextureCoord1;",        
-                    "   gl_Position = uProjectionMatrix * vertexPosition;",
-                    "}"
-                    ].join("\n");
-                    
-                source_fs = [
-                    "#ifdef GL_ES",
-                    "precision highp float;",
-                    "#endif",
-                    "",
-                    "uniform int uTexturesEnabled;",
-                    "uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
-                    "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
-                    "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
-                    "uniform int uTextureBlendOp;",
-                    "uniform vec4 uTextureColorMask;",
-                    "",
-                    "varying vec4 vLightingFactor;",
-                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-                    "",
-                    "void main()",
-                    "{",
-                    "   vec4 fragmentColor;",
-                    "   vec4 fragmentColor1;",
-                    "   vec4 fragmentColor2;",
-                    "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
-                    "   {",
-                    "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
-                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-                    "       {",
-                    "           if (fragmentColor.a == 0.0) discard;",
-                    "           else gl_FragColor = fragmentColor * vLightingFactor;",
-                    "       }",
-                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-                    "       {",
-                    "           gl_FragColor = fragmentColor;",
-                    "       }",
-                    "       else",
-                    "       {",
-                    "           gl_FragColor = vLightingFactor;",
-                    "       }",
-                    "   }",
-                    "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
-                    "   {",
-                    "       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-                    "       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
-                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-                    "       {",
-                    "           fragmentColor1.a = fragmentColor2.a;",
-                    "           if (fragmentColor1.a == 0.0) discard;",
-                    "           else gl_FragColor = fragmentColor1 * vLightingFactor;",
-                    "       }",
-                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-                    "       {",
-                    "           gl_FragColor = fragmentColor1 * fragmentColor2;",
-                    "       }",
-                    "       else",
-                    "       {",
-                    "           gl_FragColor = vLightingFactor;",
-                    "       }",
-                    "   }",
-                    "   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 0)
-                    "   {",
-                    "       gl_FragColor = vLightingFactor;",
-                    "   }",
-                    "}"
-                    ].join("\n");
-            }
-            break;
-            
-        case eShaderType.FragmentLighting:
-            {
-                source_vs = [
-                    "attribute vec3 aVertexPosition;",
-                    "attribute vec3 aVertexNormal;",
-                    "attribute vec4 aVertexColor;",
-                    "attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
-                    "attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
-                    "", 
-                    "uniform mat4 uProjectionMatrix;",
-                    "uniform mat4 uModelViewMatrix;",
-                    "uniform mat4 uNormalMatrix;",
-                    "",
-                    "varying vec4 vVertexPosition;",
-                    "varying vec4 vTransformedNormal;",
-                    "varying vec4 vVertexColor;",
-                    "varying vec4 vViewPosition;",
-                    "varying vec4 vViewDirection;",
-                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-                    "",
-                    "void main()",
-                    "{",
-                    "   vVertexPosition = uModelViewMatrix * vec4(aVertexPosition, 1);",
-                    "   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
-                    "   vVertexColor = aVertexColor;",
-                    "   vViewPosition = uModelViewMatrix * vec4(0, 0, 0, 1);",
-                    "   vViewDirection = normalize(-vViewPosition);",
-                    "   vTextureCoord[0] = aTextureCoord0;",
-                    "   vTextureCoord[1] = aTextureCoord1;",        
-                    "   gl_Position = uProjectionMatrix * vVertexPosition;",
-                    "}"
-                    ].join("\n");
-                
-                source_fs = [
-                    "#ifdef GL_ES",
-                    "precision highp float;",
-                    "#endif",
-                    "",
-                    "vec4 gAmbient;",
-                    "vec4 gDiffuse;",
-                    "vec4 gSpecular;",
-                    "",
-                    "uniform vec4 uGlobalAmbientLight;",
-                    "",
-            //        IE 11 doesn't currently support structs
-            //        "struct lightSourceParameters",
-            //        "{",
-            //        "   int enabled;",
-            //        "   vec4 ambient;",
-            //        "   vec4 diffuse;",
-            //        "   vec4 specular;",
-            //        "   vec4 position;",
-            //        "   vec4 halfVector;",
-            //        "   vec4 spotDirection;",
-            //        "   float spotExponent;",
-            //        "   float spotCutoff;",
-            //        "   float spotCosCutoff;",
-            //        "   float constantAttenuation;",
-            //        "   float linearAttenuation;",
-            //        "   float quadraticAttenuation;",
-            //        "};",
-            //        "",
-            //        "uniform lightSourceParameters uLightSource[" + gl_MaxLights + "];",
-                    "",
-                    "uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-                    "uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-                    "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-                    "",
-            //        IE 11 doesn't currently support structs
-            //        "struct materialParameters",
-            //        "{",
-            //        "   vec4 ambient;",
-            //        "   vec4 diffuse;",
-            //        "   vec4 specular;",
-            //        "   vec4 emission;",
-            //        "   float shininess;",
-            //        "};",
-            //        "",
-            //        "uniform materialParameters uFrontMaterial;",
-                    "uniform vec4 uFrontMaterial_ambient;",
-                    "uniform vec4 uFrontMaterial_diffuse;",
-                    "uniform vec4 uFrontMaterial_specular;",
-                    "uniform vec4 uFrontMaterial_emission;",
-                    "uniform float uFrontMaterial_shininess;",
-                    "",
-                    "uniform int uLightingEnabled;",
-                    "uniform int uTexturesEnabled;",
-                    "uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
-                    "uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
-                    "uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
-                    "uniform int uTextureBlendOp;",
-                    "uniform vec4 uTextureColorMask;",
-                    "",
-                    "varying vec4 vVertexPosition;",
-                    "varying vec4 vTransformedNormal;",
-                    "varying vec4 vVertexColor;",
-                    "varying vec4 vViewPosition;",
-                    "varying vec4 vViewDirection;",
-                    "varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
-                    "",
-                    "void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
-                    "{",
-                    "   vec3 lightDir;",
-                    "   float nDotL;",      // normal . light direction
-                    "   float nDotHV;",     // normal . half-vector
-                    "   float pf;",         // power factor
-                    "",
-                    "   lightDir = normalize(vec3(position));",
-                    "",	
-                    "   nDotL = max(dot(normal, lightDir), 0.0);",
-                    "   if (nDotL == 0.0)",
-                    "   {",
-                    "       pf = 0.0;",
-                    "   }",
-                    "   else",
-                    "   {",
-                    "       nDotHV = max(0.0, dot(normal, halfVector));",
-                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-                    "   }",
-                    "",
-                    "   gAmbient  += ambient * uFrontMaterial_ambient;",
-                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-                    "   gSpecular += specular * uFrontMaterial_specular * pf;",
-                    "}",
-                    "",
-                    "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
-                    "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
-                    "{",
-                    "   float nDotL;",      // normal . light direction
-                    "   float nDotHV;",     // normal . light half vector
-                    "   float pf;",         // power factor
-                    "   float attenuation;",// computed attenuation factor
-                    "   float d;",          // distance from surface to light source
-                    "   vec3  L;",          // direction from surface to light position
-                    "   vec3  halfVector;", //
-                    "",
-                    "", // Compute vector from surface to light position
-                    "   L = vec3(position) - vPosition;",
-                    "",
-                    "", // Compute distance between surface and light position
-                    "   d = length(L);",
-                    "",
-                    "", // Normalize the vector from surface to light position,
-                    "   L = normalize(L);",
-                    "",
-                    "", // Compute attenuation,
-                    "   attenuation = 1.0 / (constantAttenuation +",
-                    "      linearAttenuation * d +",
-                    "      quadraticAttenuation * d * d);",
-                    "",
-                    "   nDotL = max(0.0, dot(normal, L));",
-                    "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
-                    "",
-                    "   if (nDotL == 0.0)",
-                    "   {",
-                    "       pf = 0.0;",
-                    "   }",
-                    "   else",
-                    "   {",
-                    "       pf = pow(nDotHV, uFrontMaterial_shininess);",
-                    "   }",
-                    "",    
-                    "   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-                    "   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-                    "   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
-                    "}",
-                    "",
-                    "void main()",
-                    "{",
-                    "   vec4 lightingFactor;",
-                    "   if (uLightingEnabled != 0)",
-                    "   {",
-                    "       gAmbient = vec4(0, 0, 0, 0);",
-                    "       gDiffuse = vec4(0, 0, 0, 0);",
-                    "       gSpecular = vec4(0, 0, 0, 0);",
-                    "",
-                    "       for (int i=0; i < " + gl_MaxLights + "; i++)",
-                    "       {",
-                    "           if (uLightSource_enabled[i] != 0)",
-                    "           {",
-                    "               if (uLightSource_position[i][3] == 0.0)", // directional light
-                    "               {",
-                    "                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-                    "                       uLightSource_diffuse[i], uLightSource_specular[i],",
-                    "                       normalize(vec3(vTransformedNormal)),",
-                    "                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
-                    "               }",
-                    "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
-                    "               {",
-                    "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-                    "                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
-                    "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
-                    "                       normalize(vec3(vTransformedNormal)),",
-                    "                       vec3(vViewDirection), vec3(vVertexPosition));",
-                    "               }",
-                    "               else", // spotlight
-                    "               {",
-                    "               }",   
-                    "           }",
-                    "       }",
-                    "",
-                    "       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
-                    "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-                    "       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
-                    "                           uFrontMaterial_diffuse.a / 3.0 + ",
-                    "                           uFrontMaterial_specular.a / 3.0;",
-                    "   }",
-                    "   else", // uLightingEnabled == 0
-                    "   {",
-                    "       lightingFactor = vVertexColor;",
-                    "   }",
-                    "",
-                    "   vec4 fragmentColor;",
-                    "   vec4 fragmentColor1;",
-                    "   vec4 fragmentColor2;",
-                    "   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
-                    "   {",
-                    "       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-                    "       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
-                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-                    "       {",
-                    "           if (fragmentColor.a == 0.0) discard;",
-                    "           else gl_FragColor = fragmentColor * lightingFactor;",
-                    "       }",
-                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-                    "       {",
-                    "           gl_FragColor = fragmentColor;",
-                    "       }",
-                    "       else",
-                    "       {",
-                    "           gl_FragColor = lightingFactor;",
-                    "       }",
-                    "   }",
-                    "   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
-                    "   {",
-                    "       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
-                    "       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
-                    "       if (uTextureBlendOp == " + RC_MODULATE + ")",
-                    "       {",
-                    "           fragmentColor1.a = fragmentColor2.a;",
-                    "           if (fragmentColor1.a == 0.0) discard;",
-                    "           else gl_FragColor = fragmentColor1 * lightingFactor;",
-                    "       }",
-                    "       else if (uTextureBlendOp == " + RC_REPLACE + ")",
-                    "       {",
-                    "           gl_FragColor = fragmentColor1 * fragmentColor2;",
-                    "       }",
-                    "       else",
-                    "       {",
-                    "           gl_FragColor = lightingFactor;",
-                    "       }",
-                    "   }",
-                    "   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 1)
-                    "   {",
-                    "       gl_FragColor = lightingFactor;",
-                    "   }",
-                    "}"
-                    ].join("\n");
-            }
-            break;
+        var target = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
+        gl.texImage2D(target, 0, gl.RGBA, width, height, 0, gl.RGBA, floatExt.type, null);  
+    }
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+    
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    
+    this.bindForWriting = function(face)
+    {
+        var glFace = 0;
+        switch (face)
+        {
+            case eCubeMapFace.Positive_X: glFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; break;
+            case eCubeMapFace.Negative_X: glFace = gl.TEXTURE_CUBE_MAP_NEGATIVE_X; break;
+            case eCubeMapFace.Positive_Y: glFace = gl.TEXTURE_CUBE_MAP_POSITIVE_Y; break;
+            case eCubeMapFace.Negative_Y: glFace = gl.TEXTURE_CUBE_MAP_NEGATIVE_Y; break;
+            case eCubeMapFace.Positive_Z: glFace = gl.TEXTURE_CUBE_MAP_POSITIVE_Z; break;
+            case eCubeMapFace.Negative_Z: glFace = gl.TEXTURE_CUBE_MAP_NEGATIVE_Z; break;
+            default: return false;
+        }
         
-        default:
-            return { vertex: null, fragment: null };
-            break;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, glFace, shadowMap, 0);
+        
+        var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if (status != gl.FRAMEBUFFER_COMPLETE)
+        {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            return false;
+        }
+        
+        gl.viewport(0, 0, width, height);
+        gl.clearColor(FLT_MAX, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        return true;
     }
     
-    var vs = gl.createShader(gl.VERTEX_SHADER); 
-    if (vs)
+    this.bindForReading = function()
     {
-        gl.shaderSource(vs, source_vs);
-        gl.compileShader(vs);
-
-        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
-        {
-            alert(gl.getShaderInfoLog(vs));
-        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.activeTexture(gl.TEXTURE0 + eTextureUnit.ShadowMap);
+        gl.uniform1i(rc.getProgram().textureSamplerShadowMap, eTextureUnit.ShadowMap);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, shadowMap);
+        //gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); 
     }
-    
-    var fs = gl.createShader(gl.FRAGMENT_SHADER); 
-    if (fs) 
-    {
-        gl.shaderSource(fs, source_fs);
-        gl.compileShader(fs);
-        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
-        {
-            alert(gl.getShaderInfoLog(fs));
-        }
-    }
-                    
-    return { vertex: vs, fragment: fs };
 }
+
+
+var pcf_shadow_mapping_depth_pass_vs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+"",
+"attribute vec3 aVertexPosition;",
+"attribute vec3 aVertexNormal;", 
+"", 
+"uniform mat4 uProjectionMatrix;",
+"uniform mat4 uViewMatrix;",
+"uniform mat4 uWorldMatrix;",
+"uniform mat4 uNormalMatrix;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"",
+"void main()",
+"{",
+"   vVertexPosition = uWorldMatrix * vec4(aVertexPosition, 1);",
+"   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+"   gl_Position = uProjectionMatrix * uViewMatrix * vVertexPosition;",
+"}"
+].join("\n");
+
+var pcf_shadow_mapping_depth_pass_fs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+//"#extension GL_OES_standard_derivatives : enable",
+"",
+"uniform vec3 uShadowCasterWorldPosition;",
+"uniform int uModelID;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"",
+"void main()",
+"{",
+"   float depth = length(vVertexPosition.xyz - uShadowCasterWorldPosition);",
+//"   float moment1 = depth;",
+//"   float moment2 = depth * depth;",
+//"   float dx = dFdx(depth);",
+//"   float dy = dFdy(depth);",
+//"   moment2 += 0.25*(dx*dx+dy*dy);", 
+//"   gl_FragColor = vec4(moment1, moment2, 0, 0);",
+"   gl_FragColor = vec4(depth, uModelID, 0, 0);",
+"}"
+].join("\n");
+var pcf_shadow_mapping_render_pass_vs = [
+"attribute vec3 aVertexPosition;",
+"attribute vec3 aVertexNormal;",
+"attribute vec4 aVertexColor;",
+"attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
+"attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
+"", 
+"uniform mat4 uProjectionMatrix;",
+"uniform mat4 uViewMatrix;",
+"uniform mat4 uWorldMatrix;",
+"uniform mat4 uNormalMatrix;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"varying vec4 vVertexColor;",
+"varying vec4 vViewPosition;",
+"varying vec4 vViewDirection;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"void main()",
+"{",
+"   vVertexPosition = uWorldMatrix * vec4(aVertexPosition, 1);",
+"   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+"   vVertexColor = aVertexColor;",
+"   vViewPosition = uViewMatrix * vec4(0, 0, 0, 1);",
+"   vViewDirection = normalize(-vViewPosition);",
+"   vTextureCoord[0] = aTextureCoord0;",
+"   vTextureCoord[1] = aTextureCoord1;",        
+"   gl_Position = uProjectionMatrix * uViewMatrix * vVertexPosition;",
+"}"
+].join("\n");
+
+var pcf_shadow_mapping_render_pass_fs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+"",
+"#define EPSILON 0.1",
+"",
+"vec4 gAmbient;",
+"vec4 gDiffuse;",
+"vec4 gSpecular;",
+"",
+"uniform vec4 uGlobalAmbientLight;",                    
+"",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
+"",
+"uniform int uLightingEnabled;",
+"uniform int uTexturesEnabled;",
+"uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
+"uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
+"uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
+"uniform samplerCube uTextureSamplerShadowMap;",
+"uniform int uTextureBlendOp;",
+"uniform vec4 uTextureColorMask;",
+"uniform vec4 uClipPlane[" + gl_MaxClipPlanes + "];",
+"uniform int uClipPlaneEnabled[" + gl_MaxClipPlanes + "];",
+"uniform vec3 uShadowCasterWorldPosition;",
+"uniform int uModelID;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"varying vec4 vVertexColor;",
+"varying vec4 vViewPosition;",
+"varying vec4 vViewDirection;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"float shadowFactor(vec3 lightDirection, float cosTheta)",
+"{",
+"   float distance = length(lightDirection);",
+"   lightDirection.y = -lightDirection.y;",
+"   vec2 moments = textureCube(uTextureSamplerShadowMap, lightDirection).rg;", 
+//"   float moment = textureCube(uTextureSamplerShadowMap, lightDirection).r;",
+"",
+"   float bias = EPSILON * tan(acos(cosTheta));",
+"   if (distance <= moments.x + bias)",
+//"   if (distance <= moment + bias)",
+"       return 1.0;",
+"   else if (abs(float(uModelID) - moments.y) >= 1.0)",
+"   {",
+//"       float variance = moments.y - (moments.x * moments.x);",
+//"       variance = max(variance, 0.07);",
+//"",
+//"       float d = distance - moments.x;",
+//"       float p_max = variance / (variance + d * d);",
+//"", 
+"       return 0.25;//p_max;",
+"   }",
+"   else return 1.0;",
+"}",
+"",
+"void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
+"{",
+"   vec3 lightDir;",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . half-vector
+"   float pf;",         // power factor
+"",
+"   lightDir = normalize(vec3(position));",
+"",	
+"   nDotL = max(dot(normal, lightDir), 0.0);",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       nDotHV = max(0.0, dot(normal, halfVector));",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"}",
+"",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+"                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
+"{",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . light half vector
+"   float pf;",         // power factor
+"   float attenuation;",// computed attenuation factor
+"   float shadow;",
+"   float d;",          // distance from surface to light source
+"   vec3  L;",          // direction from surface to light position
+"   vec3  halfVector;", //
+"",
+"", // Compute vector from surface to light position
+"   L = vec3(position) - vPosition;",
+"",
+"", // Compute distance between surface and light position
+"   d = length(L);",
+"",
+"", // Normalize the vector from surface to light position,
+"   L = normalize(L);",
+"",
+"", // Compute attenuation,
+"   attenuation = 1.0 / (constantAttenuation +",
+"      linearAttenuation * d +",
+"      quadraticAttenuation * d * d);",
+"",
+"", // Compute shadow factor
+"   shadow = shadowFactor(vPosition - uShadowCasterWorldPosition, max(0.0, dot(normal, L)));",
+"",
+"   nDotL = max(0.0, dot(normal, L));",
+"   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
+"",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",    
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation * shadow;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation * shadow;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation * shadow;",
+"}",
+"",
+"void main()",
+"{",
+"   vec4 lightingFactor;",
+"   if (uLightingEnabled != 0)",
+"   {",
+"       gAmbient = vec4(0, 0, 0, 0);",
+"       gDiffuse = vec4(0, 0, 0, 0);",
+"       gSpecular = vec4(0, 0, 0, 0);",
+"",
+"       for (int i=0; i < " + gl_MaxLights + "; i++)",
+"       {",
+"           if (uLightSource_enabled[i] != 0)",
+"           {",
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               {",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(vTransformedNormal)),",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
+"               }",
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               {",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(vTransformedNormal)),",
+"                       vec3(vViewDirection), vec3(vVertexPosition));",
+"               }",
+"               else", // spotlight
+"               {",
+"               }",   
+"           }",
+"       }",
+"",
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
+"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
+"   }",
+"   else", // uLightingEnabled == 0
+"   {",
+"       lightingFactor = vVertexColor;",
+"   }",
+"",
+"   vec4 fragmentColor;",
+"   vec4 fragmentColor1;",
+"   vec4 fragmentColor2;",
+"",
+"   for (int i=0; i < " + gl_MaxClipPlanes + "; i++)",
+"   {",
+"       if (uClipPlaneEnabled[i] != 0)",
+"       {",
+"           if (dot(vVertexPosition.xyz, uClipPlane[i].xyz) - uClipPlane[i].w >= 0.0) discard;",    
+"       }",
+"   }",
+"",
+"   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
+"   {",
+"       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           if (fragmentColor.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor * lightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = lightingFactor;",
+"       }",
+"   }",
+"   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
+"   {",
+"       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           fragmentColor1.a = fragmentColor2.a;",
+"           if (fragmentColor1.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor1 * lightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor1 * fragmentColor2;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = lightingFactor;",
+"       }",
+"   }",
+"   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 1)
+"   {",
+"       gl_FragColor = lightingFactor;",
+"   }",
+"}"
+].join("\n");
+
+
 ContentHandler.prototype = new AttributeContainer();
 ContentHandler.prototype.constructor = ContentHandler;
 
@@ -14849,9 +15510,9 @@ ParentableMotionElement.prototype.applyTransform = function()
     // applied to avoid translation caused by scaling  
 
     // set transformation matrix
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.leftMultMatrix(this.sectorTransformCompound);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
 
     // TODO: if invsere scale was applied, re-apply scale
 }
@@ -15528,9 +16189,9 @@ Camera.prototype.applyTransform = function()
     matrix.loadMatrix(this.sectorTransformCompound);
     matrix.invert();
 
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
     this.graphMgr.renderContext.loadMatrix(matrix);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyViewTransform();
 }
 
 function Camera_NearDistanceModifiedCB(attribute, container)
@@ -15761,7 +16422,8 @@ PerspectiveCamera.prototype.setClipPlanes = function()
 
 PerspectiveCamera.prototype.applyPerspectiveTransform = function()
 {
-    this.graphMgr.renderContext.projectionMatrixStack.top().loadMatrix(this.projectionMatrix);
+    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+    this.graphMgr.renderContext.loadMatrix(this.projectionMatrix);
     this.graphMgr.renderContext.applyProjectionTransform();
 }
 
@@ -15808,7 +16470,7 @@ function Light()
     ParentableMotionElement.call(this);
     this.className = "Light";
     this.attrType = eAttrType.Light;
-    
+
     this.updateAmbient = true;
     this.updateDiffuse = true;
     this.updateSpecular = true;
@@ -15819,13 +16481,13 @@ function Light()
     this.lightDesc.validMembersMask = 0;
     this.lightIndex = 0;
     this.setLightDesc = false;
-    
+
     this.ambient = new ColorAttr(0, 0, 0, 1);
-	this.diffuse = new ColorAttr(1, 1, 1, 1);
-	this.specular = new ColorAttr(1, 1, 1, 1);
-	this.constantAttenuation = new NumberAttr(1);
-	this.linearAttenuation = new NumberAttr(0);
-	this.quadraticAttenuation = new NumberAttr(0);
+    this.diffuse = new ColorAttr(1, 1, 1, 1);
+    this.specular = new ColorAttr(1, 1, 1, 1);
+    this.constantAttenuation = new NumberAttr(1);
+    this.linearAttenuation = new NumberAttr(0);
+    this.quadraticAttenuation = new NumberAttr(0);
     this.shadowCaster = new BooleanAttr(false);
 
     this.ambient.addModifiedCB(Light_AmbientModifiedCB, this);
@@ -15847,13 +16509,13 @@ function Light()
 Light.prototype.setGraphMgr = function(graphMgr)
 {
     this.lightIndex = graphMgr.getAvailableLightIndex();
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.setGraphMgr.call(this, graphMgr);
 }
 
 Light.prototype.update = function(params, visitChildren)
-{  
+{
     if (this.updateAmbient)
     {
         this.updateAmbient = false;
@@ -15906,10 +16568,10 @@ Light.prototype.update = function(params, visitChildren)
     {
         this.setLightDesc = true;
     }
-    
+
     // ensure continued update (lights are transformed by view matrix)
     this.setModified();
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.update.call(this, params, visitChildren);
 }
@@ -15921,41 +16583,42 @@ Light.prototype.apply = function(directive, params, visitChildren)
     {
         switch (directive)
         {
-        case "render":
-            {
-                this.setLightEnabled();
-            }
-            break;
+            case "render":
+                {
+                    this.setLightEnabled();
+                }
+                break;
         }
-        
+
         // call base-class implementation
         ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-    
+
     switch (directive)
     {
-    case "render":
-        {
-            if (this.setLightDesc)
+        case "render":
             {
-                this.setLightDesc = false;
-                
-                this.applyLightDesc();
-            }
+                if (this.setLightDesc)
+                {
+                    this.setLightDesc = false;
 
-            this.setLightEnabled();   
-        }
-        break;
+                    this.applyLightDesc();
+                }
+
+                this.setLightEnabled();
+                params.lights.push(this);
+            }
+            break;
     }
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 }
 
 Light.prototype.applyLightDesc = function()
 {
-    this.graphMgr.renderContext.setLight(this.lightIndex, this.lightDesc);  
+    this.graphMgr.renderContext.setLight(this.lightIndex, this.lightDesc);
 }
 
 Light.prototype.setLightEnabled = function()
@@ -15967,7 +16630,7 @@ Light.prototype.onRemove = function()
 {
     // disable light
     this.graphMgr.renderContext.enableLight(this.lightIndex, 0);
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.onRemove.call(this);
 }
@@ -15995,7 +16658,7 @@ function Light_ConstantAttenuationModifiedCB(attribute, container)
     container.updateConstantAttenuation = true;
     container.incrementModificationCount();
 }
-    
+
 function Light_LinearAttenuationModifiedCB(attribute, container)
 {
     container.updateLinearAttenuation = true;
@@ -16408,14 +17071,14 @@ function Isolator()
     Group.call(this);
     this.className = "Isolator";
     this.attrType = eAttrType.Isolator;
-    
+
     this.updateIsolateTransforms = true;
     this.updateIsolateLights = true;
     this.updateIsolateMaterials = true;
     this.updateIsolateTextures = true;
     this.updateIsolateFog = true;
     this.updateIsolateClipPlanes = true;
-    
+
     this.isolateTransforms = new BooleanAttr(false);
     this.isolateLights = new BooleanAttr(false);
     this.isolateMaterials = new BooleanAttr(false);
@@ -16433,7 +17096,7 @@ function Isolator()
     this.isolateTextures.addModifiedCB(Isolator_IsolateTexturesModifiedCB, this);
     this.isolateFog.addModifiedCB(Isolator_IsolateFogModifiedCB, this);
     this.isolateClipPlanes.addModifiedCB(Isolator_IsolateClipPlanesModifiedCB, this);
-    
+
     this.registerAttribute(this.isolateTransforms, "isolateTransforms");
     this.registerAttribute(this.isolateLights, "isolateLights");
     this.registerAttribute(this.isolateMaterials, "isolateMaterials");
@@ -16462,6 +17125,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
+    var isolateLights = this.isolateLights.getValueDirect();
     var isolateTransforms = this.isolateTransforms.getValueDirect();
     var isolateTextures = this.isolateTextures.getValueDirect();
     var isolateDissolves = this.isolateDissolves.getValueDirect();
@@ -16473,14 +17137,24 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     var lastProjMatrix = null;
     var lastViewMatrix = null;
     var lastWorldMatrix = null;
+
+    var lights = null;
     
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.pushIsolatedStates();
 
                 // TODO
+
+                // push lights
+                if (isolateLights)
+                {
+                    // TODO
+                    lights = params.lights.slice();
+                }
 
                 // push transforms
                 if (isolateTransforms)
@@ -16488,14 +17162,16 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     lastProjMatrix = params.projMatrix;
                     lastViewMatrix = params.viewMatrix;
                     lastWorldMatrix = params.worldMatrix;
-                    
+
                     // TEMP -- move to pushIsolatedStates
-                	this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
-                	this.graphMgr.renderContext.pushMatrix();
-                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
-                	this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+                    this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
+                    this.graphMgr.renderContext.pushMatrix();
                 }
-                
+
                 // push textures
                 if (isolateTextures)
                 {
@@ -16538,7 +17214,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "collide":
             {
                 // push transforms
@@ -16548,7 +17224,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "highlight":
             {
                 // push transforms
@@ -16566,25 +17242,35 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.popIsolatedStates();
 
                 // TODO
 
+                // pop lights
+                if (isolateLights)
+                {
+                    // TODO
+                    params.lights = lights.slice();
+                }
+                
                 // pop transforms
                 if (isolateTransforms)
                 {
                     params.projMatrix = lastProjMatrix;
                     params.viewMatrix = lastViewMatrix;
                     params.worldMatrix = lastWorldMatrix;
-                    
+
                     // TEMP -- move to popIsolatedStates
                     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
-                	this.graphMgr.renderContext.popMatrix();
-                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
-                	this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
+                    this.graphMgr.renderContext.popMatrix();
                 }
-                    
+
                 // pop textures
                 if (isolateTextures)
                 {
@@ -16627,7 +17313,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "collide":
             {
                 // pop transforms
@@ -16637,7 +17323,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "highlight":
             {
                 // pop transforms
@@ -16653,8 +17339,8 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
 Isolator.prototype.pushIsolatedStates = function()
 {
     // TODO
-    
-    
+
+
 }
 
 Isolator.prototype.popIsolatedStates = function()
@@ -16679,7 +17365,7 @@ function Isolator_IsolateMaterialsModifiedCB(attribute, container)
     container.updateIsolateMaterials = true;
     container.incrementModificationCount();
 }
- 
+
 function Isolator_IsolateTexturesModifiedCB(attribute, container)
 {
     container.updateIsolateTextures = true;
@@ -16785,6 +17471,7 @@ Dissolve.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 var dissolve = this.dissolve.getValueDirect();
                 this.lastDissolve = dissolve;
@@ -16826,6 +17513,8 @@ function RenderParams()
     this.displayListObj = null;
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
+    this.lights = [];
+    this.modelID = 0;
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -16841,6 +17530,7 @@ function RenderDirective()
 
     this.backgroundImageSet = false;
     
+    this.program = null;
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
     this.backgroundImageFilename = new StringAttr("");
@@ -16874,6 +17564,8 @@ function RenderDirective()
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
     
+    this.shadowDirective = new ShadowDirective();
+    
     this.backgroundScreen = new Isolator();
     this.backgroundScreen.isolateTextures.setValueDirect(true);
     
@@ -16890,6 +17582,7 @@ RenderDirective.prototype.setRegistry = function(registry)
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
+    this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
     this.backgroundScreenRect.setRegistry(registry);
@@ -16903,9 +17596,14 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
+    this.shadowDirective.setGraphMgr(graphMgr);
     this.backgroundScreen.setGraphMgr(graphMgr);
     this.backgroundTexture.setGraphMgr(graphMgr);
     this.backgroundScreenRect.setGraphMgr(graphMgr);
+    
+    // create shader program
+    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -16913,27 +17611,21 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
 
 RenderDirective.prototype.execute = function(root)
 {  
+    // set shader program
+    this.graphMgr.renderContext.useProgram(this.program);
+    
     // draw background
-    this.drawBackground();
+    //this.drawBackground();
     
     root = root || this.rootNode.getValueDirect();
 
     var visited = this.updateDirective.execute(root);
     
+    // setup shadow map
+    this.shadowDirective.execute(root);
+    
     // render
     params = new RenderParams();
-    /*
-    renderParams.path = NULL;//m_path;
-    renderParams.pathIndex = 1;
-    renderParams.viewport = m_currentViewport;
-    renderParams.jitterAmt = m_currentJitterAmt + jitterAmt; // RenderDirective jitter + AA jitter
-    renderParams.distanceSortAgent = m_distanceSortAgent;
-    renderParams.polygonSortAgent = m_polygonSortAgent;
-    renderParams.renderSequenceAgent = m_renderSequenceAgent;
-    renderParams.shadowRenderAgent = m_shadowRenderAgent;
-    renderParams.drawTextures = m_texturesEnabled->GetValueDirect();
-    renderParams.userData = m_userData->GetValueDirect();
-     */
     params.directive = this;
     params.path = null;
     params.pathIndex = 1;
@@ -16941,7 +17633,7 @@ RenderDirective.prototype.execute = function(root)
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-	// if resetting display lists, set the disableDisplayLists renderParams flag this render
+    // if resetting display lists, set the disableDisplayLists renderParams flag this render
     if (this.resetDisplayLists)
     {
     	params.resetDisplayLists = true;
@@ -17479,7 +18171,6 @@ VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
     //GcSGNode::Post_Clone_Child(childClone, pathSrc, pathClone); Not being used right now. Maybe used in the futrue.
 }
 
-
 VertexGeometry.prototype.getUVCoords = function(texture)
 {
     for (var i=0; i < this.uvCoords.length; i++)
@@ -17516,7 +18207,8 @@ VertexGeometry.prototype.update = function(params, visitChildren)
     {
         this.updateVertices = false;
         
-        this.vertexBuffer.setVertices(this.vertices.getValueDirect());
+        var vertices = this.vertices.getValueDirect();
+        this.vertexBuffer.setVertices(vertices);
         
         this.updateBoundingTree = true;
         
@@ -17564,6 +18256,24 @@ VertexGeometry.prototype.apply = function(directive, params, visitChildren)
     {
         case "render":
             {
+            }
+            break;
+            
+        case "shadow":
+            {
+                var drawNow = true;
+                var dissolve = params.dissolve;
+                var opacity = params.opacity;
+                if (dissolve == 1)// || opacity == 0) // completely transparent objects can still reflect specularity
+                {
+                    // completely transparent, skip drawing
+                    drawNow = false;
+                }
+
+                if (drawNow)
+                {
+                    this.vertexBuffer.draw();
+                }
             }
             break;
     }
@@ -18760,6 +19470,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 var show = this.show.getValueDirect();
                 if (!show)
@@ -18769,14 +19480,23 @@ Model.prototype.apply = function(directive, params, visitChildren)
                     return;
                 }
 
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);              
+
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                
                 this.pushMatrix();
 
                 this.applyTransform();
 
+                this.graphMgr.renderContext.setModelID(params.modelID++);
+                
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 this.popMatrix();
+                
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
             break;
 
@@ -18815,7 +19535,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);              
 
-                //params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
   
                 // call base-class implementation
@@ -18882,15 +19601,15 @@ Model.prototype.onRemove = function()
 
 Model.prototype.pushMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
 }
 
 Model.prototype.popMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();    
+    this.graphMgr.renderContext.applyWorldTransform();    
 }
 
 Model.prototype.addSurface = function(surface)
@@ -22481,7 +23200,7 @@ DistanceSortAgent.prototype.addGeometry = function(geometry, min, max, dissolve)
 
     // calculate distance from camera
     var worldViewMatrix = new Matrix4x4();
-    worldViewMatrix.loadMatrix(this.graphMgr.renderContext.modelViewMatrixStack.top());
+    worldViewMatrix.loadMatrix(this.graphMgr.renderContext.worldMatrixStack.top());
 
     // initialize
     rec.distance = FLT_MAX;
@@ -22784,6 +23503,7 @@ Transform.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
         {
             params.worldMatrix = this.matrixTransform.multiply(params.worldMatrix);
             this.applyTransform();
@@ -22822,9 +23542,9 @@ Transform.prototype.apply = function(directive, params, visitChildren)
 Transform.prototype.applyTransform = function()
 {
     // set transformation matrix
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.leftMultMatrix(this.matrixTransform);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
 }
 
 function Transform_MatrixModifiedCB(attribute, container)
@@ -23798,14 +24518,14 @@ HighlightDirective.prototype.configureStencil_Target = function(renderContext,
     renderContext.pushMatrix();
     renderContext.loadMatrix(projMatrix);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(worldViewMatrix);
-    renderContext.applyModelViewTransform();
+    renderContext.applyWorldTransform();
     geometry.drawPrimitives();
     renderContext.setMatrixMode(RC_PROJECTION);
     renderContext.popMatrix();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.popMatrix();
 
     // restore render states
@@ -23844,10 +24564,10 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
-    renderContext.applyModelViewTransform();
+    renderContext.applyWorldTransform();
     this.vertexBuffer.draw();
     renderContext.popMatrix();
     renderContext.setMatrixMode(RC_PROJECTION);
@@ -23859,7 +24579,7 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.setEnabled(eRenderMode.StencilTest, lastStencilTest);
     renderContext.setEnabled(eRenderMode.AlphaBlend, lastAlphaBlend);
     renderContext.setEnabled(eRenderMode.Lighting, lastLighting);
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
 }
                                       
 HighlightDirective.prototype.initHighlightSquareVB = function()
@@ -23907,6 +24627,171 @@ function HighlightDirective_HighlightColorModifiedCB(attribute, container)
     container.highlightColorModified();
 }
 
+ShadowParams.prototype = new DirectiveParams();
+ShadowParams.prototype.constructor = ShadowParams();
+
+function ShadowParams()
+{
+    DirectiveParams.call(this);
+    
+    this.worldMatrix = new Matrix4x4();
+    this.dissolve = 0;
+    this.opacity = 1;
+    this.modelID = 0;
+}
+
+ShadowDirective.prototype = new SGDirective();
+ShadowDirective.prototype.constructor = ShadowDirective;
+
+function ShadowDirective()
+{
+    SGDirective.call(this);
+    this.className = "ShadowDirective";
+    this.attrType = eAttrType.ShadowDirective;
+
+    this.program = null;
+    this.shadowFBO = null;
+    this.displayListObj = null;
+    
+    this.name.setValueDirect("ShadowDirective");
+    
+    this.casterWorldPosition = new Vector3DAttr(0, 0, 0);
+    
+    this.registerAttribute(this.casterWorldPosition, "casterWorldPosition");
+}
+
+ShadowDirective.prototype.setGraphMgr = function(graphMgr)
+{
+    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_depth_pass_vs, pcf_shadow_mapping_depth_pass_fs);
+    this.shadowFBO = graphMgr.renderContext.createShadowFramebufferObject();
+    this.displayListObj = new DisplayListObj(graphMgr.renderContext);
+    
+    // call base-class implementation
+    SGDirective.prototype.setGraphMgr.call(this, graphMgr);
+}
+
+ShadowDirective.prototype.execute = function(root)
+{
+    root = root || this.rootNode.getValueDirect();
+
+    // get current shader program
+    var program = this.graphMgr.renderContext.getProgram();
+
+    // get current display list (if any)
+    var lastDisplayListObj = this.graphMgr.renderContext.getDisplayList();
+    
+    // get current viewport and clear color
+    var viewport = this.graphMgr.renderContext.getViewport();
+    var clearColor = this.graphMgr.renderContext.getClearColor();
+
+    // set shader program
+    this.graphMgr.renderContext.useProgram(this.program);
+    
+    // set projection
+    var fovyRadians = toRadians(90);
+    var height = 1024;
+    var width = 1024;
+    var near = 1;
+    var far = 100;
+    
+    var top = Math.tan(fovyRadians / 2) * near;
+    var bottom = -top;
+    var right = top * (width / height);
+    var left = -right;
+   
+    var projectionMatrix = this.graphMgr.renderContext.perspectiveMatrixLH(left, right,
+        top, bottom, near, far);
+    
+    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+    this.graphMgr.renderContext.pushMatrix();
+    this.graphMgr.renderContext.loadMatrix(projectionMatrix);
+    this.graphMgr.renderContext.applyProjectionTransform();
+    
+    // TODO: make configurable
+    worldPos = this.casterWorldPosition.getValueDirect();
+    this.graphMgr.renderContext.setShadowCasterWorldPosition(worldPos.x, worldPos.y, worldPos.z);
+    
+    // set view
+    var translationMatrix = new Matrix4x4();
+    translationMatrix.loadTranslation(worldPos.x, worldPos.y, worldPos.z); // TODO
+    
+    var rotationMatrix = new Matrix4x4();
+    rotationMatrix.loadYAxisRotation(90);
+    
+    var viewMatrix = rotationMatrix.multiply(translationMatrix);
+    viewMatrix.invert();
+    
+    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+    this.graphMgr.renderContext.pushMatrix();
+    this.graphMgr.renderContext.loadMatrix(viewMatrix);
+    this.graphMgr.renderContext.applyViewTransform();
+    
+    // bind the first face of the shadow fbo to the framebuffer
+    this.shadowFBO.bindForWriting(eCubeMapFace.Positive_X);
+    
+    // set this display list to render context    
+    this.graphMgr.renderContext.setDisplayList(this.displayListObj);
+    
+    // begin recording
+    this.displayListObj.record_begin();
+    
+    // draw
+    var params = new ShadowParams();
+    root.apply("shadow", params, true);
+    
+    // stop recording
+    this.displayListObj.record_end();
+    
+    // bind subsequent faces of the shadow fbo to the framebuffer and draw
+    for (var i = 1; i < 6; i++)
+    {
+        // bind the face of the shadow fbo to the framebuffer
+        this.shadowFBO.bindForWriting(eCubeMapFace.Positive_X + i);
+        
+        // set view
+        switch (eCubeMapFace.Positive_X + i)
+        {
+            case eCubeMapFace.Negative_X: rotationMatrix.loadYAxisRotation(-90); break;
+            case eCubeMapFace.Positive_Y: rotationMatrix.loadXAxisRotation(90); break;
+            case eCubeMapFace.Negative_Y: rotationMatrix.loadXAxisRotation(-90); break;
+            case eCubeMapFace.Positive_Z: rotationMatrix.loadYAxisRotation(0); break;
+            case eCubeMapFace.Negative_Z: rotationMatrix.loadYAxisRotation(180); break;
+        }
+        viewMatrix = rotationMatrix.multiply(translationMatrix);
+        viewMatrix.invert();
+        this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+        this.graphMgr.renderContext.loadMatrix(viewMatrix);
+        this.graphMgr.renderContext.applyViewTransform();
+        
+        // draw
+        this.displayListObj.play();
+    }
+    
+    // restore previous projection
+    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+    this.graphMgr.renderContext.popMatrix();
+    this.graphMgr.renderContext.applyProjectionTransform();
+    
+    // restore previous view
+    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+    this.graphMgr.renderContext.popMatrix();
+    this.graphMgr.renderContext.applyViewTransform();
+    
+    // restore last display list (if any)
+    this.graphMgr.renderContext.setDisplayList(lastDisplayListObj);
+    
+    // restore last viewport and clear color
+    this.graphMgr.renderContext.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+    this.graphMgr.renderContext.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    
+    // restore last shader program
+    this.graphMgr.renderContext.useProgram(program);
+    
+    this.graphMgr.renderContext.setShadowCasterWorldPosition(worldPos.x, worldPos.y, worldPos.z);
+    
+    // unbind the shadow fbo from the framebuffer and bind for reading by the render pass
+    this.shadowFBO.bindForReading();
+}
 var OBJECTMOTION_PAN_BIT     = 0x001;
 var OBJECTMOTION_LINEAR_BIT  = 0x002;
 var OBJECTMOTION_ANGULAR_BIT = 0x004;
@@ -24487,6 +25372,7 @@ Cube.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.materialNode.apply(directive, params, visitChildren);
                 this.draw(params.dissolve);
@@ -24497,18 +25383,18 @@ Cube.prototype.apply = function(directive, params, visitChildren)
 
 Cube.prototype.draw = function(dissolve)
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
 
     this.graphMgr.renderContext.leftMultMatrix(this.transform);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     
     // draw primitives
     this.vertexBuffer.draw();
     
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
 }
 
 function Cube_PositionModifiedCB(attribute, container)
@@ -24584,10 +25470,10 @@ ScreenRect.prototype.draw = function(dissolve)
 {
     // set projection matrix
     var m = new Matrix4x4();
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
     this.graphMgr.renderContext.loadMatrix(m);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
     this.graphMgr.renderContext.pushMatrix();
     this.graphMgr.renderContext.loadMatrix(m);
@@ -24606,9 +25492,9 @@ ScreenRect.prototype.draw = function(dissolve)
     // restore projection matrix
     this.graphMgr.renderContext.popMatrix();
     this.graphMgr.renderContext.applyProjectionTransform();
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     
     this.graphMgr.renderContext.enable(eRenderMode.DepthTest);
     this.graphMgr.renderContext.enable(eRenderMode.DepthBufferWrite);
@@ -71569,7 +72455,6 @@ JSM.ThreeViewer.prototype.GetObjectsUnderPosition=function(a,b){var c=2*(a/this.
 JSM.ThreeViewer.prototype.GetObjectsUnderTouch=function(){return this.GetObjectsUnderPosition(this.navigation.touch.currX,this.navigation.touch.currY)};JSM.ThreeViewer.prototype.ProjectVector=function(a,b,c){var d=this.canvas.width/2,e=this.canvas.height/2,f=new THREE.Projector;a=new THREE.Vector3(a,b,c);f.projectVector(a,this.camera);a.x=a.x*d+d;a.y=-(a.y*e)+e;return a};JSM.ThreeViewer.prototype.EnableDraw=function(a){this.enableDraw=a};
 JSM.ThreeViewer.prototype.Draw=function(){if(this.enableDraw){null!==this.runBeforeRender&&this.runBeforeRender();this.camera.position.set(this.cameraMove.eye.x,this.cameraMove.eye.y,this.cameraMove.eye.z);this.camera.up.set(this.cameraMove.up.x,this.cameraMove.up.y,this.cameraMove.up.z);this.camera.lookAt(new THREE.Vector3(this.cameraMove.center.x,this.cameraMove.center.y,this.cameraMove.center.z));var a=(new THREE.Vector3).subVectors(this.cameraMove.eye,this.cameraMove.center);this.directionalLight.position.set(a.x,
 a.y,a.z);this.renderer.render(this.scene,this.camera);null!==this.runAfterRender&&this.runAfterRender();this.drawLoop&&requestAnimationFrame(this.Draw.bind(this))}};JSM.ThreeViewer.prototype.DrawIfNeeded=function(){this.drawLoop||this.Draw()};JSM.ThreeViewer.prototype.StartDrawLoop=function(){this.drawLoop=!0;this.Draw()};
-
 
 // This is ammo.js, a port of Bullet Physics to JavaScript. zlib licensed.
 var Ammo = (function() {
