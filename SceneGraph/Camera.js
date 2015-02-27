@@ -133,9 +133,9 @@ Camera.prototype.applyTransform = function()
     matrix.loadMatrix(this.sectorTransformCompound);
     matrix.invert();
 
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
     this.graphMgr.renderContext.loadMatrix(matrix);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyViewTransform();
 }
 
 function Camera_NearDistanceModifiedCB(attribute, container)

@@ -262,14 +262,14 @@ HighlightDirective.prototype.configureStencil_Target = function(renderContext,
     renderContext.pushMatrix();
     renderContext.loadMatrix(projMatrix);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(worldViewMatrix);
-    renderContext.applyModelViewTransform();
+    renderContext.applyWorldTransform();
     geometry.drawPrimitives();
     renderContext.setMatrixMode(RC_PROJECTION);
     renderContext.popMatrix();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.popMatrix();
 
     // restore render states
@@ -308,10 +308,10 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
-    renderContext.applyModelViewTransform();
+    renderContext.applyWorldTransform();
     this.vertexBuffer.draw();
     renderContext.popMatrix();
     renderContext.setMatrixMode(RC_PROJECTION);
@@ -323,7 +323,7 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.setEnabled(eRenderMode.StencilTest, lastStencilTest);
     renderContext.setEnabled(eRenderMode.AlphaBlend, lastAlphaBlend);
     renderContext.setEnabled(eRenderMode.Lighting, lastLighting);
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
 }
                                       
 HighlightDirective.prototype.initHighlightSquareVB = function()

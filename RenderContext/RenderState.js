@@ -1,14 +1,15 @@
-﻿var RENDERSTATE_TRANSFORM_BIT      = 0x001;
+var RENDERSTATE_TRANSFORM_BIT      = 0x001;
 var RENDERSTATE_LIGHTING_BIT       = 0x002;
 var RENDERSTATE_MATERIAL_BIT       = 0x004;
 var RENDERSTATE_FOG_BIT            = 0x008;
 var RENDERSTATE_CLIP_PLANE_BIT     = 0x010;
-var RENDERSTATE_ZBUFFER_BIT		   = 0x020;
+var RENDERSTATE_ZBUFFER_BIT        = 0x020;
 var RENDERSTATE_ALL_BITS           = 0x03F;
 
 function RenderStateRec()
 {
     this.projMatrix = new Matrix4x4();
+    this.viewMatrix = new Matrix4x4();
     this.worldViewMatrix = new Matrix4x4();
     // TODO: textureMatrices
     this.lightIndices = [];
@@ -53,7 +54,8 @@ function RenderState(rc)
         if (mask & RENDERSTATE_TRANSFORM_BIT)
         {
             rec.projMatrix = this.renderContext.projectionMatrixStack.top();
-            rec.worldViewMatrix = this.renderContext.modelViewMatrixStack.top();
+            rec.viewMatrix = this.renderContext.viewMatrixStack.top();
+            rec.worldViewMatrix = this.renderContext.worldMatrixStack.top();
         }
 
         if (mask & RENDERSTATE_LIGHTING_BIT)
@@ -96,8 +98,10 @@ function RenderState(rc)
         {
             this.renderContext.projectionMatrixStack.loadMatrix(rec.projMatrix);
             this.renderContext.applyProjectionTransform();
-            this.renderContext.modelViewMatrixStack.loadMatrix(rec.worldViewMatrix);
-            this.renderContext.applyModelViewTransform();
+            this.renderContext.viewMatrixStack.loadMatrix(rec.viewMatrix);
+            this.renderContext.applyViewTransform();
+            this.renderContext.worldMatrixStack.loadMatrix(rec.worldViewMatrix);
+            this.renderContext.applyWorldTransform();
         }
 
         if (mask & RENDERSTATE_LIGHTING_BIT)
@@ -105,9 +109,9 @@ function RenderState(rc)
             // set light state for each set light within this state block
             for (var i = 0; i < rec.lightIndices.length; i++)
             {
-                this.renderContext.modelViewMatrixStack.push(rec.lightMatrices[i]);
+                this.renderContext.worldMatrixStack.push(rec.lightMatrices[i]);
                 this.renderContext.setLight(rec.lightIndices[i], rec.lightStates[i]);
-                this.renderContext.modelViewMatrixStack.pop();
+                this.renderContext.worldMatrixStack.pop();
             }
 
             // set light state to disabled for lights set outside this state block

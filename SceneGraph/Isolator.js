@@ -6,14 +6,14 @@ function Isolator()
     Group.call(this);
     this.className = "Isolator";
     this.attrType = eAttrType.Isolator;
-    
+
     this.updateIsolateTransforms = true;
     this.updateIsolateLights = true;
     this.updateIsolateMaterials = true;
     this.updateIsolateTextures = true;
     this.updateIsolateFog = true;
     this.updateIsolateClipPlanes = true;
-    
+
     this.isolateTransforms = new BooleanAttr(false);
     this.isolateLights = new BooleanAttr(false);
     this.isolateMaterials = new BooleanAttr(false);
@@ -31,7 +31,7 @@ function Isolator()
     this.isolateTextures.addModifiedCB(Isolator_IsolateTexturesModifiedCB, this);
     this.isolateFog.addModifiedCB(Isolator_IsolateFogModifiedCB, this);
     this.isolateClipPlanes.addModifiedCB(Isolator_IsolateClipPlanesModifiedCB, this);
-    
+
     this.registerAttribute(this.isolateTransforms, "isolateTransforms");
     this.registerAttribute(this.isolateLights, "isolateLights");
     this.registerAttribute(this.isolateMaterials, "isolateMaterials");
@@ -60,6 +60,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
+    var isolateLights = this.isolateLights.getValueDirect();
     var isolateTransforms = this.isolateTransforms.getValueDirect();
     var isolateTextures = this.isolateTextures.getValueDirect();
     var isolateDissolves = this.isolateDissolves.getValueDirect();
@@ -71,14 +72,24 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     var lastProjMatrix = null;
     var lastViewMatrix = null;
     var lastWorldMatrix = null;
+
+    var lights = null;
     
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.pushIsolatedStates();
 
                 // TODO
+
+                // push lights
+                if (isolateLights)
+                {
+                    // TODO
+                    lights = params.lights.slice();
+                }
 
                 // push transforms
                 if (isolateTransforms)
@@ -86,14 +97,16 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                     lastProjMatrix = params.projMatrix;
                     lastViewMatrix = params.viewMatrix;
                     lastWorldMatrix = params.worldMatrix;
-                    
+
                     // TEMP -- move to pushIsolatedStates
-                	this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
-                	this.graphMgr.renderContext.pushMatrix();
-                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
-                	this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+                    this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.pushMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
+                    this.graphMgr.renderContext.pushMatrix();
                 }
-                
+
                 // push textures
                 if (isolateTextures)
                 {
@@ -136,7 +149,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "collide":
             {
                 // push transforms
@@ -146,7 +159,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "highlight":
             {
                 // push transforms
@@ -164,25 +177,35 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.popIsolatedStates();
 
                 // TODO
 
+                // pop lights
+                if (isolateLights)
+                {
+                    // TODO
+                    params.lights = lights.slice();
+                }
+                
                 // pop transforms
                 if (isolateTransforms)
                 {
                     params.projMatrix = lastProjMatrix;
                     params.viewMatrix = lastViewMatrix;
                     params.worldMatrix = lastWorldMatrix;
-                    
+
                     // TEMP -- move to popIsolatedStates
                     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
-                	this.graphMgr.renderContext.popMatrix();
-                	this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
-                	this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_VIEW);
+                    this.graphMgr.renderContext.popMatrix();
+                    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
+                    this.graphMgr.renderContext.popMatrix();
                 }
-                    
+
                 // pop textures
                 if (isolateTextures)
                 {
@@ -225,7 +248,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "collide":
             {
                 // pop transforms
@@ -235,7 +258,7 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
                 }
             }
             break;
-            
+
         case "highlight":
             {
                 // pop transforms
@@ -251,8 +274,8 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
 Isolator.prototype.pushIsolatedStates = function()
 {
     // TODO
-    
-    
+
+
 }
 
 Isolator.prototype.popIsolatedStates = function()
@@ -277,7 +300,7 @@ function Isolator_IsolateMaterialsModifiedCB(attribute, container)
     container.updateIsolateMaterials = true;
     container.incrementModificationCount();
 }
- 
+
 function Isolator_IsolateTexturesModifiedCB(attribute, container)
 {
     container.updateIsolateTextures = true;

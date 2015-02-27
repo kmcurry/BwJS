@@ -1,4 +1,4 @@
-﻿RenderParams.prototype = new DirectiveParams();
+RenderParams.prototype = new DirectiveParams();
 RenderParams.prototype.constructor = RenderParams();
 
 function RenderParams()
@@ -16,6 +16,8 @@ function RenderParams()
     this.displayListObj = null;
     this.disableDisplayLists = false;
     this.resetDisplayLists = false;
+    this.lights = [];
+    this.modelID = 0;
 }
 
 RenderDirective.prototype = new SGDirective();
@@ -31,6 +33,7 @@ function RenderDirective()
 
     this.backgroundImageSet = false;
     
+    this.program = null;
     this.viewport = new ViewportAttr();
     this.backgroundColor = new ColorAttr(1, 1, 1, 1);
     this.backgroundImageFilename = new StringAttr("");
@@ -64,6 +67,8 @@ function RenderDirective()
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
     
+    this.shadowDirective = new ShadowDirective();
+    
     this.backgroundScreen = new Isolator();
     this.backgroundScreen.isolateTextures.setValueDirect(true);
     
@@ -80,6 +85,7 @@ RenderDirective.prototype.setRegistry = function(registry)
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
+    this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
     this.backgroundScreenRect.setRegistry(registry);
@@ -93,9 +99,14 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
+    this.shadowDirective.setGraphMgr(graphMgr);
     this.backgroundScreen.setGraphMgr(graphMgr);
     this.backgroundTexture.setGraphMgr(graphMgr);
     this.backgroundScreenRect.setGraphMgr(graphMgr);
+    
+    // create shader program
+    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -103,27 +114,21 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
 
 RenderDirective.prototype.execute = function(root)
 {  
+    // set shader program
+    this.graphMgr.renderContext.useProgram(this.program);
+    
     // draw background
-    this.drawBackground();
+    //this.drawBackground();
     
     root = root || this.rootNode.getValueDirect();
 
     var visited = this.updateDirective.execute(root);
     
+    // setup shadow map
+    this.shadowDirective.execute(root);
+    
     // render
     params = new RenderParams();
-    /*
-    renderParams.path = NULL;//m_path;
-    renderParams.pathIndex = 1;
-    renderParams.viewport = m_currentViewport;
-    renderParams.jitterAmt = m_currentJitterAmt + jitterAmt; // RenderDirective jitter + AA jitter
-    renderParams.distanceSortAgent = m_distanceSortAgent;
-    renderParams.polygonSortAgent = m_polygonSortAgent;
-    renderParams.renderSequenceAgent = m_renderSequenceAgent;
-    renderParams.shadowRenderAgent = m_shadowRenderAgent;
-    renderParams.drawTextures = m_texturesEnabled->GetValueDirect();
-    renderParams.userData = m_userData->GetValueDirect();
-     */
     params.directive = this;
     params.path = null;
     params.pathIndex = 1;
@@ -131,7 +136,7 @@ RenderDirective.prototype.execute = function(root)
     params.distanceSortAgent = this.distanceSortAgent;
     params.drawTextures = this.texturesEnabled.getValueDirect();
 
-	// if resetting display lists, set the disableDisplayLists renderParams flag this render
+    // if resetting display lists, set the disableDisplayLists renderParams flag this render
     if (this.resetDisplayLists)
     {
     	params.resetDisplayLists = true;

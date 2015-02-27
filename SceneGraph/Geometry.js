@@ -1,4 +1,4 @@
-﻿Geometry.prototype = new RenderableElement();
+Geometry.prototype = new RenderableElement();
 Geometry.prototype.constructor = Geometry;
 
 function Geometry()

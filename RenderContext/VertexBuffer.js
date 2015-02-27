@@ -1,4 +1,4 @@
-﻿var RC_POINTS                       = 0x0000;
+var RC_POINTS                       = 0x0000;
 var RC_LINES                        = 0x0001;
 var RC_LINE_LOOP                    = 0x0002;
 var RC_LINE_STRIP                   = 0x0003;

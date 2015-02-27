@@ -114,6 +114,7 @@ Cube.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 this.materialNode.apply(directive, params, visitChildren);
                 this.draw(params.dissolve);
@@ -124,18 +125,18 @@ Cube.prototype.apply = function(directive, params, visitChildren)
 
 Cube.prototype.draw = function(dissolve)
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
 
     this.graphMgr.renderContext.leftMultMatrix(this.transform);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     
     // draw primitives
     this.vertexBuffer.draw();
     
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
 }
 
 function Cube_PositionModifiedCB(attribute, container)
