@@ -274,7 +274,7 @@ function webglRC(canvas, background)
                 break;
 
             case eRenderMode.Lighting:
-                e = _gl.getUniform(_program, _program.lightingEnabled);
+                e = _gl.getUniform(_program.getGLProgram(), _program.lightingEnabled);
                 break;
                 
             case eRenderMode.StencilTest:
@@ -358,7 +358,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = _gl.getUniform(_program, _program.globalAmbientLight);
+        var values = _gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }

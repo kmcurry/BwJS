@@ -224,10 +224,10 @@ HighlightDirective.prototype.getWorldViewMatrix = function(highlightType, highli
 }
 
 HighlightDirective.prototype.configureStencil_Target = function(renderContext,
-                                                               geometry,
-                                                               projMatrix,
-                                                               worldViewMatrix,
-                                                               stencilOp)
+                                                                geometry,
+                                                                projMatrix,
+                                                                worldViewMatrix,
+                                                                stencilOp)
 {
     // get current render states
     var lastDepthBufferWrite = renderContext.enabled(eRenderMode.DepthBufferWrite);
@@ -262,12 +262,18 @@ HighlightDirective.prototype.configureStencil_Target = function(renderContext,
     renderContext.pushMatrix();
     renderContext.loadMatrix(projMatrix);
     renderContext.applyProjectionTransform();
+    renderContext.setMatrixMode(RC_VIEW);
+    renderContext.pushMatrix();
+    renderContext.loadMatrix(new Matrix4x4());
+    renderContext.applyViewTransform();
     renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(worldViewMatrix);
     renderContext.applyWorldTransform();
     geometry.drawPrimitives();
     renderContext.setMatrixMode(RC_PROJECTION);
+    renderContext.popMatrix();
+    renderContext.setMatrixMode(RC_VIEW);
     renderContext.popMatrix();
     renderContext.setMatrixMode(RC_WORLD);
     renderContext.popMatrix();
@@ -308,11 +314,17 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
     renderContext.applyProjectionTransform();
+    renderContext.setMatrixMode(RC_VIEW);
+    renderContext.pushMatrix();
+    renderContext.loadMatrix(m);
+    renderContext.applyViewTransform();
     renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
     renderContext.applyWorldTransform();
     this.vertexBuffer.draw();
+    renderContext.popMatrix();
+    renderContext.setMatrixMode(RC_VIEW);
     renderContext.popMatrix();
     renderContext.setMatrixMode(RC_PROJECTION);
     renderContext.popMatrix();
