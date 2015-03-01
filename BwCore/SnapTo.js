@@ -53,6 +53,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     plug.setMotionParent(socket);
     plug.getAttribute("position").setValueDirect(0, 0, 0);
     plug.getAttribute("rotation").setValueDirect(0, 0, 0);
+    plug.getAttribute("scale").setValueDirect(1, 1, 1);
     zeroInspectionGroup(plug);
 
     var socketWorldMatrix = new Matrix4x4();//this.socketWorldMatrix.getValueDirect();
