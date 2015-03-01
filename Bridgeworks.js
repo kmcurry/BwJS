@@ -17628,8 +17628,8 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // create shader program
-    this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
-    //this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -17648,7 +17648,7 @@ RenderDirective.prototype.execute = function(root)
     var visited = this.updateDirective.execute(root);
     
     // setup shadow map
-    //this.shadowDirective.execute(root);
+    this.shadowDirective.execute(root);
     
     // render
     params = new RenderParams();
