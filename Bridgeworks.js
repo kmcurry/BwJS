@@ -24109,7 +24109,8 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         // physics simulator uses parents for child models
 
         models.push(model);
-        bodies.push_back(model.getAttribute("name"));
+        var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
+        bodies.push_back(name);
     }
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
 
@@ -24265,6 +24266,7 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
+                break;
             }
         }
     }
