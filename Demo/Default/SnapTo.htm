@@ -44,8 +44,12 @@
         <script type="text/javascript" src="../../RenderContext/WebGL/webglRC.js"></script>
         <script type="text/javascript" src="../../RenderContext/WebGL/webglVB.js"></script>
         <script type="text/javascript" src="../../RenderContext/WebGL/webglTO.js"></script>
-        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/default_vertex_lighting.js"></script>
-        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/default_fragment_lighting.js"></script>
+        <script type="text/javascript" src="../../RenderContext/WebGL/webglShadowFBO.js"></script>
+        <script type="text/javascript" src="../../RenderContext/WebGL/webgl-texture-float-extension-shims.js"></script>      
+        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/default-vertex-lighting.js"></script>
+        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/default-fragment-lighting.js"></script>
+        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/pcf-shadow-mapping-depth-pass.js"></script>
+        <script type="text/javascript" src="../../RenderContext/WebGL/Shaders/pcf-shadow-mapping-render-pass.js"></script>
         <script type="text/javascript" src="../../RenderContext/DisplayList.js"></script>
         <script type="text/javascript" src="../../ContentHandler/ContentHandler.js"></script>
         <script type="text/javascript" src="../../ContentHandler/ContentBuilder.js"></script>
@@ -113,6 +117,7 @@
         <script type="text/javascript" src="../../SceneGraph/SerializeDirective.js"></script>
         <script type="text/javascript" src="../../SceneGraph/CollideDirective.js"></script>
         <script type="text/javascript" src="../../SceneGraph/HighlightDirective.js"></script>
+        <script type="text/javascript" src="../../SceneGraph/ShadowDirective.js"></script>
         <script type="text/javascript" src="../../SceneGraph/ObjectMover.js"></script>
         <script type="text/javascript" src="../../SceneGraph/AnimalMover.js"></script>
         <script type="text/javascript" src="../../SceneGraph/WalkSimulator.js"></script>
@@ -194,12 +199,18 @@
         <script type="text/javascript">
             var bridgeworks = null;
             var xml = "";
-
-            function locate()
+            var x = 1.5;
+            var y = 1.5;
+            var z = 1.5;
+            function rotate()
             {
-                var xml = "\<Locate target='" + document.getElementById('objectname').value + "'/>";
+                var xml = "\<Set target='UV_BoxG''>";
+                xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
                 console.debug(xml);
                 bridgeworks.updateScene(xml);
+                x += 0.5;
+                y += 0.5;
+                z += 0.5;
             }
         </script>
 
@@ -217,7 +228,7 @@
             <button onclick="bridgeworks.renderController.stop();">Stop</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             Object: <input id="objectname"/>
-            <button onclick="locate();">Locate</button>
+            <button onclick="rotate();">Rotate</button>
         </div>
     </center>
 

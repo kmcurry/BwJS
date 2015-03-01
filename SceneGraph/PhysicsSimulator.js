@@ -421,14 +421,14 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var motionState = this.physicsBodies[n].getMotionState();
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInteria);
+    Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
 
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
-    Ammo.destroy(this.physicsBodies[n].getMotionState());
     Ammo.destroy(this.physicsBodies[n]);
+    // don't destroy motionState because it's now being used by the new body
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
