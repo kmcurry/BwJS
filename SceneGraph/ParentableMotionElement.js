@@ -609,6 +609,17 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     this.synchronizeSectorPosition();
 }
 
+ParentableMotionElement.prototype.isMotionAncestor = function(pme)
+{
+    if (!pme || !this.motionParent) 
+        return false;
+    
+    if (this.motionParent == pme)
+        return true;
+    
+    return this.motionParent.isMotionAncestor(pme);
+}
+    
 ParentableMotionElement.prototype.velocityModified = function()
 {
     if (this.panVelocity.isZero() &&

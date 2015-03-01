@@ -212,8 +212,11 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 
         for (var j = 0; j < sockets.length; j++)
         {
-            // only test sockets/plugs between different models
-            if (plugs[i].second.model == sockets[j].second.model)
+            // only test sockets/plugs between different models, and models that are not already in a motion
+            // ancestor/descendent relationship
+            if (plugs[i].second.model == sockets[j].second.model ||
+                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
+                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
                 continue;
             
             var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
