@@ -12009,14 +12009,14 @@ function webglShadowFBO(rc, gl)
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, glFace, shadowMap, 0);
-        
+        /*
         var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
         if (status != gl.FRAMEBUFFER_COMPLETE)
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             return false;
         }
-        
+        */
         gl.viewport(0, 0, width, height);
         gl.clearColor(FLT_MAX, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -15686,8 +15686,23 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
         var inspectionGroup = getInspectionGroup(this.motionParent);
         if (inspectionGroup)
         {
+            var translate = inspectionGroup.getChild(0);
+            var translationMatrix = translate.getAttribute("matrix").getValueDirect();
+            
+            var scaleInverse = inspectionGroup.getChild(1);
+            var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
+            
             var quaternionRotate = inspectionGroup.getChild(2);
-            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            
+            var scale = inspectionGroup.getChild(3);
+            var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
+            
+            var translateBack = inspectionGroup.getChild(4);
+            var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
+            
+            inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
+                    rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
         }
         
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
@@ -17602,8 +17617,8 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // create shader program
-    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
-    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+    //this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
@@ -17622,7 +17637,7 @@ RenderDirective.prototype.execute = function(root)
     var visited = this.updateDirective.execute(root);
     
     // setup shadow map
-    this.shadowDirective.execute(root);
+    //this.shadowDirective.execute(root);
     
     // render
     params = new RenderParams();
@@ -26802,14 +26817,14 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var motionState = this.physicsBodies[n].getMotionState();
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInteria);
+    Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
 
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
-    Ammo.destroy(this.physicsBodies[n].getMotionState());
     Ammo.destroy(this.physicsBodies[n]);
+    // don't destroy motionState because it's now being used by the new body
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
@@ -32121,7 +32136,6 @@ function setInspectionGroupActivationState(node, enable)
             var pos = g_objPosMap[node];
             pPos.setValueDirect(pos);
         }
-
     }
 
     return;
@@ -32129,7 +32143,6 @@ function setInspectionGroupActivationState(node, enable)
 
 function setInspectionGroupContainer(node)
 {
-
     var pRotGroup = getInspectionGroup(node);
     if (pRotGroup)
     {
@@ -32153,7 +32166,6 @@ function setInspectionGroupContainer(node)
         pRotGroup.getChild(2).getAttribute("enabled").setContainer(node);
         pRotGroup.getChild(3).getAttribute("scale").setContainer(node);
         pRotGroup.getChild(4).getAttribute("translation").setContainer(node);
-
     }
 
     return;
