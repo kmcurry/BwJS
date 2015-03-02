@@ -24798,42 +24798,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
-                // get socket world matrix
-                
-                // get base motion parent
-                var inspectionRoot = sockets[j].second.model;
-                while (inspectionRoot.motionParent)
-                {
-                    inspectionRoot = inspectionRoot.motionParent;
-                }
-                
-                // remove any object-inspected rotation from the socket world matrix
-                var inspectionRotationMatrix = new Matrix4x4();
-                var inspectionGroup = getInspectionGroup(inspectionRoot);
-                if (inspectionGroup)
-                {
-                    var translate = inspectionGroup.getChild(0);
-                    var translationMatrix = translate.getAttribute("matrix").getValueDirect();
-
-                    var scaleInverse = inspectionGroup.getChild(1);
-                    var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
-
-                    var quaternionRotate = inspectionGroup.getChild(2);
-                    var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
-
-                    var scale = inspectionGroup.getChild(3);
-                    var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
-
-                    var translateBack = inspectionGroup.getChild(4);
-                    var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
-
-                    inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
-                        rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
-                }
-                inspectionRotationMatrix.invert();
-                
-                var socketWorldMatrix = sockets[j].second.worldMatrix.multiply(inspectionRotationMatrix);
-        
                 // perform snap-to!
                 var factory = this.registry.find("AttributeFactory");
                 var snapTo = factory.create("SnapTo");
@@ -24841,8 +24805,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
                 snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
                 snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
-                snapTo.getAttribute("socketWorldMatrix").setValueDirect(socketWorldMatrix);
-                snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
                 snapTo.getAttribute("slot").setValueDirect(connection);
                 snapTo.execute();
 
@@ -33346,14 +33308,6 @@ function SnapToCommand()
     this.slot = new NumberAttr(0);
     this.socketConnector = new SocketConnector();
     this.plugConnector = new PlugConnector();
-    this.socketWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
-    this.plugWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
 
     this.target.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
     this.socket.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
@@ -33364,8 +33318,6 @@ function SnapToCommand()
     this.registerAttribute(this.slot, "slot");
     this.registerAttribute(this.socketConnector, "socketConnector");
     this.registerAttribute(this.plugConnector, "plugConnector");
-    this.registerAttribute(this.socketWorldMatrix, "socketWorldMatrix");
-    this.registerAttribute(this.plugWorldMatrix, "plugWorldMatrix");
 
     this.target.addTarget(this.socket, null, null, false);
 }
@@ -33387,16 +33339,12 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     plug.getAttribute("scale").setValueDirect(1, 1, 1);
     zeroInspectionGroup(plug);
 
-    var socketWorldMatrix = this.socketWorldMatrix.getValueDirect();
-
-    var matrix = new Matrix4x4();
-
     // set rotation
-
+    var matrix = new Matrix4x4();
+    
     // rotate so that normals are coincident; do this by rotating angle between
     // the normals degrees about the cross product of the normals
     var socketNormal = this.socketConnector.getAttribute("normal").getValueDirect();
-    socketNormal = socketWorldMatrix.transform(socketNormal.x, socketNormal.y, socketNormal.z, 0);
     socketNormal = new Vector3D(socketNormal.x, socketNormal.y, socketNormal.z);
     socketNormal.normalize();
 
@@ -33424,9 +33372,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
 
     pin1 = matrix.transform(pin1.x, pin1.y, pin1.z, 1);
-    //slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
-    //slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
 
     var pinToPin, slotToSlot;
     switch (this.slot.getValueDirect())
@@ -33477,8 +33423,6 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         default:
             return;
     }
-    pin = new Vector3D(pin.x, pin.y, pin.z);
-    //slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
 
     // project pin onto plug normal, scale socketNormal
     var dot = dotProduct(pin, plugNormal);
