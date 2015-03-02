@@ -1,4 +1,4 @@
-﻿PointLight.prototype = new Light();
+PointLight.prototype = new Light();
 PointLight.prototype.constructor = PointLight;
 
 function PointLight()
@@ -16,6 +16,8 @@ function PointLight()
     this.range.addModifiedCB(PointLight_RangeModifiedCB, this);
 
     this.registerAttribute(this.range, "range");
+    
+    this.range.setValueDirect(FLT_MAX); // invoke modified CB
 }
 
 PointLight.prototype.update = function(params, visitChildren)
