@@ -9302,7 +9302,7 @@ function RenderContext(canvas, background)
     this.viewMatrixStack = new MatrixStack(new Matrix4x4());
     this.worldMatrixStack = new MatrixStack(new Matrix4x4());
     this.matrixMode = RC_WORLD;
-    
+    this.globalIllumination = new Color();
     this.frontMaterial = new MaterialDesc();
     
     this.displayListObj = null;
@@ -10489,6 +10489,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
         this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
         this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
         this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
@@ -10933,7 +10934,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = _gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
+        var values = this.globalIllumination.v();//_gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }
@@ -11196,20 +11197,22 @@ function webglRC(canvas, background)
         var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
         _gl.uniform4fv(_program.globalAmbientLight, new Float32Array(values));
+        
+        this.globalIllumination.load(ambient.r, ambient.g, ambient.b, ambient.a);
     }
 
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
         
-        // get current world transform
-        var worldMatrix = this.worldMatrixStack.top();
+        // get current view transform
+        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
             // transform to view space
-            var position = worldMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
             var values = [position.x, position.y, position.z, position.w];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
@@ -11218,7 +11221,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
             // transform to view space
-            var direction = worldMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
             var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
@@ -11282,7 +11285,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_RANGE_BIT)
         {
             // TODO
-            //_gl.uniform1f(_program.lightSource[index].range, desc.range);
+            _gl.uniform1f(_program.lightSource[index].range, desc.range);
         }
 
         // outer cone angle
@@ -11451,6 +11454,9 @@ function webglRC(canvas, background)
             if (_program)
             {
                 _program.enableVertexAttribArrays();
+                
+                // restore states that don't translate between program switches
+                this.setGlobalIllumination(this.globalIllumination);
             }
         }
     }
@@ -12145,6 +12151,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
 "uniform vec4 uFrontMaterial_ambient;",
 "uniform vec4 uFrontMaterial_diffuse;",
@@ -12221,14 +12228,13 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
-"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
 "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
 "{",
 "   float nDotL;",      // normal . light direction
 "   float nDotHV;",     // normal . light half vector
 "   float pf;",         // power factor
 "   float attenuation;",// computed attenuation factor
-"   float shadow;",
 "   float d;",          // distance from surface to light source
 "   vec3  L;",          // direction from surface to light position
 "   vec3  halfVector;", //
@@ -12236,8 +12242,8 @@ var pcf_shadow_mapping_render_pass_fs = [
 "", // Compute vector from surface to light position
 "   L = vec3(position) - vPosition;",
 "",
-"", // Compute distance between surface and light position
-"   d = length(L);",
+"", // Compute distance between surface and light position; if greater than range, return
+"   d = length(L); if (d > range) return;",
 "",
 "", // Normalize the vector from surface to light position,
 "   L = normalize(L);",
@@ -12245,10 +12251,8 @@ var pcf_shadow_mapping_render_pass_fs = [
 "", // Compute attenuation,
 "   attenuation = 1.0 / (constantAttenuation +",
 "      linearAttenuation * d +",
-"      quadraticAttenuation * d * d);",
-"",
-"", // Compute shadow factor
-"   shadow = shadowFactor(vPosition - uShadowCasterWorldPosition, max(0.0, dot(normal, L)));",
+"      quadraticAttenuation * d * d) *",
+"      shadowFactor(vPosition - uShadowCasterWorldPosition, max(0.0, dot(normal, L)));",
 "",
 "   nDotL = max(0.0, dot(normal, L));",
 "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
@@ -12262,9 +12266,9 @@ var pcf_shadow_mapping_render_pass_fs = [
 "       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation * shadow;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation * shadow;",
-"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation * shadow;",
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12290,7 +12294,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
 "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
 "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
@@ -17564,12 +17568,14 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
     this.backgroundColor.addModifiedCB(RenderDirective_BackgroundColorModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
+    this.shadowsEnabled.addModifiedCB(RenderDirective_ShadowsEnabledModifiedCB, this);
     
     this.registerAttribute(this.viewport, "viewport");
     this.registerAttribute(this.backgroundColor, "backgroundColor");
@@ -17577,7 +17583,8 @@ function RenderDirective()
     this.registerAttribute(this.foregroundImageFilename, "foregroundImageFilename");
     this.registerAttribute(this.foregroundAlphaFilename, "foregroundAlphaFilename");   
     this.registerAttribute(this.foregroundFadeEnabled, "foregroundFadeEnabled");   
-    this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
+    this.registerAttribute(this.texturesEnabled, "texturesEnabled");
+    this.registerAttribute(this.shadowsEnabled, "shadowsEnabled");
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.highlightType, "highlightType");
     
@@ -17628,9 +17635,15 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // create shader program
-    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
-    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
+
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
@@ -17647,9 +17660,12 @@ RenderDirective.prototype.execute = function(root)
 
     var visited = this.updateDirective.execute(root);
     
-    // setup shadow map
-    this.shadowDirective.execute(root);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        // setup shadow map
+        this.shadowDirective.execute(root);
+    }
+
     // render
     params = new RenderParams();
     params.directive = this;
@@ -17743,6 +17759,19 @@ function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
     //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
     container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
     container.backgroundImageSet = true;
+}
+
+function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+    if (enabled)
+    {
+        container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
 }
 RayPickParams.prototype = new DirectiveParams();
 RayPickParams.prototype.constructor = RayPickParams();
@@ -32811,7 +32840,7 @@ SnapToCommand.prototype.execute = function()
 
 SnapToCommand.prototype.snapTo = function(socket, plug)
 {
-    // parent plug to socket; clear its position/rotation and inspection group
+    // parent plug to socket; clear its position/rotation/scale and inspection group
     plug.setMotionParent(socket);
     plug.getAttribute("position").setValueDirect(0, 0, 0);
     plug.getAttribute("rotation").setValueDirect(0, 0, 0);
