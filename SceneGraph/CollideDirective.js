@@ -226,6 +226,13 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
+                // remove plug from object inspection
+                var objectInspector = this.registry.find("ObjectInspector");
+                if (objectInspector)
+                {
+                    objectInspector.clearSelection(plugs[i].second.model);
+                }
+                
                 // perform snap-to!
                 var factory = this.registry.find("AttributeFactory");
                 var snapTo = factory.create("SnapTo");
@@ -239,6 +246,7 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
+                
                 break;
             }
         }

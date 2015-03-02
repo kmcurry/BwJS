@@ -440,6 +440,17 @@ ObjectInspector.prototype.getInspectionObject = function(selected)
     return selected;
 }
 
+ObjectInspector.prototype.clearSelection = function(selected)
+{
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        if (this.selectedObjects[i] == selected)
+        {
+            this.selectedObjects.splice(i, 1);
+        }
+    }
+}
+
 function ObjectInspector_TranslationDeltaModifiedCB(attribute, container)
 {
     var enabled = container.enabled.getValueDirect();
