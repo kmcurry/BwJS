@@ -43,6 +43,8 @@ RenderContext/WebGL/webglRC.js
 RenderContext/WebGL/webglVB.js 
 RenderContext/WebGL/webglTO.js
 RenderContext/WebGL/webglShadowFBO.js
+RenderContext/WebGL/Shaders/default-fragment-lighting.js
+RenderContext/WebGL/Shaders/default-vertex-lighting.js
 RenderContext/WebGL/Shaders/pcf-shadow-mapping-depth-pass.js
 RenderContext/WebGL/Shaders/pcf-shadow-mapping-render-pass.js
 ContentHandler/ContentHandler.js 
