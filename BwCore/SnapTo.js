@@ -56,7 +56,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     plug.getAttribute("scale").setValueDirect(1, 1, 1);
     zeroInspectionGroup(plug);
 
-    var socketWorldMatrix = new Matrix4x4();//this.socketWorldMatrix.getValueDirect();
+    var socketWorldMatrix = this.socketWorldMatrix.getValueDirect();
 
     var matrix = new Matrix4x4();
 
@@ -93,9 +93,9 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
 
     pin1 = matrix.transform(pin1.x, pin1.y, pin1.z, 1);
-    slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
+    //slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
-    slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
+    //slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
 
     var pinToPin, slotToSlot;
     switch (this.slot.getValueDirect())
@@ -147,7 +147,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
             return;
     }
     pin = new Vector3D(pin.x, pin.y, pin.z);
-    slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
+    //slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
 
     // project pin onto plug normal, scale socketNormal
     var dot = dotProduct(pin, plugNormal);
