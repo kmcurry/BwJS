@@ -226,42 +226,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
-                // get socket world matrix
-                
-                // get base motion parent
-                var inspectionRoot = sockets[j].second.model;
-                while (inspectionRoot.motionParent)
-                {
-                    inspectionRoot = inspectionRoot.motionParent;
-                }
-                
-                // remove any object-inspected rotation from the socket world matrix
-                var inspectionRotationMatrix = new Matrix4x4();
-                var inspectionGroup = getInspectionGroup(inspectionRoot);
-                if (inspectionGroup)
-                {
-                    var translate = inspectionGroup.getChild(0);
-                    var translationMatrix = translate.getAttribute("matrix").getValueDirect();
-
-                    var scaleInverse = inspectionGroup.getChild(1);
-                    var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
-
-                    var quaternionRotate = inspectionGroup.getChild(2);
-                    var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
-
-                    var scale = inspectionGroup.getChild(3);
-                    var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
-
-                    var translateBack = inspectionGroup.getChild(4);
-                    var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
-
-                    inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
-                        rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
-                }
-                inspectionRotationMatrix.invert();
-                
-                var socketWorldMatrix = sockets[j].second.worldMatrix.multiply(inspectionRotationMatrix);
-        
                 // perform snap-to!
                 var factory = this.registry.find("AttributeFactory");
                 var snapTo = factory.create("SnapTo");
@@ -269,8 +233,6 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
                 snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
                 snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
-                snapTo.getAttribute("socketWorldMatrix").setValueDirect(socketWorldMatrix);
-                snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
                 snapTo.getAttribute("slot").setValueDirect(connection);
                 snapTo.execute();
 
