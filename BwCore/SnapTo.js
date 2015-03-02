@@ -113,7 +113,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 
     // set position
 
-    // get world positions of pin and slot to connect 
+    // get positions of pin and slot to connect 
     var pin, slot;
     switch (this.slot.getValueDirect())
     {
@@ -130,13 +130,9 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         default:
             return;
     }
+    pin = matrix.transform(pin.x, pin.y, pin.z, 1);
 
-    // project pin onto plug normal, scale socketNormal
-    var dot = dotProduct(pin, plugNormal);
-    socketNormal.multiplyScalar(dot);
-    
-    plug.getAttribute("sectorPosition").setValueDirect(slot.x + slotToSlot.x / 2 + socketNormal.x, 
-        slot.y + slotToSlot.y / 2 + socketNormal.y, slot.z + slotToSlot.z / 2 + socketNormal.z);
+    plug.getAttribute("sectorPosition").setValueDirect(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
 }
 
 function SnapToCommand_TargetModifiedCB(attribute, container)

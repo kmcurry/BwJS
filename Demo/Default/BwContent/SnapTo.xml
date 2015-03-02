@@ -50,33 +50,33 @@
                             <socketConnector type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <slot1>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <slot1>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <slot1>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
@@ -85,33 +85,33 @@
                             <plugConnector type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <pin1>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <pin1>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <pin1>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
@@ -120,7 +120,7 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <!--<Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -128,33 +128,33 @@
                             <socketConnector type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <slot1>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <slot1>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <slot1>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
@@ -163,33 +163,33 @@
                             <plugConnector type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <pin1>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <pin1>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <pin1>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
@@ -197,7 +197,7 @@
                         <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>  
-                    </Model>
+                    </Model>-->
                     <!--<Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="4" y=".26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
@@ -206,33 +206,33 @@
                             <socketConnector type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <slot1>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <slot1>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <slot1>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
@@ -241,33 +241,33 @@
                             <plugConnector type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <pin1>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <pin1>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <pin1>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
@@ -284,33 +284,33 @@
                             <socketConnector type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <slot1>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0.25" y="0" z="0"/>
+                                    <center x="0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <slot1>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0.25" z="0"/>
+                                    <center x="0" y="0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
                             <socketConnector type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <slot1>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot1>
                                 <slot2>
-                                    <center x="0" y="0" z="0.25"/>
+                                    <center x="0" y="0" z="0.5"/>
                                     <radius>0.2</radius>
                                 </slot2>
                             </socketConnector>
@@ -319,33 +319,33 @@
                             <plugConnector type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <pin1>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="-0.25" y="0" z="0"/>
+                                    <center x="-0.25" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <pin1>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="-0.25" z="0"/>
+                                    <center x="0" y="-0.25" z="0.25"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
                             <plugConnector type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <pin1>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin1>
                                 <pin2>
-                                    <center x="0" y="0" z="-0.25"/>
+                                    <center x="0" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </pin2>
                             </plugConnector>
@@ -354,7 +354,7 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
+                    <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
                         <rotation x="90" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -374,7 +374,7 @@
                         <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>  
-                    </Model>-->
+                    </Model>
                     <!--<Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
                          <position x="-2" y=".26" z="0"/>
                          <rotation x="0" y="0" z="0"/>
