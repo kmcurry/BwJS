@@ -41,12 +41,14 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
     this.backgroundColor.addModifiedCB(RenderDirective_BackgroundColorModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
+    this.shadowsEnabled.addModifiedCB(RenderDirective_ShadowsEnabledModifiedCB, this);
     
     this.registerAttribute(this.viewport, "viewport");
     this.registerAttribute(this.backgroundColor, "backgroundColor");
@@ -54,7 +56,8 @@ function RenderDirective()
     this.registerAttribute(this.foregroundImageFilename, "foregroundImageFilename");
     this.registerAttribute(this.foregroundAlphaFilename, "foregroundAlphaFilename");   
     this.registerAttribute(this.foregroundFadeEnabled, "foregroundFadeEnabled");   
-    this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
+    this.registerAttribute(this.texturesEnabled, "texturesEnabled");
+    this.registerAttribute(this.shadowsEnabled, "shadowsEnabled");
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.highlightType, "highlightType");
     
@@ -105,9 +108,15 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // create shader program
-    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
-    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
+
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
@@ -124,9 +133,12 @@ RenderDirective.prototype.execute = function(root)
 
     var visited = this.updateDirective.execute(root);
     
-    // setup shadow map
-    this.shadowDirective.execute(root);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        // setup shadow map
+        this.shadowDirective.execute(root);
+    }
+
     // render
     params = new RenderParams();
     params.directive = this;
@@ -220,4 +232,17 @@ function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
     //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
     container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
     container.backgroundImageSet = true;
+}
+
+function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+    if (enabled)
+    {
+        container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
 }

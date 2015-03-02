@@ -358,7 +358,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = _gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
+        var values = this.globalIllumination.v();//_gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }
@@ -621,20 +621,22 @@ function webglRC(canvas, background)
         var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
         _gl.uniform4fv(_program.globalAmbientLight, new Float32Array(values));
+        
+        this.globalIllumination.load(ambient.r, ambient.g, ambient.b, ambient.a);
     }
 
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
         
-        // get current world transform
-        var worldMatrix = this.worldMatrixStack.top();
+        // get current view transform
+        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
             // transform to view space
-            var position = worldMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
             var values = [position.x, position.y, position.z, position.w];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
@@ -643,7 +645,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
             // transform to view space
-            var direction = worldMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
             var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
@@ -707,7 +709,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_RANGE_BIT)
         {
             // TODO
-            //_gl.uniform1f(_program.lightSource[index].range, desc.range);
+            _gl.uniform1f(_program.lightSource[index].range, desc.range);
         }
 
         // outer cone angle
@@ -876,6 +878,9 @@ function webglRC(canvas, background)
             if (_program)
             {
                 _program.enableVertexAttribArrays();
+                
+                // restore states that don't translate between program switches
+                this.setGlobalIllumination(this.globalIllumination);
             }
         }
     }

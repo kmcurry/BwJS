@@ -88,6 +88,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
         this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
         this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
         this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
