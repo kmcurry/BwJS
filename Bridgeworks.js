@@ -24800,9 +24800,16 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             {
                 // get socket world matrix
                 
+                // get base motion parent
+                var inspectionRoot = sockets[j].second.model;
+                while (inspectionRoot.motionParent)
+                {
+                    inspectionRoot = inspectionRoot.motionParent;
+                }
+                
                 // remove any object-inspected rotation from the socket world matrix
                 var inspectionRotationMatrix = new Matrix4x4();
-                var inspectionGroup = getInspectionGroup(sockets[j].second.model);
+                var inspectionGroup = getInspectionGroup(inspectionRoot);
                 if (inspectionGroup)
                 {
                     var translate = inspectionGroup.getChild(0);
