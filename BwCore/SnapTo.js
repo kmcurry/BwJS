@@ -49,7 +49,7 @@ SnapToCommand.prototype.execute = function()
 
 SnapToCommand.prototype.snapTo = function(socket, plug)
 {
-    // parent plug to socket; clear its position/rotation and inspection group
+    // parent plug to socket; clear its position/rotation/scale and inspection group
     plug.setMotionParent(socket);
     plug.getAttribute("position").setValueDirect(0, 0, 0);
     plug.getAttribute("rotation").setValueDirect(0, 0, 0);
