@@ -274,6 +274,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     switch (directive)
     {
         case "render":
+        case "shadow":
             {
                 var show = this.show.getValueDirect();
                 if (!show)
@@ -283,14 +284,23 @@ Model.prototype.apply = function(directive, params, visitChildren)
                     return;
                 }
 
+                var lastWorldMatrix = new Matrix4x4();
+                lastWorldMatrix.loadMatrix(params.worldMatrix);              
+
+                params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                
                 this.pushMatrix();
 
                 this.applyTransform();
 
+                this.graphMgr.renderContext.setModelID(params.modelID++);
+                
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 this.popMatrix();
+                
+                params.worldMatrix.loadMatrix(lastWorldMatrix);
             }
             break;
 
@@ -329,7 +339,6 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);              
 
-                //params.worldMatrix.loadMatrix(this.sectorTransformCompound.multiply(params.worldMatrix));
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
   
                 // call base-class implementation
@@ -387,7 +396,7 @@ Model.prototype.onRemove = function()
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
     for (var i = 0; i < physicsSimulators.length; i++)
     {
-        physicsSimulators[i].remove(this);
+        physicsSimulators[i].deleteModel(this);
     }
     
     // call base-class implementation
@@ -396,15 +405,15 @@ Model.prototype.onRemove = function()
 
 Model.prototype.pushMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
 }
 
 Model.prototype.popMatrix = function()
 {
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();    
+    this.graphMgr.renderContext.applyWorldTransform();    
 }
 
 Model.prototype.addSurface = function(surface)

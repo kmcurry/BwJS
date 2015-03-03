@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * enable caps 
  */
 var eRenderMode =
@@ -70,6 +70,9 @@ var eShadeModel =
 
 var RC_BLEND            = 0x0001;
 var RC_CULL_FACE        = 0x0B44;
+
+var RC_FRONT            = 0x0010;
+var RC_BACK             = 0x0020;
 
 /*
  * light desc
@@ -168,6 +171,16 @@ var RC_BLEND                        = 0x004;
 var RC_DECAL                        = 0x008;
 
 /*
+ * texture unit
+ */
+var eTextureUnit =
+{
+    Color0                          : 0,
+    Color1                          : 1,
+    ShadowMap                       : 2
+}
+
+/*
  * texture coordinate source
  */
 var eTextureCoordSrc = 
@@ -187,9 +200,23 @@ var RC_MIRRORED_REPEAT             = 0x8370;
 /*
  * matrix mode
  */
-var RC_MODELVIEW				   = 0x001;
-var RC_PROJECTION				   = 0x002;
-var RC_TEXTURE					   = 0x004;
+var RC_WORLD			   = 0x001;
+var RC_VIEW                        = 0x002;
+var RC_PROJECTION		   = 0x004;
+var RC_TEXTURE                     = 0x008;
+
+/*
+ * cube map face
+ */
+var eCubeMapFace =
+{
+    Positive_X                      : 0,
+    Negative_X                      : 1,
+    Positive_Y                      : 2,
+    Negative_Y                      : 3,
+    Positive_Z                      : 4,
+    Negative_Z                      : 5
+}
 
 /*
  * render context
@@ -202,9 +229,10 @@ function RenderContext(canvas, background)
     this.background = background;
     
     this.projectionMatrixStack = new MatrixStack(new Matrix4x4());
-    this.modelViewMatrixStack = new MatrixStack(new Matrix4x4());
-    this.matrixMode = RC_MODELVIEW;
-    
+    this.viewMatrixStack = new MatrixStack(new Matrix4x4());
+    this.worldMatrixStack = new MatrixStack(new Matrix4x4());
+    this.matrixMode = RC_WORLD;
+    this.globalIllumination = new Color();
     this.frontMaterial = new MaterialDesc();
     
     this.displayListObj = null;
@@ -249,17 +277,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.push();
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.push();
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.push();
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.push();
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.push();
+            }
+            break;
     	}	
     }
     
@@ -269,17 +303,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.pop();
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.pop();
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.pop();
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.pop();
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.pop();
+            }
+            break;
     	}
     }
     
@@ -289,17 +329,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.loadMatrix(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.loadMatrix(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.loadMatrix(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.loadMatrix(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.loadMatrix(matrix);
+            }
+            break;
     	}	
     }
     
@@ -309,17 +355,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.leftMultiply(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.leftMultiply(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.leftMultiply(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.leftMultiply(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.leftMultiply(matrix);
+            }
+            break;
     	}
     }
     
@@ -329,17 +381,23 @@ function RenderContext(canvas, background)
     	
     	switch (this.matrixMode)
     	{
-    		case RC_MODELVIEW:
-    		{
-    			this.modelViewMatrixStack.rightMultiply(matrix);
-    		}
-    		break;
-    		
-    		case RC_PROJECTION:
-    		{
-    			this.projectionMatrixStack.rightMultiply(matrix);
-    		}
-    		break;
+            case RC_WORLD:
+            {
+                this.worldMatrixStack.rightMultiply(matrix);
+            }
+            break;
+
+            case RC_VIEW:
+            {
+                this.viewMatrixStack.rightMultiply(matrix);
+            }
+            break;
+
+            case RC_PROJECTION:
+            {
+                this.projectionMatrixStack.rightMultiply(matrix);
+            }
+            break;
     	}	
     }
     

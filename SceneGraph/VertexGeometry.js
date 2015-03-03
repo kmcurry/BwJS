@@ -1,4 +1,4 @@
-﻿VertexGeometry.prototype = new Geometry();
+VertexGeometry.prototype = new Geometry();
 VertexGeometry.prototype.constructor = VertexGeometry;
 
 function VertexGeometry()
@@ -74,7 +74,6 @@ VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
     //GcSGNode::Post_Clone_Child(childClone, pathSrc, pathClone); Not being used right now. Maybe used in the futrue.
 }
 
-
 VertexGeometry.prototype.getUVCoords = function(texture)
 {
     for (var i=0; i < this.uvCoords.length; i++)
@@ -111,7 +110,8 @@ VertexGeometry.prototype.update = function(params, visitChildren)
     {
         this.updateVertices = false;
         
-        this.vertexBuffer.setVertices(this.vertices.getValueDirect());
+        var vertices = this.vertices.getValueDirect();
+        this.vertexBuffer.setVertices(vertices);
         
         this.updateBoundingTree = true;
         
@@ -159,6 +159,24 @@ VertexGeometry.prototype.apply = function(directive, params, visitChildren)
     {
         case "render":
             {
+            }
+            break;
+            
+        case "shadow":
+            {
+                var drawNow = true;
+                var dissolve = params.dissolve;
+                var opacity = params.opacity;
+                if (dissolve == 1)// || opacity == 0) // completely transparent objects can still reflect specularity
+                {
+                    // completely transparent, skip drawing
+                    drawNow = false;
+                }
+
+                if (drawNow)
+                {
+                    this.vertexBuffer.draw();
+                }
             }
             break;
     }

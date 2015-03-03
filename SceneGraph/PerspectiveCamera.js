@@ -91,7 +91,8 @@ PerspectiveCamera.prototype.setClipPlanes = function()
 
 PerspectiveCamera.prototype.applyPerspectiveTransform = function()
 {
-    this.graphMgr.renderContext.projectionMatrixStack.top().loadMatrix(this.projectionMatrix);
+    this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
+    this.graphMgr.renderContext.loadMatrix(this.projectionMatrix);
     this.graphMgr.renderContext.applyProjectionTransform();
 }
 

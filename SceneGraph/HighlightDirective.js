@@ -224,10 +224,10 @@ HighlightDirective.prototype.getWorldViewMatrix = function(highlightType, highli
 }
 
 HighlightDirective.prototype.configureStencil_Target = function(renderContext,
-                                                               geometry,
-                                                               projMatrix,
-                                                               worldViewMatrix,
-                                                               stencilOp)
+                                                                geometry,
+                                                                projMatrix,
+                                                                worldViewMatrix,
+                                                                stencilOp)
 {
     // get current render states
     var lastDepthBufferWrite = renderContext.enabled(eRenderMode.DepthBufferWrite);
@@ -262,14 +262,20 @@ HighlightDirective.prototype.configureStencil_Target = function(renderContext,
     renderContext.pushMatrix();
     renderContext.loadMatrix(projMatrix);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_VIEW);
+    renderContext.pushMatrix();
+    renderContext.loadMatrix(new Matrix4x4());
+    renderContext.applyViewTransform();
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.pushMatrix();
     renderContext.loadMatrix(worldViewMatrix);
-    renderContext.applyModelViewTransform();
+    renderContext.applyWorldTransform();
     geometry.drawPrimitives();
     renderContext.setMatrixMode(RC_PROJECTION);
     renderContext.popMatrix();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_VIEW);
+    renderContext.popMatrix();
+    renderContext.setMatrixMode(RC_WORLD);
     renderContext.popMatrix();
 
     // restore render states
@@ -308,11 +314,17 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
     renderContext.applyProjectionTransform();
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_VIEW);
     renderContext.pushMatrix();
     renderContext.loadMatrix(m);
-    renderContext.applyModelViewTransform();
+    renderContext.applyViewTransform();
+    renderContext.setMatrixMode(RC_WORLD);
+    renderContext.pushMatrix();
+    renderContext.loadMatrix(m);
+    renderContext.applyWorldTransform();
     this.vertexBuffer.draw();
+    renderContext.popMatrix();
+    renderContext.setMatrixMode(RC_VIEW);
     renderContext.popMatrix();
     renderContext.setMatrixMode(RC_PROJECTION);
     renderContext.popMatrix();
@@ -323,7 +335,7 @@ HighlightDirective.prototype.renderHighlightSquare = function(params, renderCont
     renderContext.setEnabled(eRenderMode.StencilTest, lastStencilTest);
     renderContext.setEnabled(eRenderMode.AlphaBlend, lastAlphaBlend);
     renderContext.setEnabled(eRenderMode.Lighting, lastLighting);
-    renderContext.setMatrixMode(RC_MODELVIEW);
+    renderContext.setMatrixMode(RC_WORLD);
 }
                                       
 HighlightDirective.prototype.initHighlightSquareVB = function()

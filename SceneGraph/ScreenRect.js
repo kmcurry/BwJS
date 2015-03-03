@@ -52,10 +52,10 @@ ScreenRect.prototype.draw = function(dissolve)
 {
     // set projection matrix
     var m = new Matrix4x4();
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.pushMatrix();
     this.graphMgr.renderContext.loadMatrix(m);
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     this.graphMgr.renderContext.setMatrixMode(RC_PROJECTION);
     this.graphMgr.renderContext.pushMatrix();
     this.graphMgr.renderContext.loadMatrix(m);
@@ -74,9 +74,9 @@ ScreenRect.prototype.draw = function(dissolve)
     // restore projection matrix
     this.graphMgr.renderContext.popMatrix();
     this.graphMgr.renderContext.applyProjectionTransform();
-    this.graphMgr.renderContext.setMatrixMode(RC_MODELVIEW);
+    this.graphMgr.renderContext.setMatrixMode(RC_WORLD);
     this.graphMgr.renderContext.popMatrix();
-    this.graphMgr.renderContext.applyModelViewTransform();
+    this.graphMgr.renderContext.applyWorldTransform();
     
     this.graphMgr.renderContext.enable(eRenderMode.DepthTest);
     this.graphMgr.renderContext.enable(eRenderMode.DepthBufferWrite);

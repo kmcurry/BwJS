@@ -1,4 +1,4 @@
-﻿GraphMgr.prototype = new AttributeContainer();
+GraphMgr.prototype = new AttributeContainer();
 GraphMgr.prototype.constructor = GraphMgr;
 
 function GraphMgr()

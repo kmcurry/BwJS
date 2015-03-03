@@ -1,4 +1,4 @@
-﻿Light.prototype = new ParentableMotionElement();
+Light.prototype = new ParentableMotionElement();
 Light.prototype.constructor = Light;
 
 function Light()
@@ -6,7 +6,7 @@ function Light()
     ParentableMotionElement.call(this);
     this.className = "Light";
     this.attrType = eAttrType.Light;
-    
+
     this.updateAmbient = true;
     this.updateDiffuse = true;
     this.updateSpecular = true;
@@ -17,13 +17,13 @@ function Light()
     this.lightDesc.validMembersMask = 0;
     this.lightIndex = 0;
     this.setLightDesc = false;
-    
+
     this.ambient = new ColorAttr(0, 0, 0, 1);
-	this.diffuse = new ColorAttr(1, 1, 1, 1);
-	this.specular = new ColorAttr(1, 1, 1, 1);
-	this.constantAttenuation = new NumberAttr(1);
-	this.linearAttenuation = new NumberAttr(0);
-	this.quadraticAttenuation = new NumberAttr(0);
+    this.diffuse = new ColorAttr(1, 1, 1, 1);
+    this.specular = new ColorAttr(1, 1, 1, 1);
+    this.constantAttenuation = new NumberAttr(1);
+    this.linearAttenuation = new NumberAttr(0);
+    this.quadraticAttenuation = new NumberAttr(0);
     this.shadowCaster = new BooleanAttr(false);
 
     this.ambient.addModifiedCB(Light_AmbientModifiedCB, this);
@@ -45,13 +45,13 @@ function Light()
 Light.prototype.setGraphMgr = function(graphMgr)
 {
     this.lightIndex = graphMgr.getAvailableLightIndex();
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.setGraphMgr.call(this, graphMgr);
 }
 
 Light.prototype.update = function(params, visitChildren)
-{  
+{
     if (this.updateAmbient)
     {
         this.updateAmbient = false;
@@ -104,10 +104,10 @@ Light.prototype.update = function(params, visitChildren)
     {
         this.setLightDesc = true;
     }
-    
+
     // ensure continued update (lights are transformed by view matrix)
     this.setModified();
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.update.call(this, params, visitChildren);
 }
@@ -119,41 +119,42 @@ Light.prototype.apply = function(directive, params, visitChildren)
     {
         switch (directive)
         {
-        case "render":
-            {
-                this.setLightEnabled();
-            }
-            break;
+            case "render":
+                {
+                    this.setLightEnabled();
+                }
+                break;
         }
-        
+
         // call base-class implementation
         ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-    
+
     switch (directive)
     {
-    case "render":
-        {
-            if (this.setLightDesc)
+        case "render":
             {
-                this.setLightDesc = false;
-                
-                this.applyLightDesc();
-            }
+                if (this.setLightDesc)
+                {
+                    this.setLightDesc = false;
 
-            this.setLightEnabled();   
-        }
-        break;
+                    this.applyLightDesc();
+                }
+
+                this.setLightEnabled();
+                params.lights.push(this);
+            }
+            break;
     }
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 }
 
 Light.prototype.applyLightDesc = function()
 {
-    this.graphMgr.renderContext.setLight(this.lightIndex, this.lightDesc);  
+    this.graphMgr.renderContext.setLight(this.lightIndex, this.lightDesc);
 }
 
 Light.prototype.setLightEnabled = function()
@@ -165,7 +166,7 @@ Light.prototype.onRemove = function()
 {
     // disable light
     this.graphMgr.renderContext.enableLight(this.lightIndex, 0);
-    
+
     // call base-class implementation
     ParentableMotionElement.prototype.onRemove.call(this);
 }
@@ -193,7 +194,7 @@ function Light_ConstantAttenuationModifiedCB(attribute, container)
     container.updateConstantAttenuation = true;
     container.incrementModificationCount();
 }
-    
+
 function Light_LinearAttenuationModifiedCB(attribute, container)
 {
     container.updateLinearAttenuation = true;
