@@ -9302,7 +9302,7 @@ function RenderContext(canvas, background)
     this.viewMatrixStack = new MatrixStack(new Matrix4x4());
     this.worldMatrixStack = new MatrixStack(new Matrix4x4());
     this.matrixMode = RC_WORLD;
-    
+    this.globalIllumination = new Color();
     this.frontMaterial = new MaterialDesc();
     
     this.displayListObj = null;
@@ -10489,6 +10489,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
         this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
         this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
         this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
@@ -10933,7 +10934,7 @@ function webglRC(canvas, background)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.GetGlobalIllumination, null);
         
-        var values = _gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
+        var values = this.globalIllumination.v();//_gl.getUniform(_program.getGLProgram(), _program.globalAmbientLight);
 
         return { r: values[0], g: values[1], b: values[2], a: values[3] };
     }
@@ -11196,20 +11197,22 @@ function webglRC(canvas, background)
         var values = [ ambient.r, ambient.g, ambient.b, ambient.a ];
 
         _gl.uniform4fv(_program.globalAmbientLight, new Float32Array(values));
+        
+        this.globalIllumination.load(ambient.r, ambient.g, ambient.b, ambient.a);
     }
 
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
         
-        // get current world transform
-        var worldMatrix = this.worldMatrixStack.top();
+        // get current view transform
+        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
             // transform to view space
-            var position = worldMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
             var values = [position.x, position.y, position.z, position.w];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
@@ -11218,7 +11221,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
             // transform to view space
-            var direction = worldMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
             var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
@@ -11282,7 +11285,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & LIGHTDESC_RANGE_BIT)
         {
             // TODO
-            //_gl.uniform1f(_program.lightSource[index].range, desc.range);
+            _gl.uniform1f(_program.lightSource[index].range, desc.range);
         }
 
         // outer cone angle
@@ -11451,6 +11454,9 @@ function webglRC(canvas, background)
             if (_program)
             {
                 _program.enableVertexAttribArrays();
+                
+                // restore states that don't translate between program switches
+                this.setGlobalIllumination(this.globalIllumination);
             }
         }
     }
@@ -12009,14 +12015,14 @@ function webglShadowFBO(rc, gl)
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, glFace, shadowMap, 0);
-        
+        /*
         var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
         if (status != gl.FRAMEBUFFER_COMPLETE)
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             return false;
         }
-        
+        */
         gl.viewport(0, 0, width, height);
         gl.clearColor(FLT_MAX, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -12039,6 +12045,508 @@ function webglShadowFBO(rc, gl)
 }
 
 
+var default_fragment_lighting_vs = [
+"attribute vec3 aVertexPosition;",
+"attribute vec3 aVertexNormal;",
+"attribute vec4 aVertexColor;",
+"attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
+"attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
+"", 
+"uniform mat4 uProjectionMatrix;",
+"uniform mat4 uViewMatrix;",
+"uniform mat4 uWorldMatrix;",
+"uniform mat4 uNormalMatrix;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"varying vec4 vVertexColor;",
+"varying vec4 vViewPosition;",
+"varying vec4 vViewDirection;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"void main()",
+"{",
+
+"   vVertexPosition = uWorldMatrix * vec4(aVertexPosition, 1);",
+"   vTransformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+"   vVertexColor = aVertexColor;",
+"   vViewPosition = uViewMatrix * vec4(0, 0, 0, 1);",
+"   vViewDirection = normalize(-vViewPosition);",
+"   vTextureCoord[0] = aTextureCoord0;",
+"   vTextureCoord[1] = aTextureCoord1;",        
+"   gl_Position = uProjectionMatrix * uViewMatrix * vVertexPosition;",
+"}"
+].join("\n");
+
+var default_fragment_lighting_fs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+"",
+"vec4 gAmbient;",
+"vec4 gDiffuse;",
+"vec4 gSpecular;",
+"",
+"uniform vec4 uGlobalAmbientLight;",                    
+"",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
+"",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
+"",
+"uniform int uLightingEnabled;",
+"uniform int uTexturesEnabled;",
+"uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
+"uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
+"uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
+"uniform int uTextureBlendOp;",
+"uniform vec4 uTextureColorMask;",
+"uniform vec4 uClipPlane[" + gl_MaxClipPlanes + "];",
+"uniform int uClipPlaneEnabled[" + gl_MaxClipPlanes + "];",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vTransformedNormal;",
+"varying vec4 vVertexColor;",
+"varying vec4 vViewPosition;",
+"varying vec4 vViewDirection;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
+"{",
+"   vec3 lightDir;",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . half-vector
+"   float pf;",         // power factor
+"",
+"   lightDir = normalize(vec3(position));",
+"",	
+"   nDotL = max(dot(normal, lightDir), 0.0);",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       nDotHV = max(0.0, dot(normal, halfVector));",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"}",
+"",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
+"                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
+"{",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . light half vector
+"   float pf;",         // power factor
+"   float attenuation;",// computed attenuation factor
+"   float d;",          // distance from surface to light source
+"   vec3  L;",          // direction from surface to light position
+"   vec3  halfVector;", //
+"",
+"", // Compute vector from surface to light position
+"   L = vec3(position) - vPosition;",
+"",
+"", // Compute distance between surface and light position; if greater than range, return
+"   d = length(L); if (d > range) return;",
+"",
+"", // Normalize the vector from surface to light position,
+"   L = normalize(L);",
+"",
+"", // Compute attenuation,
+"   attenuation = 1.0 / (constantAttenuation +",
+"      linearAttenuation * d +",
+"      quadraticAttenuation * d * d);",
+"",
+"   nDotL = max(0.0, dot(normal, L));",
+"   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
+"",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",    
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+"}",
+"",
+"void main()",
+"{",
+"   vec4 lightingFactor;",
+"   if (uLightingEnabled != 0)",
+"   {",
+"       gAmbient = vec4(0, 0, 0, 0);",
+"       gDiffuse = vec4(0, 0, 0, 0);",
+"       gSpecular = vec4(0, 0, 0, 0);",
+"",
+"       for (int i=0; i < " + gl_MaxLights + "; i++)",
+"       {",
+"           if (uLightSource_enabled[i] != 0)",
+"           {",
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               {",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(vTransformedNormal)),",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
+"               }",
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               {",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(vTransformedNormal)),",
+"                       vec3(vViewDirection), vec3(vVertexPosition));",
+"               }",
+"               else", // spotlight
+"               {",
+"               }",   
+"           }",
+"       }",
+"",
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
+"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
+"   }",
+"   else", // uLightingEnabled == 0
+"   {",
+"       lightingFactor = vVertexColor;",
+"   }",
+"",
+"   vec4 fragmentColor;",
+"   vec4 fragmentColor1;",
+"   vec4 fragmentColor2;",
+"",
+"   for (int i=0; i < " + gl_MaxClipPlanes + "; i++)",
+"   {",
+"       if (uClipPlaneEnabled[i] != 0)",
+"       {",
+"           if (dot(vVertexPosition.xyz, uClipPlane[i].xyz) - uClipPlane[i].w >= 0.0) discard;",    
+"       }",
+"   }",
+"",
+"   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
+"   {",
+"       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           if (fragmentColor.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor * lightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = lightingFactor;",
+"       }",
+"   }",
+"   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
+"   {",
+"       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           fragmentColor1.a = fragmentColor2.a;",
+"           if (fragmentColor1.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor1 * lightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor1 * fragmentColor2;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = lightingFactor;",
+"       }",
+"   }",
+"   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 1)
+"   {",
+"       gl_FragColor = lightingFactor;",
+"   }",
+"}"
+].join("\n");
+
+
+var default_vertex_lighting_vs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+"",
+"vec4 gAmbient;",
+"vec4 gDiffuse;",
+"vec4 gSpecular;",
+"",
+"attribute vec3 aVertexPosition;",
+"attribute vec3 aVertexNormal;",
+"attribute vec4 aVertexColor;",
+"attribute vec2 aTextureCoord0;",   // attributes cannot be arrays and must be specified
+"attribute vec2 aTextureCoord1;",   // attributes cannot be arrays and must be specified      
+"", 
+"uniform mat4 uProjectionMatrix;",
+"uniform mat4 uViewMatrix;",
+"uniform mat4 uWorldMatrix;",
+"uniform mat4 uNormalMatrix;",
+"",
+"uniform vec4 uGlobalAmbientLight;",
+"",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
+"",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
+"",
+"uniform int uLightingEnabled;",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vLightingFactor;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"void directionalLight(vec4 position, vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 halfVector)",
+"{",
+"   vec3 lightDir;",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . half-vector
+"   float pf;",         // power factor
+"",
+"   lightDir = normalize(vec3(position));",
+"",	
+"   nDotL = max(dot(normal, lightDir), 0.0);",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       nDotHV = max(0.0, dot(normal, halfVector));",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"}",
+"",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
+"                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
+"{",
+"   float nDotL;",      // normal . light direction
+"   float nDotHV;",     // normal . light half vector
+"   float pf;",         // power factor
+"   float attenuation;",// computed attenuation factor
+"   float d;",          // distance from surface to light source
+"   vec3  L;",          // direction from surface to light position
+"   vec3  halfVector;", //
+"",
+"", // Compute vector from surface to light position
+"   L = vec3(position) - vPosition;",
+"",
+"", // Compute distance between surface and light position; if greater than range, return
+"   d = length(L); if (d > range) return;",
+"",
+"", // Normalize the vector from surface to light position,
+"   L = normalize(L);",
+"",
+"", // Compute attenuation,
+"   attenuation = 1.0 / (constantAttenuation +",
+"      linearAttenuation * d +",
+"      quadraticAttenuation * d * d);",
+"",
+"   nDotL = max(0.0, dot(normal, L));",
+"   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
+"",
+"   if (nDotL == 0.0)",
+"   {",
+"       pf = 0.0;",
+"   }",
+"   else",
+"   {",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"   }",
+"",    
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+"}",
+"",
+"void main()",
+"{",
+"   vec4 transformedNormal;",
+"   vec4 viewPosition;",
+"   vec4 viewDirection;",
+"",
+"   vVertexPosition = uWorldMatrix * vec4(aVertexPosition, 1);",
+"",
+"   if (uLightingEnabled != 0)",
+"   {",                    
+"       transformedNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 0));",
+"       viewPosition = uViewMatrix * vec4(0, 0, 0, 1);",
+"       viewDirection = normalize(-viewPosition);",
+
+"       gAmbient = vec4(0, 0, 0, 0);",
+"       gDiffuse = vec4(0, 0, 0, 0);",
+"       gSpecular = vec4(0, 0, 0, 0);",
+"",
+"       for (int i=0; i < " + gl_MaxLights + "; i++)",
+"       {",
+"           if (uLightSource_enabled[i] != 0)",
+"           {",
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               {",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(transformedNormal)),",
+"                       normalize(vec3(viewDirection) + vec3(uLightSource_position[i])));",
+"               }",
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               {",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                       normalize(vec3(transformedNormal)),",
+"                       vec3(viewDirection), vec3(vVertexPosition));",
+"               }",
+"               else", // spotlight
+"               {",
+"               }",   
+"           }",
+"       }",
+"",
+"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
+"       vLightingFactor.a = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
+"   }",
+"   else", // uLightingEnabled == 0
+"   {",  
+"       vLightingFactor = aVertexColor;",
+"   }",
+"",
+"   vTextureCoord[0] = aTextureCoord0;",
+"   vTextureCoord[1] = aTextureCoord1;",        
+"   gl_Position = uProjectionMatrix * uViewMatrix * vVertexPosition;",
+"}"
+].join("\n");
+    
+var default_vertex_lighting_fs = [
+"#ifdef GL_ES",
+"precision highp float;",
+"#endif",
+"",
+"uniform int uTexturesEnabled;",
+"uniform int uTextureStageEnabled[" + gl_MaxTextureStages + "];",       
+"uniform sampler2D uTextureSamplerColor[" + gl_MaxTextureStages + "];",
+"uniform sampler2D uTextureSamplerAlpha[" + gl_MaxTextureStages + "];",
+"uniform int uTextureBlendOp;",
+"uniform vec4 uTextureColorMask;",
+"uniform vec4 uClipPlane[" + gl_MaxClipPlanes + "];",
+"uniform int uClipPlaneEnabled[" + gl_MaxClipPlanes + "];",
+"",
+"varying vec4 vVertexPosition;",
+"varying vec4 vLightingFactor;",
+"varying vec2 vTextureCoord[" + gl_MaxTextureStages + "];",
+"",
+"void main()",
+"{",
+"   vec4 fragmentColor;",
+"   vec4 fragmentColor1;",
+"   vec4 fragmentColor2;",
+"",
+"   for (int i=0; i < " + gl_MaxClipPlanes + "; i++)",
+"   {",
+"       if (uClipPlaneEnabled[i] != 0)",
+"       {",
+"           if (dot(vVertexPosition.xyz, uClipPlane[i].xyz) - uClipPlane[i].w >= 0.0) discard;",    
+"       }",
+"   }",
+"",
+"   if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 0)",
+"   {",
+"       fragmentColor = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       if (fragmentColor.r == uTextureColorMask.r && fragmentColor.g == uTextureColorMask.g && fragmentColor.b == uTextureColorMask.b && fragmentColor.a == uTextureColorMask.a) discard;",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           if (fragmentColor.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor * vLightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = vLightingFactor;",
+"       }",
+"   }",
+"   else if (uTexturesEnabled == 1 && uTextureStageEnabled[0] == 1 && uTextureStageEnabled[1] == 1)",
+"   {",
+"       fragmentColor1 = texture2D(uTextureSamplerColor[0], vec2(vTextureCoord[0].s, vTextureCoord[0].t));",
+"       fragmentColor2 = texture2D(uTextureSamplerColor[1], vec2(vTextureCoord[1].s, vTextureCoord[1].t));",
+"       if (uTextureBlendOp == " + RC_MODULATE + ")",
+"       {",
+"           fragmentColor1.a = fragmentColor2.a;",
+"           if (fragmentColor1.a == 0.0) discard;",
+"           else gl_FragColor = fragmentColor1 * vLightingFactor;",
+"       }",
+"       else if (uTextureBlendOp == " + RC_REPLACE + ")",
+"       {",
+"           gl_FragColor = fragmentColor1 * fragmentColor2;",
+"       }",
+"       else",
+"       {",
+"           gl_FragColor = vLightingFactor;",
+"       }",
+"   }",
+"   else", // uTexturesEnabled == 0 || (uTextureStageEnabled[0] == 0 && uTextureStageEnabled[1] == 0)
+"   {",
+"       gl_FragColor = vLightingFactor;",
+"   }",
+"}"
+].join("\n");
 var pcf_shadow_mapping_depth_pass_vs = [
 "#ifdef GL_ES",
 "precision highp float;",
@@ -12145,6 +12653,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
 "uniform vec4 uFrontMaterial_ambient;",
 "uniform vec4 uFrontMaterial_diffuse;",
@@ -12221,14 +12730,13 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
-"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
 "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
 "{",
 "   float nDotL;",      // normal . light direction
 "   float nDotHV;",     // normal . light half vector
 "   float pf;",         // power factor
 "   float attenuation;",// computed attenuation factor
-"   float shadow;",
 "   float d;",          // distance from surface to light source
 "   vec3  L;",          // direction from surface to light position
 "   vec3  halfVector;", //
@@ -12236,8 +12744,8 @@ var pcf_shadow_mapping_render_pass_fs = [
 "", // Compute vector from surface to light position
 "   L = vec3(position) - vPosition;",
 "",
-"", // Compute distance between surface and light position
-"   d = length(L);",
+"", // Compute distance between surface and light position; if greater than range, return
+"   d = length(L); if (d > range) return;",
 "",
 "", // Normalize the vector from surface to light position,
 "   L = normalize(L);",
@@ -12245,10 +12753,8 @@ var pcf_shadow_mapping_render_pass_fs = [
 "", // Compute attenuation,
 "   attenuation = 1.0 / (constantAttenuation +",
 "      linearAttenuation * d +",
-"      quadraticAttenuation * d * d);",
-"",
-"", // Compute shadow factor
-"   shadow = shadowFactor(vPosition - uShadowCasterWorldPosition, max(0.0, dot(normal, L)));",
+"      quadraticAttenuation * d * d) *",
+"      shadowFactor(vPosition - uShadowCasterWorldPosition, max(0.0, dot(normal, L)));",
 "",
 "   nDotL = max(0.0, dot(normal, L));",
 "   nDotHV = max(0.0, dot(normal, normalize(L + eye)));",
@@ -12262,9 +12768,9 @@ var pcf_shadow_mapping_render_pass_fs = [
 "       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation * shadow;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation * shadow;",
-"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation * shadow;",
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12290,7 +12796,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
 "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
 "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
@@ -15686,8 +16192,23 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
         var inspectionGroup = getInspectionGroup(this.motionParent);
         if (inspectionGroup)
         {
+            var translate = inspectionGroup.getChild(0);
+            var translationMatrix = translate.getAttribute("matrix").getValueDirect();
+            
+            var scaleInverse = inspectionGroup.getChild(1);
+            var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
+            
             var quaternionRotate = inspectionGroup.getChild(2);
-            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            
+            var scale = inspectionGroup.getChild(3);
+            var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
+            
+            var translateBack = inspectionGroup.getChild(4);
+            var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
+            
+            inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
+                    rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
         }
         
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
@@ -15863,6 +16384,17 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     this.synchronizeSectorPosition();
 }
 
+ParentableMotionElement.prototype.isMotionAncestor = function(pme)
+{
+    if (!pme || !this.motionParent) 
+        return false;
+    
+    if (this.motionParent == pme)
+        return true;
+    
+    return this.motionParent.isMotionAncestor(pme);
+}
+    
 ParentableMotionElement.prototype.velocityModified = function()
 {
     if (this.panVelocity.isZero() &&
@@ -16737,6 +17269,8 @@ function PointLight()
     this.range.addModifiedCB(PointLight_RangeModifiedCB, this);
 
     this.registerAttribute(this.range, "range");
+    
+    this.range.setValueDirect(FLT_MAX); // invoke modified CB
 }
 
 PointLight.prototype.update = function(params, visitChildren)
@@ -17538,12 +18072,14 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
     this.viewport.addModifiedCB(RenderDirective_ViewportModifiedCB, this);
     this.backgroundColor.addModifiedCB(RenderDirective_BackgroundColorModifiedCB, this);
     this.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, this);
+    this.shadowsEnabled.addModifiedCB(RenderDirective_ShadowsEnabledModifiedCB, this);
     
     this.registerAttribute(this.viewport, "viewport");
     this.registerAttribute(this.backgroundColor, "backgroundColor");
@@ -17551,7 +18087,8 @@ function RenderDirective()
     this.registerAttribute(this.foregroundImageFilename, "foregroundImageFilename");
     this.registerAttribute(this.foregroundAlphaFilename, "foregroundAlphaFilename");   
     this.registerAttribute(this.foregroundFadeEnabled, "foregroundFadeEnabled");   
-    this.registerAttribute(this.texturesEnabled, "texturesEnabled");   
+    this.registerAttribute(this.texturesEnabled, "texturesEnabled");
+    this.registerAttribute(this.shadowsEnabled, "shadowsEnabled");
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.highlightType, "highlightType");
     
@@ -17602,9 +18139,15 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.backgroundScreenRect.setGraphMgr(graphMgr);
     
     // create shader program
-    //this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
-    this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
+
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
 }
@@ -17621,9 +18164,12 @@ RenderDirective.prototype.execute = function(root)
 
     var visited = this.updateDirective.execute(root);
     
-    // setup shadow map
-    this.shadowDirective.execute(root);
-    
+    if (this.shadowsEnabled.getValueDirect() == true)
+    {
+        // setup shadow map
+        this.shadowDirective.execute(root);
+    }
+
     // render
     params = new RenderParams();
     params.directive = this;
@@ -17717,6 +18263,19 @@ function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
     //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
     container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
     container.backgroundImageSet = true;
+}
+
+function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+    if (enabled)
+    {
+        container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+    }
+    else
+    {
+        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+    }
 }
 RayPickParams.prototype = new DirectiveParams();
 RayPickParams.prototype.constructor = RayPickParams();
@@ -24094,7 +24653,8 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         // physics simulator uses parents for child models
 
         models.push(model);
-        bodies.push_back(model.getAttribute("name"));
+        var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
+        bodies.push_back(name);
     }
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
 
@@ -24224,8 +24784,11 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 
         for (var j = 0; j < sockets.length; j++)
         {
-            // only test sockets/plugs between different models
-            if (plugs[i].second.model == sockets[j].second.model)
+            // only test sockets/plugs between different models, and models that are not already in a motion
+            // ancestor/descendent relationship
+            if (plugs[i].second.model == sockets[j].second.model ||
+                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
+                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
                 continue;
             
             var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
@@ -24235,6 +24798,13 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
             if (connection > 0)
             {
+                // remove plug from object inspection
+                var objectInspector = this.registry.find("ObjectInspector");
+                if (objectInspector)
+                {
+                    objectInspector.clearSelection(plugs[i].second.model);
+                }
+                
                 // perform snap-to!
                 var factory = this.registry.find("AttributeFactory");
                 var snapTo = factory.create("SnapTo");
@@ -24242,14 +24812,14 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                 snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
                 snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
                 snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
-                snapTo.getAttribute("socketWorldMatrix").setValueDirect(sockets[j].second.worldMatrix);
-                snapTo.getAttribute("plugWorldMatrix").setValueDirect(plugs[i].second.worldMatrix);
                 snapTo.getAttribute("slot").setValueDirect(connection);
                 snapTo.execute();
 
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
+                
+                break;
             }
         }
     }
@@ -26802,14 +27372,14 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var motionState = this.physicsBodies[n].getMotionState();
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInteria);
+    Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
 
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
-    Ammo.destroy(this.physicsBodies[n].getMotionState());
     Ammo.destroy(this.physicsBodies[n]);
+    // don't destroy motionState because it's now being used by the new body
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
@@ -30544,6 +31114,17 @@ ObjectInspector.prototype.getInspectionObject = function(selected)
     return selected;
 }
 
+ObjectInspector.prototype.clearSelection = function(selected)
+{
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        if (this.selectedObjects[i] == selected)
+        {
+            this.selectedObjects.splice(i, 1);
+        }
+    }
+}
+
 function ObjectInspector_TranslationDeltaModifiedCB(attribute, container)
 {
     var enabled = container.enabled.getValueDirect();
@@ -32121,7 +32702,6 @@ function setInspectionGroupActivationState(node, enable)
             var pos = g_objPosMap[node];
             pPos.setValueDirect(pos);
         }
-
     }
 
     return;
@@ -32129,7 +32709,6 @@ function setInspectionGroupActivationState(node, enable)
 
 function setInspectionGroupContainer(node)
 {
-
     var pRotGroup = getInspectionGroup(node);
     if (pRotGroup)
     {
@@ -32153,7 +32732,6 @@ function setInspectionGroupContainer(node)
         pRotGroup.getChild(2).getAttribute("enabled").setContainer(node);
         pRotGroup.getChild(3).getAttribute("scale").setContainer(node);
         pRotGroup.getChild(4).getAttribute("translation").setContainer(node);
-
     }
 
     return;
@@ -32749,14 +33327,6 @@ function SnapToCommand()
     this.slot = new NumberAttr(0);
     this.socketConnector = new SocketConnector();
     this.plugConnector = new PlugConnector();
-    this.socketWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
-    this.plugWorldMatrix = new Matrix4x4Attr(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
 
     this.target.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
     this.socket.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
@@ -32767,8 +33337,6 @@ function SnapToCommand()
     this.registerAttribute(this.slot, "slot");
     this.registerAttribute(this.socketConnector, "socketConnector");
     this.registerAttribute(this.plugConnector, "plugConnector");
-    this.registerAttribute(this.socketWorldMatrix, "socketWorldMatrix");
-    this.registerAttribute(this.plugWorldMatrix, "plugWorldMatrix");
 
     this.target.addTarget(this.socket, null, null, false);
 }
@@ -32783,22 +33351,19 @@ SnapToCommand.prototype.execute = function()
 
 SnapToCommand.prototype.snapTo = function(socket, plug)
 {
-    // parent plug to socket; clear its position/rotation and inspection group
+    // parent plug to socket; clear its position/rotation/scale and inspection group
     plug.setMotionParent(socket);
     plug.getAttribute("position").setValueDirect(0, 0, 0);
     plug.getAttribute("rotation").setValueDirect(0, 0, 0);
+    plug.getAttribute("scale").setValueDirect(1, 1, 1);
     zeroInspectionGroup(plug);
 
-    var socketWorldMatrix = new Matrix4x4();//this.socketWorldMatrix.getValueDirect();
-
-    var matrix = new Matrix4x4();
-
     // set rotation
-
+    var matrix = new Matrix4x4();
+    
     // rotate so that normals are coincident; do this by rotating angle between
     // the normals degrees about the cross product of the normals
     var socketNormal = this.socketConnector.getAttribute("normal").getValueDirect();
-    socketNormal = socketWorldMatrix.transform(socketNormal.x, socketNormal.y, socketNormal.z, 0);
     socketNormal = new Vector3D(socketNormal.x, socketNormal.y, socketNormal.z);
     socketNormal.normalize();
 
@@ -32826,9 +33391,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
     var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
 
     pin1 = matrix.transform(pin1.x, pin1.y, pin1.z, 1);
-    slot1 = socketWorldMatrix.transform(slot1.x, slot1.y, slot1.z, 1);
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
-    slot2 = socketWorldMatrix.transform(slot2.x, slot2.y, slot2.z, 1);
 
     var pinToPin, slotToSlot;
     switch (this.slot.getValueDirect())
@@ -32862,7 +33425,7 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
 
     // set position
 
-    // get world positions of pin and slot to connect 
+    // get positions of pin and slot to connect 
     var pin, slot;
     switch (this.slot.getValueDirect())
     {
@@ -32879,15 +33442,9 @@ SnapToCommand.prototype.snapTo = function(socket, plug)
         default:
             return;
     }
-    pin = new Vector3D(pin.x, pin.y, pin.z);
-    slot = socketWorldMatrix.transform(slot.x, slot.y, slot.z, 1);
+    pin = matrix.transform(pin.x, pin.y, pin.z, 1);
 
-    // project pin onto plug normal, scale socketNormal
-    var dot = dotProduct(pin, plugNormal);
-    socketNormal.multiplyScalar(dot);
-    
-    plug.getAttribute("sectorPosition").setValueDirect(slot.x + slotToSlot.x / 2 + socketNormal.x, 
-        slot.y + slotToSlot.y / 2 + socketNormal.y, slot.z + slotToSlot.z / 2 + socketNormal.z);
+    plug.getAttribute("sectorPosition").setValueDirect(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
 }
 
 function SnapToCommand_TargetModifiedCB(attribute, container)

@@ -232,7 +232,7 @@ function RenderContext(canvas, background)
     this.viewMatrixStack = new MatrixStack(new Matrix4x4());
     this.worldMatrixStack = new MatrixStack(new Matrix4x4());
     this.matrixMode = RC_WORLD;
-    
+    this.globalIllumination = new Color();
     this.frontMaterial = new MaterialDesc();
     
     this.displayListObj = null;

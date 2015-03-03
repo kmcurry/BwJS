@@ -134,7 +134,6 @@ function setInspectionGroupActivationState(node, enable)
             var pos = g_objPosMap[node];
             pPos.setValueDirect(pos);
         }
-
     }
 
     return;
@@ -142,7 +141,6 @@ function setInspectionGroupActivationState(node, enable)
 
 function setInspectionGroupContainer(node)
 {
-
     var pRotGroup = getInspectionGroup(node);
     if (pRotGroup)
     {
@@ -166,7 +164,6 @@ function setInspectionGroupContainer(node)
         pRotGroup.getChild(2).getAttribute("enabled").setContainer(node);
         pRotGroup.getChild(3).getAttribute("scale").setContainer(node);
         pRotGroup.getChild(4).getAttribute("translation").setContainer(node);
-
     }
 
     return;

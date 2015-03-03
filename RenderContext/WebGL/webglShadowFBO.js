@@ -53,14 +53,14 @@ function webglShadowFBO(rc, gl)
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, glFace, shadowMap, 0);
-        
+        /*
         var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
         if (status != gl.FRAMEBUFFER_COMPLETE)
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             return false;
         }
-        
+        */
         gl.viewport(0, 0, width, height);
         gl.clearColor(FLT_MAX, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

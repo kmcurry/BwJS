@@ -33,6 +33,7 @@ var default_vertex_lighting_vs = [
 "uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
 "uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
 "uniform vec4 uFrontMaterial_ambient;",
 "uniform vec4 uFrontMaterial_diffuse;",
@@ -71,7 +72,7 @@ var default_vertex_lighting_vs = [
 "   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
-"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation,",
+"void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
 "                vec4 ambient, vec4 diffuse, vec4 specular, vec3 normal, vec3 eye, vec3 vPosition)",
 "{",
 "   float nDotL;",      // normal . light direction
@@ -85,8 +86,8 @@ var default_vertex_lighting_vs = [
 "", // Compute vector from surface to light position
 "   L = vec3(position) - vPosition;",
 "",
-"", // Compute distance between surface and light position
-"   d = length(L);",
+"", // Compute distance between surface and light position; if greater than range, return
+"   d = length(L); if (d > range) return;",
 "",
 "", // Normalize the vector from surface to light position,
 "   L = normalize(L);",
@@ -145,7 +146,7 @@ var default_vertex_lighting_vs = [
 "               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
 "                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
 "                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(transformedNormal)),",
 "                       vec3(viewDirection), vec3(vVertexPosition));",

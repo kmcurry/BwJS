@@ -417,8 +417,23 @@ ParentableMotionElement.prototype.updateCompoundTransform = function()
         var inspectionGroup = getInspectionGroup(this.motionParent);
         if (inspectionGroup)
         {
+            var translate = inspectionGroup.getChild(0);
+            var translationMatrix = translate.getAttribute("matrix").getValueDirect();
+            
+            var scaleInverse = inspectionGroup.getChild(1);
+            var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
+            
             var quaternionRotate = inspectionGroup.getChild(2);
-            inspectionRotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+            
+            var scale = inspectionGroup.getChild(3);
+            var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
+            
+            var translateBack = inspectionGroup.getChild(4);
+            var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
+            
+            inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
+                    rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
         }
         
         if (this.inheritsPosition && this.inheritsRotation && this.inheritsScale && this.inheritsPivot)
@@ -594,6 +609,17 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
     this.synchronizeSectorPosition();
 }
 
+ParentableMotionElement.prototype.isMotionAncestor = function(pme)
+{
+    if (!pme || !this.motionParent) 
+        return false;
+    
+    if (this.motionParent == pme)
+        return true;
+    
+    return this.motionParent.isMotionAncestor(pme);
+}
+    
 ParentableMotionElement.prototype.velocityModified = function()
 {
     if (this.panVelocity.isZero() &&
