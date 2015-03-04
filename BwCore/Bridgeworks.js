@@ -1,4 +1,6 @@
-﻿Bridgeworks.prototype = new AttributeContainer();
+var bridgeworks = null;
+
+Bridgeworks.prototype = new AttributeContainer();
 Bridgeworks.prototype.constructor = Bridgeworks;
 
 function Bridgeworks(canvas, bgImage, contentDir)
@@ -89,6 +91,7 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
     switch (getObjectClassName(event))
     {
         case "MouseEvent":
+        case "MouseEventConstructor": // Safari
             {
                 var absPos = getElementAbsolutePos(this.canvas);
                 event.canvasX = event.clientX - absPos.x;
@@ -98,6 +101,7 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
             break;
         
         case "KeyboardEvent":
+        case "KeyboardEventConstructor": // Safari
             {
                 bwEvent = this.eventAdapter.createKeyboardEvent(event, eventType);
             }
