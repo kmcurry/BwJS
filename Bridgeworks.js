@@ -25219,6 +25219,7 @@ function ShadowParams()
     this.worldMatrix = new Matrix4x4();
     this.dissolve = 0;
     this.opacity = 1;
+    this.lights = [];
     this.modelID = 0;
 }
 
