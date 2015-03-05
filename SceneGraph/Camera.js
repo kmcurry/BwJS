@@ -141,11 +141,11 @@ Camera.prototype.applyTransform = function()
 function Camera_NearDistanceModifiedCB(attribute, container)
 {
     container.updateNearDistance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Camera_FarDistanceModifiedCB(attribute, container)
 {
     container.updateFarDistance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

@@ -286,35 +286,35 @@ Isolator.prototype.popIsolatedStates = function()
 function Isolator_IsolateTransformsModifiedCB(attribute, container)
 {
     container.updateIsolateTransforms = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateLightsModifiedCB(attribute, container)
 {
     container.updateIsolateLights = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateMaterialsModifiedCB(attribute, container)
 {
     container.updateIsolateMaterials = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateTexturesModifiedCB(attribute, container)
 {
     container.updateIsolateTextures = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateFogModifiedCB(attribute, container)
 {
     container.updateIsolateFog = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateClipPlanesModifiedCB(attribute, container)
 {
     container.updateIsolateClipPlanes = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

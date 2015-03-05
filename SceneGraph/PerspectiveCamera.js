@@ -129,5 +129,5 @@ PerspectiveCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
 function PerspectiveCamera_ZoomModifiedCB(attribute, container)
 {
     container.updateZoom = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

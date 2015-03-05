@@ -21,10 +21,10 @@ function Surface()
     this.doubleSided = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
     this.colorTexturesPresent = new BooleanAttr(true);
-    this.diffuseTexturesPresent = new BooleanAttr(true);
-    this.luminosityTexturesPresent = new BooleanAttr(true);
-    this.specularityTexturesPresent = new BooleanAttr(true);
-    this.transparencyTexturesPresent = new BooleanAttr(true);
+    this.diffuseTexturesPresent = new BooleanAttr(false);
+    this.luminosityTexturesPresent = new BooleanAttr(false);
+    this.specularityTexturesPresent = new BooleanAttr(false);
+    this.transparencyTexturesPresent = new BooleanAttr(false);
     this.numColorTextures = new NumberAttr(0);
     this.numDiffuseTextures = new NumberAttr(0);
     this.numLuminosityTextures = new NumberAttr(0);
@@ -88,6 +88,9 @@ function Surface()
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
+    
+    //this.autoDisplayList.setValueDirect(true);
+    //this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)

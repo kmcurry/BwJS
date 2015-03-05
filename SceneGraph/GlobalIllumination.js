@@ -76,5 +76,5 @@ GlobalIllumination.prototype.onRemove = function()
 function GlobalIllumination_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

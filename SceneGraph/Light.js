@@ -174,35 +174,35 @@ Light.prototype.onRemove = function()
 function Light_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_DiffuseModifiedCB(attribute, container)
 {
     container.updateDiffuse = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_SpecularModifiedCB(attribute, container)
 {
     container.updateSpecular = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_ConstantAttenuationModifiedCB(attribute, container)
 {
     container.updateConstantAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_LinearAttenuationModifiedCB(attribute, container)
 {
     container.updateLinearAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_QuadraticAttenuationModifiedCB(attribute, container)
 {
     container.updateQuadraticAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

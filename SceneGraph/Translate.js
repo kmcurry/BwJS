@@ -48,5 +48,5 @@ Translate.prototype.apply = function(directive, params, visitChildren)
 function Translate_TranslationModifiedCB(attribute, container)
 {
     container.updateTranslation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

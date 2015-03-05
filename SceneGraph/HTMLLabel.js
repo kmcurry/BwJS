@@ -1211,7 +1211,7 @@ HTMLLabel.prototype.eventPerformed = function(pEvent, isSelected)
             node.this.updateLabelHTML = true;
         }
 
-		//node.incrementModificationCount();
+		//node.setModified();
 	}
 }
 

@@ -416,7 +416,7 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="false">
+    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>UV_BoxG</body>

@@ -1,4 +1,4 @@
-﻿function Base() 
+function Base() 
 {
     this.userData = "";
     this.className = "";
@@ -5678,7 +5678,7 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
 {
-	if (!attribute) return;
+    if (!attribute) return;
 	
     for (var i in this.attrNameMap)
     {
@@ -5897,42 +5897,43 @@ function AttributeRegistry()
     this.attrType = eAttrType.AttributeRegistry;
 
     this.objectCount = 0;
-    
+
     this.typeRegistry = [];
     this.nameRegistry = [];
-    
+
     this.uniqueAttributes = [];
 }
 
 AttributeRegistry.prototype.addUnique = function(attribute)
 {
-	for (var i=0; i < this.uniqueAttributes.length; i++)
-	{
-		if (this.uniqueAttributes[i] == attribute) return;
-	}
-	
-	this.uniqueAttributes.push(attribute);
+    for (var i = 0; i < this.uniqueAttributes.length; i++)
+    {
+        if (this.uniqueAttributes[i] == attribute)
+            return;
+    }
+
+    this.uniqueAttributes.push(attribute);
 }
-    
+
 AttributeRegistry.prototype.removeUnique = function(attribute)
 {
-	for (var i=0; i < this.uniqueAttributes.length; i++)
-	{
-		if (this.uniqueAttributes[i] == attribute)
-		{
-			this.uniqueAttributes.splice(i, 1);
-			return;
-		}
-	}
+    for (var i = 0; i < this.uniqueAttributes.length; i++)
+    {
+        if (this.uniqueAttributes[i] == attribute)
+        {
+            this.uniqueAttributes.splice(i, 1);
+            return;
+        }
+    }
 }
-    
+
 AttributeRegistry.prototype.registerByType = function(attribute, type)
 {
     if (this.typeRegistry[type] == undefined)
     {
         this.typeRegistry[type] = new Array();
     }
-    
+
     this.typeRegistry[type].push(attribute);
 }
 
@@ -5942,7 +5943,7 @@ AttributeRegistry.prototype.registerByName = function(attribute, name)
     {
         name = "unnamed";
     }
-    
+
     if (this.nameRegistry[name] == undefined)
     {
         this.nameRegistry[name] = new Array();
@@ -5959,18 +5960,17 @@ AttributeRegistry.prototype.register = function(attribute)
     // register using name attribute if container
     if (attribute.isContainer())
     {
-        var name = attribute.getAttribute("name") ||
-                   attribute.getAttribute("id");
+        var name = attribute.getAttribute("name") || attribute.getAttribute("id");
         if (name)
         {
             this.registerByName(attribute, name.getValueDirect().join(""));
-            name.addModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this); 
+            name.addModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this);
         }
     }
-    
+
     this.addUnique(attribute);
     this.objectCount++;
-    
+
     attribute.onRegister(this);
 }
 
@@ -5988,7 +5988,7 @@ AttributeRegistry.prototype.unregisterByName = function(attribute, name)
     {
         name = "unnamed";
     }
-    
+
     if (this.nameRegistry[name])
     {
         this.nameRegistry[name].splice(this.nameRegistry[name].indexOf(attribute), 1);
@@ -5999,22 +5999,22 @@ AttributeRegistry.prototype.unregister = function(attribute)
 {
     // register using type
     this.unregisterByType(attribute, attribute.attrType);
-    
+
     // register using name attribute if container
     if (attribute.isContainer())
     {
         var name = attribute.getAttribute("name") ||
-                   attribute.getAttribute("id");
+                attribute.getAttribute("id");
         if (name)
         {
             this.unregisterByName(attribute, name.getValueDirect().join(""));
-            name.removeModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this); 
+            name.removeModifiedCB(AttributeRegistry_AttributeContainerNameModifiedCB, this);
         }
     }
-    
+
     this.removeUnique(attribute);
     this.objectCount--;
-    
+
     attribute.onUnregister(this);
 }
 
@@ -6022,52 +6022,52 @@ AttributeRegistry.prototype.getByType = function(type)
 {
     switch (type)
     {
-    case eAttrType.Camera:
-        {
-            var result = [];
-            var perspectives = this.getByType(eAttrType.PerspectiveCamera);
-            if (perspectives)
+        case eAttrType.Camera:
             {
-                for (var j=0; j < perspectives.length; j++)
+                var result = [];
+                var perspectives = this.getByType(eAttrType.PerspectiveCamera);
+                if (perspectives)
                 {
-                    result.push(perspectives[j]);
-                }
-            }
-            var orthographics = this.getByType(eAttrType.OrthographicCamera);
-            if (orthographics)
-            {
-                for (var j=0; j < orthographics.length; j++)
-                {
-                    result.push(orthographics[j]);
-                }
-            }
-            return result;
-        }
-        break;
-        
-    case eAttrType.Evaluator:
-        {
-            var result = [];
-            for (var i=eAttrType.Evaluator+1; i != eAttrType.Evaluator_End; i++)
-            {
-                var evaluators = this.getByType(i);
-                if (evaluators)
-                {
-                    for (var j=0; j < evaluators.length; j++)
+                    for (var j = 0; j < perspectives.length; j++)
                     {
-                        result.push(evaluators[j]);
+                        result.push(perspectives[j]);
                     }
-                }    
-            }   
-            return result;
-        }
-        break;
-        
-    default:
-        {
-            return this.typeRegistry[type];
-        }
-        break;    
+                }
+                var orthographics = this.getByType(eAttrType.OrthographicCamera);
+                if (orthographics)
+                {
+                    for (var j = 0; j < orthographics.length; j++)
+                    {
+                        result.push(orthographics[j]);
+                    }
+                }
+                return result;
+            }
+            break;
+
+        case eAttrType.Evaluator:
+            {
+                var result = [];
+                for (var i = eAttrType.Evaluator + 1; i != eAttrType.Evaluator_End; i++)
+                {
+                    var evaluators = this.getByType(i);
+                    if (evaluators)
+                    {
+                        for (var j = 0; j < evaluators.length; j++)
+                        {
+                            result.push(evaluators[j]);
+                        }
+                    }
+                }
+                return result;
+            }
+            break;
+
+        default:
+            {
+                return this.typeRegistry[type];
+            }
+            break;
     }
 }
 
@@ -6080,7 +6080,7 @@ AttributeRegistry.prototype.updateName = function(container, name)
 {
     for (var i in this.nameRegistry)
     {
-        for (var j=0; j < this.nameRegistry[i].length; j++)
+        for (var j = 0; j < this.nameRegistry[i].length; j++)
         {
             if (this.nameRegistry[i][j] == container)
             {
@@ -6099,19 +6099,19 @@ AttributeRegistry.prototype.clear = function()
         this.typeRegistry[i] = [];
     }
     this.typeRegistry = [];
-    
+
     for (var i in this.nameRegistry)
     {
         this.nameRegistry[i] = [];
-    } 
+    }
     this.nameRegistry = [];
 
     this.uniqueAttributes = [];
-    
+
     this.objectCount = 0;
 }
 
-AttributeRegistry.prototype.getObjectCount = function ()
+AttributeRegistry.prototype.getObjectCount = function()
 {
     return this.uniqueAttributes.length;
 }
@@ -6120,9 +6120,9 @@ AttributeRegistry.prototype.getObject = function(num)
 {
     if (num < this.uniqueAttributes.length)
     {
-    	return this.uniqueAttributes[num];
+        return this.uniqueAttributes[num];
     }
-    
+
     return null;
 }
 
@@ -14914,6 +14914,7 @@ function GraphMgr()
     this.labelIndex = 1;
     this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
+    this.updateRegistry = new UpdateRegistry();
     
     this.name = new StringAttr("GraphMgr");
     
@@ -14997,6 +14998,8 @@ GraphMgr.prototype.reset = function ()
         this.renderContext.enableLight(i, false);
     }
 }
+var g__nodeId__ = 0;
+
 Node.prototype = new AttributeContainer();
 Node.prototype.constructor = Node;
 
@@ -15006,12 +15009,9 @@ function Node()
     this.className = "Node";
     this.attrType = eAttrType.Node;
 
+    this.__nodeId__ = g__nodeId__++;
     this.children = [];
     this.parents = [];
-    this.modificationCount = 0;
-    this.thisModified = false;
-    this.childModified = false;
-    this.childrenModified = [];
 
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
@@ -15204,7 +15204,7 @@ Node.prototype.addChild = function(child)
 {
     this.children.push(child);
 
-    this.incrementModificationCount();
+    this.setModified();
 
     child.addParent(this);
 }
@@ -15213,7 +15213,7 @@ Node.prototype.insertChild = function(child, at)
 {
     this.children.splice(at, 0, child);
 
-    this.incrementModificationCount();
+    this.setModified();
 
     child.addParent(this);
 }
@@ -15222,7 +15222,7 @@ Node.prototype.removeChild = function(child)
 {
     this.children.splice(this.children.indexOf(child), 1);
 
-    this.incrementModificationCount();
+    this.setModified();
 
     child.removeParent(this);
 }
@@ -15289,15 +15289,6 @@ Node.prototype.removeParent = function(parent)
 
 Node.prototype.update = function(params, visitChildren)
 {
-    // only update if this and/or child has been modified
-    if (!this.thisModified && !this.childModified)
-    {
-        // no need to update; inform parent this node is unmodified
-        this.setChildModified(false, false);
-        params.visited.push(this);
-        return;
-    }
-
     params.visited.push(this);
 
     if (visitChildren)
@@ -15308,8 +15299,6 @@ Node.prototype.update = function(params, visitChildren)
             this.children[i].update(params, visitChildren);
         }
     }
-
-    this.childModified = this.isChildModified();
 }
 
 Node.prototype.apply = function(directive, params, visitChildren)
@@ -15394,45 +15383,8 @@ Node.prototype.applyNode = function(node, directive, params, visitChildren)
 
 Node.prototype.setModified = function()
 {
-    this.thisModified = true;
-
-    // notify parent(s) of modification so that display lists can be maintained
-    this.setChildModified(true, true);
-}
-
-Node.prototype.incrementModificationCount = function()
-{
-    this.modificationCount++;
-
-    this.setModified();
-}
-
-Node.prototype.setChildModified = function(modified, recurse)
-{
-    // set on parent(s) of this; recurse if specified
-    var parent = null;
-    for (var i = 0; i < this.parents.length; i++)
-    {
-        parent = this.parents[i];
-        if (parent)
-        {
-            parent.childrenModified[this.name.getValueDirect().join("")] = modified;
-            parent.childModified = modified ? true : parent.isChildModified();
-            if (recurse)
-                parent.setChildModified(modified, recurse);
-        }
-    }
-}
-
-Node.prototype.isChildModified = function()
-{
-    for (var i in this.childrenModified)
-    {
-        if (this.childrenModified[i] == true)
-            return true;
-    }
-
-    return false;
+    // TODO: remove if
+    if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
 
 Node.prototype.onRemove = function()
@@ -15451,16 +15403,16 @@ function SGNode()
 {
     Node.call(this);
     this.className = "SGNode";
-    
+
     this.graphMgr = null;
     this.recordDisplayList = false;
     this.disableDisplayLists = false;
     this.displayListObj = null;
-    
+
     this.enableDisplayList = new BooleanAttr(false);
     this.autoDisplayList = new BooleanAttr(false);
     this.updateDisplayList = new PulseAttr();
-    
+
     this.registerAttribute(this.enableDisplayList, "enableDisplayList");
     this.registerAttribute(this.autoDisplayList, "autoDisplayList");
     this.registerAttribute(this.updateDisplayList, "updateDisplayList");
@@ -15473,100 +15425,12 @@ SGNode.prototype.setGraphMgr = function(graphMgr)
 
 SGNode.prototype.update = function(params, visitChildren)
 {
-    // don't update if not enabled and not modified
-    if (!(this.enabled.getValueDirect()) && !this.thisModified)
+    if (this.recordDisplayList)
     {
-        return;
+        this.createDisplayList();
     }
 
-    // only update if this and/or child has been modified, and
-    // display lists are enabled
-    if (!this.thisModified && !this.childModified &&
-         this.enableDisplayList.getValueDirect() == false &&
-         this.autoDisplayList.getValueDirect() == false)
-    {
-        // no need to update; inform parent this node is unmodified
-        this.setChildModified(false, false);
-        params.visited.push(this);
-        return;
-    }
-    
-    params.visited.push(this);
-    
-    var subtreeModified = false;
-
-    if (this.thisModified)
-    {
-        subtreeModified = true;
-        this.thisModified = false;
-    }
-
-    if (this.childModified)
-    {
-        subtreeModified = true;
-    }
-    
-    if (this.disableDisplayLists)
-    {
-        params.disableDisplayLists = true;
-        this.disableDisplayLists = false;
-    }
-    
-    // if the subtree has been modified, disable display list for this node
-    if (subtreeModified)
-    {
-        this.enableDisplayList.setValueDirect(false);
-        this.recordDisplayList = true; // re-record when (and if) list is re-enabled
-    }
-    
-    // if using auto-display lists...
-    // if the subtree has not been modified, enable display list for this node
-    if (this.autoDisplayList.getValueDirect() && !subtreeModified)
-    {
-        this.enableDisplayList.setValueDirect(true);
-    }
-
-    // if there is already a current display list, or the manual override flag for disabling display lists is set, disable display list for this node
-    if (params.displayListObj || params.disableDisplayLists)
-    {
-        this.enableDisplayList.setValueDirect(false);
-    }
-
-    // if enable display list is true, create display list object if not yet created and set recording to true
-    if (this.enableDisplayList.getValueDirect())
-    {
-        if (!this.displayListObj)
-        {
-            this.createDisplayList();
-
-            this.recordDisplayList = true;
-        }
-        
-        // if recording is set to false, do not visit children
-        if (!this.recordDisplayList)
-        {
-            visitChildren = false;
-        }
-
-        params.displayListObj = this.displayListObj;
-    }
-    
-    if (visitChildren)
-    {
-        // call for all children
-        for (var i=0; i < this.children.length; i++)
-        {
-            this.children[i].update(params, visitChildren);
-        }
-    }
-    
-    // if display list object was set to the update params, clear it
-    if (params.displayListObj == this.displayListObj)
-    {
-        params.displayListObj = null;
-    }
-    
-    this.childModified = this.isChildModified();
+    Node.prototype.update.call(this, params, visitChildren);
 }
 
 SGNode.prototype.apply = function(directive, params, visitChildren)
@@ -15576,9 +15440,9 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
     {
         return;
     }
-    
+
     var useDisplayList = false;
-    
+
     switch (directive)
     {
         case "render":
@@ -15587,20 +15451,20 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
                 {
                     this.recordDisplayList = true;
                 }
-                
+
                 // determine if display list should be used; if a display list (from a parent node) is already operating, don't nest record or play...
                 // this node's display list operations  will be recorded by the currently operating display list; also check manual override flag for disabling
                 // display lists
-                useDisplayList = this.enableDisplayList.getValueDirect() && 
-                                 this.displayListObj &&
-                                 !params.displayListObj && 
-                                 !params.disableDisplayLists;
-    
-                if (useDisplayList && 0)
+                useDisplayList = this.enableDisplayList.getValueDirect() &&
+                        this.displayListObj != null &&
+                        params.displayListObj == null &&
+                        !params.disableDisplayLists;
+
+                if (useDisplayList)
                 {
                     // set as current display list
                     params.displayListObj = this.displayListObj;
-    
+
                     if (this.recordDisplayList)
                     {
                         // start recording render engine calls
@@ -15611,17 +15475,17 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
                         // playback render engine calls and do not visit children
                         this.displayListObj.play();
                         visitChildren = false;
-                    }  
+                    }
                 }
             }
             break;
-            
+
         case "rayPick":
             {
                 params.currentNodePath.push(this);
             }
             break;
-            
+
         default:
             {
                 // call base-class implementation
@@ -15630,7 +15494,7 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
             }
             break;
     }
-        
+
     if (visitChildren)
     {
         if (params.path)
@@ -15638,7 +15502,7 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
             // call for next node in path if next node in path is a child of this node
             if (params.path.length > params.pathIndex)
             {
-                for (var i=0; i < this.children.length; i++)
+                for (var i = 0; i < this.children.length; i++)
                 {
                     var next = params.path[params.pathIndex];
 
@@ -15653,13 +15517,13 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
         else
         {
             // call for all children
-            for (var i=0; i < this.children.length; i++)
+            for (var i = 0; i < this.children.length; i++)
             {
                 this.children[i].apply(directive, params, visitChildren);
             }
         }
     }
-    
+
     switch (directive)
     {
         case "render":
@@ -15672,13 +15536,13 @@ SGNode.prototype.apply = function(directive, params, visitChildren)
                         this.displayListObj.record_end();
                         this.recordDisplayList = false;
                     }
-    
+
                     // clear current display list
                     params.displayListObj = null;
                 }
             }
             break;
-            
+
         case "rayPick":
             {
                 params.currentNodePath.pop();
@@ -15692,37 +15556,45 @@ SGNode.prototype.isRecordingDisplayList = function()
     if (this.graphMgr.renderContext.getDisplayList())
     {
         return true;
-    }   
-    
-    return false; 
+    }
+
+    return false;
 }
 
 SGNode.prototype.createDisplayList = function()
 {
-    this.displayListObj = new DisplayListObj(this.graphMgr.renderContext);  
+    this.displayListObj = new DisplayListObj(this.graphMgr.renderContext);
 }
 
 SGNode.prototype.deleteDisplayList = function()
 {
-    this.displayListObj = null;    
+    this.displayListObj = null;
 }
 
 SGNode.prototype.enableDisplayListModified = function()
-{   
+{
+}
+
+SGNode.prototype.setModified = function()
+{
+    // call base-class implementation
+    Node.prototype.setModified.call(this);
+
+    this.recordDisplayList = true;
 }
 
 function SGNode_EnableDisplayListModifiedCB(attribute, container)
 {
-    container.enableDisplayListModified();  
+    container.enableDisplayListModified();
 }
 
 function SGNode_AutoDisplayListModifiedCB(attribute, container)
-{    
+{
 }
 
 function SGNode_UpdateDisplayListModifiedCB(attribute, container)
 {
-    container.disableDisplayLists = true;    
+    container.disableDisplayLists = true;
 }
 
 RenderableElement.prototype = new SGNode();
@@ -15961,11 +15833,7 @@ ParentableMotionElement.prototype.update = function(params, visitChildren)
     }
 
     // update this element's transformations (translation/rotation/scale/pivot)
-    var modified = this.updateSimpleTransform();
-    if (modified)
-    {
-        this.incrementModificationCount();
-    }
+    this.updateSimpleTransform();
     if (this.motionParent)
     {
         this.motionParent.update(params, false);
@@ -16410,48 +16278,60 @@ ParentableMotionElement.prototype.velocityModified = function()
     }
 }
 
+ParentableMotionElement.prototype.setModified = function()
+{
+    // call base-class implementation
+    RenderableElement.prototype.setModified.call(this);
+    
+    // call for motion children
+    for (var i = 0; i < this.motionChildren.length; i++)
+    {
+        this.motionChildren[i].setModified();
+    }
+}
+
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
 {
     container.updatePosition = true;
     container.synchronizeSectorPosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
 {
     container.updateQuaternion = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_ScaleModifiedCB(attribute, container)
 {
     container.updateScale = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_PivotModifiedCB(attribute, container)
 {
     container.updatePivot = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_SectorOriginModifiedCB(attribute, container)
 {
     container.synchronizeSectorPosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_SectorPositionModifiedCB(attribute, container)
 {
     container.updateSectorPosition = true;
     container.synchronizePosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_ParentModifiedCB(attribute, container)
@@ -16462,13 +16342,13 @@ function ParentableMotionElement_ParentModifiedCB(attribute, container)
 function ParentableMotionElement_VelocityModifiedCB(attribute, container)
 {
     container.velocityModified();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_InheritanceModifiedCB(attribute, container)
 {
     container.updateInheritance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 function DirectiveParams()
 {
@@ -16554,17 +16434,17 @@ UpdateDirective.prototype.setRegistry = function(registry)
 
 UpdateDirective.prototype.setGraphMgr = function(graphMgr)
 {
-    this.collideDirective.setGraphMgr(graphMgr);
-    
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
+    
+    this.collideDirective.setGraphMgr(graphMgr);  
 }
 
 UpdateDirective.prototype.execute = function(root, detectCollision)
 {
     root = root || this.rootNode.getValueDirect();
     if (detectCollision == undefined) detectCollision = true;
-    
+    /*
     var params = new UpdateParams();
     params.directive = this.updateDirective;
     params.disableDisplayLists = this.resetDisplayLists; 
@@ -16572,7 +16452,9 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
     
     // update (perform first pass)
     root.update(params, true);
-
+    */
+    this.update();
+   
     if (detectCollision)
     {
         // detect collisions
@@ -16581,10 +16463,26 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
         this.collideDirective.execute(root, collideParams);
         
         // update (second pass)
-        root.update(params, true);
+        //root.update(params, true);
+        this.update();
     }
 
-    return params.visited;
+    return root;//params.visited;
+}
+
+UpdateDirective.prototype.update = function()
+{
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+    params.disableDisplayLists = this.resetDisplayLists; 
+    params.timeIncrement = this.timeIncrement.getValueDirect();
+    
+    for (var i in this.graphMgr.updateRegistry.nodeRegistry)
+    {
+        this.graphMgr.updateRegistry.nodeRegistry[i].update(params, false);
+    }
+    
+    this.graphMgr.updateRegistry.clear();
 }
 Camera.prototype = new ParentableMotionElement();
 Camera.prototype.constructor = Camera;
@@ -16729,13 +16627,13 @@ Camera.prototype.applyTransform = function()
 function Camera_NearDistanceModifiedCB(attribute, container)
 {
     container.updateNearDistance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Camera_FarDistanceModifiedCB(attribute, container)
 {
     container.updateFarDistance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 OrthographicCamera.prototype = new Camera();
 OrthographicCamera.prototype.constructor = OrthographicCamera;
@@ -16859,7 +16757,7 @@ OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
 function OrthographicCamera_WidthModifiedCB(attribute, container)
 {
     container.updateWidth = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 PerspectiveCamera.prototype = new Camera();
 PerspectiveCamera.prototype.constructor = PerspectiveCamera;
@@ -16992,7 +16890,7 @@ PerspectiveCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
 function PerspectiveCamera_ZoomModifiedCB(attribute, container)
 {
     container.updateZoom = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Light.prototype = new ParentableMotionElement();
 Light.prototype.constructor = Light;
@@ -17170,37 +17068,37 @@ Light.prototype.onRemove = function()
 function Light_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_DiffuseModifiedCB(attribute, container)
 {
     container.updateDiffuse = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_SpecularModifiedCB(attribute, container)
 {
     container.updateSpecular = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_ConstantAttenuationModifiedCB(attribute, container)
 {
     container.updateConstantAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_LinearAttenuationModifiedCB(attribute, container)
 {
     container.updateLinearAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Light_QuadraticAttenuationModifiedCB(attribute, container)
 {
     container.updateQuadraticAttenuation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 DirectionalLight.prototype = new Light();
@@ -17269,6 +17167,12 @@ function PointLight()
     this.range.addModifiedCB(PointLight_RangeModifiedCB, this);
 
     this.registerAttribute(this.range, "range");
+}
+
+PointLight.prototype.setGraphMgr = function(graphMgr)
+{
+    // call base-class implementation
+    Light.prototype.setGraphMgr.call(this, graphMgr);
     
     this.range.setValueDirect(FLT_MAX); // invoke modified CB
 }
@@ -17325,7 +17229,7 @@ PointLight.prototype.apply = function(directive, params, visitChildren)
 function PointLight_RangeModifiedCB(attribute, container)
 {
     container.updateRange = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 GlobalIllumination.prototype = new SGNode();
 GlobalIllumination.prototype.constructor = GlobalIllumination;
@@ -17405,7 +17309,7 @@ GlobalIllumination.prototype.onRemove = function()
 function GlobalIllumination_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Group.prototype = new SGNode();
 Group.prototype.constructor = Group;
@@ -17415,37 +17319,20 @@ function Group()
     SGNode.call(this);
     this.className = "Group";
     this.attrType = eAttrType.Group;
-    
+
     this.proxyChildAttrs = new BooleanAttr(false);
-    
+
     this.proxyChildAttrs.addModifiedCB(Group_ProxyChildAttrsModifiedCB, this);
-    
+
     this.registerAttribute(this.proxyChildAttrs, "proxyChildAttrs");
-    
-    this.enableDisplayList.addModifiedCB(Group_EnableDisplayListModifiedCB, this);
-    
-    // enable auto-display lists
-    this.autoDisplayList.setValueDirect(true);
-    this.autoDisplayList.addModifiedCB(Group_AutoDisplayListModifiedCB, this);
 }
 
 Group.prototype.addChild = function(child)
 {
-	if (this.proxyChildAttrs.getValueDirect() == true)
+    if (this.proxyChildAttrs.getValueDirect() == true)
     {
         this.proxyAttributes(child);
     }
-
-    var autoDL = child.getAttribute("autoDisplayList");
-    if (autoDL)
-    {
-        autoDL.addTarget(this.autoDisplayList, eAttrSetOp.AND);
-        autoDL.addModifiedCB(Group_ChildAutoDisplayListModifiedCB, this);
-    }
-	else // cannot use auto display lists because child doesn't support them
-	{
-		this.autoDisplayList.setValueDirect(false);
-	}
 
     // call base-class implementation
     SGNode.prototype.addChild.call(this, child);
@@ -17458,34 +17345,16 @@ Group.prototype.insertChild = function(child, at)
         this.proxyAttributes(child);
     }
 
-    var autoDL = child.getAttribute("autoDisplayList");
-    if (autoDL)
-    {
-        autoDL.addTarget(this.autoDisplayList, eAttrSetOp.AND);
-        autoDL.addModifiedCB(Group_ChildAutoDisplayListModifiedCB, this);
-    }
-	else // cannot use auto display lists because child doesn't support them
-	{
-		this.autoDisplayList.setValueDirect(false);
-	}
-
     // call base-class implementation
     SGNode.prototype.insertChild.call(this, child, at);
 }
-    
+
 Group.prototype.removeChild = function(child)
 {
     if (this.proxyChildAttrs.getValueDirect() == true)
     {
         //UnProxyAttributes(child);
         this.synchronizeProxiedAttributes();
-    }
-
-    var autoDL = child.getAttribute("autoDisplayList");
-    if (autoDL)
-    {
-        autoDL.removeTarget(this.autoDisplayList, eAttrSetOp.AND);
-        autoDL.removeModifiedCB(Group_ChildAutoDisplayListModifiedCB, this);
     }
 
     // call base-class implementation
@@ -17500,24 +17369,6 @@ Group.prototype.replaceChild = function(replacement, replacee)
         this.proxyAttributes(replacement);
         this.synchronizeProxiedAttributes(); // replacement might not be the same type as replacee
     }
-
-	var autoDL = replacee.getAttribute("autoDisplayList");
-    if (autoDL)
-    {
-        autoDL.removeTarget(this.autoDisplayList, eAttrSetOp.AND);
-        autoDL.removeModifiedCB(Group_ChildAutoDisplayListModifiedCB, this);
-    }
-    
-    autoDL = replacement.getAttribute("autoDisplayList");
-    if (autoDL)
-    {
-    	autoDL.addTarget(this.autoDisplayList, eAttrSetOp.AND);
-    	autoDL.addModifiedCB(Group_ChildAutoDisplayListModifiedCB, this);	
-    }
-    else // cannot use auto display lists because replacement doesn't support them
-	{
-		this.autoDisplayList.setValueDirect(false);
-	}
 
     // call base-class implementation
     return SGNode.prototype.replaceChild.call(this, replacement, replacee);
@@ -17540,30 +17391,6 @@ Group.prototype.proxyChildAttrsModified = function()
     // TODO
 }
 
-Group.prototype.childAutoDisplayListModified = function()
-{
-    // check the state of all children's autoDisplayList.  If all are set to true, set this node's autoDisplayList to true; if any
-    // are set to false, set this node's autoDisplayList to false (cannot rely solely upon the fact that the children's autoDisplayList
-    // attribute are 'AND' targeted to this node's autoDisplayList, because as soon as this node's autoDisplayList is false, 'AND' with
-    // all children will still be false, even if all children are true; that portion of the algorithm handles the case when a child with
-    // autoDisplayList set to false is added to this; this step handles the other portion of the algorithm).
-    var autoDL = true;
-    for (var i=0; i < this.children.length; i++)
-    {
-        childAutoDL = this.children[i].getAttribute("autoDisplayList");
-        if (childAutoDL)
-        {
-            autoDL &= childAutoDL.getValueDirect();
-            if (!autoDL)
-            {
-                break;
-            }
-        }
-    }
-
-    this.autoDisplayList.setValueDirect(autoDL);
-}
-
 function Group_ProxyChildAttrsModifiedCB(attribute, container)
 {
     container.proxyChildAttrsModified();
@@ -17573,29 +17400,6 @@ function Group_ProxiedAttrModifiedCB(attribute, data)
 {
     data.group.proxiedAttrModified(data.proxiedNodeTypeString, attribute, data.proxiedAttrName);
 }
-
-function Group_EnableDisplayListModifiedCB(attribute, container)
-{
-    var enableDL = attribute.getValueDirect();    
-}
-
-function Group_AutoDisplayListModifiedCB(attribute, container)
-{
-    var autoDL = attribute.getValueDirect();
-    if (!autoDL && container)
-    {
-        if (container.enableDisplayList.getValueDirect() == true)
-        {
-            container.enableDisplayList.setValueDirect(attribute.getValueDirect());
-        }
-    }  
-}
-
-function Group_ChildAutoDisplayListModifiedCB(attribute, container)
-{
-    container.childAutoDisplayListModified();
-}
-
 
 Isolator.prototype = new Group();
 Isolator.prototype.constructor = Isolator;
@@ -17885,37 +17689,37 @@ Isolator.prototype.popIsolatedStates = function()
 function Isolator_IsolateTransformsModifiedCB(attribute, container)
 {
     container.updateIsolateTransforms = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateLightsModifiedCB(attribute, container)
 {
     container.updateIsolateLights = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateMaterialsModifiedCB(attribute, container)
 {
     container.updateIsolateMaterials = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateTexturesModifiedCB(attribute, container)
 {
     container.updateIsolateTextures = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateFogModifiedCB(attribute, container)
 {
     container.updateIsolateFog = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateClipPlanesModifiedCB(attribute, container)
 {
     container.updateIsolateClipPlanes = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 Selector.prototype = new Group();
@@ -18027,7 +17831,7 @@ Dissolve.prototype.apply = function(directive, params, visitChildren)
 
 function Dissolve_DissolveModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();   
+    container.setModified();   
 }
 RenderParams.prototype = new DirectiveParams();
 RenderParams.prototype.constructor = RenderParams();
@@ -18186,7 +17990,7 @@ RenderDirective.prototype.execute = function(root)
         this.resetDisplayLists = false;
     }
         
-    visited[0].apply("render", params, true);
+    root.apply("render", params, true);
     
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())
@@ -18646,13 +18450,13 @@ function Geometry_SelectableModifiedCB(attribute, container)
 
 function Geometry_ShowModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Geometry_ApproximationLevelsModifiedCB(attribute, container)
 {
     container.updateBoundingTree = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 VertexGeometry.prototype = new Geometry();
 VertexGeometry.prototype.constructor = VertexGeometry;
@@ -19208,19 +19012,19 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function VertexGeometry_ColorsModifiedCB(attribute, container)
 {
     container.updateColors = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function VertexGeometry_UVCoordsModifiedCB(attribute, container)
 {
     container.updateUVCoords.push(attribute);
-    container.incrementModificationCount();
+    container.setModified();
 }
 TriList.prototype = new VertexGeometry();
 TriList.prototype.constructor = TriList;
@@ -19310,7 +19114,7 @@ TriList.prototype.getTriangles = function()
 function TriList_NormalsModifiedCB(attribute, container)
 {
     container.updateNormals = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Material.prototype = new SGNode();
 Material.prototype.constructor = Material;
@@ -19538,72 +19342,72 @@ Material.prototype.applyMaterialDesc = function()
 function Material_ColorModifiedCB(attribute, container)
 {
     container.updateColor = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_AmbientLevelModifiedCB(attribute, container)
 {
     container.updateAmbientLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_DiffuseLevelModifiedCB(attribute, container)
 {
     container.updateDiffuseLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_SpecularLevelModifiedCB(attribute, container)
 {
     container.updateSpecularLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_EmissiveLevelModifiedCB(attribute, container)
 {
     container.updateEmissiveLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_DiffuseModifiedCB(attribute, container)
 {
     container.updateDiffuse = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_SpecularModifiedCB(attribute, container)
 {
     container.updateSpecular = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_EmissiveModifiedCB(attribute, container)
 {
     container.updateEmissive = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_GlossinessModifiedCB(attribute, container)
 {
     container.updateGlosiness = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_OpacityModifiedCB(attribute, container)
 {
     container.updateOpacity = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_DoubleSidedModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 Surface.prototype = new Isolator();
 Surface.prototype.constructor = Surface;
@@ -19695,6 +19499,9 @@ function Surface()
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
+    
+    //this.autoDisplayList.setValueDirect(true);
+    //this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)
@@ -19917,11 +19724,6 @@ function Model()
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
-
-    // enable auto-display lists
-    this.autoDisplayList.setValueDirect(true);
-    this.autoDisplayList.addModifiedCB(Model_AutoDisplayListModifiedCB, this);
-
     //this.surfacesNode.setCreatedByParent(true);
 }
 
@@ -20052,7 +19854,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-
+                
                 this.popMatrix();
                 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
@@ -20319,18 +20121,8 @@ Model.prototype.buildBoundingTree = function()
     this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
-Model.prototype.autoDisplayListModified = function()
-{
-    
-}
-
 Model.prototype.collisionDetectedModified = function()
 {
-}
-
-function Model_AutoDisplayListModifiedCB(attribute, container)
-{
-    container.autoDisplayListModified();
 }
 
 function Model_SortPolygonsModifiedCB(attribute, container)
@@ -20342,38 +20134,16 @@ function Model_SortPolygonsModifiedCB(attribute, container)
 function Model_RenderSequenceSlotModifiedCB(attribute, container)
 {
     var slot = attribute.getValueDirect();
-
-    // if render seqence slot is non-zero, cannot use display lists
-    if (slot > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_DissolveModifiedCB(attribute, container)
 {
     var dissolve = attribute.getValueDirect();
-
-    if (dissolve > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
-
-    //this.updateDisableOnDissolve(); // TODO
 }
 
 function Model_OpacityModifiedCB(attribute, container)
 {
     var opacity = attribute.getValueDirect();
-    
-    // if opacity is less than 1, cannot use display lists
-    if (opacity < 1)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_TextureOpacityModifiedCB(attribute, container)
@@ -20384,13 +20154,6 @@ function Model_TextureOpacityModifiedCB(attribute, container)
 function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 {
     var numTransparencyTextures = attribute.getValueDirect();
-    
-    // if count is greater than 0, cannot use display lists
-    if (numTransparencyTextures > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
@@ -20400,7 +20163,7 @@ function Model_GeometryBBoxModifiedCB(attribute, container)
 
 function Model_SurfaceAttrModifiedCB(attribute, container)
 {
-    //container.incrementModificationCount();
+    //container.setModified();
 }
 
 function Model_GeometryAttrModifiedCB(attribute, container)
@@ -20410,14 +20173,7 @@ function Model_GeometryAttrModifiedCB(attribute, container)
 
 function Model_DetectCollisionModifiedCB(attribute, container)
 {
-	var detectCollision = attribute.getValueDirect();
-    
-    // if detecting collisions, cannot use display lists
-    if (detectCollision)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
+    var detectCollision = attribute.getValueDirect();
 }
 
 function Model_CollisionDetectedModifiedCB(attribute, container)
@@ -20602,18 +20358,18 @@ Texture.prototype.SetImage = function()
 function Texture_ImageModifiedCB(attribute, container)
 {
     container.updateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_ImagePixelsModifiedCB(attribute, container)
 {
     container.updateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_OpacityModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_TextureTypeModifiedCB(attribute, container)
@@ -20640,18 +20396,18 @@ function Texture_TextureTypeModifiedCB(attribute, container)
     }
     
     container.blendOp.setValueDirect(op);
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_WrapModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_MipmappingEnabledModifiedCB(attribute, container)
 {
     container.updateMipmappingEnabled = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 MediaTexture.prototype = new Texture();
 MediaTexture.prototype.constructor = MediaTexture;
@@ -20793,7 +20549,7 @@ MediaTexture.prototype.loadMedia = function()
     }
     
     // increment modification count
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 MediaTexture.prototype.setImageSize = function()
@@ -20905,7 +20661,7 @@ MediaTexture.prototype.updateMediaTextureImage = function()
     }
     
     // increment modification count
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 MediaTexture.prototype.onImageLoad = function()
@@ -20916,7 +20672,7 @@ MediaTexture.prototype.onImageLoad = function()
     {
         this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8A8, eImageFormat.RGBA);
         this.imageSet = true;
-        this.incrementModificationCount();
+        this.setModified();
         return;
     }
     
@@ -20968,25 +20724,25 @@ function MediaTexture_OnVideoLoad()
 function MediaTexture_ImageFilenameModifiedCB(attribute, container)
 {
     container.updateImageFilename = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_AlphaFilenameModifiedCB(attribute, container)
 {
     container.updateAlphaFilename = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_NegateImageModifiedCB(attribute, container)
 {
     container.updateNegateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_NegateAlphaModifiedCB(attribute, container)
 {
     container.updateNegateAlpha = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Evaluator.prototype = new Node();
 Evaluator.prototype.constructor = Evaluator;
@@ -23075,7 +22831,7 @@ BalloonTipLabel.prototype.balloonTipLabelStyleDisplayModeModified = function(mod
         break;
     }
         
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 BalloonTipLabel.prototype.balloonTipLabelStyleHtmlLabelStyleModified = function()
@@ -23088,7 +22844,7 @@ BalloonTipLabel.prototype.balloonTipLabelStyleHtmlLabelStyleModified = function(
         this.qtip_api.set("content.text", html);
     }
     
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 BalloonTipLabel.prototype.renderSequenceSlotModified = function()
@@ -24109,7 +23865,7 @@ Transform.prototype.applyTransform = function()
 function Transform_MatrixModifiedCB(attribute, container)
 {
     container.updateMatrix = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 
@@ -24195,7 +23951,7 @@ QuaternionRotate.prototype.apply = function(directive, params, visitChildren)
 function QuaternionRotate_RotationQuatModifiedCB(attribute, container)
 {
     container.updateRotationQuat = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Rotate.prototype = new Transform();
 Rotate.prototype.constructor = Rotate;
@@ -24247,7 +24003,7 @@ Rotate.prototype.apply = function(directive, params, visitChildren)
 function Rotate_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Scale.prototype = new Transform();
 Scale.prototype.constructor = Scale;
@@ -24299,7 +24055,7 @@ Scale.prototype.apply = function(directive, params, visitChildren)
 function Scale_ScaleModifiedCB(attribute, container)
 {
     container.updateScale = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 Translate.prototype = new Transform();
 Translate.prototype.constructor = Translate;
@@ -24351,7 +24107,7 @@ Translate.prototype.apply = function(directive, params, visitChildren)
 function Translate_TranslationModifiedCB(attribute, container)
 {
     container.updateTranslation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 MultiTargetObserver.prototype = new Evaluator();
 MultiTargetObserver.prototype.constructor = MultiTargetObserver;
@@ -32593,7 +32349,7 @@ function addInspectionGroup(node, factory)
     var pScale = new Scale();
     pScale.setGraphMgr(factory.graphMgr);
 
-    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
+    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, node);
 
     pGrp.name.setValueDirect("InspectionGroup");
     pTranslate.name.setValueDirect("Translate");
@@ -32764,17 +32520,10 @@ function clearObjectPositionMap()
     return;
 }
 
-// Doesn't do anything.
+// notify node that the rotation quat rotates that it has been modified
 function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
 {
-    /* 
-     CQuaternionf q;
-     CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
-     if (quat)
-     {
-     quat.getValueDirect(q);
-     }
-     */
+    container.setModified();
 }
 SerializeCommand.prototype = new Command();
 SerializeCommand.prototype.constructor = SerializeCommand;

@@ -1,4 +1,4 @@
-﻿AttributeContainer.prototype = new Attribute();
+AttributeContainer.prototype = new Attribute();
 AttributeContainer.prototype.constructor = AttributeContainer;
 
 function AttributeContainer()
@@ -59,7 +59,7 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
 {
-	if (!attribute) return;
+    if (!attribute) return;
 	
     for (var i in this.attrNameMap)
     {
@@ -266,5 +266,5 @@ function AttributeContainer_AttributeModifiedCB(attribute, container)
 
 function AttributeContainer_AttributeModifiedCounterCB(attribute, container)
 {
-    container.incrementAttributeModificationCount(attribute);  
+    container.incrementAttributeModificationCount(attribute);
 }

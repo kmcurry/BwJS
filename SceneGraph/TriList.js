@@ -86,5 +86,5 @@ TriList.prototype.getTriangles = function()
 function TriList_NormalsModifiedCB(attribute, container)
 {
     container.updateNormals = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
