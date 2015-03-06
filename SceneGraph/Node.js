@@ -16,10 +16,12 @@ function Node()
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
     this.orphan = new BooleanAttr(false);
+    this.modified = new PulseAttr();
 
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.enabled, "enabled");
     this.registerAttribute(this.orphan, "orphan");
+    this.registerAttribute(this.modified, "modified");
 }
 
 Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
@@ -49,8 +51,6 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     // if requested, clone children
     if (cloneChildren)
     {
-        //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
-
         var pos;
         for (var i in this.children)
         {
@@ -93,8 +93,6 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
                 }
             }
         }
-
-        //m_graphAccessLock.Unlock();//(CReadWriteLock::eRWLockMode_Read);
     }
 
     this.postClone(clone, pathSrc, pathClone);
@@ -383,6 +381,8 @@ Node.prototype.applyNode = function(node, directive, params, visitChildren)
 
 Node.prototype.setModified = function()
 {
+    this.modified.pulse();
+    
     // TODO: remove if
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }

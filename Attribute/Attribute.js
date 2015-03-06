@@ -1,15 +1,15 @@
-﻿var eAttrSetOp = {
-    Replace         :0,  
-    Add				:1,
-    Subtract		:2,
-    Multiply		:3,
-    Divide			:4,
-	Append			:5,
-    AND				:6,
-    OR				:7,
-    XOR             :8,
-    NAND			:9,
-    NOR				:10
+var eAttrSetOp = {
+    Replace     :0,  
+    Add		:1,
+    Subtract	:2,
+    Multiply	:3,
+    Divide	:4,
+    Append	:5,
+    AND		:6,
+    OR		:7,
+    XOR         :8,
+    NAND	:9,
+    NOR		:10
 };
 
 function AttributeTargetDesc(target, 
@@ -74,6 +74,7 @@ function Attribute()
     this.transient = false;
     this.persistent = false;
     this.deserialized = false;
+    this.modificationCount = -1;
     
     this.values = [];
     this.lastValues = [];
@@ -208,6 +209,8 @@ Attribute.prototype.setValue = function(values, params)
             targetDesc.target.setValue(this.values, params);
         }
     }
+    
+    this.modificationCount++;
 }
 
 Attribute.prototype.revertValues = function()

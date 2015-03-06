@@ -102,16 +102,7 @@ Camera.prototype.apply = function(directive, params, visitChildren)
                 params.viewMatrix.invert(); // put in view-space
             }
             break;
-            
-        case "collide":
-            {
-                // caller wants bbox in view space; set view matrix so that geometry nodes 
-                // can multiply world matrix by view matrix to get worldView matrix
-                params.viewMatrix.loadMatrix(this.sectorTransformCompound);
-                params.viewMatrix.invert(); // put in view-space
-            }
-            break;
-            
+                       
         case "highlight":
             {
                 params.projMatrix.loadMatrix(this.projectionMatrix); // TODO: using jittered allows for antialiasing

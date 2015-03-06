@@ -8,7 +8,6 @@ function AttributeContainer()
     this.attrType = eAttrType.AttributeContainer;
 
     this.attrNameMap = [];
-    this.attrModifiedCountMap = [];
 }
 
 AttributeContainer.prototype.destroy = function()
@@ -44,8 +43,6 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
         this.attrNameMap[name] = new Array();
     }
     this.attrNameMap[name].push(attribute);
-    //this.attrModifiedCountMap[attribute] = 0; // doesn't work
-    this.attrModifiedCountMap.push(new Pair(attribute, 0));
 
     // set the container if null
     if (!attribute.getContainer())
@@ -54,7 +51,6 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
     }
 
     attribute.addModifiedCB(AttributeContainer_AttributeModifiedCB, this);
-    attribute.addModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
 }
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
@@ -68,7 +64,6 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
             if (this.attrNameMap[i][j] == attribute)
             {
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
-                attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
                 delete this.attrNameMap[i][j];
                 this.attrNameMap[i].splice(j, 1);
                 break;
@@ -146,33 +141,6 @@ AttributeContainer.prototype.getAttributeCount = function()
     var count = 0;
     for (var i in this.attrNameMap) count += this.attrNameMap[i].length;
     return count;
-}
-
-AttributeContainer.prototype.getAttributeModificationCount = function(attribute)
-{
-    //return this.attrModifiedCountMap[attribute];
-    for (var i in this.attrModifiedCountMap)
-    {
-        if (this.attrModifiedCountMap[i].first == attribute)
-        {
-            return this.attrModifiedCountMap[i].second;
-        }
-    }
-
-    return undefined;
-}
-
-AttributeContainer.prototype.incrementAttributeModificationCount = function(attribute)
-{
-    //this.attrModifiedCountMap[attribute]++;
-    for (var i in this.attrModifiedCountMap)
-    {
-        if (this.attrModifiedCountMap[i].first == attribute)
-        {
-            this.attrModifiedCountMap[i].second++;
-            break;
-        }
-    }
 }
 
 AttributeContainer.prototype.addTarget = function(target, op, converter, setValueOnTargeting)
@@ -262,9 +230,4 @@ function AttributeContainer_AttributeModifiedCB(attribute, container)
     {
         container.modifiedCBs[i](container, container.modifiedCBsData[i]);
     }
-}
-
-function AttributeContainer_AttributeModifiedCounterCB(attribute, container)
-{
-    container.incrementAttributeModificationCount(attribute);
 }

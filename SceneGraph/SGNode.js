@@ -15,6 +15,8 @@ function SGNode()
     this.autoDisplayList = new BooleanAttr(false);
     this.updateDisplayList = new PulseAttr();
 
+    this.modified.addModifiedCB(SGNode_ModifiedModifiedCB, this);
+    
     this.registerAttribute(this.enableDisplayList, "enableDisplayList");
     this.registerAttribute(this.autoDisplayList, "autoDisplayList");
     this.registerAttribute(this.updateDisplayList, "updateDisplayList");
@@ -185,16 +187,7 @@ SGNode.prototype.setModified = function()
     this.recordDisplayList = true;
 }
 
-function SGNode_EnableDisplayListModifiedCB(attribute, container)
+function SGNode_ModifiedModifiedCB(attribute, container)
 {
-    container.enableDisplayListModified();
-}
-
-function SGNode_AutoDisplayListModifiedCB(attribute, container)
-{
-}
-
-function SGNode_UpdateDisplayListModifiedCB(attribute, container)
-{
-    container.disableDisplayLists = true;
+    container.recordDisplayList = true;
 }

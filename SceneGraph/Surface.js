@@ -65,32 +65,38 @@ function Surface()
 
     this.materialNode = new Material();
     this.materialNode.getAttribute("name").setValueDirect("Material");
+    this.materialNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.materialNode);
 
     this.colorTexturesNode = new Group();
     this.colorTexturesNode.getAttribute("name").setValueDirect("Color Textures");
+    this.colorTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.colorTexturesNode);
 
     this.diffuseTexturesNode = new Group();
     this.diffuseTexturesNode.getAttribute("name").setValueDirect("Diffuse Textures");
+    this.diffuseTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.diffuseTexturesNode);
 
     this.luminosityTexturesNode = new Group();
     this.luminosityTexturesNode.getAttribute("name").setValueDirect("Luminosity Textures");
+    this.luminosityTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.luminosityTexturesNode);
 
     this.specularityTexturesNode = new Group();
     this.specularityTexturesNode.getAttribute("name").setValueDirect("Specularity Textures");
+    this.specularityTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.specularityTexturesNode);
 
     this.transparencyTexturesNode = new Group();
     this.transparencyTexturesNode.getAttribute("name").setValueDirect("Transparency Textures");
+    this.transparencyTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
     
-    //this.autoDisplayList.setValueDirect(true);
-    //this.enableDisplayList.setValueDirect(true);
+    this.autoDisplayList.setValueDirect(true);
+    this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)
@@ -136,13 +142,15 @@ Surface.prototype.connectMaterialAttributes = function(material)
 
 Surface.prototype.connectMaterialAttribute = function(material, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(material.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
 Surface.prototype.addTexture = function(texture)
 {
-    // TODO
+    texture.getAttribute("modified").addTarget(this.modified);
+    
+    // TODO  
     this.colorTexturesNode.addChild(texture);
 }
 

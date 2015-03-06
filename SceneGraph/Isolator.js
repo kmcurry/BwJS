@@ -60,11 +60,11 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
-    var isolateLights = this.isolateLights.getValueDirect();
-    var isolateTransforms = this.isolateTransforms.getValueDirect();
-    var isolateTextures = this.isolateTextures.getValueDirect();
-    var isolateDissolves = this.isolateDissolves.getValueDirect();
-    var isolateClipPlanes = this.isolateClipPlanes.getValueDirect();
+    var isolateLights = this.isolateLights.values[0];
+    var isolateTransforms = this.isolateTransforms.values[0];
+    var isolateTextures = this.isolateTextures.values[0];
+    var isolateDissolves = this.isolateDissolves.values[0];
+    var isolateClipPlanes = this.isolateClipPlanes.values[0];
 
     var lastDissolve = 0;
     var dissolveNode = null;

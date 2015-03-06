@@ -453,7 +453,7 @@ Model.prototype.connectSurfaceAttributes = function(surface)
 
 Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
@@ -474,7 +474,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
 
 Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
