@@ -5137,17 +5137,17 @@ function enumerateAttributeElementTypes()
     }
 }
 var eAttrSetOp = {
-    Replace         :0,  
-    Add				:1,
-    Subtract		:2,
-    Multiply		:3,
-    Divide			:4,
-	Append			:5,
-    AND				:6,
-    OR				:7,
-    XOR             :8,
-    NAND			:9,
-    NOR				:10
+    Replace     :0,  
+    Add		:1,
+    Subtract	:2,
+    Multiply	:3,
+    Divide	:4,
+    Append	:5,
+    AND		:6,
+    OR		:7,
+    XOR         :8,
+    NAND	:9,
+    NOR		:10
 };
 
 function AttributeTargetDesc(target, 
@@ -5212,6 +5212,7 @@ function Attribute()
     this.transient = false;
     this.persistent = false;
     this.deserialized = false;
+    this.modificationCount = -1;
     
     this.values = [];
     this.lastValues = [];
@@ -5346,6 +5347,8 @@ Attribute.prototype.setValue = function(values, params)
             targetDesc.target.setValue(this.values, params);
         }
     }
+    
+    this.modificationCount++;
 }
 
 Attribute.prototype.revertValues = function()
@@ -5627,7 +5630,6 @@ function AttributeContainer()
     this.attrType = eAttrType.AttributeContainer;
 
     this.attrNameMap = [];
-    this.attrModifiedCountMap = [];
 }
 
 AttributeContainer.prototype.destroy = function()
@@ -5663,8 +5665,6 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
         this.attrNameMap[name] = new Array();
     }
     this.attrNameMap[name].push(attribute);
-    //this.attrModifiedCountMap[attribute] = 0; // doesn't work
-    this.attrModifiedCountMap.push(new Pair(attribute, 0));
 
     // set the container if null
     if (!attribute.getContainer())
@@ -5673,7 +5673,6 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
     }
 
     attribute.addModifiedCB(AttributeContainer_AttributeModifiedCB, this);
-    attribute.addModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
 }
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
@@ -5687,7 +5686,6 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
             if (this.attrNameMap[i][j] == attribute)
             {
                 attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
-                attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCounterCB, this);
                 delete this.attrNameMap[i][j];
                 this.attrNameMap[i].splice(j, 1);
                 break;
@@ -5765,33 +5763,6 @@ AttributeContainer.prototype.getAttributeCount = function()
     var count = 0;
     for (var i in this.attrNameMap) count += this.attrNameMap[i].length;
     return count;
-}
-
-AttributeContainer.prototype.getAttributeModificationCount = function(attribute)
-{
-    //return this.attrModifiedCountMap[attribute];
-    for (var i in this.attrModifiedCountMap)
-    {
-        if (this.attrModifiedCountMap[i].first == attribute)
-        {
-            return this.attrModifiedCountMap[i].second;
-        }
-    }
-
-    return undefined;
-}
-
-AttributeContainer.prototype.incrementAttributeModificationCount = function(attribute)
-{
-    //this.attrModifiedCountMap[attribute]++;
-    for (var i in this.attrModifiedCountMap)
-    {
-        if (this.attrModifiedCountMap[i].first == attribute)
-        {
-            this.attrModifiedCountMap[i].second++;
-            break;
-        }
-    }
 }
 
 AttributeContainer.prototype.addTarget = function(target, op, converter, setValueOnTargeting)
@@ -5883,10 +5854,6 @@ function AttributeContainer_AttributeModifiedCB(attribute, container)
     }
 }
 
-function AttributeContainer_AttributeModifiedCounterCB(attribute, container)
-{
-    container.incrementAttributeModificationCount(attribute);
-}
 AttributeRegistry.prototype = new AttributeContainer();
 AttributeRegistry.prototype.constructor = AttributeRegistry;
 
@@ -7222,55 +7189,55 @@ FontStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // antialiasType
-    if (style.getAttributeModificationCount(style.antialiasType))
+    if (style.antialiasType.modificationCount > 0)
     {
         this.antialiasType.copyValue(style.antialiasType, setOp);
     }
 
     // borderColor
-    if (style.getAttributeModificationCount(style.borderColor))
+    if (style.borderColor.modificationCount > 0)
     {
         this.borderColor.copyValue(style.borderColor, setOp);
     }
 
     // borderWidth
-    if (style.getAttributeModificationCount(style.borderWidth))
+    if (style.borderWidth.modificationCount > 0)
     {
         this.borderWidth.copyValue(style.borderWidth, setOp);
     }
 
     // color
-    if (style.getAttributeModificationCount(style.color))
+    if (style.color.modificationCount > 0)
     {
         this.color.copyValue(style.color, setOp);
     }
 
     // effects
-    if (style.getAttributeModificationCount(style.effects))
+    if (style.effects.modificationCount > 0)
     {
         this.effects.copyValue(style.effects, setOp);
     }
 
     // font
-    if (style.getAttributeModificationCount(style.font))
+    if (style.font.modificationCount > 0)
     {
         this.font.copyValue(style.font, setOp);
     }
 
     // opacity
-    if (style.getAttributeModificationCount(style.opacity))
+    if (style.opacity.modificationCount > 0)
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
     // size
-    if (style.getAttributeModificationCount(style.size))
+    if (style.size.modificationCount > 0)
     {
         this.size.copyValue(style.size, setOp);
     }
 
     // style
-    if (style.getAttributeModificationCount(style.style))
+    if (style.style.modificationCount > 0)
     {
         this.style.copyValue(style.style, setOp);
     }
@@ -7315,19 +7282,19 @@ LabelStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // angle
-    if (style.getAttributeModificationCount(style.angle))
+    if (style.angle.modificationCount > 0)
     {
         this.angle.copyValue(style.angle, setOp);
     }
 
     // backgroundColor
-    if (style.getAttributeModificationCount(style.backgroundColor))
+    if (style.backgroundColor.modificationCount > 0)
     {
         this.backgroundColor.copyValue(style.backgroundColor, setOp);
     }
 
     // backgroundOpacity
-    if (style.getAttributeModificationCount(style.backgroundOpacity))
+    if (style.backgroundOpacity.modificationCount > 0)
     {
         this.backgroundOpacity.copyValue(style.backgroundOpacity, setOp);
     }
@@ -7336,43 +7303,43 @@ LabelStyleAttr.prototype.updateStyle = function (style)
     this.fontStyle.updateStyle(style.fontStyle);
 
     // format
-    if (style.getAttributeModificationCount(style.format))
+    if (style.format.modificationCount > 0)
     {
         this.format.copyValue(style.format, setOp);
     }
 
     // height
-    if (style.getAttributeModificationCount(style.height))
+    if (style.height.modificationCount > 0)
     {
         this.height.copyValue(style.height, setOp);
     }
 
     // offset
-    if (style.getAttributeModificationCount(style.offset))
+    if (style.offset.modificationCount > 0)
     {
         this.offset.copyValue(style.offset, setOp);
     }
 
     // padding
-    if (style.getAttributeModificationCount(style.padding))
+    if (style.padding.modificationCount > 0)
     {
         this.padding.copyValue(style.padding, setOp);
     }
 
     // scale
-    if (style.getAttributeModificationCount(style.scale))
+    if (style.scale.modificationCount > 0)
     {
         this.scale.copyValue(style.scale, setOp);
     }
 
     // textAlign
-    if (style.getAttributeModificationCount(style.textAlign))
+    if (style.textAlign.modificationCount > 0)
     {
         this.textAlign.copyValue(style.textAlign, setOp);
     }
 
     // width
-    if (style.getAttributeModificationCount(style.width))
+    if (style.width.modificationCount > 0)
     {
         this.width.copyValue(style.width, setOp);
     }
@@ -7405,31 +7372,31 @@ IconStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // alphaUrl
-    if (style.getAttributeModificationCount(style.alphaUrl))
+    if (style.alphaUrl.modificationCount > 0)
     {
         this.alphaUrl.copyValue(style.alphaUrl, setOp);
     }
 
     // color
-    if (style.getAttributeModificationCount(style.color))
+    if (style.color.modificationCount > 0)
     {
         this.color.copyValue(style.color, setOp);
     }
 
     // opacity
-    if (style.getAttributeModificationCount(style.opacity))
+    if (style.opacity.modificationCount > 0)
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
     // scale
-    if (style.getAttributeModificationCount(style.scale))
+    if (style.scale.modificationCount > 0)
     {
         this.scale.copyValue(style.scale, setOp);
     }
 
     // url
-    if (style.getAttributeModificationCount(style.url))
+    if (style.url.modificationCount > 0)
     {
         this.url.copyValue(style.url, setOp);
     }
@@ -7493,19 +7460,19 @@ BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // balloonOffset
-    if (style.getAttributeModificationCount(style.balloonOffset))
+    if (style.balloonOffset.modificationCount > 0)
     {
         this.balloonOffset.copyValue(style.balloonOffset, setOp);
     }
 
     // bgColor
-    if (style.getAttributeModificationCount(style.bgColor))
+    if (style.bgColor.modificationCount > 0)
     {
         this.bgColor.copyValue(style.bgColor, setOp);
     }
 
     // displayMode
-    if (style.getAttributeModificationCount(style.displayMode))
+    if (style.displayMode.modificationCount > 0)
     {
         this.displayMode.copyValue(style.displayMode, setOp);
     }
@@ -7514,13 +7481,13 @@ BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
     this.htmlLabelStyle.updateStyle(style.htmlLabelStyle);
 
     // text
-    if (style.getAttributeModificationCount(style.text))
+    if (style.text.modificationCount > 0)
     {
         this.text.copyValue(style.text, setOp);
     }
 
     // textColor
-    if (style.getAttributeModificationCount(style.textColor))
+    if (style.textColor.modificationCount > 0)
     {
         this.textColor.copyValue(style.textColor, setOp);
     }
@@ -7547,13 +7514,13 @@ RenderableElementStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // hasFocus
-    if (style.getAttributeModificationCount(style.hasFocus))
+    if (style.hasFocus.modificationCount > 0)
     {
         this.hasFocus.copyValue(style.hasFocus, setOp);
     }
 
     // selected
-    if (style.getAttributeModificationCount(style.selected))
+    if (style.selected.modificationCount > 0)
     {
         this.selected.copyValue(style.selected, setOp);
     }
@@ -13949,7 +13916,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     attribute = container.getAttributeAt(i);
-                    if (container.getAttributeModificationCount(attribute) == 0) continue;
+                    if (attribute.modificationCount == 0) continue;
                     var attrName = container.getAttributeName(attribute);
                     if (attribute.isNative() == false)
                     {
@@ -15037,10 +15004,12 @@ function Node()
     this.name = new StringAttr("");
     this.enabled = new BooleanAttr(true);
     this.orphan = new BooleanAttr(false);
+    this.modified = new PulseAttr();
 
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.enabled, "enabled");
     this.registerAttribute(this.orphan, "orphan");
+    this.registerAttribute(this.modified, "modified");
 }
 
 Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
@@ -15070,8 +15039,6 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
     // if requested, clone children
     if (cloneChildren)
     {
-        //  m_graphAccessLock.Lock("CNode::Clone");//(CReadWriteLock::eRWLockMode_Read);
-
         var pos;
         for (var i in this.children)
         {
@@ -15114,8 +15081,6 @@ Node.prototype.copyNode = function(clone, cloneChildren, pathSrc, pathClone)
                 }
             }
         }
-
-        //m_graphAccessLock.Unlock();//(CReadWriteLock::eRWLockMode_Read);
     }
 
     this.postClone(clone, pathSrc, pathClone);
@@ -15404,6 +15369,8 @@ Node.prototype.applyNode = function(node, directive, params, visitChildren)
 
 Node.prototype.setModified = function()
 {
+    this.modified.pulse();
+    
     // TODO: remove if
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
@@ -15434,6 +15401,8 @@ function SGNode()
     this.autoDisplayList = new BooleanAttr(false);
     this.updateDisplayList = new PulseAttr();
 
+    this.modified.addModifiedCB(SGNode_ModifiedModifiedCB, this);
+    
     this.registerAttribute(this.enableDisplayList, "enableDisplayList");
     this.registerAttribute(this.autoDisplayList, "autoDisplayList");
     this.registerAttribute(this.updateDisplayList, "updateDisplayList");
@@ -15604,18 +15573,9 @@ SGNode.prototype.setModified = function()
     this.recordDisplayList = true;
 }
 
-function SGNode_EnableDisplayListModifiedCB(attribute, container)
+function SGNode_ModifiedModifiedCB(attribute, container)
 {
-    container.enableDisplayListModified();
-}
-
-function SGNode_AutoDisplayListModifiedCB(attribute, container)
-{
-}
-
-function SGNode_UpdateDisplayListModifiedCB(attribute, container)
-{
-    container.disableDisplayLists = true;
+    container.recordDisplayList = true;
 }
 
 RenderableElement.prototype = new SGNode();
@@ -16598,16 +16558,7 @@ Camera.prototype.apply = function(directive, params, visitChildren)
                 params.viewMatrix.invert(); // put in view-space
             }
             break;
-            
-        case "collide":
-            {
-                // caller wants bbox in view space; set view matrix so that geometry nodes 
-                // can multiply world matrix by view matrix to get worldView matrix
-                params.viewMatrix.loadMatrix(this.sectorTransformCompound);
-                params.viewMatrix.invert(); // put in view-space
-            }
-            break;
-            
+                       
         case "highlight":
             {
                 params.projMatrix.loadMatrix(this.projectionMatrix); // TODO: using jittered allows for antialiasing
@@ -17473,11 +17424,11 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
-    var isolateLights = this.isolateLights.getValueDirect();
-    var isolateTransforms = this.isolateTransforms.getValueDirect();
-    var isolateTextures = this.isolateTextures.getValueDirect();
-    var isolateDissolves = this.isolateDissolves.getValueDirect();
-    var isolateClipPlanes = this.isolateClipPlanes.getValueDirect();
+    var isolateLights = this.isolateLights.values[0];
+    var isolateTransforms = this.isolateTransforms.values[0];
+    var isolateTextures = this.isolateTextures.values[0];
+    var isolateDissolves = this.isolateDissolves.values[0];
+    var isolateClipPlanes = this.isolateClipPlanes.values[0];
 
     var lastDissolve = 0;
     var dissolveNode = null;
@@ -19486,32 +19437,38 @@ function Surface()
 
     this.materialNode = new Material();
     this.materialNode.getAttribute("name").setValueDirect("Material");
+    this.materialNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.materialNode);
 
     this.colorTexturesNode = new Group();
     this.colorTexturesNode.getAttribute("name").setValueDirect("Color Textures");
+    this.colorTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.colorTexturesNode);
 
     this.diffuseTexturesNode = new Group();
     this.diffuseTexturesNode.getAttribute("name").setValueDirect("Diffuse Textures");
+    this.diffuseTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.diffuseTexturesNode);
 
     this.luminosityTexturesNode = new Group();
     this.luminosityTexturesNode.getAttribute("name").setValueDirect("Luminosity Textures");
+    this.luminosityTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.luminosityTexturesNode);
 
     this.specularityTexturesNode = new Group();
     this.specularityTexturesNode.getAttribute("name").setValueDirect("Specularity Textures");
+    this.specularityTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.specularityTexturesNode);
 
     this.transparencyTexturesNode = new Group();
     this.transparencyTexturesNode.getAttribute("name").setValueDirect("Transparency Textures");
+    this.transparencyTexturesNode.getAttribute("modified").addTarget(this.modified);
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
     
-    //this.autoDisplayList.setValueDirect(true);
-    //this.enableDisplayList.setValueDirect(true);
+    this.autoDisplayList.setValueDirect(true);
+    this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)
@@ -19557,13 +19514,15 @@ Surface.prototype.connectMaterialAttributes = function(material)
 
 Surface.prototype.connectMaterialAttribute = function(material, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(material.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
 Surface.prototype.addTexture = function(texture)
 {
-    // TODO
+    texture.getAttribute("modified").addTarget(this.modified);
+    
+    // TODO  
     this.colorTexturesNode.addChild(texture);
 }
 
@@ -20025,13 +19984,13 @@ Model.prototype.connectSurfaceAttributes = function(surface)
 
 Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
-	this.connectGeometryAttribute(geometry,	this.name, "name");
+    this.connectGeometryAttribute(geometry, this.name, "name");
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
@@ -20046,7 +20005,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
 
 Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
@@ -26990,9 +26949,7 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         transform.setOrigin(vector);
         Ammo.destroy(vector);
 
-        var rotation = model.getAttribute("rotation").getValueDirect();
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quat = model.getAttribute("quaternion").getValueDirect();
         var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
         transform.setRotation(quaternion);
         Ammo.destroy(quaternion);
@@ -34317,7 +34274,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     
     // set name if not already set by scene
     var name = model.getAttribute("name");
-    if (model.getAttributeModificationCount(name) == 0)
+    if (name.modificationCount == 0)
     {
         var layerName = data.name;
         if (data.layers.length > 1)
@@ -34329,7 +34286,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     
     // set pivot if not already set by scene
     var pivot = model.getAttribute("pivot");
-    if (model.getAttributeModificationCount(pivot) == 0)
+    if (pivot.modificationCount == 0)
     {
         pivot.setValue(layer.pivot.v());
     }

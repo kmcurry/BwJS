@@ -272,9 +272,7 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         transform.setOrigin(vector);
         Ammo.destroy(vector);
 
-        var rotation = model.getAttribute("rotation").getValueDirect();
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quat = model.getAttribute("quaternion").getValueDirect();
         var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
         transform.setRotation(quaternion);
         Ammo.destroy(quaternion);

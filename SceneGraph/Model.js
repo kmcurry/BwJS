@@ -459,7 +459,7 @@ Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
-	this.connectGeometryAttribute(geometry,	this.name, "name");
+    this.connectGeometryAttribute(geometry, this.name, "name");
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
