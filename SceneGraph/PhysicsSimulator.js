@@ -308,17 +308,28 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 {
     var compoundShape = new Ammo.btCompoundShape();
 
-    this.addCollisionShape(model, model.getAttribute("scale").getValueDirect(), compoundShape);
+    var position = new Vector3D();
+    var rotation = new Vector3D();
+    var scale = model.getAttribute("scale").getValueDirect();
+    this.addCollisionShape(model, position, rotation, scale, compoundShape);
 
     return compoundShape;
 }
 
-PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundShape)
+PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
     var shape = this.getCollisionShape(model, scale);
 
     var transform = new Ammo.btTransform();
     transform.setIdentity();
+    var origin = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(origin);
+    Ammo.destroy(origin);
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+    transform.setRotation(quaternion);
+    Ammo.destroy(quaternion);
 
     compoundShape.addChildShape(transform, shape);
     Ammo.destroy(transform);
@@ -327,12 +338,23 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundSh
     for (var i = 0; i < model.motionChildren.length; i++)
     {
         var child = model.motionChildren[i];
+        
+        var childPosition = child.getAttribute("position").getValueDirect();
+        childPosition.x += position.x;
+        childPosition.y += position.y;
+        childPosition.z += position.z;
+        
+        childRotation = child.getAttribute("rotation").getValueDirect();
+        childRotation.x += rotation.x;
+        childRotation.y += rotation.y;
+        childRotation.z += rotation.z;
+        
         var childScale = child.getAttribute("scale").getValueDirect();
         childScale.x *= scale.x;
         childScale.y *= scale.y;
         childScale.z *= scale.z;
 
-        this.addCollisionShape(child, childScale, compoundShape);
+        this.addCollisionShape(child, childPosition, childRotation, childScale, compoundShape);
     }
 }
 
@@ -342,24 +364,7 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
 
-    // set local transform for motion children
-    var translationMatrix = new Matrix4x4();
-    var rotationMatrix = new Matrix4x4();
-    var pivotMatrix = new Matrix4x4();
-    if (model.motionParent)
-    {
-        var position = model.getAttribute("sectorPosition").getValueDirect();
-        translationMatrix.loadTranslation(position.x, position.y, position.z);
-
-        var rotation = model.getAttribute("rotation").getValueDirect();
-        rotationMatrix.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-
-        var pivot = model.getAttribute("pivot").getValueDirect();
-        pivotMatrix.loadTranslation(-pivot.x, -pivot.y, -pivot.z);
-    }
-
-    var matrix = new Matrix4x4();
-    matrix.loadMatrix(scaleMatrix.leftMultiply(pivotMatrix.multiply(rotationMatrix.multiply(translationMatrix))));
+    var matrix = scaleMatrix;
 
     var shape = new Ammo.btConvexHullShape();
     var verts = model.getAttribute("vertices").getValueDirect();

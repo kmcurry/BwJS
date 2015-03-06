@@ -59,6 +59,7 @@ Image/MediaPlayback.js
 SceneGraph/SceneGraph.js
 SceneGraph/StyleMgr.js
 SceneGraph/GraphMgr.js
+SceneGraph/NodeRegistry.js
 SceneGraph/Node.js  
 SceneGraph/SGNode.js 
 SceneGraph/RenderableElement.js 
