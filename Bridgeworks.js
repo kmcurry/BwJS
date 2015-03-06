@@ -5885,7 +5885,7 @@ function AttributeContainer_AttributeModifiedCB(attribute, container)
 
 function AttributeContainer_AttributeModifiedCounterCB(attribute, container)
 {
-    container.incrementAttributeModificationCount(attribute);  
+    container.incrementAttributeModificationCount(attribute);
 }
 AttributeRegistry.prototype = new AttributeContainer();
 AttributeRegistry.prototype.constructor = AttributeRegistry;
@@ -14914,7 +14914,7 @@ function GraphMgr()
     this.labelIndex = 1;
     this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
-    this.updateRegistry = new UpdateRegistry();
+    this.updateRegistry = new NodeRegistry();
     
     this.name = new StringAttr("GraphMgr");
     
@@ -14998,6 +14998,27 @@ GraphMgr.prototype.reset = function ()
         this.renderContext.enableLight(i, false);
     }
 }
+NodeRegistry.prototype = new AttributeContainer();
+NodeRegistry.prototype.constructor = NodeRegistry;
+
+function NodeRegistry()
+{
+    AttributeContainer.call(this);
+    this.className = "NodeRegistry";
+    
+    this.nodes = [];
+}
+
+NodeRegistry.prototype.register = function(node)
+{
+    this.nodes[node.__nodeId__] = node;
+}
+
+NodeRegistry.prototype.clear = function()
+{
+    this.nodes = [];
+}
+
 var g__nodeId__ = 0;
 
 Node.prototype = new AttributeContainer();
@@ -16444,15 +16465,7 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
 {
     root = root || this.rootNode.getValueDirect();
     if (detectCollision == undefined) detectCollision = true;
-    /*
-    var params = new UpdateParams();
-    params.directive = this.updateDirective;
-    params.disableDisplayLists = this.resetDisplayLists; 
-    params.timeIncrement = this.timeIncrement.getValueDirect();
     
-    // update (perform first pass)
-    root.update(params, true);
-    */
     this.update();
    
     if (detectCollision)
@@ -16463,11 +16476,8 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
         this.collideDirective.execute(root, collideParams);
         
         // update (second pass)
-        //root.update(params, true);
         this.update();
     }
-
-    return root;//params.visited;
 }
 
 UpdateDirective.prototype.update = function()
@@ -16477,9 +16487,9 @@ UpdateDirective.prototype.update = function()
     params.disableDisplayLists = this.resetDisplayLists; 
     params.timeIncrement = this.timeIncrement.getValueDirect();
     
-    for (var i in this.graphMgr.updateRegistry.nodeRegistry)
+    for (var i in this.graphMgr.updateRegistry.nodes)
     {
-        this.graphMgr.updateRegistry.nodeRegistry[i].update(params, false);
+        this.graphMgr.updateRegistry.nodes[i].update(params, false);
     }
     
     this.graphMgr.updateRegistry.clear();
@@ -17966,7 +17976,7 @@ RenderDirective.prototype.execute = function(root)
     
     root = root || this.rootNode.getValueDirect();
 
-    var visited = this.updateDirective.execute(root);
+    this.updateDirective.execute(root);
     
     if (this.shadowsEnabled.getValueDirect() == true)
     {
@@ -19432,10 +19442,10 @@ function Surface()
     this.doubleSided = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
     this.colorTexturesPresent = new BooleanAttr(true);
-    this.diffuseTexturesPresent = new BooleanAttr(true);
-    this.luminosityTexturesPresent = new BooleanAttr(true);
-    this.specularityTexturesPresent = new BooleanAttr(true);
-    this.transparencyTexturesPresent = new BooleanAttr(true);
+    this.diffuseTexturesPresent = new BooleanAttr(false);
+    this.luminosityTexturesPresent = new BooleanAttr(false);
+    this.specularityTexturesPresent = new BooleanAttr(false);
+    this.transparencyTexturesPresent = new BooleanAttr(false);
     this.numColorTextures = new NumberAttr(0);
     this.numDiffuseTextures = new NumberAttr(0);
     this.numLuminosityTextures = new NumberAttr(0);
@@ -27016,17 +27026,28 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 {
     var compoundShape = new Ammo.btCompoundShape();
 
-    this.addCollisionShape(model, model.getAttribute("scale").getValueDirect(), compoundShape);
+    var position = new Vector3D();
+    var rotation = new Vector3D();
+    var scale = model.getAttribute("scale").getValueDirect();
+    this.addCollisionShape(model, position, rotation, scale, compoundShape);
 
     return compoundShape;
 }
 
-PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundShape)
+PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
     var shape = this.getCollisionShape(model, scale);
 
     var transform = new Ammo.btTransform();
     transform.setIdentity();
+    var origin = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(origin);
+    Ammo.destroy(origin);
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+    transform.setRotation(quaternion);
+    Ammo.destroy(quaternion);
 
     compoundShape.addChildShape(transform, shape);
     Ammo.destroy(transform);
@@ -27035,12 +27056,23 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, scale, compoundSh
     for (var i = 0; i < model.motionChildren.length; i++)
     {
         var child = model.motionChildren[i];
+        
+        var childPosition = child.getAttribute("position").getValueDirect();
+        childPosition.x += position.x;
+        childPosition.y += position.y;
+        childPosition.z += position.z;
+        
+        childRotation = child.getAttribute("rotation").getValueDirect();
+        childRotation.x += rotation.x;
+        childRotation.y += rotation.y;
+        childRotation.z += rotation.z;
+        
         var childScale = child.getAttribute("scale").getValueDirect();
         childScale.x *= scale.x;
         childScale.y *= scale.y;
         childScale.z *= scale.z;
 
-        this.addCollisionShape(child, childScale, compoundShape);
+        this.addCollisionShape(child, childPosition, childRotation, childScale, compoundShape);
     }
 }
 
@@ -27050,24 +27082,7 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
 
-    // set local transform for motion children
-    var translationMatrix = new Matrix4x4();
-    var rotationMatrix = new Matrix4x4();
-    var pivotMatrix = new Matrix4x4();
-    if (model.motionParent)
-    {
-        var position = model.getAttribute("sectorPosition").getValueDirect();
-        translationMatrix.loadTranslation(position.x, position.y, position.z);
-
-        var rotation = model.getAttribute("rotation").getValueDirect();
-        rotationMatrix.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-
-        var pivot = model.getAttribute("pivot").getValueDirect();
-        pivotMatrix.loadTranslation(-pivot.x, -pivot.y, -pivot.z);
-    }
-
-    var matrix = new Matrix4x4();
-    matrix.loadMatrix(scaleMatrix.leftMultiply(pivotMatrix.multiply(rotationMatrix.multiply(translationMatrix))));
+    var matrix = scaleMatrix;
 
     var shape = new Ammo.btConvexHullShape();
     var verts = model.getAttribute("vertices").getValueDirect();
@@ -37392,27 +37407,12 @@ Bridgeworks.prototype.onLoadModified = function()
     this.selector.clearSelections();
     this.selector.getAttribute("lastSelectedName").setValueDirect("");
     this.viewportMgr.initLayout();
-/*    std::map<std::string, std::pair<CAttribute*, CAttribute*> >::const_iterator it;
- for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
- {
- it->second.first->AddRef();
- it->second.second->AddRef();
- }*/
 
     this.registry.clear();
+    g__nodeId__ = 0; // reset node ID counter
+    
     this.initEventListeners();
     this.initRegistry();
-
-    /*	for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
-     {
-     std::string data_name(it->first.c_str());
-     data_name += "_data";
-
-     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.first, it->first.c_str());
-     it->second.first->Release();
-     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.second, data_name.c_str());
-     it->second.second->Release();
-     }*/
 
     this.renderAgent.getAttribute("globalTimeInSecs").setValueDirect(0);
 
@@ -37422,7 +37422,6 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.iscetAgent.start(); There is no isectAgent in javascript version
     this.selector.start();
     this.rasterComponentEventListener.start();
-
 
     // TODO
     console.debug("TODO: " + arguments.callee.name);
