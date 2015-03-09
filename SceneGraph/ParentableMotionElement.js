@@ -603,6 +603,8 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
+    
+    this.setModified();
 }
 
 ParentableMotionElement.prototype.isMotionAncestor = function(pme)

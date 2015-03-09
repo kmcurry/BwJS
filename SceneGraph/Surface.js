@@ -94,9 +94,6 @@ function Surface()
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
-    
-    this.autoDisplayList.setValueDirect(true);
-    this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)
