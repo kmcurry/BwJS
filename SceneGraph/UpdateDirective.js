@@ -1,4 +1,4 @@
-﻿UpdateParams.prototype = new DirectiveParams();
+UpdateParams.prototype = new DirectiveParams();
 UpdateParams.prototype.constructor = UpdateParams();
 
 function UpdateParams() // combined CUpdateParams & GtUpdateParams in this version
@@ -41,10 +41,10 @@ UpdateDirective.prototype.setRegistry = function(registry)
 
 UpdateDirective.prototype.setGraphMgr = function(graphMgr)
 {
-    this.collideDirective.setGraphMgr(graphMgr);
-    
     // call base-class implementation
     SGDirective.prototype.setGraphMgr.call(this, graphMgr);
+    
+    this.collideDirective.setGraphMgr(graphMgr);  
 }
 
 UpdateDirective.prototype.execute = function(root, detectCollision)
@@ -52,14 +52,8 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
     root = root || this.rootNode.getValueDirect();
     if (detectCollision == undefined) detectCollision = true;
     
-    var params = new UpdateParams();
-    params.directive = this.updateDirective;
-    params.disableDisplayLists = this.resetDisplayLists; 
-    params.timeIncrement = this.timeIncrement.getValueDirect();
-    
-    // update (perform first pass)
-    root.update(params, true);
-
+    this.update();
+   
     if (detectCollision)
     {
         // detect collisions
@@ -68,8 +62,21 @@ UpdateDirective.prototype.execute = function(root, detectCollision)
         this.collideDirective.execute(root, collideParams);
         
         // update (second pass)
-        root.update(params, true);
+        this.update();
     }
+}
 
-    return params.visited;
+UpdateDirective.prototype.update = function()
+{
+    var params = new UpdateParams();
+    params.directive = this.updateDirective;
+    params.disableDisplayLists = this.resetDisplayLists; 
+    params.timeIncrement = this.timeIncrement.getValueDirect();
+    
+    for (var i in this.graphMgr.updateRegistry.nodes)
+    {
+        this.graphMgr.updateRegistry.nodes[i].update(params, false);
+    }
+    
+    this.graphMgr.updateRegistry.clear();
 }

@@ -16,6 +16,12 @@ function PointLight()
     this.range.addModifiedCB(PointLight_RangeModifiedCB, this);
 
     this.registerAttribute(this.range, "range");
+}
+
+PointLight.prototype.setGraphMgr = function(graphMgr)
+{
+    // call base-class implementation
+    Light.prototype.setGraphMgr.call(this, graphMgr);
     
     this.range.setValueDirect(FLT_MAX); // invoke modified CB
 }
@@ -72,5 +78,5 @@ PointLight.prototype.apply = function(directive, params, visitChildren)
 function PointLight_RangeModifiedCB(attribute, container)
 {
     container.updateRange = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

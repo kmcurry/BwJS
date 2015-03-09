@@ -106,6 +106,6 @@ Transform.prototype.applyTransform = function()
 function Transform_MatrixModifiedCB(attribute, container)
 {
     container.updateMatrix = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 

@@ -18,6 +18,7 @@ function GraphMgr()
     this.labelIndex = 1;
     this.balloonTipLabelIndex = 1;
     this.styleMgr = new StyleMgr();
+    this.updateRegistry = new NodeRegistry();
     
     this.name = new StringAttr("GraphMgr");
     

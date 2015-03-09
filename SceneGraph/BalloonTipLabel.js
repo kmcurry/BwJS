@@ -223,7 +223,7 @@ BalloonTipLabel.prototype.balloonTipLabelStyleDisplayModeModified = function(mod
         break;
     }
         
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 BalloonTipLabel.prototype.balloonTipLabelStyleHtmlLabelStyleModified = function()
@@ -236,7 +236,7 @@ BalloonTipLabel.prototype.balloonTipLabelStyleHtmlLabelStyleModified = function(
         this.qtip_api.set("content.text", html);
     }
     
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 BalloonTipLabel.prototype.renderSequenceSlotModified = function()

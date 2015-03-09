@@ -1,4 +1,4 @@
-﻿function Base() 
+function Base() 
 {
     this.userData = "";
     this.className = "";

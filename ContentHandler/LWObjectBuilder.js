@@ -74,7 +74,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     
     // set name if not already set by scene
     var name = model.getAttribute("name");
-    if (model.getAttributeModificationCount(name) == 0)
+    if (name.modificationCount == 0)
     {
         var layerName = data.name;
         if (data.layers.length > 1)
@@ -86,7 +86,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     
     // set pivot if not already set by scene
     var pivot = model.getAttribute("pivot");
-    if (model.getAttributeModificationCount(pivot) == 0)
+    if (pivot.modificationCount == 0)
     {
         pivot.setValue(layer.pivot.v());
     }

@@ -131,7 +131,7 @@ RenderDirective.prototype.execute = function(root)
     
     root = root || this.rootNode.getValueDirect();
 
-    var visited = this.updateDirective.execute(root);
+    this.updateDirective.execute(root);
     
     if (this.shadowsEnabled.getValueDirect() == true)
     {
@@ -155,7 +155,7 @@ RenderDirective.prototype.execute = function(root)
         this.resetDisplayLists = false;
     }
         
-    visited[0].apply("render", params, true);
+    root.apply("render", params, true);
     
     // sort and draw semi-transparent geometries (if any)
     if (!this.distanceSortAgent.isEmpty())

@@ -174,55 +174,55 @@ FontStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // antialiasType
-    if (style.getAttributeModificationCount(style.antialiasType))
+    if (style.antialiasType.modificationCount > 0)
     {
         this.antialiasType.copyValue(style.antialiasType, setOp);
     }
 
     // borderColor
-    if (style.getAttributeModificationCount(style.borderColor))
+    if (style.borderColor.modificationCount > 0)
     {
         this.borderColor.copyValue(style.borderColor, setOp);
     }
 
     // borderWidth
-    if (style.getAttributeModificationCount(style.borderWidth))
+    if (style.borderWidth.modificationCount > 0)
     {
         this.borderWidth.copyValue(style.borderWidth, setOp);
     }
 
     // color
-    if (style.getAttributeModificationCount(style.color))
+    if (style.color.modificationCount > 0)
     {
         this.color.copyValue(style.color, setOp);
     }
 
     // effects
-    if (style.getAttributeModificationCount(style.effects))
+    if (style.effects.modificationCount > 0)
     {
         this.effects.copyValue(style.effects, setOp);
     }
 
     // font
-    if (style.getAttributeModificationCount(style.font))
+    if (style.font.modificationCount > 0)
     {
         this.font.copyValue(style.font, setOp);
     }
 
     // opacity
-    if (style.getAttributeModificationCount(style.opacity))
+    if (style.opacity.modificationCount > 0)
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
     // size
-    if (style.getAttributeModificationCount(style.size))
+    if (style.size.modificationCount > 0)
     {
         this.size.copyValue(style.size, setOp);
     }
 
     // style
-    if (style.getAttributeModificationCount(style.style))
+    if (style.style.modificationCount > 0)
     {
         this.style.copyValue(style.style, setOp);
     }
@@ -267,19 +267,19 @@ LabelStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // angle
-    if (style.getAttributeModificationCount(style.angle))
+    if (style.angle.modificationCount > 0)
     {
         this.angle.copyValue(style.angle, setOp);
     }
 
     // backgroundColor
-    if (style.getAttributeModificationCount(style.backgroundColor))
+    if (style.backgroundColor.modificationCount > 0)
     {
         this.backgroundColor.copyValue(style.backgroundColor, setOp);
     }
 
     // backgroundOpacity
-    if (style.getAttributeModificationCount(style.backgroundOpacity))
+    if (style.backgroundOpacity.modificationCount > 0)
     {
         this.backgroundOpacity.copyValue(style.backgroundOpacity, setOp);
     }
@@ -288,43 +288,43 @@ LabelStyleAttr.prototype.updateStyle = function (style)
     this.fontStyle.updateStyle(style.fontStyle);
 
     // format
-    if (style.getAttributeModificationCount(style.format))
+    if (style.format.modificationCount > 0)
     {
         this.format.copyValue(style.format, setOp);
     }
 
     // height
-    if (style.getAttributeModificationCount(style.height))
+    if (style.height.modificationCount > 0)
     {
         this.height.copyValue(style.height, setOp);
     }
 
     // offset
-    if (style.getAttributeModificationCount(style.offset))
+    if (style.offset.modificationCount > 0)
     {
         this.offset.copyValue(style.offset, setOp);
     }
 
     // padding
-    if (style.getAttributeModificationCount(style.padding))
+    if (style.padding.modificationCount > 0)
     {
         this.padding.copyValue(style.padding, setOp);
     }
 
     // scale
-    if (style.getAttributeModificationCount(style.scale))
+    if (style.scale.modificationCount > 0)
     {
         this.scale.copyValue(style.scale, setOp);
     }
 
     // textAlign
-    if (style.getAttributeModificationCount(style.textAlign))
+    if (style.textAlign.modificationCount > 0)
     {
         this.textAlign.copyValue(style.textAlign, setOp);
     }
 
     // width
-    if (style.getAttributeModificationCount(style.width))
+    if (style.width.modificationCount > 0)
     {
         this.width.copyValue(style.width, setOp);
     }
@@ -357,31 +357,31 @@ IconStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // alphaUrl
-    if (style.getAttributeModificationCount(style.alphaUrl))
+    if (style.alphaUrl.modificationCount > 0)
     {
         this.alphaUrl.copyValue(style.alphaUrl, setOp);
     }
 
     // color
-    if (style.getAttributeModificationCount(style.color))
+    if (style.color.modificationCount > 0)
     {
         this.color.copyValue(style.color, setOp);
     }
 
     // opacity
-    if (style.getAttributeModificationCount(style.opacity))
+    if (style.opacity.modificationCount > 0)
     {
         this.opacity.copyValue(style.opacity, setOp);
     }
 
     // scale
-    if (style.getAttributeModificationCount(style.scale))
+    if (style.scale.modificationCount > 0)
     {
         this.scale.copyValue(style.scale, setOp);
     }
 
     // url
-    if (style.getAttributeModificationCount(style.url))
+    if (style.url.modificationCount > 0)
     {
         this.url.copyValue(style.url, setOp);
     }
@@ -445,19 +445,19 @@ BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // balloonOffset
-    if (style.getAttributeModificationCount(style.balloonOffset))
+    if (style.balloonOffset.modificationCount > 0)
     {
         this.balloonOffset.copyValue(style.balloonOffset, setOp);
     }
 
     // bgColor
-    if (style.getAttributeModificationCount(style.bgColor))
+    if (style.bgColor.modificationCount > 0)
     {
         this.bgColor.copyValue(style.bgColor, setOp);
     }
 
     // displayMode
-    if (style.getAttributeModificationCount(style.displayMode))
+    if (style.displayMode.modificationCount > 0)
     {
         this.displayMode.copyValue(style.displayMode, setOp);
     }
@@ -466,13 +466,13 @@ BalloonTipLabelStyleAttr.prototype.updateStyle = function (style)
     this.htmlLabelStyle.updateStyle(style.htmlLabelStyle);
 
     // text
-    if (style.getAttributeModificationCount(style.text))
+    if (style.text.modificationCount > 0)
     {
         this.text.copyValue(style.text, setOp);
     }
 
     // textColor
-    if (style.getAttributeModificationCount(style.textColor))
+    if (style.textColor.modificationCount > 0)
     {
         this.textColor.copyValue(style.textColor, setOp);
     }
@@ -499,13 +499,13 @@ RenderableElementStyleAttr.prototype.updateStyle = function (style)
     var setOp = style.setOp.getValueDirect();
 
     // hasFocus
-    if (style.getAttributeModificationCount(style.hasFocus))
+    if (style.hasFocus.modificationCount > 0)
     {
         this.hasFocus.copyValue(style.hasFocus, setOp);
     }
 
     // selected
-    if (style.getAttributeModificationCount(style.selected))
+    if (style.selected.modificationCount > 0)
     {
         this.selected.copyValue(style.selected, setOp);
     }

@@ -48,5 +48,5 @@ Rotate.prototype.apply = function(directive, params, visitChildren)
 function Rotate_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

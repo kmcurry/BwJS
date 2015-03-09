@@ -171,18 +171,18 @@ Texture.prototype.SetImage = function()
 function Texture_ImageModifiedCB(attribute, container)
 {
     container.updateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_ImagePixelsModifiedCB(attribute, container)
 {
     container.updateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_OpacityModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_TextureTypeModifiedCB(attribute, container)
@@ -209,16 +209,16 @@ function Texture_TextureTypeModifiedCB(attribute, container)
     }
     
     container.blendOp.setValueDirect(op);
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_WrapModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Texture_MipmappingEnabledModifiedCB(attribute, container)
 {
     container.updateMipmappingEnabled = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

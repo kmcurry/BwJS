@@ -48,5 +48,5 @@ Scale.prototype.apply = function(directive, params, visitChildren)
 function Scale_ScaleModifiedCB(attribute, container)
 {
     container.updateScale = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

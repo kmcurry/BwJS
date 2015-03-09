@@ -186,11 +186,7 @@ ParentableMotionElement.prototype.update = function(params, visitChildren)
     }
 
     // update this element's transformations (translation/rotation/scale/pivot)
-    var modified = this.updateSimpleTransform();
-    if (modified)
-    {
-        this.incrementModificationCount();
-    }
+    this.updateSimpleTransform();
     if (this.motionParent)
     {
         this.motionParent.update(params, false);
@@ -635,48 +631,60 @@ ParentableMotionElement.prototype.velocityModified = function()
     }
 }
 
+ParentableMotionElement.prototype.setModified = function()
+{
+    // call base-class implementation
+    RenderableElement.prototype.setModified.call(this);
+    
+    // call for motion children
+    for (var i = 0; i < this.motionChildren.length; i++)
+    {
+        this.motionChildren[i].setModified();
+    }
+}
+
 function ParentableMotionElement_PositionModifiedCB(attribute, container)
 {
     container.updatePosition = true;
     container.synchronizeSectorPosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
     container.updateRotation = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
 {
     container.updateQuaternion = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_ScaleModifiedCB(attribute, container)
 {
     container.updateScale = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_PivotModifiedCB(attribute, container)
 {
     container.updatePivot = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_SectorOriginModifiedCB(attribute, container)
 {
     container.synchronizeSectorPosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_SectorPositionModifiedCB(attribute, container)
 {
     container.updateSectorPosition = true;
     container.synchronizePosition();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_ParentModifiedCB(attribute, container)
@@ -687,11 +695,11 @@ function ParentableMotionElement_ParentModifiedCB(attribute, container)
 function ParentableMotionElement_VelocityModifiedCB(attribute, container)
 {
     container.velocityModified();
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function ParentableMotionElement_InheritanceModifiedCB(attribute, container)
 {
     container.updateInheritance = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

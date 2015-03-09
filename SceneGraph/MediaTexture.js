@@ -138,7 +138,7 @@ MediaTexture.prototype.loadMedia = function()
     }
     
     // increment modification count
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 MediaTexture.prototype.setImageSize = function()
@@ -250,7 +250,7 @@ MediaTexture.prototype.updateMediaTextureImage = function()
     }
     
     // increment modification count
-    this.incrementModificationCount();
+    this.setModified();
 }
 
 MediaTexture.prototype.onImageLoad = function()
@@ -261,7 +261,7 @@ MediaTexture.prototype.onImageLoad = function()
     {
         this.textureObj.setImage(this.imagePlayback.htmlImageElement, ePixelFormat.R8G8B8A8, eImageFormat.RGBA);
         this.imageSet = true;
-        this.incrementModificationCount();
+        this.setModified();
         return;
     }
     
@@ -313,23 +313,23 @@ function MediaTexture_OnVideoLoad()
 function MediaTexture_ImageFilenameModifiedCB(attribute, container)
 {
     container.updateImageFilename = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_AlphaFilenameModifiedCB(attribute, container)
 {
     container.updateAlphaFilename = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_NegateImageModifiedCB(attribute, container)
 {
     container.updateNegateImage = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function MediaTexture_NegateAlphaModifiedCB(attribute, container)
 {
     container.updateNegateAlpha = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

@@ -1,15 +1,15 @@
-﻿var eAttrSetOp = {
-    Replace         :0,  
-    Add				:1,
-    Subtract		:2,
-    Multiply		:3,
-    Divide			:4,
-	Append			:5,
-    AND				:6,
-    OR				:7,
-    XOR             :8,
-    NAND			:9,
-    NOR				:10
+var eAttrSetOp = {
+    Replace     :0,  
+    Add		:1,
+    Subtract	:2,
+    Multiply	:3,
+    Divide	:4,
+    Append	:5,
+    AND		:6,
+    OR		:7,
+    XOR         :8,
+    NAND	:9,
+    NOR		:10
 };
 
 function AttributeTargetDesc(target, 
@@ -74,6 +74,7 @@ function Attribute()
     this.transient = false;
     this.persistent = false;
     this.deserialized = false;
+    this.modificationCount = -1;
     
     this.values = [];
     this.lastValues = [];
@@ -127,6 +128,36 @@ Attribute.prototype.getValue = function(values, params)
         var valueElementIndex = Math.max(0, params ? params.valueElementIndex : 0);
             
         values[valueElementIndex] = this.values[elementIndex];
+    }
+}
+
+Attribute.prototype.getLastValue = function(values, params)
+{
+    var elementIndex = (params ? params.elementIndex : -1);
+    
+    if (elementIndex < 0)
+    {
+        if (this.lastValues == null)
+        {
+            values[0] = null;
+        }
+        else if (this.lastValues.length == undefined)
+        {
+            values[0] = this.lastValues;
+        }
+        else // this.values.length > 0
+        {
+            for (var i=0; i < this.lastValues.length; i++)
+            {
+                values[i] = this.lastValues[i];
+            }
+        }
+    }
+    else // elementIndex >= 0
+    {
+        var valueElementIndex = Math.max(0, params ? params.valueElementIndex : 0);
+            
+        values[valueElementIndex] = this.lastValues[elementIndex];
     }
 }
 
@@ -208,6 +239,8 @@ Attribute.prototype.setValue = function(values, params)
             targetDesc.target.setValue(this.values, params);
         }
     }
+    
+    this.modificationCount++;
 }
 
 Attribute.prototype.revertValues = function()

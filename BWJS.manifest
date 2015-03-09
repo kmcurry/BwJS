@@ -59,6 +59,7 @@ Image/MediaPlayback.js
 SceneGraph/SceneGraph.js
 SceneGraph/StyleMgr.js
 SceneGraph/GraphMgr.js
+SceneGraph/NodeRegistry.js
 SceneGraph/Node.js  
 SceneGraph/SGNode.js 
 SceneGraph/RenderableElement.js 
@@ -170,10 +171,11 @@ ContentHandler/LWSceneHandler.js
 ContentHandler/LWSceneBuilder.js
 Attribute/AttributeFactory.js
 BwCore/Bridgeworks.js
-Libs/jquery/jquery-1.3.2.min.js 
+Libs/qTip2/jquery-1.10.2.min.js
+Libs/qTip2/jquery.qtip.min.js
 Libs/jquery/jquery.hoverIntent.minified.js 
 Libs/jquery/jquery.bgiframe.min.js 
-Libs/jquery/bt/jquery.bt.min.js
 Libs/three.js/three.js
 Libs/JSModeler/build/jsmodeler.js
 Libs/ammo.js/ammo.js
+
