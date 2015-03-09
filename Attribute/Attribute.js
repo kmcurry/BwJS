@@ -131,6 +131,36 @@ Attribute.prototype.getValue = function(values, params)
     }
 }
 
+Attribute.prototype.getLastValue = function(values, params)
+{
+    var elementIndex = (params ? params.elementIndex : -1);
+    
+    if (elementIndex < 0)
+    {
+        if (this.lastValues == null)
+        {
+            values[0] = null;
+        }
+        else if (this.lastValues.length == undefined)
+        {
+            values[0] = this.lastValues;
+        }
+        else // this.values.length > 0
+        {
+            for (var i=0; i < this.lastValues.length; i++)
+            {
+                values[i] = this.lastValues[i];
+            }
+        }
+    }
+    else // elementIndex >= 0
+    {
+        var valueElementIndex = Math.max(0, params ? params.valueElementIndex : 0);
+            
+        values[valueElementIndex] = this.lastValues[elementIndex];
+    }
+}
+
 Attribute.prototype.setValue = function(values, params)
 {
     this.lastValues = this.values.slice();

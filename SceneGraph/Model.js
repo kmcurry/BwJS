@@ -56,6 +56,7 @@ function Model()
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
     this.stopOnCollision = new BooleanAttr(false);
+    this.detectObstruction = new BooleanAttr(false);
     this.obstructionDetected = new BooleanAttr(false);
     this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
@@ -137,6 +138,7 @@ function Model()
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
     this.registerAttribute(this.stopOnCollision, "stopOnCollision");
+    this.registerAttribute(this.detectObstruction, "detectObstruction");
     this.registerAttribute(this.obstructionDetected, "obstructionDetected");
     this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");

@@ -74,7 +74,7 @@ PhysicsSimulator.prototype.evaluate = function()
                 break;
         }
     }
-    
+
     var trans = new Ammo.btTransform();
     var worldHalfExtents = this.worldHalfExtents.getValueDirect();
     var modelsOutOfBounds = [];
@@ -93,21 +93,21 @@ PhysicsSimulator.prototype.evaluate = function()
 
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
-        
+
         // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
         if (position.x < -worldHalfExtents.x || position.x > worldHalfExtents.x ||
             position.y < -worldHalfExtents.y || position.y > worldHalfExtents.y ||
             position.z < -worldHalfExtents.z || position.z > worldHalfExtents.z)
         {
-            modelsOutOfBounds.push(this.bodyModels[i]);      
+            modelsOutOfBounds.push(this.bodyModels[i]);
         }
     }
     Ammo.destroy(trans);
-    
+
     // remove any models that have moved outside of the world boundary
     for (var i = 0; i < modelsOutOfBounds.length; i++)
     {
-        this.deleteModel(modelsOutOfBounds[i]);
+        this.deletePhysicsBody(modelsOutOfBounds[i]);
     }
 }
 
@@ -127,10 +127,61 @@ PhysicsSimulator.prototype.update = function()
     }
 }
 
-PhysicsSimulator.prototype.stepSimulation = function(timeIncrement)
+PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
+    maxSubSteps = maxSubSteps || 10;
+    
     this.update();
-    this.world.stepSimulation(timeIncrement, 10);
+    this.world.stepSimulation(timeIncrement, maxSubSteps);
+}
+
+PhysicsSimulator.prototype.isColliding = function(model)
+{
+    // if model is parented, get parent
+    while (model.motionParent)
+    {
+        model = model.motionParent;
+    }
+    
+    // find physics body corresponding to model
+    var physicsBody = this.getPhysicsBody(model);
+    if (physicsBody)
+    {
+        var numManifolds = this.world.getDispatcher().getNumManifolds();
+        for (var i = 0; i < numManifolds; i++)
+        {
+            var contactManifold = this.world.getDispatcher().getManifoldByIndexInternal(i);
+            var body0 = contactManifold.getBody0();
+            var body1 = contactManifold.getBody1();
+            
+            //var distance = FLT_MAX;
+            var numContacts = contactManifold.getNumContacts();
+            /*for (var j = 0; j < numContacts; j++)
+            {
+                var pt = contactManifold.getContactPoint(j);
+                var ptA = pt.getPositionWorldOnA();
+                var ptB = pt.getPositionWorldOnB();
+
+                var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
+                //console.log(distance);               
+            }
+            */
+            //if (distance < 0.05)
+            if (numContacts > 0)
+            {
+                if (body0.ptr == physicsBody.ptr)
+                {
+                    return true;
+                }
+                else if (body1.ptr == physicsBody.ptr)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 PhysicsSimulator.prototype.getColliders = function(model)
@@ -154,9 +205,9 @@ PhysicsSimulator.prototype.getColliders = function(model)
             var body0 = contactManifold.getBody0();
             var body1 = contactManifold.getBody1();
             
-            var distance = FLT_MAX;
+            //var distance = FLT_MAX;
             var numContacts = contactManifold.getNumContacts();
-            for (var j = 0; j < numContacts; j++)
+            /*for (var j = 0; j < numContacts; j++)
             {
                 var pt = contactManifold.getContactPoint(j);
                 var ptA = pt.getPositionWorldOnA();
@@ -165,8 +216,9 @@ PhysicsSimulator.prototype.getColliders = function(model)
                 var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
                 //console.log(distance);               
             }
-            
+            */
             //if (distance < 0.05)
+            if (numContacts > 0)
             {
                 if (body0.ptr == physicsBody.ptr)
                 {
@@ -182,7 +234,7 @@ PhysicsSimulator.prototype.getColliders = function(model)
 
     return colliders;
 }
-               
+
 PhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
 {
     for (var i = 0; i < this.bodyModels.length; i++)
@@ -225,79 +277,101 @@ PhysicsSimulator.prototype.isSelected = function(model)
 
 PhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
-    // clear modified CBs
-    for (var i = 0; i < this.bodyModels.length; i++)
-    {
-        this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
-        this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-    }
-    
     // remove existing bodies
     while (this.bodyModels.length > 0)
     {
-        this.deleteModel(this.bodyModels[0]);
+        this.deletePhysicsBody(this.bodyModels[0]);
     }
 
-    // add bodies to world
+    // add bodies to world (if not already present)
     for (var i = 0; i < this.bodies.Size(); i++)
     {
-        var name = this.bodies.getAt(i);
-        var model = this.registry.find(name.getValueDirect().join(""));
-        if (!model)
-            continue;
-
-        // watch for changes in scale
-        model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
-        // watch for changes in parent
-        model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-
-        // if model is parented, don't add here; it will be added as a shape to the parent model's body
-        if (model.motionParent)
-            continue;
-
-        var shape = this.getCompoundShape(model);
-
-        var mass = this.getNetMass(model);
-
-        var transform = new Ammo.btTransform();
-        transform.setIdentity();
-
-        var position = model.getAttribute("sectorPosition").getValueDirect();
-        // temporary fix to remove y-axis padding between static and dynamic objects
-        if (mass == 0)
+        var name = this.bodies.getAt(i).getValueDirect().join("");
+        var model = this.registry.find(name);
+        if (model)
         {
-            position.y -= 0.075;
+            this.createPhysicsBody(model);
         }
-        var vector = new Ammo.btVector3(position.x, position.y, position.z);
-        transform.setOrigin(vector);
-        Ammo.destroy(vector);
+    }
+}
 
-        var quat = model.getAttribute("quaternion").getValueDirect();
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
+PhysicsSimulator.prototype.createPhysicsBody = function(model)
+{
+    if (!model)
+        return;
 
-        var isDynamic = (mass != 0);
-        var localInertia = new Ammo.btVector3(0, 0, 0);
-        if (isDynamic)
+    // watch for changes in scale
+    model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
+    // watch for changes in parent
+    model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+
+    // if model is parented, don't add here; it will be added as a shape to the parent model's body
+    if (model.motionParent)
+        return;
+
+    var shape = this.getCompoundShape(model);
+
+    var mass = this.getNetMass(model);
+
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();
+
+    var position = model.getAttribute("sectorPosition").getValueDirect();
+    // temporary fix to remove y-axis padding between static and dynamic objects
+    if (mass == 0)
+    {
+        position.y -= 0.075;
+    }
+    var vector = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(vector);
+    Ammo.destroy(vector);
+
+    var quat = model.getAttribute("quaternion").getValueDirect();
+    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+    transform.setRotation(quaternion);
+    Ammo.destroy(quaternion);
+
+    var isDynamic = (mass != 0);
+    var localInertia = new Ammo.btVector3(0, 0, 0);
+    if (isDynamic)
+    {
+        shape.calculateLocalInertia(mass, localInertia);
+    }
+
+    var motionState = new Ammo.btDefaultMotionState(transform);
+    Ammo.destroy(transform);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    Ammo.destroy(localInertia);
+    var body = new Ammo.btRigidBody(rbInfo);
+    Ammo.destroy(rbInfo);
+
+    this.world.addRigidBody(body);
+    //if (isDynamic)
+    {
+        this.bodyModels.push(model);
+        this.physicsShapes.push(shape);
+        this.physicsBodies.push(body);
+        this.bodyAdded.push(true);
+    }
+}
+
+PhysicsSimulator.prototype.deletePhysicsBody = function(model)
+{
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == model)
         {
-            shape.calculateLocalInertia(mass, localInertia);
-        }
-
-        var motionState = new Ammo.btDefaultMotionState(transform);
-        Ammo.destroy(transform);
-        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        Ammo.destroy(localInertia);
-        var body = new Ammo.btRigidBody(rbInfo);
-        Ammo.destroy(rbInfo);
-
-        this.world.addRigidBody(body);
-        //if (isDynamic)
-        {
-            this.bodyModels.push(model);
-            this.physicsShapes.push(shape);
-            this.physicsBodies.push(body);
-            this.bodyAdded.push(true);
+            this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
+            this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+            this.world.removeRigidBody(this.physicsBodies[i]);
+            Ammo.destroy(this.physicsShapes[i]);
+            Ammo.destroy(this.physicsBodies[i].getMotionState());
+            Ammo.destroy(this.physicsBodies[i]);
+            this.physicsBodies.splice(i, 1);
+            this.physicsShapes.splice(i, 1);
+            this.bodyModels.splice(i, 1);
+            this.bodyAdded.splice(i, 1);
+            return;
         }
     }
 }
@@ -336,17 +410,17 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     for (var i = 0; i < model.motionChildren.length; i++)
     {
         var child = model.motionChildren[i];
-        
+
         var childPosition = child.getAttribute("position").getValueDirect();
         childPosition.x += position.x;
         childPosition.y += position.y;
         childPosition.z += position.z;
-        
+
         childRotation = child.getAttribute("rotation").getValueDirect();
         childRotation.x += rotation.x;
         childRotation.y += rotation.y;
         childRotation.z += rotation.z;
-        
+
         var childScale = child.getAttribute("scale").getValueDirect();
         childScale.x *= scale.x;
         childScale.y *= scale.y;
@@ -358,17 +432,20 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
 
 PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
 {
+    var center = model.getAttribute("center").getValueDirect();
+    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
 
     var matrix = scaleMatrix;
-
+    
     var shape = new Ammo.btConvexHullShape();
     var verts = model.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
+        //var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
         Ammo.destroy(point);
@@ -518,12 +595,16 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.initPhysics = function()
 {
-    if (this.collisionConfiguration) Ammo.destroy(this.collisionConfiguration);
-    if (this.dispatcher) Ammo.destroy(this.dispatcher);
-    if (this.overlappingPairCache) Ammo.destroy(this.overlappingPairCache);
-    if (this.solver) Ammo.destroy(this.solver);
+    if (this.collisionConfiguration)
+        Ammo.destroy(this.collisionConfiguration);
+    if (this.dispatcher)
+        Ammo.destroy(this.dispatcher);
+    if (this.overlappingPairCache)
+        Ammo.destroy(this.overlappingPairCache);
+    if (this.solver)
+        Ammo.destroy(this.solver);
     //if (this.world) Ammo.destroy(this.world);
-    
+
     this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
     this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
     this.overlappingPairCache = new Ammo.btDbvtBroadphase();
@@ -534,23 +615,9 @@ PhysicsSimulator.prototype.initPhysics = function()
     this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
 }
 
-PhysicsSimulator.prototype.deleteModel = function(model)
+PhysicsSimulator.prototype.bodiesModified = function()
 {
-    for (var i = 0; i < this.bodyModels.length; i++)
-    {
-        if (this.bodyModels[i] == model)
-        {
-            this.world.removeRigidBody(this.physicsBodies[i]);
-            Ammo.destroy(this.physicsShapes[i]);
-            Ammo.destroy(this.physicsBodies[i].getMotionState());
-            Ammo.destroy(this.physicsBodies[i]);                  
-            this.physicsBodies.splice(i, 1);
-            this.physicsShapes.splice(i, 1);
-            this.bodyModels.splice(i, 1);
-            this.bodyAdded.splice(i, 1);
-            return;
-        }
-    }
+    this.updateBodies = true;
 }
 
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
@@ -560,7 +627,7 @@ function PhysicsSimulator_GravityModifiedCB(attribute, container)
 
 function PhysicsSimulator_BodiesModifiedCB(attribute, container)
 {
-    container.updateBodies = true;
+    container.bodiesModified();
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)

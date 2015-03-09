@@ -66,10 +66,12 @@ CollideDirective.prototype.execute = function(root)
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
+    var i, j;
+    
     // synchronize models with physics simulator
     var models = [];
     var bodies = new AttributeVector();
-    for (var i in collideRecs)
+    for (i in collideRecs)
     {
         var model = collideRecs[i].model;
 
@@ -87,7 +89,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
 
     // update positions of models (retain inspection group's rotation)
-    for (var i = 0; i < models.length; i++)
+    for (i = 0; i < models.length; i++)
     {
         var model = models[i];
 
@@ -100,18 +102,20 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     }
 
     // update physics simulation
-    this.physicsSim.stepSimulation(0.1);
+    this.physicsSim.stepSimulation(1, 1);
 
     // get collisions
-    for (var i = 0; i < models.length; i++)
+    for (i = 0; i < models.length; i++)
     {
         var model = models[i];
-
+        if (!this.isSelected(model)) continue; // for now only test currently selected model
+            
+        /*
         var colliders = this.physicsSim.getColliders(model);
         if (colliders.length > 0)
         {
             // TODO: should parent's collision be propagated to child models?
-            for (var j = 0; j < colliders.length; j++)
+            for (j = 0; j < colliders.length; j++)
             {
                 model.getAttribute("collisionList").push_back(colliders[j]);
             }
@@ -126,6 +130,23 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 Ammo.destroy(trans);
                 var position = new Vector3D(origin.x(), origin.y(), origin.z());
                 model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+                
+            }
+        }
+        */
+        var colliding = this.physicsSim.isColliding(model);
+        if (colliding)
+        {
+            // if model is set to stop on collision, update its position from the physics simulator
+            if (model.getAttribute("stopOnCollision").getValueDirect())
+            {
+                var trans = new Ammo.btTransform();
+                this.physicsSim.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
+                var origin = trans.getOrigin();
+                Ammo.destroy(trans);
+                var position = new Vector3D(origin.x(), origin.y(), origin.z());
+                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+                
             }
         }
     }
@@ -133,12 +154,15 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
 
 CollideDirective.prototype.detectObstructions = function(collideRecs)
 {
+    var i, j;
     var models = [];
     var trees = [];
     var obstructions = [];
 
-    for (var i in collideRecs)
+    for (i in collideRecs)
     {
+        if (collideRecs[i].model.getAttribute("detectObstruction").getValueDirect() == false) continue;
+        
         models.push(collideRecs[i].model);
         trees.push(collideRecs[i].tree);
         obstructions.push(false);
@@ -148,14 +172,14 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
     var distance = 0;
     var minDistance = FLT_MAX;
-    for (var i = 0; i < trees.length; i++)
+    for (i = 0; i < trees.length; i++)
     {
         var directionVectors = models[i].getDirectionVectors();
         directionVectors.forward.x *= MAX_SEE_AHEAD;
         directionVectors.forward.y *= MAX_SEE_AHEAD;
         directionVectors.forward.z *= MAX_SEE_AHEAD;
 
-        for (var j = 0; j < trees.length; j++)
+        for (j = 0; j < trees.length; j++)
         {
             if (i == j)
                 continue;
@@ -170,7 +194,7 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
         }
     }
 
-    for (var i = 0; i < obstructions.length; i++)
+    for (i = 0; i < obstructions.length; i++)
     {
         models[i].getAttribute("obstructionDetected").setValueDirect(obstructions[i]);
     }
@@ -178,14 +202,15 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
+    var i, j;
     var sockets = [];
     var plugs = [];
 
     // get disconnected sockets/plugs
-    for (var i in collideRecs)
+    for (i in collideRecs)
     {
         var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
-        for (var j = 0; j < socketConnectors.Size(); j++)
+        for (j = 0; j < socketConnectors.Size(); j++)
         {
             var socketConnector = socketConnectors.getAt(j);
             if (socketConnector.getAttribute("connected").getValueDirect() == false)
@@ -194,8 +219,11 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             }
         }
 
+        // only test plugs from the currently selected (and unparented) model (can only have 1 motion parent at a time)
+        if (collideRecs[i].model.motionParent || !this.isSelected(collideRecs[i].model)) continue;
+        
         var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
-        for (var j = 0; j < plugConnectors.Size(); j++)
+        for (j = 0; j < plugConnectors.Size(); j++)
         {
             var plugConnector = plugConnectors.getAt(j);
             if (plugConnector.getAttribute("connected").getValueDirect() == false)
@@ -206,11 +234,11 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     }
 
     // test plugs for collision with sockets
-    for (var i = 0; i < plugs.length; i++)
+    for (i = 0; i < plugs.length; i++)
     {
         var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
 
-        for (var j = 0; j < sockets.length; j++)
+        for (j = 0; j < sockets.length; j++)
         {
             // only test sockets/plugs between different models, and models that are not already in a motion
             // ancestor/descendent relationship
@@ -251,4 +279,18 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
             }
         }
     }
+}
+
+CollideDirective.prototype.isSelected = function(model)
+{
+    var selected = model.getAttribute("selected").getValueDirect();
+    if (!selected)
+    {
+        for (var i = 0; i < model.motionChildren.length && !selected; i++)
+        {
+            selected = this.isSelected(model.motionChildren[i]);
+        }
+    }
+
+    return selected;
 }

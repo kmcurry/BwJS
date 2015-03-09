@@ -14,6 +14,11 @@ NodeRegistry.prototype.register = function(node)
     this.nodes[node.__nodeId__] = node;
 }
 
+NodeRegistry.prototype.unregister = function(node)
+{
+    // TODO
+}
+
 NodeRegistry.prototype.clear = function()
 {
     this.nodes = [];
