@@ -56,6 +56,7 @@ function Model()
     this.collisionDetected = new BooleanAttr(false);
     this.collisionList = new AttributeVector();
     this.stopOnCollision = new BooleanAttr(false);
+    this.detectObstruction = new BooleanAttr(false);
     this.obstructionDetected = new BooleanAttr(false);
     this.obstructionList = new AttributeVector(); // currently will only contain most threatening (closest) obstructor
     this.highlight = new BooleanAttr(false);
@@ -137,6 +138,7 @@ function Model()
     this.registerAttribute(this.collisionDetected, "collisionDetected");
     this.registerAttribute(this.collisionList, "collisionList");
     this.registerAttribute(this.stopOnCollision, "stopOnCollision");
+    this.registerAttribute(this.detectObstruction, "detectObstruction");
     this.registerAttribute(this.obstructionDetected, "obstructionDetected");
     this.registerAttribute(this.obstructionList, "obstructionList");
     this.registerAttribute(this.highlight, "highlight");
@@ -162,11 +164,6 @@ function Model()
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
-
-    // enable auto-display lists
-    this.autoDisplayList.setValueDirect(true);
-    this.autoDisplayList.addModifiedCB(Model_AutoDisplayListModifiedCB, this);
-
     //this.surfacesNode.setCreatedByParent(true);
 }
 
@@ -297,7 +294,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
                 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
-
+                
                 this.popMatrix();
                 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
@@ -458,13 +455,13 @@ Model.prototype.connectSurfaceAttributes = function(surface)
 
 Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
-	this.connectGeometryAttribute(geometry,	this.name, "name");
+    this.connectGeometryAttribute(geometry, this.name, "name");
     this.connectGeometryAttribute(geometry, this.selectable, "selectable");
     this.connectGeometryAttribute(geometry, this.cullable, "cullable");
     this.connectGeometryAttribute(geometry, this.show, "show");
@@ -479,7 +476,7 @@ Model.prototype.connectGeometryAttributes = function(geometry)
 
 Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
 {
-    var modified = this.getAttributeModificationCount(attribute) > 0 ? true : false;
+    var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
@@ -564,18 +561,8 @@ Model.prototype.buildBoundingTree = function()
     this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }
 
-Model.prototype.autoDisplayListModified = function()
-{
-    
-}
-
 Model.prototype.collisionDetectedModified = function()
 {
-}
-
-function Model_AutoDisplayListModifiedCB(attribute, container)
-{
-    container.autoDisplayListModified();
 }
 
 function Model_SortPolygonsModifiedCB(attribute, container)
@@ -587,38 +574,16 @@ function Model_SortPolygonsModifiedCB(attribute, container)
 function Model_RenderSequenceSlotModifiedCB(attribute, container)
 {
     var slot = attribute.getValueDirect();
-
-    // if render seqence slot is non-zero, cannot use display lists
-    if (slot > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_DissolveModifiedCB(attribute, container)
 {
     var dissolve = attribute.getValueDirect();
-
-    if (dissolve > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
-
-    //this.updateDisableOnDissolve(); // TODO
 }
 
 function Model_OpacityModifiedCB(attribute, container)
 {
     var opacity = attribute.getValueDirect();
-    
-    // if opacity is less than 1, cannot use display lists
-    if (opacity < 1)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_TextureOpacityModifiedCB(attribute, container)
@@ -629,13 +594,6 @@ function Model_TextureOpacityModifiedCB(attribute, container)
 function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 {
     var numTransparencyTextures = attribute.getValueDirect();
-    
-    // if count is greater than 0, cannot use display lists
-    if (numTransparencyTextures > 0)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
 }
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
@@ -645,7 +603,7 @@ function Model_GeometryBBoxModifiedCB(attribute, container)
 
 function Model_SurfaceAttrModifiedCB(attribute, container)
 {
-    //container.incrementModificationCount();
+    //container.setModified();
 }
 
 function Model_GeometryAttrModifiedCB(attribute, container)
@@ -655,14 +613,7 @@ function Model_GeometryAttrModifiedCB(attribute, container)
 
 function Model_DetectCollisionModifiedCB(attribute, container)
 {
-	var detectCollision = attribute.getValueDirect();
-    
-    // if detecting collisions, cannot use display lists
-    if (detectCollision)
-    {
-        container.autoDisplayList.setValueDirect(false);
-        container.enableDisplayList.setValueDirect(false);
-    }
+    var detectCollision = attribute.getValueDirect();
 }
 
 function Model_CollisionDetectedModifiedCB(attribute, container)

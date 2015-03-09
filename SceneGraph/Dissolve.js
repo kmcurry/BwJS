@@ -57,5 +57,5 @@ Dissolve.prototype.apply = function(directive, params, visitChildren)
 
 function Dissolve_DissolveModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();   
+    container.setModified();   
 }

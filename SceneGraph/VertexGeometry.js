@@ -552,17 +552,17 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function VertexGeometry_ColorsModifiedCB(attribute, container)
 {
     container.updateColors = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function VertexGeometry_UVCoordsModifiedCB(attribute, container)
 {
     container.updateUVCoords.push(attribute);
-    container.incrementModificationCount();
+    container.setModified();
 }

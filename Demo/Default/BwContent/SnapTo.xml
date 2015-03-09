@@ -120,164 +120,8 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <!--<Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="2" y=".26" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <socketConnectors>
-                            <socketConnector type="default">
-                                <normal x="1" y="0" z="0"/>
-                                <slot1>
-                                    <center x="0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                            <socketConnector type="default">
-                                <normal x="0" y="1" z="0"/>
-                                <slot1>
-                                    <center x="0" y="0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0" y="0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                            <socketConnector type="default">
-                                <normal x="0" y="0" z="1"/>
-                                <slot1>
-                                    <center x="0" y="0" z="0.5"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0" y="0" z="0.5"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                        </socketConnectors>
-                        <plugConnectors>
-                            <plugConnector type="default">
-                                <normal x="-1" y="0" z="0"/>
-                                <pin1>
-                                    <center x="-0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="-0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                            <plugConnector type="default">
-                                <normal x="0" y="-1" z="0"/>
-                                <pin1>
-                                    <center x="0" y="-0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="0" y="-0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                            <plugConnector type="default">
-                                <normal x="0" y="0" z="-1"/>
-                                <pin1>
-                                    <center x="0" y="0" z="0"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="0" y="0" z="0"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                        </plugConnectors>
-                        <physicalProperties>
-                        <mass>5</mass>
-                    </physicalProperties>  
-                    </Model>-->
-                    <!--<Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="4" y=".26" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
-                        <socketConnectors>
-                            <socketConnector type="default">
-                                <normal x="1" y="0" z="0"/>
-                                <slot1>
-                                    <center x="0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                            <socketConnector type="default">
-                                <normal x="0" y="1" z="0"/>
-                                <slot1>
-                                    <center x="0" y="0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0" y="0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                            <socketConnector type="default">
-                                <normal x="0" y="0" z="1"/>
-                                <slot1>
-                                    <center x="0" y="0" z="0.5"/>
-                                    <radius>0.2</radius>
-                                </slot1>
-                                <slot2>
-                                    <center x="0" y="0" z="0.5"/>
-                                    <radius>0.2</radius>
-                                </slot2>
-                            </socketConnector>
-                        </socketConnectors>
-                        <plugConnectors>
-                            <plugConnector type="default">
-                                <normal x="-1" y="0" z="0"/>
-                                <pin1>
-                                    <center x="-0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="-0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                            <plugConnector type="default">
-                                <normal x="0" y="-1" z="0"/>
-                                <pin1>
-                                    <center x="0" y="-0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="0" y="-0.25" z="0.25"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                            <plugConnector type="default">
-                                <normal x="0" y="0" z="-1"/>
-                                <pin1>
-                                    <center x="0" y="0" z="0"/>
-                                    <radius>0.2</radius>
-                                </pin1>
-                                <pin2>
-                                    <center x="0" y="0" z="0"/>
-                                    <radius>0.2</radius>
-                                </pin2>
-                            </plugConnector>
-                        </plugConnectors>
-                        <physicalProperties>
-                        <mass>5</mass>
-                    </physicalProperties>  
-                    </Model>-->
-                    <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="-2" y=".26" z="0"/>
+                    <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                        <position x="0" y="1.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <socketConnectors>
@@ -354,7 +198,163 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
+                    <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                        <position x="0" y="2.26" z="0"/>
+                        <rotation x="0" y="0" z="0"/>
+                        <scale x="1" y="1" z="1"/>
+                        <socketConnectors>
+                            <socketConnector type="default">
+                                <normal x="1" y="0" z="0"/>
+                                <slot1>
+                                    <center x="0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                            <socketConnector type="default">
+                                <normal x="0" y="1" z="0"/>
+                                <slot1>
+                                    <center x="0" y="0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0" y="0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                            <socketConnector type="default">
+                                <normal x="0" y="0" z="1"/>
+                                <slot1>
+                                    <center x="0" y="0" z="0.5"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0" y="0" z="0.5"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                        </socketConnectors>
+                        <plugConnectors>
+                            <plugConnector type="default">
+                                <normal x="-1" y="0" z="0"/>
+                                <pin1>
+                                    <center x="-0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="-0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                            <plugConnector type="default">
+                                <normal x="0" y="-1" z="0"/>
+                                <pin1>
+                                    <center x="0" y="-0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="0" y="-0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                            <plugConnector type="default">
+                                <normal x="0" y="0" z="-1"/>
+                                <pin1>
+                                    <center x="0" y="0" z="0"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="0" y="0" z="0"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                        </plugConnectors>
+                        <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>  
+                    </Model>
+                    <Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                        <position x="0" y="3.26" z="0"/>
+                        <rotation x="0" y="0" z="0"/>
+                        <scale x="1" y="1" z="1"/>
+                        <socketConnectors>
+                            <socketConnector type="default">
+                                <normal x="1" y="0" z="0"/>
+                                <slot1>
+                                    <center x="0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                            <socketConnector type="default">
+                                <normal x="0" y="1" z="0"/>
+                                <slot1>
+                                    <center x="0" y="0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0" y="0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                            <socketConnector type="default">
+                                <normal x="0" y="0" z="1"/>
+                                <slot1>
+                                    <center x="0" y="0" z="0.5"/>
+                                    <radius>0.2</radius>
+                                </slot1>
+                                <slot2>
+                                    <center x="0" y="0" z="0.5"/>
+                                    <radius>0.2</radius>
+                                </slot2>
+                            </socketConnector>
+                        </socketConnectors>
+                        <plugConnectors>
+                            <plugConnector type="default">
+                                <normal x="-1" y="0" z="0"/>
+                                <pin1>
+                                    <center x="-0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="-0.25" y="0" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                            <plugConnector type="default">
+                                <normal x="0" y="-1" z="0"/>
+                                <pin1>
+                                    <center x="0" y="-0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="0" y="-0.25" z="0.25"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                            <plugConnector type="default">
+                                <normal x="0" y="0" z="-1"/>
+                                <pin1>
+                                    <center x="0" y="0" z="0"/>
+                                    <radius>0.2</radius>
+                                </pin1>
+                                <pin2>
+                                    <center x="0" y="0" z="0"/>
+                                    <radius>0.2</radius>
+                                </pin2>
+                            </plugConnector>
+                        </plugConnectors>
+                        <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>  
+                    </Model>
+                    <!--<Model name="cylinderRight" url="/objects/UV_CylinderG.lwo" enableSharing="false" detectCollision="true">
                         <position x="2" y=".26" z="0"/>
                         <rotation x="90" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -374,7 +374,7 @@
                         <physicalProperties>
                         <mass>5</mass>
                     </physicalProperties>  
-                    </Model>
+                    </Model>-->
                     <!--<Model name="cylinderLeft" url="/objects/UV_CylinderG.lwo" enableSharing="false">
                          <position x="-2" y=".26" z="0"/>
                          <rotation x="0" y="0" z="0"/>
@@ -416,7 +416,7 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="false">
+    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>UV_BoxG</body>

@@ -1,4 +1,6 @@
-﻿Bridgeworks.prototype = new AttributeContainer();
+var bridgeworks = null;
+
+Bridgeworks.prototype = new AttributeContainer();
 Bridgeworks.prototype.constructor = Bridgeworks;
 
 function Bridgeworks(canvas, bgImage, contentDir)
@@ -89,6 +91,7 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
     switch (getObjectClassName(event))
     {
         case "MouseEvent":
+        case "MouseEventConstructor": // Safari
             {
                 var absPos = getElementAbsolutePos(this.canvas);
                 event.canvasX = event.clientX - absPos.x;
@@ -98,6 +101,7 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
             break;
         
         case "KeyboardEvent":
+        case "KeyboardEventConstructor": // Safari
             {
                 bwEvent = this.eventAdapter.createKeyboardEvent(event, eventType);
             }
@@ -177,27 +181,12 @@ Bridgeworks.prototype.onLoadModified = function()
     this.selector.clearSelections();
     this.selector.getAttribute("lastSelectedName").setValueDirect("");
     this.viewportMgr.initLayout();
-/*    std::map<std::string, std::pair<CAttribute*, CAttribute*> >::const_iterator it;
- for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
- {
- it->second.first->AddRef();
- it->second.second->AddRef();
- }*/
 
     this.registry.clear();
+    g__nodeId__ = 0; // reset node ID counter
+    
     this.initEventListeners();
     this.initRegistry();
-
-    /*	for (it = m_messageSinks.begin(); it != m_messageSinks.end(); it++)
-     {
-     std::string data_name(it->first.c_str());
-     data_name += "_data";
-
-     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.first, it->first.c_str());
-     it->second.first->Release();
-     dynamic_cast<AttributeRegistry*>(registry)->Register(it->second.second, data_name.c_str());
-     it->second.second->Release();
-     }*/
 
     this.renderAgent.getAttribute("globalTimeInSecs").setValueDirect(0);
 
@@ -207,7 +196,6 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.iscetAgent.start(); There is no isectAgent in javascript version
     this.selector.start();
     this.rasterComponentEventListener.start();
-
 
     // TODO
     console.debug("TODO: " + arguments.callee.name);

@@ -80,5 +80,5 @@ QuaternionRotate.prototype.apply = function(directive, params, visitChildren)
 function QuaternionRotate_RotationQuatModifiedCB(attribute, container)
 {
     container.updateRotationQuat = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

@@ -423,6 +423,12 @@ function newRenderContext(api, canvas, background)
     case "webgl":
         {
             rc = new webglRC(canvas, background);
+            // load default program
+            if (rc.valid)
+            {
+                var program = rc.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+                rc.useProgram(program);
+            }
         }
         break;
     }

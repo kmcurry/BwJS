@@ -134,8 +134,10 @@ ObjectMover.prototype.connectTarget = function(target)
         this.linearVelocity.addTarget(target.getAttribute("linearVelocity"));
         this.angularVelocity.addTarget(target.getAttribute("angularVelocity"));
         this.scalarVelocity.addTarget(target.getAttribute("scalarVelocity"));
+        target.getAttribute("detectCollision").setValueDirect(true);
         target.getAttribute("collisionDetected").addModifiedCB(ObjectMover_TargetCollisionDetectedModifiedCB, this);
-        target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);
+        target.getAttribute("detectObstruction").setValueDirect(true);
+        target.getAttribute("obstructionDetected").addModifiedCB(ObjectMover_TargetObstructionDetectedModifiedCB, this);       
     }
 
     this.targetObject = target;

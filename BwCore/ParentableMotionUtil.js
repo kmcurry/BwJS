@@ -24,7 +24,7 @@ function addInspectionGroup(node, factory)
     var pScale = new Scale();
     pScale.setGraphMgr(factory.graphMgr);
 
-    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, null);
+    pQuat.addModifiedCB(Util_InspectionGroup_RotationQuatModifiedCB, node);
 
     pGrp.name.setValueDirect("InspectionGroup");
     pTranslate.name.setValueDirect("Translate");
@@ -195,15 +195,8 @@ function clearObjectPositionMap()
     return;
 }
 
-// Doesn't do anything.
+// notify node that the rotation quat rotates that it has been modified
 function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
 {
-    /* 
-     CQuaternionf q;
-     CQuaternionFloatAttr quat = dynamic_cast<CQuaternionFloatAttr>(attr);
-     if (quat)
-     {
-     quat.getValueDirect(q);
-     }
-     */
+    container.setModified();
 }

@@ -224,70 +224,70 @@ Material.prototype.applyMaterialDesc = function()
 function Material_ColorModifiedCB(attribute, container)
 {
     container.updateColor = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_AmbientLevelModifiedCB(attribute, container)
 {
     container.updateAmbientLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_DiffuseLevelModifiedCB(attribute, container)
 {
     container.updateDiffuseLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_SpecularLevelModifiedCB(attribute, container)
 {
     container.updateSpecularLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_EmissiveLevelModifiedCB(attribute, container)
 {
     container.updateEmissiveLevel = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_AmbientModifiedCB(attribute, container)
 {
     container.updateAmbient = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_DiffuseModifiedCB(attribute, container)
 {
     container.updateDiffuse = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_SpecularModifiedCB(attribute, container)
 {
     container.updateSpecular = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_EmissiveModifiedCB(attribute, container)
 {
     container.updateEmissive = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_GlossinessModifiedCB(attribute, container)
 {
     container.updateGlosiness = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
     
 function Material_OpacityModifiedCB(attribute, container)
 {
     container.updateOpacity = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Material_DoubleSidedModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }

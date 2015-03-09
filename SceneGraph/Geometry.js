@@ -197,11 +197,11 @@ function Geometry_SelectableModifiedCB(attribute, container)
 
 function Geometry_ShowModifiedCB(attribute, container)
 {
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Geometry_ApproximationLevelsModifiedCB(attribute, container)
 {
     container.updateBoundingTree = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

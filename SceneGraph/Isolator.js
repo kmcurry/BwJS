@@ -60,11 +60,11 @@ Isolator.prototype.apply = function(directive, params, visitChildren)
         return;
     }
 
-    var isolateLights = this.isolateLights.getValueDirect();
-    var isolateTransforms = this.isolateTransforms.getValueDirect();
-    var isolateTextures = this.isolateTextures.getValueDirect();
-    var isolateDissolves = this.isolateDissolves.getValueDirect();
-    var isolateClipPlanes = this.isolateClipPlanes.getValueDirect();
+    var isolateLights = this.isolateLights.values[0];
+    var isolateTransforms = this.isolateTransforms.values[0];
+    var isolateTextures = this.isolateTextures.values[0];
+    var isolateDissolves = this.isolateDissolves.values[0];
+    var isolateClipPlanes = this.isolateClipPlanes.values[0];
 
     var lastDissolve = 0;
     var dissolveNode = null;
@@ -286,35 +286,35 @@ Isolator.prototype.popIsolatedStates = function()
 function Isolator_IsolateTransformsModifiedCB(attribute, container)
 {
     container.updateIsolateTransforms = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateLightsModifiedCB(attribute, container)
 {
     container.updateIsolateLights = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateMaterialsModifiedCB(attribute, container)
 {
     container.updateIsolateMaterials = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateTexturesModifiedCB(attribute, container)
 {
     container.updateIsolateTextures = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateFogModifiedCB(attribute, container)
 {
     container.updateIsolateFog = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
 
 function Isolator_IsolateClipPlanesModifiedCB(attribute, container)
 {
     container.updateIsolateClipPlanes = true;
-    container.incrementModificationCount();
+    container.setModified();
 }

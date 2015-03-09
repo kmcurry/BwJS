@@ -279,6 +279,13 @@ StringAttr.prototype.getValueDirect = function()
     return values;
 }
 
+StringAttr.prototype.getLastValueDirect = function()
+{
+    var lastValues = [];
+    this.getLastValue(lastValues);
+    return lastValues;
+}
+
 StringAttr.prototype.setValueDirect = function(value, params)
 {
     this.setValue(value, params);

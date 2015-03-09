@@ -496,7 +496,7 @@ Serializer.prototype.serializeAttributeContainer = function(container)
                 for (var i = 0; i < uiAttrCount; ++i)
                 {
                     attribute = container.getAttributeAt(i);
-                    if (container.getAttributeModificationCount(attribute) == 0) continue;
+                    if (attribute.modificationCount == 0) continue;
                     var attrName = container.getAttributeName(attribute);
                     if (attribute.isNative() == false)
                     {

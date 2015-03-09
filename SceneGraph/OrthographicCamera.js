@@ -120,5 +120,5 @@ OrthographicCamera.prototype.getViewSpaceRay = function(viewport, clickPoint)
 function OrthographicCamera_WidthModifiedCB(attribute, container)
 {
     container.updateWidth = true;
-    container.incrementModificationCount();
+    container.setModified();
 }
