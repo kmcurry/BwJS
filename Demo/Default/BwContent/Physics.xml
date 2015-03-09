@@ -119,7 +119,7 @@
         </intersectees>
     </Set>
     <?bwinclude url="SendMessage.xml"?>
-    <PhysicsSimulator name="PhysicsSimulator" timeScale="1" evaluate="false">
+    <PhysicsSimulator name="PhysicsSimulator" timeScale="1" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>UV_SphereG</body>
