@@ -9500,7 +9500,7 @@ function newRenderContext(api, canvas, background)
             // load default program
             if (rc.valid)
             {
-                var program = rc.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+                var program = rc.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
                 rc.useProgram(program);
             }
         }
@@ -10488,18 +10488,18 @@ function webglProgram(rc, gl, source_vs, source_fs)
     {
         this.lightSource[i] = new gl_LightSourceParameters();
 
-        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
-        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
-        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
-        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
-        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
-        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
-        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
-        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
-        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
-        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
-        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
-        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
+        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource[" + i + "].enabled");
+        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource[" + i + "].ambient");
+        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource[" + i + "].diffuse");
+        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource[" + i + "].specular");
+        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource[" + i + "].position");
+        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource[" + i + "].spotDirection");
+        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource[" + i + "].spotExponent");
+        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource[" + i + "].spotCutoff");
+        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].constantAttenuation");
+        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].linearAttenuation");
+        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].quadraticAttenuation");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource[" + i + "].range");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
@@ -10507,11 +10507,11 @@ function webglProgram(rc, gl, source_vs, source_fs)
 
     // materials
     this.frontMaterial = new gl_MaterialParameters();
-    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
-    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
-    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
-    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
-    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
+    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial.ambient");
+    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial.diffuse");
+    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial.specular");
+    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial.emission");
+    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial.shininess");
 
     // textures
     this.textureSamplerColor = new Array(gl_MaxTextureStages);
@@ -12099,26 +12099,30 @@ var default_fragment_lighting_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_range["  + gl_MaxLights + "];",
+"uniform struct",
+"{",
+"   int enabled;",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 position;",
+"   vec4 spotDirection;",
+"   float spotExponent;",
+"   float spotCutoff;",
+"   float constantAttenuation;",
+"   float linearAttenuation;",
+"   float quadraticAttenuation;",
+"   float range;",
+"} uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform vec4 uFrontMaterial_ambient;",
-"uniform vec4 uFrontMaterial_diffuse;",
-"uniform vec4 uFrontMaterial_specular;",
-"uniform vec4 uFrontMaterial_emission;",
-"uniform float uFrontMaterial_shininess;",
+"uniform struct",
+"{",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 emission;",
+"   float shininess;",
+"} uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -12154,12 +12158,12 @@ var default_fragment_lighting_fs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial_ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial.ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial.specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12196,12 +12200,12 @@ var default_fragment_lighting_fs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12215,20 +12219,20 @@ var default_fragment_lighting_fs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource_enabled[i] != 0)",
+"           if (uLightSource[i].enabled != 0)",
 "           {",
-"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               if (uLightSource[i].position[3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
+"                       uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(vTransformedNormal)),",
-"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource[i].position)));",
 "               }",
-"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
-"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
+"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
+"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12238,11 +12242,11 @@ var default_fragment_lighting_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
-"                           uFrontMaterial_diffuse.a / 3.0 + ",
-"                           uFrontMaterial_specular.a / 3.0;",
+"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
+"                           uFrontMaterial.diffuse.a / 3.0 + ",
+"                           uFrontMaterial.specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",
@@ -12328,26 +12332,30 @@ var default_vertex_lighting_vs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",
 "",
-"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_range["  + gl_MaxLights + "];",
+"uniform struct",
+"{",
+"   int enabled;",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 position;",
+"   vec4 spotDirection;",
+"   float spotExponent;",
+"   float spotCutoff;",
+"   float constantAttenuation;",
+"   float linearAttenuation;",
+"   float quadraticAttenuation;",
+"   float range;",
+"} uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform vec4 uFrontMaterial_ambient;",
-"uniform vec4 uFrontMaterial_diffuse;",
-"uniform vec4 uFrontMaterial_specular;",
-"uniform vec4 uFrontMaterial_emission;",
-"uniform float uFrontMaterial_shininess;",
+"uniform struct",
+"{",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 emission;",
+"   float shininess;",
+"} uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "",
@@ -12372,12 +12380,12 @@ var default_vertex_lighting_vs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial_ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial.ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial.specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12414,12 +12422,12 @@ var default_vertex_lighting_vs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12442,20 +12450,20 @@ var default_vertex_lighting_vs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource_enabled[i] != 0)",
+"           if (uLightSource[i].enabled != 0)",
 "           {",
-"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               if (uLightSource[i].position[3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
+"                       uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(transformedNormal)),",
-"                       normalize(vec3(viewDirection) + vec3(uLightSource_position[i])));",
+"                       normalize(vec3(viewDirection) + vec3(uLightSource[i].position)));",
 "               }",
-"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
-"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
+"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
+"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(transformedNormal)),",
 "                       vec3(viewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12465,11 +12473,11 @@ var default_vertex_lighting_vs = [
 "           }",
 "       }",
 "",
-"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = uFrontMaterial_ambient.a / 3.0 + ",
-"                           uFrontMaterial_diffuse.a / 3.0 + ",
-"                           uFrontMaterial_specular.a / 3.0;",
+"       vLightingFactor.a = uFrontMaterial.ambient.a / 3.0 + ",
+"                           uFrontMaterial.diffuse.a / 3.0 + ",
+"                           uFrontMaterial.specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",  
@@ -12650,26 +12658,30 @@ var pcf_shadow_mapping_render_pass_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
-"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
-"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
-"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
-"uniform float uLightSource_range["  + gl_MaxLights + "];",
+"uniform struct",
+"{",
+"   int enabled;",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 position;",
+"   vec4 spotDirection;",
+"   float spotExponent;",
+"   float spotCutoff;",
+"   float constantAttenuation;",
+"   float linearAttenuation;",
+"   float quadraticAttenuation;",
+"   float range;",
+"} uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform vec4 uFrontMaterial_ambient;",
-"uniform vec4 uFrontMaterial_diffuse;",
-"uniform vec4 uFrontMaterial_specular;",
-"uniform vec4 uFrontMaterial_emission;",
-"uniform float uFrontMaterial_shininess;",
+"uniform struct",
+"{",
+"   vec4 ambient;",
+"   vec4 diffuse;",
+"   vec4 specular;",
+"   vec4 emission;",
+"   float shininess;",
+"} uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -12732,12 +12744,12 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial_ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial_specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial.ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial.specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12775,12 +12787,12 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial_shininess);",
+"       pf = pow(nDotHV, uFrontMaterial.shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12794,20 +12806,20 @@ var pcf_shadow_mapping_render_pass_fs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource_enabled[i] != 0)",
+"           if (uLightSource[i].enabled != 0)",
 "           {",
-"               if (uLightSource_position[i][3] == 0.0)", // directional light
+"               if (uLightSource[i].position[3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
-"                       uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
+"                       uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(vTransformedNormal)),",
-"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource[i].position)));",
 "               }",
-"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
+"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
-"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
-"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
+"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
+"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
+"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12817,11 +12829,11 @@ var pcf_shadow_mapping_render_pass_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
-"                           uFrontMaterial_diffuse.a / 3.0 + ",
-"                           uFrontMaterial_specular.a / 3.0;",
+"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
+"                           uFrontMaterial.diffuse.a / 3.0 + ",
+"                           uFrontMaterial.specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",
@@ -17887,7 +17899,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(false);//true);
+    this.shadowsEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
@@ -17916,7 +17928,7 @@ function RenderDirective()
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
     
-    this.shadowDirective = null;//new ShadowDirective();
+    this.shadowDirective = new ShadowDirective();
     
     this.backgroundScreen = new Isolator();
     this.backgroundScreen.isolateTextures.setValueDirect(true);
@@ -17934,7 +17946,7 @@ RenderDirective.prototype.setRegistry = function(registry)
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
-    //this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
+    this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
     this.backgroundScreenRect.setRegistry(registry);
@@ -17948,7 +17960,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
-    //this.shadowDirective.setGraphMgr(graphMgr);
+    this.shadowDirective.setGraphMgr(graphMgr);
     this.backgroundScreen.setGraphMgr(graphMgr);
     this.backgroundTexture.setGraphMgr(graphMgr);
     this.backgroundScreenRect.setGraphMgr(graphMgr);
@@ -17956,11 +17968,11 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     // create shader program
     if (this.shadowsEnabled.getValueDirect() == true)
     {
-        //this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+        this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     }
     else
     {
-        //this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 
     // call base-class implementation
@@ -17970,7 +17982,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
 RenderDirective.prototype.execute = function(root)
 {  
     // set shader program
-    //this.graphMgr.renderContext.useProgram(this.program);
+    this.graphMgr.renderContext.useProgram(this.program);
     
     // draw background
     //this.drawBackground();
@@ -17982,7 +17994,7 @@ RenderDirective.prototype.execute = function(root)
     if (this.shadowsEnabled.getValueDirect() == true)
     {
         // setup shadow map
-        //this.shadowDirective.execute(root);
+        this.shadowDirective.execute(root);
     }
 
     // render
@@ -18085,11 +18097,11 @@ function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
     var enabled = attribute.getValueDirect();
     if (enabled)
     {
-        //container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+        container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     }
     else
     {
-        //container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 }
 RayPickParams.prototype = new DirectiveParams();
