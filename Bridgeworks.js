@@ -17887,7 +17887,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(false);//true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
@@ -17916,7 +17916,7 @@ function RenderDirective()
     this.highlightDirective = new HighlightDirective();
     this.highlightType.addTarget(this.highlightDirective.getAttribute("highlightType"));
     
-    this.shadowDirective = new ShadowDirective();
+    this.shadowDirective = null;//new ShadowDirective();
     
     this.backgroundScreen = new Isolator();
     this.backgroundScreen.isolateTextures.setValueDirect(true);
@@ -17934,7 +17934,7 @@ RenderDirective.prototype.setRegistry = function(registry)
     this.distanceSortAgent.setRegistry(registry);
     this.updateDirective.setRegistry(registry);
     this.highlightDirective.setRegistry(registry);
-    this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
+    //this.shadowDirective.setRegistry(registry); registry.register(this.shadowDirective);
     this.backgroundScreen.setRegistry(registry);
     this.backgroundTexture.setRegistry(registry);
     this.backgroundScreenRect.setRegistry(registry);
@@ -17948,7 +17948,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     this.distanceSortAgent.setGraphMgr(graphMgr);
     this.updateDirective.setGraphMgr(graphMgr);
     this.highlightDirective.setGraphMgr(graphMgr);
-    this.shadowDirective.setGraphMgr(graphMgr);
+    //this.shadowDirective.setGraphMgr(graphMgr);
     this.backgroundScreen.setGraphMgr(graphMgr);
     this.backgroundTexture.setGraphMgr(graphMgr);
     this.backgroundScreenRect.setGraphMgr(graphMgr);
@@ -17956,11 +17956,11 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     // create shader program
     if (this.shadowsEnabled.getValueDirect() == true)
     {
-        this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+        //this.program = graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     }
     else
     {
-        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        //this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 
     // call base-class implementation
@@ -17970,7 +17970,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
 RenderDirective.prototype.execute = function(root)
 {  
     // set shader program
-    this.graphMgr.renderContext.useProgram(this.program);
+    //this.graphMgr.renderContext.useProgram(this.program);
     
     // draw background
     //this.drawBackground();
@@ -17982,7 +17982,7 @@ RenderDirective.prototype.execute = function(root)
     if (this.shadowsEnabled.getValueDirect() == true)
     {
         // setup shadow map
-        this.shadowDirective.execute(root);
+        //this.shadowDirective.execute(root);
     }
 
     // render
@@ -18085,11 +18085,11 @@ function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
     var enabled = attribute.getValueDirect();
     if (enabled)
     {
-        container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
+        //container.program = container.graphMgr.renderContext.createProgram(pcf_shadow_mapping_render_pass_vs, pcf_shadow_mapping_render_pass_fs);
     }
     else
     {
-        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        //container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 }
 RayPickParams.prototype = new DirectiveParams();
