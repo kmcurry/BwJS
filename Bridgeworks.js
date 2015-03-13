@@ -10608,7 +10608,7 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
-var gl_MaxLights = 8;
+var gl_MaxLights = 4;
 var gl_MaxTextureStages = 2;
 var gl_MaxClipPlanes = 8;
 
@@ -12099,7 +12099,7 @@ var default_fragment_lighting_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"uniform struct",
+"struct lightSource",
 "{",
 "   int enabled;",
 "   vec4 ambient;",
@@ -12113,16 +12113,18 @@ var default_fragment_lighting_fs = [
 "   float linearAttenuation;",
 "   float quadraticAttenuation;",
 "   float range;",
-"} uLightSource[" + gl_MaxLights + "];",
+"};",
+"uniform lightSource uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform struct",
+"struct material",
 "{",
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
 "   vec4 emission;",
 "   float shininess;",
-"} uFrontMaterial;",
+"};",
+"uniform material uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -12332,7 +12334,7 @@ var default_vertex_lighting_vs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",
 "",
-"uniform struct",
+"struct lightSource",
 "{",
 "   int enabled;",
 "   vec4 ambient;",
@@ -12346,16 +12348,18 @@ var default_vertex_lighting_vs = [
 "   float linearAttenuation;",
 "   float quadraticAttenuation;",
 "   float range;",
-"} uLightSource[" + gl_MaxLights + "];",
+"};",
+"uniform lightSource uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform struct",
+"struct material",
 "{",
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
 "   vec4 emission;",
 "   float shininess;",
-"} uFrontMaterial;",
+"};",
+"uniform material uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "",
@@ -12658,7 +12662,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"uniform struct",
+"struct lightSource",
 "{",
 "   int enabled;",
 "   vec4 ambient;",
@@ -12672,16 +12676,18 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   float linearAttenuation;",
 "   float quadraticAttenuation;",
 "   float range;",
-"} uLightSource[" + gl_MaxLights + "];",
+"};",
+"uniform lightSource uLightSource[" + gl_MaxLights + "];",
 "",
-"uniform struct",
+"struct material",
 "{",
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
 "   vec4 emission;",
 "   float shininess;",
-"} uFrontMaterial;",
+"};",
+"uniform material uFrontMaterial;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -17899,7 +17905,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(false);//true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
