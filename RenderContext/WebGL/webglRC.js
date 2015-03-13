@@ -22,9 +22,9 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
-var gl_MaxLights = 8;
+var gl_MaxLights = 4;
 var gl_MaxTextureStages = 2;
-var gl_MaxClipPlanes = 8;
+var gl_MaxClipPlanes = 4;
 
 webglRC.prototype = new RenderContext();
 webglRC.prototype.constructor = webglRC;
