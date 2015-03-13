@@ -41,7 +41,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(false);//true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
