@@ -250,7 +250,7 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
     var panVelocity = this.panVelocity.getValueDirect();
     var linearVelocity = this.linearVelocity.getValueDirect();
     if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
-            linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
     {
         // position
         var position = this.position.getValueDirect();
@@ -263,20 +263,20 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // update position
         position.x = position.x + (directionVectors.right.x * panVelocity.x * timeIncrement) +
-                (directionVectors.up.x * panVelocity.y * timeIncrement) +
-                (directionVectors.forward.x * panVelocity.z * timeIncrement) +
-                (linearVelocity.x * timeIncrement);
+                                  (directionVectors.up.x * panVelocity.y * timeIncrement) +
+                                  (directionVectors.forward.x * panVelocity.z * timeIncrement) +
+                                  (linearVelocity.x * timeIncrement);
         if (linearVelocity_affectPosition_Y)
         {
             position.y = position.y + (directionVectors.right.y * panVelocity.x * timeIncrement) +
-                    (directionVectors.up.y * panVelocity.y * timeIncrement) +
-                    (directionVectors.forward.y * panVelocity.z * timeIncrement) +
-                    (linearVelocity.y * timeIncrement);
+                                      (directionVectors.up.y * panVelocity.y * timeIncrement) +
+                                      (directionVectors.forward.y * panVelocity.z * timeIncrement) +
+                                      (linearVelocity.y * timeIncrement);
         }
         position.z = position.z + (directionVectors.right.z * panVelocity.x * timeIncrement) +
-                (directionVectors.up.z * panVelocity.y * timeIncrement) +
-                (directionVectors.forward.z * panVelocity.z * timeIncrement) +
-                (linearVelocity.z * timeIncrement);
+                                  (directionVectors.up.z * panVelocity.y * timeIncrement) +
+                                  (directionVectors.forward.z * panVelocity.z * timeIncrement) +
+                                  (linearVelocity.z * timeIncrement);
 
         this.position.setValueDirect(position.x, position.y, position.z);
     }

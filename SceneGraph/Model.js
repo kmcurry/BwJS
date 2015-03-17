@@ -7,7 +7,8 @@ function Model()
     this.className = "Model";
     this.attrType = eAttrType.Model;
     
-    this.geometry = [];
+    this.surfaces = [];
+    this.geometries = [];
     this.geometryIndices = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
@@ -63,6 +64,7 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
+    this.genericConnectors = new GenericConnectors();
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
     this.physicalProperties = new PhysicalPropertiesAttr();
@@ -145,6 +147,7 @@ function Model()
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
+    this.registerAttribute(this.genericConnectors, "genericConnectors");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
     this.registerAttribute(this.physicalProperties, "physicalProperties");
@@ -417,6 +420,8 @@ Model.prototype.addSurface = function(surface)
 {
     this.surfacesNode.addChild(surface);
     
+    this.surfaces.push(surface);
+    
     // register surface to this for accessiblity with Set
     this.registerAttribute(surface, surface.getAttribute("name").getValueDirect().join(""));
 	
@@ -425,12 +430,12 @@ Model.prototype.addSurface = function(surface)
 
 Model.prototype.addGeometry = function(geometry, indices, surface)
 {
-    surface.addChild(geometry);
+    if (surface) surface.addGeometry(geometry);
     
     this.connectGeometryAttributes(geometry);
     this.addGeometryBBox(geometry);
-    this.geometry.push(geometry);
-    this.geometryIndices.push(indices);
+    this.geometries.push(geometry);
+    if (indices) this.geometryIndices.push(indices);
         
     this.updateBoundingTree = true;
 }
@@ -551,9 +556,9 @@ Model.prototype.updateBBox = function()
 Model.prototype.buildBoundingTree = function()
 {
     var tris = [];
-    for (var i = 0; i < this.geometry.length; i++)
+    for (var i = 0; i < this.geometries.length; i++)
     {
-        tris = tris.concat(this.geometry[i].getTriangles());
+        tris = tris.concat(this.geometries[i].getTriangles());
     }
     
     this.boundingTree = new Octree();

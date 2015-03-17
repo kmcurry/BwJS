@@ -133,7 +133,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 
             }
         }
-        */
+        *//*
         var colliding = this.physicsSim.isColliding(model);
         if (colliding)
         {
@@ -148,7 +148,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
                 
             }
-        }
+        }*/
     }
 }
 
@@ -202,35 +202,44 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
+    this.detectGenericSnapConnections(collideRecs);
+    this.detectPlugSocketSnapConnections(collideRecs);
+}
+
+CollideDirective.prototype.detectGenericSnapConnections = function(collideRecs)
+{
     var i, j;
     var sockets = [];
     var plugs = [];
-
-    // get disconnected sockets/plugs
+    
+    // get disconnected generic sockets/plugs
     for (i in collideRecs)
     {
-        var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
-        for (j = 0; j < socketConnectors.Size(); j++)
+        // only test plugs from the currently selected model
+        if (this.isSelected(collideRecs[i].model))
         {
-            var socketConnector = socketConnectors.getAt(j);
-            if (socketConnector.getAttribute("connected").getValueDirect() == false)
+            var plugConnectors = collideRecs[i].model.getAttribute("genericConnectors");
+            for (j = 0; j < plugConnectors.Size(); j++)
             {
-                sockets.push(new Pair(socketConnector, collideRecs[i]));
+                var plugConnector = plugConnectors.getAt(j);
+                if (plugConnector.getAttribute("connected").getValueDirect() == false)
+                {
+                    plugs.push(new Pair(plugConnector, collideRecs[i]));
+                }
             }
         }
-
-        // only test plugs from the currently selected (and unparented) model (can only have 1 motion parent at a time)
-        if (collideRecs[i].model.motionParent || !this.isSelected(collideRecs[i].model)) continue;
-        
-        var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
-        for (j = 0; j < plugConnectors.Size(); j++)
+        else // !selected
         {
-            var plugConnector = plugConnectors.getAt(j);
-            if (plugConnector.getAttribute("connected").getValueDirect() == false)
+            var socketConnectors = collideRecs[i].model.getAttribute("genericConnectors");
+            for (j = 0; j < socketConnectors.Size(); j++)
             {
-                plugs.push(new Pair(plugConnector, collideRecs[i]));
+                var socketConnector = socketConnectors.getAt(j);
+                if (socketConnector.getAttribute("connected").getValueDirect() == false)
+                {
+                    sockets.push(new Pair(socketConnector, collideRecs[i]));
+                }
             }
-        }
+        }       
     }
 
     // test plugs for collision with sockets
@@ -261,26 +270,100 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
                     objectInspector.clearSelection(plugs[i].second.model);
                 }
                 
-                // perform snap-to!
-                var factory = this.registry.find("AttributeFactory");
-                var snapTo = factory.create("SnapTo");
-                snapTo.getAttribute("target").copyValue(sockets[j].second.model.getAttribute("name"));
-                snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
-                snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
-                snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
-                snapTo.getAttribute("slot").setValueDirect(connection);
-                snapTo.execute();
-
                 // flag plug/socket as connected
                 plugs[i].first.getAttribute("connected").setValueDirect(true);
                 sockets[j].first.getAttribute("connected").setValueDirect(true);
                 
-                break;
+                // perform snap-to!
+                var snapMgr = this.registry.find("SnapMgr");
+                snapMgr.snapGenericToGeneric(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first);
+                
+                return;
+                //break;
             }
         }
     }
 }
+    
+CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRecs)
+{
+    var i, j;
+    var sockets = [];
+    var plugs = [];
 
+    // get disconnected sockets/plugs
+    for (i in collideRecs)
+    {
+        // only test plugs from the currently selected model
+        if (this.isSelected(collideRecs[i].model))
+        {
+            var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
+            for (j = 0; j < plugConnectors.Size(); j++)
+            {
+                var plugConnector = plugConnectors.getAt(j);
+                if (plugConnector.getAttribute("connected").getValueDirect() == false)
+                {
+                    plugs.push(new Pair(plugConnector, collideRecs[i]));
+                }
+            }
+        }
+        else // !selected
+        {
+            var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
+            for (j = 0; j < socketConnectors.Size(); j++)
+            {
+                var socketConnector = socketConnectors.getAt(j);
+                if (socketConnector.getAttribute("connected").getValueDirect() == false)
+                {
+                    sockets.push(new Pair(socketConnector, collideRecs[i]));
+                }
+            }
+        }       
+    }
+
+    // test plugs for collision with sockets
+    for (i = 0; i < plugs.length; i++)
+    {
+        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
+
+        for (j = 0; j < sockets.length; j++)
+        {
+            // only test sockets/plugs between different models, and models that are not already in a motion
+            // ancestor/descendent relationship
+            if (plugs[i].second.model == sockets[j].second.model ||
+                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
+                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
+                continue;
+            
+            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
+            if (plugType != socketType)
+                continue;
+
+            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
+            if (connection > 0)
+            {
+                // remove plug from object inspection
+                var objectInspector = this.registry.find("ObjectInspector");
+                if (objectInspector)
+                {
+                    objectInspector.clearSelection(plugs[i].second.model);
+                }
+                
+                // flag plug/socket as connected
+                plugs[i].first.getAttribute("connected").setValueDirect(true);
+                sockets[j].first.getAttribute("connected").setValueDirect(true);
+                
+                // perform snap-to!
+                var snapMgr = this.registry.find("SnapMgr");
+                snapMgr.snapPlugToSocket(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first, connection);
+
+                return;
+                //break;
+            }
+        }
+    }
+}
+    
 CollideDirective.prototype.isSelected = function(model)
 {
     var selected = model.getAttribute("selected").getValueDirect();

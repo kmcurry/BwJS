@@ -7,6 +7,8 @@ function Surface()
     this.className = "Surface";
     this.attrType = eAttrType.Surface;
     
+    this.geometries = [];
+    
     this.color = new ColorAttr(1, 1, 1, 1);
     this.ambientLevel = new NumberAttr(1);
     this.diffuseLevel = new NumberAttr(1);
@@ -96,6 +98,20 @@ function Surface()
     this.connectMaterialAttributes(this.materialNode);
 }
 
+Surface.prototype.clone = function()
+{
+    // call base-class implementation
+    var clone = Isolator.prototype.clone.call(this);
+    
+    // set up texture references
+    for (var i = 0; i < this.colorTexturesNode.children.length; i++)
+    {
+        clone.addTexture(this.colorTexturesNode.children[i]);
+    }
+    
+    return clone;
+}
+
 Surface.prototype.setGraphMgr = function(graphMgr)
 {
     this.materialNode.setGraphMgr(graphMgr);
@@ -141,6 +157,12 @@ Surface.prototype.connectMaterialAttribute = function(material, attribute, name)
 {
     var modified = attribute.modificationCount > 0 ? true : false;
     attribute.addTarget(material.getAttribute(name), eAttrSetOp.Replace, null, modified);
+}
+
+Surface.prototype.addGeometry = function(geometry)
+{
+    this.addChild(geometry);
+    this.geometries.push(geometry);
 }
 
 Surface.prototype.addTexture = function(texture)
