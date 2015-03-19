@@ -1,4 +1,4 @@
-﻿function Plane(point, normal)
+function Plane(point, normal)
 {
     this.point = new Vector3D();
     this.normal = new Vector3D();

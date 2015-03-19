@@ -38,6 +38,9 @@ function SelectionListener()
     this.pointWorld = new Vector3DAttr();
     this.pointObject = new Vector3DAttr();
     this.pointGeo = new Vector3DAttr();
+    this.normalView = new Vector3DAttr();
+    this.normalWorld = new Vector3DAttr();
+    this.normalObject = new Vector3DAttr();
     this.triIndex = new NumberAttr();
     this.distance = new NumberAttr();
     this.distanceFromScreenCenter = new NumberAttr();
@@ -54,6 +57,9 @@ function SelectionListener()
     this.registerAttribute(this.pointWorld, "pointWorld");
     this.registerAttribute(this.pointObject, "pointObject");
     this.registerAttribute(this.pointGeo, "pointGeo");
+    this.registerAttribute(this.normalView, "normalView");
+    this.registerAttribute(this.normalWorld, "normalWorld");
+    this.registerAttribute(this.normalObject, "normalObject");
     this.registerAttribute(this.triIndex, "triIndex");
     this.registerAttribute(this.distance, "distance");
     this.registerAttribute(this.distanceFromScreenCenter, "distanceFromScreenCenter");
@@ -211,6 +217,9 @@ SelectionListener.prototype.processPick = function(pick)
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
         this.pointView.setValueDirect(pick.intersectRecord.pointView.x, pick.intersectRecord.pointView.y, pick.intersectRecord.pointView.z);
+        this.normalObject.setValueDirect(pick.intersectRecord.normalModel.x, pick.intersectRecord.normalModel.y, pick.intersectRecord.normalModel.z);
+        this.normalWorld.setValueDirect(pick.intersectRecord.normalWorld.x, pick.intersectRecord.normalWorld.y, pick.intersectRecord.normalWorld.z);
+        this.normalView.setValueDirect(pick.intersectRecord.normalView.x, pick.intersectRecord.normalView.y, pick.intersectRecord.normalView.z);
         this.triIndex.setValueDirect(pick.intersectRecord.triIndex);
         this.distance.setValueDirect(pick.intersectRecord.distance);
     }
