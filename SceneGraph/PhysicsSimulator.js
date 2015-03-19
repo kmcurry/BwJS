@@ -304,6 +304,10 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     // watch for changes in enabled
     model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
 
+    // if model is disabled, don't create
+    if (model.getAttribute("enabled").getValueDirect() == false)
+        return;
+    
     // if model is parented, don't add here; it will be added as a shape to the parent model's body
     if (model.motionParent)
         return;
@@ -631,11 +635,11 @@ PhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
 {
     if (enabled)
     {
-        //this.restorePhysicsBody(n);
+        this.deletePhysicsBody(model); // ensure model is not added multiple times
+        this.createPhysicsBody(model);
     }
     else // !enabled
     {
-        //this.removePhysicsBody(n);
         this.deletePhysicsBody(model); 
     }
 }
