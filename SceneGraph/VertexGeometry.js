@@ -129,8 +129,6 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.vertexBuffer.setVertices(vertices);
         
         this.updateBoundingTree = true;
-        
-        this.calculateBBox();
     }
     
     if (this.updateColors)
@@ -567,6 +565,7 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
+    container.calculateBBox();
     container.setModified();
 }
 
