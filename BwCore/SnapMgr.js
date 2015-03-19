@@ -150,7 +150,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
 {
     var i, j, k;
     var vertices, xvertices, xvertex;
-    var normals, xnormals, xnormal;
+    var normals, xnormals, normal, xnormal;
     var center, xcenter;
 
     // copy snapper surfaces to snappee
@@ -218,6 +218,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var xgenericConnector = new GenericConnector();
         xgenericConnector.synchronize(genericConnector);
         
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
+        
         center = xgenericConnector.point.center.getValueDirect();
         xcenter = matrix.transform(center.x, center.y, center.z, 1);
         xgenericConnector.point.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
@@ -233,6 +237,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var plugConnector = snapperPlugConnectors.getAt(i);
         var xplugConnector = new PlugConnector();
         xplugConnector.synchronize(plugConnector);
+        
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
         
         center = xplugConnector.pin1.center.getValueDirect();
         xcenter = matrix.transform(center.x, center.y, center.z, 1);
@@ -253,6 +261,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var socketConnector = snapperSocketConnectors.getAt(i);
         var xsocketConnector = new SocketConnector();
         xsocketConnector.synchronize(socketConnector);
+        
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
         
         center = xsocketConnector.slot1.center.getValueDirect();
         xcenter = matrix.transform(center.x, center.y, center.z, 1);
