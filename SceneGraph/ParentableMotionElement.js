@@ -335,9 +335,10 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateRotation = false;
 
             values = this.rotation.getValueDirect();
-            var quat = new Quaternion();
-            quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            this.quaternion.setValueDirect(quat);
+            //var quat = new Quaternion();
+            //quat.loadXYZAxisRotation(values.x, values.y, values.z);
+            //this.quaternion.setValueDirect(quat);
+            this.rotationMatrix.loadXYZAxisRotation(values.x, values.y, values.z);
 
             modified = true;
         }

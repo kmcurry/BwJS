@@ -358,49 +358,40 @@ SnapMgr.prototype.unsnap = function(model)
     
     var matrix = model.sectorTransformCompound;
        
-    // account for model's object-inspected rotation
-    var inspectionRotationMatrix = new Matrix4x4();
-    var inspectionGroup = getInspectionGroup(model);
-    var quaternionRotate = null;
-    if (inspectionGroup)
-    {
-        var translate = inspectionGroup.getChild(0);
-        var translationMatrix = translate.getAttribute("matrix").getValueDirect();
-
-        var scaleInverse = inspectionGroup.getChild(1);
-        var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
-
-        quaternionRotate = inspectionGroup.getChild(2);
-        var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
-
-        var scale = inspectionGroup.getChild(3);
-        var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
-
-        var translateBack = inspectionGroup.getChild(4);
-        var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
-
-        inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
-                rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
-    }
-    //matrix = matrix.leftMultiply(inspectionRotationMatrix);
-        
+    model.getAttribute("detectCollision").setValueDirect(false);
+    
     // re-enable snapped models
     for (var i = 0; i < snapConnections.length; i++)
     {
+        var snapper = snapConnections[i].snapper;
         var matrix = snapConnections[i].matrix;
         
         var position = matrix.transform(0, 0, 0, 1);
-        snapConnections[i].snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
+        snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
         
         var rotationAngles = matrix.getRotationAngles();
-        snapConnections[i].snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+        snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
         
         snapConnections[i].snapperConnector.getAttribute("connected").setValueDirect(false);
         snapConnections[i].snappeeConnector.getAttribute("connected").setValueDirect(false);
-        snapConnections[i].snapper.getAttribute("enabled").setValueDirect(true);
-        snapConnections[i].snapper.getAttribute("snapEnabled").setValueDirect(false);
-        snapConnections[i].snapper.setMotionParent(model);
-        zeroInspectionGroup(snapConnections[i].snapper);
+        snapper.getAttribute("enabled").setValueDirect(true);
+        snapper.getAttribute("snapEnabled").setValueDirect(false);
+        snapper.getAttribute("detectCollision").setValueDirect(false);
+        snapper.setMotionParent(model);
+        zeroInspectionGroup(snapper);
+        
+        snapper.updateSimpleTransform();
+        snapper.updateCompoundTransform();
+        
+        matrix = snapper.sectorTransformCompound;
+        
+        position = matrix.transform(0, 0, 0, 1);
+        snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
+        
+        rotationAngles = matrix.getRotationAngles();
+        snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+               
+        snapper.setMotionParent(null);
     }
 }
 

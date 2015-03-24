@@ -42,7 +42,7 @@
                         <mass>0</mass>
                     </physicalProperties>  
                     </Model>-->
-                    <Model name="UV_BoxG" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y=".26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -94,7 +94,7 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <Model name="UV_BoxG2" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="RightBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -146,7 +146,7 @@
                         <mass>5</mass>
                     </physicalProperties>  
                     </Model>
-                    <Model name="UV_BoxG3" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="LeftBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="-1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -311,9 +311,9 @@
     <PhysicsSimulator name="PhysicsSimulator" evaluate="false">
         <bodies>
             <body>grid</body>
-            <body>UV_BoxG</body>
-            <body>UV_BoxG2</body>
-            <body>UV_BoxG3</body>
+            <body>CenterBox</body>
+            <body>RightBox</body>
+            <body>LeftBox</body>
             <body>UV_BoxG4</body>
             <body>cylinderRight</body>
         </bodies>
