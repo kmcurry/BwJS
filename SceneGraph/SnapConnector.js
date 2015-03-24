@@ -78,6 +78,8 @@ function SocketConnector()
     this.className = "SocketConnector";
     this.attrType = eAttrType.SocketConnector;
 
+    this.slot = 0;
+    
     this.slot1 = new SphereAttr();
     this.slot2 = new SphereAttr();
 

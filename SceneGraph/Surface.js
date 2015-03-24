@@ -165,6 +165,19 @@ Surface.prototype.addGeometry = function(geometry)
     this.geometries.push(geometry);
 }
 
+Surface.prototype.removeGeometry = function(geometry)
+{
+    this.removeChild(geometry);
+    for (var i = 0; i < this.geometries.length; i++)
+    {
+        if (this.geometries[i] == geometry)
+        {
+            this.geometries.splice(i, 1);
+            break;
+        }
+    }
+}
+    
 Surface.prototype.addTexture = function(texture)
 {
     texture.getAttribute("modified").addTarget(this.modified);

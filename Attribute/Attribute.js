@@ -186,6 +186,7 @@ Attribute.prototype.setValue = function(values, params)
         }
         else // values.length > 0
         {
+            this.values.length = values.length;
             for (var i = 0; i < values.length; i++)
             {
                 switch (op)

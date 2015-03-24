@@ -30,6 +30,7 @@ function SelectionListener()
 
     this.rayPick = null;
     this.selections = new Selections();
+    this.selectionEvent = null;
     this.selected = null;
     
     this.selectionOccurred = new PulseAttr();
@@ -81,6 +82,8 @@ SelectionListener.prototype.setRayPick = function(rayPick)
 
 SelectionListener.prototype.eventPerformed = function(event)
 {
+    this.selectionEvent = event;
+    
     // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
     switch (event.type)
     {
@@ -101,9 +104,18 @@ SelectionListener.prototype.eventPerformed = function(event)
 }
 
 SelectionListener.prototype.registerSelection = function(node, element)
-{
+{ 
     // only register first item
     if (this.selected) return;
+    
+    if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
+    {
+        var snapMgr = this.registry.find("SnapMgr");
+        if (snapMgr.isSnapped(node))
+        {
+            snapMgr.unsnap(node);
+        }
+    }
     
     this.selected = node;
     var selected = node.getAttribute("selected");

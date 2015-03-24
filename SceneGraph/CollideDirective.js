@@ -216,7 +216,8 @@ CollideDirective.prototype.detectGenericSnapConnections = function(collideRecs)
     for (i in collideRecs)
     {
         // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model))
+        if (this.isSelected(collideRecs[i].model) &&
+            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
         {
             var plugConnectors = collideRecs[i].model.getAttribute("genericConnectors");
             for (j = 0; j < plugConnectors.Size(); j++)
@@ -228,7 +229,7 @@ CollideDirective.prototype.detectGenericSnapConnections = function(collideRecs)
                 }
             }
         }
-        else // !selected
+        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
         {
             var socketConnectors = collideRecs[i].model.getAttribute("genericConnectors");
             for (j = 0; j < socketConnectors.Size(); j++)
@@ -295,7 +296,8 @@ CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRec
     for (i in collideRecs)
     {
         // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model))
+        if (this.isSelected(collideRecs[i].model) &&
+            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
         {
             var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
             for (j = 0; j < plugConnectors.Size(); j++)
@@ -307,7 +309,7 @@ CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRec
                 }
             }
         }
-        else // !selected
+        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
         {
             var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
             for (j = 0; j < socketConnectors.Size(); j++)
@@ -339,8 +341,8 @@ CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRec
             if (plugType != socketType)
                 continue;
 
-            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
-            if (connection > 0)
+            sockets[j].first.slot = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
+            if (sockets[j].first.slot > 0)
             {
                 // remove plug from object inspection
                 var objectInspector = this.registry.find("ObjectInspector");
@@ -348,14 +350,10 @@ CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRec
                 {
                     objectInspector.clearSelection(plugs[i].second.model);
                 }
-                
-                // flag plug/socket as connected
-                plugs[i].first.getAttribute("connected").setValueDirect(true);
-                sockets[j].first.getAttribute("connected").setValueDirect(true);
-                
+                               
                 // perform snap-to!
                 var snapMgr = this.registry.find("SnapMgr");
-                snapMgr.snapPlugToSocket(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first, connection);
+                snapMgr.snapPlugToSocket(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first);
 
                 return;
                 //break;
