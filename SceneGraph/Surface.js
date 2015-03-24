@@ -32,6 +32,7 @@ function Surface()
     this.numLuminosityTextures = new NumberAttr(0);
     this.numSpecularityTextures = new NumberAttr(0);
     this.numTransparencyTextures = new NumberAttr(0);
+    this.vertices = new NumberArrayAttr();
     
     this.colorTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
     this.diffuseTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
@@ -62,6 +63,7 @@ function Surface()
     this.registerAttribute(this.numLuminosityTextures, "numLuminosityTextures");
     this.registerAttribute(this.numSpecularityTextures, "numSpecularityTextures");
     this.registerAttribute(this.numTransparencyTextures, "numTransparencyTextures");
+    this.registerAttribute(this.vertices, "vertices");
 
     this.isolateTextures.setValueDirect(true);
 
