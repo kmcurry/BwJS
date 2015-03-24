@@ -315,21 +315,31 @@ SnapMgr.prototype.snap = function(snapper, snappee, snapperConnector, snappeeCon
        
     // add this snap connection (and any of snapper's) to snappee's snapConnections
     var snapConnections = [];
-    var snapConnectionRec = new SnapConnectionRec();
-    snapConnectionRec.snapper = snapper;
-    snapConnectionRec.snapperConnector = snapperConnector;
-    snapConnectionRec.snappeeConnector = snappeeConnector;
-    snapConnectionRec.matrix = new Matrix4x4();
-    snapConnections.push(snapConnectionRec);
+    // snapper's
     if (this.snapConnections[snapper.__nodeId__])
     {
         snapConnections = snapConnections.concat(this.snapConnections[snapper.__nodeId__]);
+        // transform matrix by this connection's matrix
+        for (i = 0; i < snapConnections.length; i++)
+        {
+            snapConnections[i].matrix = snapConnections[i].matrix.multiply(matrix);
+        }
         // remove any snapped stuff from snapper and clear its snapConnections entry
         this.clearSnappedElements(snapper); 
         this.snapConnections[snapper.__nodeId__] = undefined;
     }
-    for (i = 0; i < snapConnections.length; i++)
-        snapConnections[i].matrix = snapConnections[i].matrix.multiply(matrix);
+    // snappee's existing
+    if (this.snapConnections[snappee.__nodeId__])
+    {
+        snapConnections = snapConnections.concat(this.snapConnections[snappee.__nodeId__]);
+    }
+    // this snap connection
+    var snapConnectionRec = new SnapConnectionRec();
+    snapConnectionRec.snapper = snapper;
+    snapConnectionRec.snapperConnector = snapperConnector;
+    snapConnectionRec.snappeeConnector = snappeeConnector;
+    snapConnectionRec.matrix = matrix;
+    snapConnections.push(snapConnectionRec);
     this.snapConnections[snappee.__nodeId__] = snapConnections;
 
     // disable (hide) snapper
