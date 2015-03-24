@@ -19533,7 +19533,6 @@ function Surface()
     this.numLuminosityTextures = new NumberAttr(0);
     this.numSpecularityTextures = new NumberAttr(0);
     this.numTransparencyTextures = new NumberAttr(0);
-    this.vertices = new NumberArrayAttr();
     
     this.colorTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
     this.diffuseTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
@@ -19564,7 +19563,6 @@ function Surface()
     this.registerAttribute(this.numLuminosityTextures, "numLuminosityTextures");
     this.registerAttribute(this.numSpecularityTextures, "numSpecularityTextures");
     this.registerAttribute(this.numTransparencyTextures, "numTransparencyTextures");
-    this.registerAttribute(this.vertices, "vertices");
 
     this.isolateTextures.setValueDirect(true);
 
@@ -24596,7 +24594,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 
             }
         }
-        */
+        *//*
         var colliding = this.physicsSim.isColliding(model);
         if (colliding)
         {
@@ -24611,7 +24609,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
                 
             }
-        }
+        }*/
     }
 }
 
@@ -27418,24 +27416,21 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    for (var i = 0; i < model.surfaces.length; i++)
-    {
-        var shape = this.getCollisionShape(model.surfaces[i], scale);
+    var shape = this.getCollisionShape(model, scale);
 
-        var transform = new Ammo.btTransform();
-        transform.setIdentity();
-        var origin = new Ammo.btVector3(position.x, position.y, position.z);
-        transform.setOrigin(origin);
-        Ammo.destroy(origin);
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();
+    var origin = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(origin);
+    Ammo.destroy(origin);
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+    transform.setRotation(quaternion);
+    Ammo.destroy(quaternion);
 
-        compoundShape.addChildShape(transform, shape);
-        Ammo.destroy(transform);
-    }
+    compoundShape.addChildShape(transform, shape);
+    Ammo.destroy(transform);
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -27461,7 +27456,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(surface, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
 {
     //var center = model.getAttribute("center").getValueDirect();
     
@@ -27472,7 +27467,7 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, scale)
     var matrix = scaleMatrix;
     
     var shape = new Ammo.btConvexHullShape();
-    var verts = surface.getAttribute("vertices").getValueDirect();
+    var verts = model.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
         //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
@@ -33653,18 +33648,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var surface = surfaces[i].clone();
         snappee.addSurface(surface);
 
-        // transform vertices
-        xvertices = [];
-        vertices = surface.getAttribute("vertices").getValueDirect();
-        for (j = 0; j < vertices.length; j += 3)
-        {
-            xvertex = matrix.transform(vertices[j], vertices[j + 1], vertices[j + 2], 1);
-            xvertices.push(xvertex.x);
-            xvertices.push(xvertex.y);
-            xvertices.push(xvertex.z);
-        }
-        surface.getAttribute("vertices").setValueDirect(xvertices);
-    
         // copy geometry
         var geometries = surfaces[i].geometries;
         for (j = 0; j < geometries.length; j++)
@@ -34972,7 +34955,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     {
         var vertices = [];
         var normals = [];
-        var surfacePnts = []; // for setting surface's layer vertices to surface
         vertexNormals[surfIndex] = []
         vertexOrder[surfIndex] = [];
         vertexMinMax[surfIndex] = new Pair();
@@ -34990,8 +34972,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < poly.length; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push([point.x, point.y, point.z]);
 
                 jsmPolygon.AddVertex(point.x, point.y, point.z);
@@ -35020,8 +35000,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 3; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push(point.x);
                 vertices.push(point.y);
                 vertices.push(point.z);
@@ -35104,7 +35082,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 2; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
                 
                 vertices.push(point.x);
                 vertices.push(point.y);
@@ -35132,7 +35109,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             var poly = layer.pols[polyIndex];
             
             var point = layer.pnts[poly[0]];
-            surfacePnts[poly[0]] = point;
             
             vertices.push(point.x);
             vertices.push(point.y);
@@ -35148,16 +35124,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             
             pointList.getAttribute("vertices").setValue(vertices);
         }
-        
-        // set surface's layer vertices to surface
-        var surfaceVertices = [];
-        for (var surfacePnt in surfacePnts)
-        {
-            surfaceVertices.push(surfacePnts[surfacePnt].x);
-            surfaceVertices.push(surfacePnts[surfacePnt].y);
-            surfaceVertices.push(surfacePnts[surfacePnt].z);
-        }
-        surfaces[surfIndex].getAttribute("vertices").setValue(surfaceVertices);
     }
 
     // calculate smooth normals for tris
