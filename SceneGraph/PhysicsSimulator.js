@@ -395,21 +395,24 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    var shape = this.getCollisionShape(model, scale);
+    for (var i = 0; i < model.surfaces.length; i++)
+    {
+        var shape = this.getCollisionShape(model.surfaces[i], scale);
 
-    var transform = new Ammo.btTransform();
-    transform.setIdentity();
-    var origin = new Ammo.btVector3(position.x, position.y, position.z);
-    transform.setOrigin(origin);
-    Ammo.destroy(origin);
-    var quat = new Quaternion();
-    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-    transform.setRotation(quaternion);
-    Ammo.destroy(quaternion);
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
 
-    compoundShape.addChildShape(transform, shape);
-    Ammo.destroy(transform);
+        compoundShape.addChildShape(transform, shape);
+        Ammo.destroy(transform);
+    }
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -435,7 +438,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(surface, scale)
 {
     //var center = model.getAttribute("center").getValueDirect();
     
@@ -446,7 +449,7 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     var matrix = scaleMatrix;
     
     var shape = new Ammo.btConvexHullShape();
-    var verts = model.getAttribute("vertices").getValueDirect();
+    var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
         //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
