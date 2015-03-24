@@ -175,18 +175,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, snapperConnector, snappeeCon
         surface.snapped = true;
         snappee.addSurface(surface);
 
-        // transform vertices
-        xvertices = [];
-        vertices = surface.getAttribute("vertices").getValueDirect();
-        for (j = 0; j < vertices.length; j += 3)
-        {
-            xvertex = matrix.transform(vertices[j], vertices[j + 1], vertices[j + 2], 1);
-            xvertices.push(xvertex.x);
-            xvertices.push(xvertex.y);
-            xvertices.push(xvertex.z);
-        }
-        surface.getAttribute("vertices").setValueDirect(xvertices);
-    
         // copy geometry
         var geometries = surfaces[i].geometries;
         for (j = 0; j < geometries.length; j++)
