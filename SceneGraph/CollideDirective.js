@@ -133,7 +133,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 
             }
         }
-        *//*
+        */
         var colliding = this.physicsSim.isColliding(model);
         if (colliding)
         {
@@ -148,7 +148,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
                 
             }
-        }*/
+        }
     }
 }
 
