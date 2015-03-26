@@ -1,5 +1,5 @@
 <html>
-    <head>
+        <head>
         <title>BWJS Demo</title>
         <script type="text/javascript" src="../../Common/Base.js"></script>
         <script type="text/javascript" src="../../Common/Util.js"></script>
@@ -200,10 +200,15 @@
         <script type="text/javascript">
             var bridgeworks = null;
             var xml = "";
-
-            function doAction()
+            var x = 1.5;
+            var y = 1.5;
+            var z = 1.5;
+            function locate()
             {
-                var xml = "<Remove target='grid'/>";
+                //var xml = "\<Set target='UV_BoxG''>";
+                //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
+                var xml = "\<Locate target='Tank'/>";
+                console.debug(xml);
                 bridgeworks.updateScene(xml);
             }
         </script>
@@ -211,7 +216,7 @@
         <img id="BackgroundImage" style="position: absolute; visibility: hidden; z-index: 1;" src="bwcontent/images/Sky.jpg">
         </img>
     <center>
-        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
+        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" ondblclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
             <canvas id="Canvas" style="position: relative; z-index: 2;">
             </canvas>     
         </div>
@@ -219,11 +224,10 @@
             <!--<button onclick="bridgeworks.renderController.rewind();">RW</button>-->
             <button onclick="bridgeworks.renderController.pause();">Pause</button>
             <button onclick="bridgeworks.renderController.play();">Play</button>
-            <button onclick="doAction();">Remove Grid</button>
-            <!--<button onclick="bridgeworks.renderController.stop();">Stop</button>-->
+            <button onclick="bridgeworks.renderController.stop();">Stop</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
-            <!--Object: <input id="objectname"/>
-            <button onclick="locate();">Locate</button>-->
+            Object: <input id="objectname"/>
+            <button onclick="locate();">Locate</button>
         </div>
     </center>
 
@@ -234,7 +238,7 @@
     <script type="text/javascript">
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
-                bridgeworks = init("Physics.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("Tank_BW_XML.xml", document.getElementById("BwContainer"));
             }
         }
     </script>
