@@ -1,4 +1,4 @@
-﻿function TLWSCSceneData()
+function TLWSCSceneData()
 {
     var fps = 0;
     var backgroundColorR = 0;
@@ -812,7 +812,8 @@ LWSceneBuilder.prototype.finalize = function()
     for (var i=0; i < this.models.length; i++)
     {
         var model = this.models[i];
-        if (model.bones.length > 0)
+        if (model.bones && 
+            model.bones.length > 0)
         {
             this.attachBoneEffectors(model, model.bones);
         }
