@@ -13612,7 +13612,7 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
         else if (attribute.isContainer())
         {
             var ctr = attribute;
-            this.serializeAttributeContainer(ctr);
+            this.serializeAttributeContainer(ctr, attrName);
         }
         else if (attrName && this.DOM)
         {
@@ -13974,21 +13974,34 @@ Serializer.prototype.serializeCommand = function(command)
     }
 }
 
-Serializer.prototype.serializeAttributeContainer = function(container)
+Serializer.prototype.serializeAttributeContainer = function(container, name)
 {
     // 1. create the start tag.
 
     if (container && this.DOM)
     {
         var element = null;
-        var pcszType = container.className;
+        var pcszType = name || container.className;
+        // TODO: is this the right way to do this?
         if (pcszType == "BwSceneInspector")
         {
-        	pcszType = "SceneInspector";
+            pcszType = "SceneInspector";
         }
-        else if (pcszType == "PhysicalPropertiesAttr") // TODO: is this the right way to do this?
+        else if (pcszType == "GenericConnector")
+        {
+            pcszType = "genericConnector";
+        }
+        else if (pcszType == "PhysicalPropertiesAttr") 
         {
             pcszType = "physicalProperties";
+        }
+        else if (pcszType == "PlugConnector")
+        {
+            pcszType = "plugConnector";
+        }
+        else if (pcszType == "SocketConnector")
+        {
+            pcszType = "socketConnector";
         }
 
         var bstr = pcszType;
