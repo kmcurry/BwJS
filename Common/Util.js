@@ -134,6 +134,8 @@ function formatPath(url)
             },
             success: function()
             {
+                var href = document.location.href;
+                
                 validPath = url;
                 
                 var ndx = validPath.lastIndexOf("objects/");
@@ -141,7 +143,8 @@ function formatPath(url)
                 if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
                 if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
                 
-                validDir = validPath.substring(0, ndx);
+                //validDir = validPath.substring(0, ndx);
+                validDir = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir;
                 
                 console.debug("File found: " + validPath);
             }
