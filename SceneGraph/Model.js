@@ -396,9 +396,12 @@ Model.prototype.onRemove = function()
     
     // remove from any physics simulators
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
-    for (var i = 0; i < physicsSimulators.length; i++)
+    if (physicsSimulators)
     {
-        physicsSimulators[i].deletePhysicsBody(this);
+        for (var i = 0; i < physicsSimulators.length; i++)
+        {
+            physicsSimulators[i].deletePhysicsBody(this);
+        }
     }
     
     // call base-class implementation
