@@ -24,7 +24,7 @@ function ParentableMotionElement()
     this.updatePosition = false;
     this.updateRotation = false;
     this.updateQuaternion = false;
-    this.updateQuaternionRotation = false;
+    this.updateNonQuaternionRotation = false;
     this.updateScale = false;
     this.updatePivot = false;
     this.updateSectorPosition = false;
@@ -40,7 +40,7 @@ function ParentableMotionElement()
     this.position = new Vector3DAttr(0, 0, 0);
     this.rotation = new Vector3DAttr(0, 0, 0);
     this.quaternion = new QuaternionAttr(1, 0, 0, 0);
-    this.quaternionRotation = new Vector3DAttr(0, 0, 0);
+    this.nonQuaternionRotation = new Vector3DAttr(0, 0, 0);
     this.scale = new Vector3DAttr(1, 1, 1);
     this.pivot = new Vector3DAttr(0, 0, 0);
     this.center = new Vector3DAttr(0, 0, 0);
@@ -80,13 +80,11 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-
-    this.quaternionRotation.addTarget(this.rotation);
-    
+   
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
-    this.quaternionRotation.addModifiedCB(ParentableMotionElement_QuaternionRotationModifiedCB, this);
+    this.nonQuaternionRotation.addModifiedCB(ParentableMotionElement_NonQuaternionRotationModifiedCB, this);
     this.scale.addModifiedCB(ParentableMotionElement_ScaleModifiedCB, this);
     this.pivot.addModifiedCB(ParentableMotionElement_PivotModifiedCB, this);
     this.sectorOrigin.addModifiedCB(ParentableMotionElement_SectorOriginModifiedCB, this);
@@ -112,7 +110,7 @@ function ParentableMotionElement()
     this.registerAttribute(this.position, "position");
     this.registerAttribute(this.rotation, "rotation");
     this.registerAttribute(this.quaternion, "quaternion");
-    this.registerAttribute(this.quaternionRotation, "quaternionRotation");
+    this.registerAttribute(this.nonQuaternionRotation, "nonQuaternionRotation");
     this.registerAttribute(this.scale, "scale");
     this.registerAttribute(this.pivot, "pivot");
     this.registerAttribute(this.center, "center");
@@ -322,7 +320,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 {
     var modified = false;
 
-    if (this.updatePosition || this.updateRotation || this.updateQuaternion || this.updateQuaternionRotation || this.updateScale || this.updatePivot)
+    if (this.updatePosition || this.updateRotation || this.updateQuaternion || this.updateNonQuaternionRotation || this.updateScale || this.updatePivot)
     {
         var values;
 
@@ -341,23 +339,13 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateRotation = false;
 
             values = this.rotation.getValueDirect();
-            this.rotationMatrix.loadXYZAxisRotation(values.x, values.y, values.z);
-
-            modified = true;
-        }
-
-        if (this.updateQuaternionRotation)
-        {
-            this.updateQuaternionRotation = false;
-            
-            values = this.quaternionRotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
             this.quaternion.setValueDirect(quat);
 
             modified = true;
         }
-        
+
         if (this.updateQuaternion)
         {
             this.updateQuaternion = false;
@@ -368,6 +356,16 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             modified = true;
         }
 
+        if (this.updateNonQuaternionRotation)
+        {
+            this.updateNonQuaternionRotation = false;
+            
+            values = this.nonQuaternionRotation.getValueDirect();
+            this.rotationMatrix.loadXYZAxisRotation(values.x, values.y, values.z);
+
+            modified = true;
+        }
+        
         if (this.updateScale)
         {
             this.updateScale = false;
@@ -680,9 +678,9 @@ function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
     container.setModified();
 }
 
-function ParentableMotionElement_QuaternionRotationModifiedCB(attribute, container)
+function ParentableMotionElement_NonQuaternionRotationModifiedCB(attribute, container)
 {
-    container.updateQuaternionRotation = true;
+    container.updateNonQuaternionRotation = true;
     container.setModified();
 }
 

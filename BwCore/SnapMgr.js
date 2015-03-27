@@ -384,7 +384,7 @@ SnapMgr.prototype.unsnap = function(model)
         snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
         
         rotationAngles = matrix.getRotationAngles();
-        snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+        snapper.getAttribute("nonQuaternionRotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
     }
     
     // apply model's object-inspected rotation to its rotation attribute and zero its inspection group
@@ -418,7 +418,7 @@ SnapMgr.prototype.unsnap = function(model)
     model.getAttribute("position").setValueDirect(position.x, position.y, position.z);
 
     var rotationAngles = matrix.getRotationAngles();
-    model.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+    model.getAttribute("nonQuaternionRotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
     
     zeroInspectionGroup(model);
 }
