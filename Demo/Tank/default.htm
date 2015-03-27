@@ -1,5 +1,5 @@
 <html>
-        <head>
+    <head>
         <title>BWJS Demo</title>
         <script type="text/javascript" src="../../Common/Base.js"></script>
         <script type="text/javascript" src="../../Common/Util.js"></script>
@@ -193,52 +193,42 @@
         <script src="../../Libs/qTip2/jquery.qtip.js" type="text/javascript"></script>
         <script src="../../Libs/ammo.js/ammo.js" type="text/javascript"></script>
         <link href="../../Libs/qTip2/jquery.qtip.css" rel="stylesheet" type="text/css" />
+        <link href="UI/styles/layout.css" rel="stylesheet" type="text/css"/>
     </head>
-    <body onresize="resize();">
-        <H1 id="H1">Bridgeworks - WebGL Version</H1>  
-
+    <body onresize="resize();" style="background-color: #F2F1E8;">
         <script type="text/javascript">
             var bridgeworks = null;
-            var xml = "";
-            var x = 1.5;
-            var y = 1.5;
-            var z = 1.5;
-            function locate()
-            {
-                //var xml = "\<Set target='UV_BoxG''>";
-                //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "\<Locate target='Tank'/>";
-                console.debug(xml);
-                bridgeworks.updateScene(xml);
-            }
         </script>
-
-        <img id="BackgroundImage" style="position: absolute; visibility: hidden; z-index: 1;" src="bwcontent/images/Sky.jpg">
-        </img>
+        <!--<div id="Header">
+            <table width="100%" class="navLinks">
+                <tr>
+                    <td width="20%"><img src="UI/images/bw_logo_header.png" width="100%"></td>
+                    <td width="80%" valign="top" align="right">
+                        <a href="http://www.bridgeworks3d.com" class="active">Bridgeworks 3D</a>
+                    </td>           
+                </tr>
+            </table>
+        </div>-->
     <center>
-        <div id="BwContainer" style="position: relative; resize: auto; border: 1px solid; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" ondblclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
+        <div id="BwContainer" style="position: relative; resize: auto; border: 0px; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" ondblclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
             <canvas id="Canvas" style="position: relative; z-index: 2;">
             </canvas>     
         </div>
-        <!--<div id="DVDControls" style="position:relative;">-->
-            <!--<button onclick="bridgeworks.renderController.rewind();">RW</button>-->
-            <!--<button onclick="bridgeworks.renderController.pause();">Pause</button>
-            <button onclick="bridgeworks.renderController.play();">Play</button>
-            <button onclick="bridgeworks.renderController.stop();">Stop</button>-->
-            <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
-            <!--Object: <input id="objectname"/>
-            <button onclick="locate();">Locate</button>
-        </div>-->
-    </center>
-
-    <!--<video controls="controls" src="http://localhost/bwjs/bwcontent/images/quake.mpg">
-    Your browser does not support the video tag.
-    </video>-->
-
+        <div>
+            <img id="sideright" style="width: 200px; height: 200px;" src="UI/images/SideRight.png">
+            <img id="frontright" style="width: 200px; height: 200px;" src="UI/images/FrontRight.png">
+            <img id="frontdown" style="width: 200px; height: 200px;" src="UI/images/FrontDown.png">
+            <img id="frontleft" style="width: 200px; height: 200px;" src="UI/images/FrontLeft.png">
+            <img id="sideleft" style="width: 200px; height: 200px;" src="UI/images/SideLeft.png">
+            <img id="backleft" style="width: 200px; height: 200px;" src="UI/images/BackLeft.png">
+            <img id="backdown" style="width: 200px; height: 200px;" src="UI/images/BackDown.png">
+            <img id="backright" style="width: 200px; height: 200px;" src="UI/images/BackRight.png"> 
+        </div>
+    </center>  
     <script type="text/javascript">
-        document.onreadystatechange = function () {
+        document.onreadystatechange = function() {
             if (document.readyState == "complete") {
-                bridgeworks = init("Tank_BW_XML.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("Tank.xml", document.getElementById("BwContainer"));
             }
         }
     </script>
