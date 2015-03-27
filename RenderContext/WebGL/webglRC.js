@@ -628,25 +628,18 @@ function webglRC(canvas, background)
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
-        
-        // get current view transform
-        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
-            // transform to view space
-            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
-            var values = [position.x, position.y, position.z, position.w];
+            var values = [desc.position.x, desc.position.y, desc.position.z, 1];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
-            // transform to view space
-            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
-            var values = [direction.x, direction.y, direction.z, 0];
+            var values = [desc.direction.x, desc.direction.y, desc.direction.z, 0];
 
             switch (desc.type)
             {
