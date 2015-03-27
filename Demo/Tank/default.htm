@@ -193,44 +193,25 @@
         <script src="../../Libs/qTip2/jquery.qtip.js" type="text/javascript"></script>
         <script src="../../Libs/ammo.js/ammo.js" type="text/javascript"></script>
         <link href="../../Libs/qTip2/jquery.qtip.css" rel="stylesheet" type="text/css" />
-        <link href="UI/styles/layout.css" rel="stylesheet" type="text/css"/>
+        
     </head>
     <body onresize="resize();" style="background-color: #F2F1E8;">
         <script type="text/javascript">
             var bridgeworks = null;
         </script>
-        <!--<div id="Header">
-            <table width="100%" class="navLinks">
-                <tr>
-                    <td width="20%"><img src="UI/images/bw_logo_header.png" width="100%"></td>
-                    <td width="80%" valign="top" align="right">
-                        <a href="http://www.bridgeworks3d.com" class="active">Bridgeworks 3D</a>
-                    </td>           
-                </tr>
-            </table>
-        </div>-->
-    <center>
-        <div id="BwContainer" style="position: relative; resize: auto; border: 0px; width: 80%; height: 80%;" onclick="bridgeworks.handleEvent(event);" ondblclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
-            <canvas id="Canvas" style="position: relative; z-index: 2;">
-            </canvas>     
-        </div>
-        <div>
-            <img id="sideright" style="width: 200px; height: 200px;" src="UI/images/SideRight.png">
-            <img id="frontright" style="width: 200px; height: 200px;" src="UI/images/FrontRight.png">
-            <img id="frontdown" style="width: 200px; height: 200px;" src="UI/images/FrontDown.png">
-            <img id="frontleft" style="width: 200px; height: 200px;" src="UI/images/FrontLeft.png">
-            <img id="sideleft" style="width: 200px; height: 200px;" src="UI/images/SideLeft.png">
-            <img id="backleft" style="width: 200px; height: 200px;" src="UI/images/BackLeft.png">
-            <img id="backdown" style="width: 200px; height: 200px;" src="UI/images/BackDown.png">
-            <img id="backright" style="width: 200px; height: 200px;" src="UI/images/BackRight.png"> 
-        </div>
-    </center>  
-    <script type="text/javascript">
-        document.onreadystatechange = function() {
-            if (document.readyState == "complete") {
-                bridgeworks = init("Tank.xml", document.getElementById("BwContainer"));
+        <center>
+            <iframe frameborder="0" scrolling="no" width="80%" src="banner.htm" seamless></iframe>
+            <div id="BwContainer" style="position: relative; resize: auto; border: 0px; width: 80%; height: 65%;" onclick="bridgeworks.handleEvent(event);" ondblclick="bridgeworks.handleEvent(event);" onmousedown="bridgeworks.handleEvent(event);" onmouseup="bridgeworks.handleEvent(event);" onmousemove="bridgeworks.handleEvent(event);" >
+                <canvas id="Canvas" style="position: relative; z-index: 2;"/>
+            </div>
+            <iframe frameborder="0" width="80%" src="thumbs.htm" seamless></iframe>
+        </center>  
+        <script type="text/javascript">
+            document.onreadystatechange = function() {
+                if (document.readyState == "complete") {
+                    bridgeworks = init("Tank.xml", document.getElementById("BwContainer"));
+                }
             }
-        }
-    </script>
-</body>
+        </script>
+    </body>
 </html>
