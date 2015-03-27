@@ -357,8 +357,6 @@ SnapMgr.prototype.unsnap = function(model)
     this.snapConnections[model.__nodeId__] = undefined;
     
     var matrix = model.sectorTransformCompound;
-       
-    model.getAttribute("detectCollision").setValueDirect(false);
     
     // re-enable snapped models
     for (var i = 0; i < snapConnections.length; i++)
@@ -376,22 +374,25 @@ SnapMgr.prototype.unsnap = function(model)
         snapConnections[i].snappeeConnector.getAttribute("connected").setValueDirect(false);
         snapper.getAttribute("enabled").setValueDirect(true);
         snapper.getAttribute("snapEnabled").setValueDirect(false);
-        snapper.getAttribute("detectCollision").setValueDirect(false);
         snapper.setMotionParent(model);
         zeroInspectionGroup(snapper);
-        
         snapper.updateSimpleTransform();
         snapper.updateCompoundTransform();
+        snapper.setMotionParent(null);
         
         matrix = snapper.sectorTransformCompound;
+        
+        
         
         position = matrix.transform(0, 0, 0, 1);
         snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
         
         rotationAngles = matrix.getRotationAngles();
         snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
-               
-        snapper.setMotionParent(null);
+        
+        // NOTE: collision detection affects this working correctly, both from physics body rotation update and stop on collide
+        
+        
     }
 }
 
