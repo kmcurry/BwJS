@@ -354,10 +354,8 @@ SnapMgr.prototype.unsnap = function(model)
     
     // remove any snapped stuff from model and clear its snapConnections entry
     this.clearSnappedElements(model); 
-    this.snapConnections[model.__nodeId__] = undefined;
-    
-    var matrix = model.sectorTransformCompound;
-    
+    this.snapConnections[model.__nodeId__] = undefined;  
+        
     // re-enable snapped models
     for (var i = 0; i < snapConnections.length; i++)
     {
@@ -382,18 +380,47 @@ SnapMgr.prototype.unsnap = function(model)
         
         matrix = snapper.sectorTransformCompound;
         
-        
-        
         position = matrix.transform(0, 0, 0, 1);
         snapper.getAttribute("position").setValueDirect(position.x, position.y, position.z);
         
         rotationAngles = matrix.getRotationAngles();
         snapper.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
-        
-        // NOTE: collision detection affects this working correctly, both from physics body rotation update and stop on collide
-        
-        
     }
+    
+    // apply model's object-inspected rotation to its rotation attribute and zero its inspection group
+    // (interferes with collision's updatePhysicsBody logic otherwise)
+    var inspectionRotationMatrix = new Matrix4x4();
+    var inspectionGroup = getInspectionGroup(model);
+    if (inspectionGroup)
+    {
+        var translate = inspectionGroup.getChild(0);
+        var translationMatrix = translate.getAttribute("matrix").getValueDirect();
+
+        var scaleInverse = inspectionGroup.getChild(1);
+        var scaleInverseMatrix = scaleInverse.getAttribute("matrix").getValueDirect();
+
+        var quaternionRotate = inspectionGroup.getChild(2);
+        var rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+
+        var scale = inspectionGroup.getChild(3);
+        var scaleMatrix = scale.getAttribute("matrix").getValueDirect();
+
+        var translateBack = inspectionGroup.getChild(4);
+        var translationBackMatrix = translateBack.getAttribute("matrix").getValueDirect();
+
+        inspectionRotationMatrix = translationBackMatrix.multiply(scaleMatrix.multiply(
+                rotationMatrix.multiply(scaleInverseMatrix.multiply(translationMatrix))));
+    }
+        
+    var matrix = inspectionRotationMatrix.multiply(model.sectorTransformCompound);
+    
+    var position = matrix.transform(0, 0, 0, 1);
+    model.getAttribute("position").setValueDirect(position.x, position.y, position.z);
+
+    var rotationAngles = matrix.getRotationAngles();
+    model.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+    
+    zeroInspectionGroup(model);
 }
 
 // resnap
