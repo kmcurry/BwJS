@@ -47,42 +47,42 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <genericConnectors>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveX">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
@@ -99,42 +99,42 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <genericConnectors>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveX">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
@@ -151,42 +151,42 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <genericConnectors>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveX">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
                                     <radius>0.2</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default">
+                            <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
@@ -285,7 +285,7 @@
                 </Isolator>
             </Group>
         </Isolator>
-        <RenderDirective name="RenderDirective" root="Root" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>
+        <RenderDirective name="RenderDirective" root="Root" highlightType="2" antialiasType="0" antialiasWaitTimeMs="5000" backgroundImageFilename="images\Sky2.jpg"/>
     </Scene>
     <ConnectAttributes sourceContainer="Camera" targetContainer="PerspectiveProjector" persist="false">
         <sourceAttribute>position</sourceAttribute>

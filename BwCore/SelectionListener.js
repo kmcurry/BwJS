@@ -32,6 +32,7 @@ function SelectionListener()
     this.selections = new Selections();
     this.selectionEvent = null;
     this.selected = null;
+    this.unsnapped = null;
     
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
@@ -108,15 +109,6 @@ SelectionListener.prototype.registerSelection = function(node, element)
     // only register first item
     if (this.selected) return;
     
-    if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
-    {
-        var snapMgr = this.registry.find("SnapMgr");
-        if (snapMgr.isSnapped(node))
-        {
-            snapMgr.unsnap(node);
-        }
-    }
-    
     this.selected = node;
     var selected = node.getAttribute("selected");
     if (selected)
@@ -143,12 +135,14 @@ SelectionListener.prototype.registerSelection = function(node, element)
 }
 
 SelectionListener.prototype.clearSelections = function()
-{
+{    
     this.selections.clear();
    
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
+        this.selected.highlight.setValueDirect(false);
+        
         var selected = this.selected.getAttribute("selected");
         if (selected)
         {
@@ -226,6 +220,34 @@ SelectionListener.prototype.processPick = function(pick)
     
     if (this.selected)
     {
+        if (this.unsnappedModel != this.selected)
+        {
+            if (this.unsnapped)
+            {
+                var snapMgr = this.registry.find("SnapMgr");
+                snapMgr.resnap(this.snappedModel, this.unsnapped);
+                this.unsnapped = null;
+            }
+        }
+    
+        if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
+        {
+            var snapMgr = this.registry.find("SnapMgr");
+            if (snapMgr.isSnapped(this.selected))
+            {
+                this.unsnapped = snapMgr.unsnap(this.selected);
+                this.snappedModel = this.selected;
+                this.unsnappedModel = this.selected;
+                if (this.selections.surfaces[0].snappedModel)
+                {
+                    this.unsnappedModel = this.selections.surfaces[0].snappedModel;
+                    this.registerSelection(this.unsnappedModel, -1);
+                }
+            }
+        }
+    
+        this.selected.highlight.setValueDirect(true);
+        
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
         this.pointView.setValueDirect(pick.intersectRecord.pointView.x, pick.intersectRecord.pointView.y, pick.intersectRecord.pointView.z);

@@ -7,10 +7,12 @@ function SnapConnector()
     this.className = "SnapConnector";
     this.attrType = eAttrType.SnapConnector;
 
+    this.name = new StringAttr();
     this.type = new StringAttr("default");
     this.normal = new Vector3DAttr(0, 0, 0);
     this.connected = new BooleanAttr(false);
 
+    this.registerAttribute(this.name, "name");
     this.registerAttribute(this.type, "type");
     this.registerAttribute(this.normal, "normal");
     this.registerAttribute(this.connected, "connected");
@@ -57,6 +59,21 @@ function GenericConnectors()
     this.appendParsedElements.setValueDirect(true);
 }
 
+GenericConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
+}
+    
 GenericConnectorAllocator.prototype = new Allocator();
 GenericConnectorAllocator.prototype.constructor = GenericConnectorAllocator;
 
@@ -97,6 +114,21 @@ function SocketConnectors()
     this.attrType = eAttrType.SocketConnectors;
 
     this.appendParsedElements.setValueDirect(true);
+}
+
+SocketConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
 }
 
 SocketConnectorAllocator.prototype = new Allocator();
@@ -161,6 +193,21 @@ function PlugConnectors()
     this.attrType = eAttrType.PlugConnectors;
 
     this.appendParsedElements.setValueDirect(true);
+}
+
+PlugConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
 }
 
 PlugConnectorAllocator.prototype = new Allocator();

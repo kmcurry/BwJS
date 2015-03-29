@@ -1,6 +1,7 @@
 function SnapConnectionRec()
 {
     this.snapper = null;
+    this.snappee = null;
     this.snapperConnector = null;
     this.snappeeConnector = null;
     this.matrix = null;
@@ -173,6 +174,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, snapperConnector, snappeeCon
     {
         var surface = surfaces[i].clone();
         surface.snapped = true;
+        surface.snappedModel = snapper;
         snappee.addSurface(surface);
 
         // transform vertices
@@ -336,6 +338,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, snapperConnector, snappeeCon
     // this snap connection
     var snapConnectionRec = new SnapConnectionRec();
     snapConnectionRec.snapper = snapper;
+    snapConnectionRec.snappee = snappee;
     snapConnectionRec.snapperConnector = snapperConnector;
     snapConnectionRec.snappeeConnector = snappeeConnector;
     snapConnectionRec.matrix = matrix;
@@ -421,9 +424,32 @@ SnapMgr.prototype.unsnap = function(model)
     model.getAttribute("nonQuaternionRotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
     
     zeroInspectionGroup(model);
+    
+    model.getAttribute("snapEnabled").setValueDirect(false);
+    
+    return snapConnections;
 }
 
-// resnap
+SnapMgr.prototype.resnap = function(model, snapConnections)
+{
+    var matrix = model.sectorTransformCompound;
+    
+    model.getAttribute("snapEnabled").setValueDirect(true);
+    for (var i = 0; i < snapConnections.length; i++)
+    {
+        var snapper = snapConnections[i].snapper;
+        var snappee = snapConnections[i].snappee;
+        // get the original snap connectors
+        var snapperConnector = snapper.genericConnectors.get(snapConnections[i].snapperConnector.name.getValueDirect().join(""));
+        var snappeeConnector = snappee.genericConnectors.get(snapConnections[i].snappeeConnector.name.getValueDirect().join(""));
+        
+        snapper.getAttribute("snapEnabled").setValueDirect(true);
+        if (snapperConnector.collides(snappeeConnector, snapper.sectorTransformCompound, snappee.sectorTransformCompound))
+        {
+            this.snapGenericToGeneric(snapper, snappee, snapperConnector, snappeeConnector);
+        }
+    }
+}
 
 SnapMgr.prototype.isSnapped = function(model)
 {
