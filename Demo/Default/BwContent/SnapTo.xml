@@ -51,42 +51,42 @@
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
@@ -103,42 +103,42 @@
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
@@ -155,42 +155,42 @@
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveY">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="PositiveZ">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeX">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeY">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default" name="NegativeZ">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
@@ -207,42 +207,42 @@
                                 <normal x="1" y="0" z="0"/>
                                 <point>
                                     <center x="0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
                                     <center x="0" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
                                     <center x="-0.25" y="0" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
                                     <center x="0" y="-0.25" z="0.25"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                             <genericConnector type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
                                     <center x="0" y="0" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
@@ -259,7 +259,7 @@
                                 <normal x="0" y="1" z="0"/>
                                 <point>
                                     <center x="0" y="0.25" z="0"/>
-                                    <radius>0.2</radius>
+                                    <radius>0.1</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>

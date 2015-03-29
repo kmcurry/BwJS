@@ -174,7 +174,11 @@ SnapMgr.prototype.snap = function(snapper, snappee, snapperConnector, snappeeCon
     {
         var surface = surfaces[i].clone();
         surface.snapped = true;
-        surface.snappedModel = snapper;
+        surface.snappedModel = surfaces[i].snappedModel;
+        if (!surface.snappedModel)
+        {
+            surface.snappedModel = snapper;
+        }
         snappee.addSurface(surface);
 
         // transform vertices

@@ -241,6 +241,7 @@ SelectionListener.prototype.processPick = function(pick)
                 if (this.selections.surfaces[0].snappedModel)
                 {
                     this.unsnappedModel = this.selections.surfaces[0].snappedModel;
+                    this.selected = null; // clear previous
                     this.registerSelection(this.unsnappedModel, -1);
                 }
             }
