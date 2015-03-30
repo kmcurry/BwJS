@@ -377,8 +377,8 @@ SnapMgr.prototype.unsnap = function(model)
         
         snapConnections[i].snapperConnector.getAttribute("connected").setValueDirect(false);
         snapConnections[i].snappeeConnector.getAttribute("connected").setValueDirect(false);
-        snapper.getAttribute("enabled").setValueDirect(true);
         snapper.getAttribute("snapEnabled").setValueDirect(false);
+        snapper.getAttribute("enabled").setValueDirect(true);
         snapper.setMotionParent(model);
         zeroInspectionGroup(snapper);
         snapper.updateSimpleTransform();
@@ -438,7 +438,6 @@ SnapMgr.prototype.resnap = function(model, snapConnections)
 {
     // restore snap connections if they are still colliding
     var slot = 0;
-    model.getAttribute("snapEnabled").setValueDirect(true);
     for (var i = 0; i < snapConnections.length; i++)
     {
         var snapper = snapConnections[i].snapper;
@@ -447,7 +446,6 @@ SnapMgr.prototype.resnap = function(model, snapConnections)
         var snapperConnector = snapper.genericConnectors.get(snapConnections[i].snapperConnector.name.getValueDirect().join(""));
         var snappeeConnector = snappee.genericConnectors.get(snapConnections[i].snappeeConnector.name.getValueDirect().join(""));
         
-        snapper.getAttribute("snapEnabled").setValueDirect(true);
         if ((slot = snapperConnector.collides(snappeeConnector, snapper.sectorTransformCompound, snappee.sectorTransformCompound)) > 0)
         {
             switch (snapperConnector.attrType)
@@ -462,6 +460,14 @@ SnapMgr.prototype.resnap = function(model, snapConnections)
                     break;
             }
         }
+    }
+    
+    // restore "snapEnabled"
+    model.getAttribute("snapEnabled").setValueDirect(true);
+    for (var i = 0; i < snapConnections.length; i++)
+    {
+        var snapper = snapConnections[i].snapper;
+        snapper.getAttribute("snapEnabled").setValueDirect(true);
     }
 }
 
