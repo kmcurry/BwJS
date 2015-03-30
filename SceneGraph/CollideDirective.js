@@ -145,8 +145,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 var origin = trans.getOrigin();
                 Ammo.destroy(trans);
                 var position = new Vector3D(origin.x(), origin.y(), origin.z());
-                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
-                
+                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);               
             }
         }
     }

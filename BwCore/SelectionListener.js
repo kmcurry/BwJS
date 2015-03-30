@@ -232,7 +232,6 @@ SelectionListener.prototype.processPick = function(pick)
                 }
                 this.snappedModel.getAttribute("selected").setValueDirect(0);
                 this.selected.getAttribute("selected").setValueDirect(1); // make sure previous steps didn't clear selected state
-                this.selected.getAttribute("stopOnCollision").setValueDirect(true);
                 
                 var snapMgr = this.registry.find("SnapMgr");
                 snapMgr.resnap(this.snappedModel, this.unsnapped);
@@ -240,6 +239,10 @@ SelectionListener.prototype.processPick = function(pick)
             }
         }
     
+        // set stopOnCollision for the selected object (do this here because it needs to be 
+        // cleared by the unsnap block below (if unsnapping)
+        this.selected.getAttribute("stopOnCollision").setValueDirect(true);
+        
         // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
         // corresponding to the snapped surface selected
         if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
@@ -250,6 +253,8 @@ SelectionListener.prototype.processPick = function(pick)
                 this.unsnapped = snapMgr.unsnap(this.selected);
                 this.snappedModel = this.selected;
                 this.unsnappedModel = this.selected;
+                // if snappedModel has been set on the surface, the selected object is from a snapped model; 
+                // register that as the selected object
                 if (this.selections.surfaces[0].snappedModel)
                 {
                     this.unsnappedModel = this.selections.surfaces[0].snappedModel;
@@ -267,7 +272,7 @@ SelectionListener.prototype.processPick = function(pick)
                 this.snappedModel.getAttribute("stopOnCollision").setValueDirect(false);
             }
         }
-    
+        
         this.selected.highlight.setValueDirect(true);
         
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
