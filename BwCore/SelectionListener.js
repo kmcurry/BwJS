@@ -220,16 +220,28 @@ SelectionListener.prototype.processPick = function(pick)
     
     if (this.selected)
     {
+        // resnap if previously unsnapped
         if (this.unsnappedModel != this.selected)
         {
             if (this.unsnapped)
             {
+                // mark all as unselected (for physics interruption)
+                for (var i = 0; i < this.unsnapped.length; i++)
+                {
+                    this.unsnapped[i].snapper.getAttribute("selected").setValueDirect(0);
+                }
+                this.snappedModel.getAttribute("selected").setValueDirect(0);
+                this.selected.getAttribute("selected").setValueDirect(1); // make sure previous steps didn't clear selected state
+                this.selected.getAttribute("stopOnCollision").setValueDirect(true);
+                
                 var snapMgr = this.registry.find("SnapMgr");
                 snapMgr.resnap(this.snappedModel, this.unsnapped);
                 this.unsnapped = null;
             }
         }
     
+        // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
+        // corresponding to the snapped surface selected
         if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
         {
             var snapMgr = this.registry.find("SnapMgr");
@@ -244,6 +256,15 @@ SelectionListener.prototype.processPick = function(pick)
                     this.selected = null; // clear previous
                     this.registerSelection(this.unsnappedModel, -1);
                 }
+                
+                // mark all as selected (for physics interruption)
+                for (var i = 0; i < this.unsnapped.length; i++)
+                {
+                    this.unsnapped[i].snapper.getAttribute("selected").setValueDirect(1);
+                    this.unsnapped[i].snapper.getAttribute("stopOnCollision").setValueDirect(false);
+                }
+                this.snappedModel.getAttribute("selected").setValueDirect(1);
+                this.snappedModel.getAttribute("stopOnCollision").setValueDirect(false);
             }
         }
     

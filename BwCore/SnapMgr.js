@@ -436,8 +436,8 @@ SnapMgr.prototype.unsnap = function(model)
 
 SnapMgr.prototype.resnap = function(model, snapConnections)
 {
-    var matrix = model.sectorTransformCompound;
-    
+    // restore snap connections if they are still colliding
+    var slot = 0;
     model.getAttribute("snapEnabled").setValueDirect(true);
     for (var i = 0; i < snapConnections.length; i++)
     {
@@ -448,9 +448,19 @@ SnapMgr.prototype.resnap = function(model, snapConnections)
         var snappeeConnector = snappee.genericConnectors.get(snapConnections[i].snappeeConnector.name.getValueDirect().join(""));
         
         snapper.getAttribute("snapEnabled").setValueDirect(true);
-        if (snapperConnector.collides(snappeeConnector, snapper.sectorTransformCompound, snappee.sectorTransformCompound))
+        if ((slot = snapperConnector.collides(snappeeConnector, snapper.sectorTransformCompound, snappee.sectorTransformCompound)) > 0)
         {
-            this.snapGenericToGeneric(snapper, snappee, snapperConnector, snappeeConnector);
+            switch (snapperConnector.attrType)
+            {
+                case eAttrType.GenericConnector:
+                    this.snapGenericToGeneric(snapper, snappee, snapperConnector, snappeeConnector);
+                    break;
+                    
+                case eAttrType.PlugConnector:
+                    snappeeConnector.slot = slot;
+                    this.snapPlugToSocket(snapper, snappee, snapperConnector, snappeeConnector);
+                    break;
+            }
         }
     }
 }
