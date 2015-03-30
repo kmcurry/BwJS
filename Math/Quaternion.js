@@ -1,4 +1,4 @@
-﻿function Quaternion(w, x, y, z)
+function Quaternion(w, x, y, z)
 {
     this.w = w || 1;
     this.x = x || 0;

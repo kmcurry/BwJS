@@ -246,7 +246,7 @@ SelectionListener.prototype.processPick = function(pick)
         // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
         // corresponding to the snapped surface selected
         if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
-        {
+        {          
             var snapMgr = this.registry.find("SnapMgr");
             if (snapMgr.isSnapped(this.selected))
             {

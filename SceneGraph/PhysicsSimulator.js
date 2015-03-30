@@ -396,9 +396,11 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
+    var center = model.getAttribute("center").getValueDirect();
+    
     for (var i = 0; i < model.surfaces.length; i++)
     {
-        var shape = this.getCollisionShape(model.surfaces[i], scale);
+        var shape = this.getCollisionShape(model.surfaces[i], center, scale);
 
         var transform = new Ammo.btTransform();
         transform.setIdentity();
@@ -425,7 +427,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
         childPosition.y += position.y;
         childPosition.z += position.z;
 
-        childRotation = child.getAttribute("rotation").getValueDirect();
+        var childRotation = child.getAttribute("rotation").getValueDirect();
         childRotation.x += rotation.x;
         childRotation.y += rotation.y;
         childRotation.z += rotation.z;
@@ -439,10 +441,8 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(surface, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
 {
-    //var center = model.getAttribute("center").getValueDirect();
-    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
@@ -453,8 +453,8 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, scale)
     var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
-        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
+        //var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
         Ammo.destroy(point);

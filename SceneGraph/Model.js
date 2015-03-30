@@ -457,7 +457,6 @@ Model.prototype.addGeometry = function(geometry, indices, surface)
     if (surface) surface.addGeometry(geometry);
     
     this.connectGeometryAttributes(geometry);
-    this.addGeometryBBox(geometry);
     this.geometries.push(geometry);
     if (indices) this.geometryIndices.push(indices);
         
@@ -640,13 +639,7 @@ Model.prototype.updateBBox = function()
             continue;
         }
         
-        min.x = Math.min(min.x, this.geometryBBoxesMap[i].first.x);
-        min.y = Math.min(min.y, this.geometryBBoxesMap[i].first.y);
-        min.z = Math.min(min.z, this.geometryBBoxesMap[i].first.z);
         
-        max.x = Math.max(max.x, this.geometryBBoxesMap[i].second.x);
-        max.y = Math.max(max.y, this.geometryBBoxesMap[i].second.y);
-        max.z = Math.max(max.z, this.geometryBBoxesMap[i].second.z);
     }
     
     this.bbox.min.setValueDirect(min.x, min.y, min.z);
@@ -711,7 +704,6 @@ function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
 {
-    container.updateGeometryBBox(attribute.getContainer().getContainer());
 }
 
 function Model_SurfaceAttrModifiedCB(attribute, container)
