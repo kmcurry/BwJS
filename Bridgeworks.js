@@ -158,6 +158,8 @@ function formatPath(url)
             },
             success: function()
             {
+                var href = document.location.href;
+                
                 validPath = url;
                 
                 var ndx = validPath.lastIndexOf("objects/");
@@ -165,7 +167,8 @@ function formatPath(url)
                 if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
                 if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
                 
-                validDir = validPath.substring(0, ndx);
+                //validDir = validPath.substring(0, ndx);
+                validDir = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir;
                 
                 console.debug("File found: " + validPath);
             }
@@ -3057,6 +3060,11 @@ function magnitude(x, y, z)
     return Math.sqrt(((x) * (x)) + ((y) * (y)) + ((z) * (z)));
 }
 
+function magnitude4(w, x, y, z)
+{
+    return Math.sqrt(((w) * (w)) + ((x) * (x)) + ((y) * (y)) + ((z) * (z)));
+}
+
 function clamp(value, min, max)
 {
     if (value < min) return min;
@@ -3836,6 +3844,33 @@ Matrix4x4.prototype.getRotationAngles = function()
     return { x: toDegrees(x), y: toDegrees(y), z: toDegrees(z) };
 }
 
+Matrix4x4.prototype.getQuaternion = function()
+{
+    var m = new Matrix4x4();
+    m.loadMatrix(this);
+    
+    // remove scale
+    var scalingFactors = m.getScalingFactors();
+    var scale = new Matrix4x4();
+    scale.loadScale(1 / scalingFactors.x, 1 / scalingFactors.y, 1 / scalingFactors.z);
+    m = m.multiply(scale);
+    
+    m.transpose();
+    
+    var q = new Quaternion();
+    
+    q.w = Math.sqrt( Math.max( 0, 1 + m._11 + m._22 + m._33 ) ) / 2; 
+    q.x = Math.sqrt( Math.max( 0, 1 + m._11 - m._22 - m._33 ) ) / 2; 
+    q.y = Math.sqrt( Math.max( 0, 1 - m._11 + m._22 - m._33 ) ) / 2; 
+    q.z = Math.sqrt( Math.max( 0, 1 - m._11 - m._22 + m._33 ) ) / 2; 
+    
+    q.x *= SIGN( m._32 - m._23 );
+    q.y *= SIGN( m._13 - m._31 );
+    q.z *= SIGN( m._21 - m._12 );
+    
+    return q;
+}
+
 Matrix4x4.prototype.loadScale = function(x, y, z)
 {
     this.loadIdentity();
@@ -4583,6 +4618,11 @@ ViewVolume.prototype.setOrthographic = function(left, right, top, bottom, near, 
 }
 var EPSILON = 0.00000001;
 
+function SIGN(x)
+{
+    return ((x >= 0) ? 1 : -1);
+}
+
 function SIGN3(v) 
 {
     (((v).x < 0 ) ? 4 : 0 | ((v).y < 0) ? 2 : 0 | ((v).z < 0) ? 1 : 0);
@@ -5043,6 +5083,7 @@ var eAttrType = {
     Bone                        :1033,
     Selector                    :1034,
     ScreenRect                  :1035,
+    SnapModel                   :1036,
     
     Evaluator                   :1100,
     SceneInspector              :1101,
@@ -5327,6 +5368,7 @@ Attribute.prototype.setValue = function(values, params)
         }
         else // values.length > 0
         {
+            this.values.length = values.length;
             for (var i = 0; i < values.length; i++)
             {
                 switch (op)
@@ -5427,8 +5469,12 @@ Attribute.prototype.addModifiedCB = function(callback, data)
 
 Attribute.prototype.removeModifiedCB = function(callback, data)
 {   
-    this.modifiedCBs.splice(this.modifiedCBs.indexOf(callback), 1);
-    this.modifiedCBsData.splice(this.modifiedCBsData.indexOf(data), 1);
+    var index = this.modifiedCBsData.indexOf(data);
+    if (index >= 0)
+    {
+        this.modifiedCBs.splice(index, 1);
+        this.modifiedCBsData.splice(index, 1);
+    }
 }
 
 Attribute.prototype.addTarget = function(target, op, converter, setValueOnTargeting)
@@ -5874,6 +5920,7 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
     {
         for (var j=0; j < src.attrNameMap[i].length; j++)
         {
+            if (!this.attrNameMap[i] || this.attrNameMap[i].length <= j) continue;
             var attr = this.attrNameMap[i][j];
             if (!attr)
             {
@@ -6165,6 +6212,13 @@ BooleanAttr.prototype.getValueDirect = function()
     var values = [];
     this.getValue(values);
     return values[0];
+}
+
+BooleanAttr.prototype.getLastValueDirect = function()
+{
+    var lastValues = [];
+    this.getLastValue(lastValues);
+    return lastValues;
 }
 
 BooleanAttr.prototype.setValueDirect = function(value, params)
@@ -6612,6 +6666,18 @@ AttributeVector.prototype.allocatesElements = function() // TODO: necessary (?)
 AttributeVector.prototype.push_back = function(item)
 {
     this.addElement(this.vector.length, item);
+}
+
+AttributeVector.prototype.erase = function(item)
+{
+    for (var i=0; i < this.vector.length; i++)
+    {
+        if (this.vector[i] == item)
+        { 
+            this.removeElement(i);
+            return;
+        }
+    }
 }
 
 AttributeVector.prototype.resize = function(size)
@@ -11261,25 +11327,18 @@ function webglRC(canvas, background)
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
-        
-        // get current view transform
-        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
-            // transform to view space
-            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
-            var values = [position.x, position.y, position.z, position.w];
+            var values = [desc.position.x, desc.position.y, desc.position.z, 1];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
-            // transform to view space
-            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
-            var values = [direction.x, direction.y, direction.z, 0];
+            var values = [desc.direction.x, desc.direction.y, desc.direction.z, 0];
 
             switch (desc.type)
             {
@@ -15832,7 +15891,7 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-
+   
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
@@ -16091,7 +16150,8 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             values = this.rotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            this.quaternion.setValueDirect(quat);
+            //this.quaternion.setValueDirect(quat);
+            this.rotationMatrix = quat.getMatrix();
 
             modified = true;
         }
@@ -16101,7 +16161,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateQuaternion = false;
             
             var quat = this.quaternion.getValueDirect();
-            this.rotationMatrix = quat.getMatrix();     
+            this.rotationMatrix = quat.getMatrix();
 
             modified = true;
         }
@@ -16354,6 +16414,12 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
         this.parent.copyValue(parent.name);
         this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
     }
+    else
+    {
+        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+        this.parent.setValueDirect("");
+        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
@@ -16535,10 +16601,12 @@ function UpdateDirective()
 
 UpdateDirective.prototype.setRegistry = function(registry)
 {
-    this.collideDirective.setRegistry(registry);
+    this.collideDirective.setRegistry(registry);    
     
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);    
+    
+    this.registry.register(this.collideDirective);
 }
 
 UpdateDirective.prototype.setGraphMgr = function(graphMgr)
@@ -19546,6 +19614,7 @@ function Surface()
     this.numLuminosityTextures = new NumberAttr(0);
     this.numSpecularityTextures = new NumberAttr(0);
     this.numTransparencyTextures = new NumberAttr(0);
+    this.vertices = new NumberArrayAttr();
     
     this.colorTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
     this.diffuseTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
@@ -19576,6 +19645,7 @@ function Surface()
     this.registerAttribute(this.numLuminosityTextures, "numLuminosityTextures");
     this.registerAttribute(this.numSpecularityTextures, "numSpecularityTextures");
     this.registerAttribute(this.numTransparencyTextures, "numTransparencyTextures");
+    this.registerAttribute(this.vertices, "vertices");
 
     this.isolateTextures.setValueDirect(true);
 
@@ -19679,6 +19749,19 @@ Surface.prototype.addGeometry = function(geometry)
     this.geometries.push(geometry);
 }
 
+Surface.prototype.removeGeometry = function(geometry)
+{
+    this.removeChild(geometry);
+    for (var i = 0; i < this.geometries.length; i++)
+    {
+        if (this.geometries[i] == geometry)
+        {
+            this.geometries.splice(i, 1);
+            break;
+        }
+    }
+}
+    
 Surface.prototype.addTexture = function(texture)
 {
     texture.getAttribute("modified").addTarget(this.modified);
@@ -19756,10 +19839,12 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
+    this.snapEnabled = new BooleanAttr(true);
     this.genericConnectors = new GenericConnectors();
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
     this.physicalProperties = new PhysicalPropertiesAttr();
+    this.physicsEnabled = new BooleanAttr(true);
     
     this.show.addTarget(this.enabled);
     
@@ -19839,10 +19924,12 @@ function Model()
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
+    this.registerAttribute(this.snapEnabled, "snapEnabled");
     this.registerAttribute(this.genericConnectors, "genericConnectors");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
     this.registerAttribute(this.physicalProperties, "physicalProperties");
+    this.registerAttribute(this.physicsEnabled, "physicsEnabled");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -19860,6 +19947,15 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
+}
+
+Model.prototype.synchronize = function(src, syncValues)
+{
+    // call base-class implementation
+    ParentableMotionElement.prototype.synchronize.call(this, src, syncValues);
+    
+    // sectorPosition is overwriting position
+    this.position.copyValue(src.getAttribute("position"));
 }
 
 Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
@@ -20000,16 +20096,12 @@ Model.prototype.apply = function(directive, params, visitChildren)
             {
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);
-                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
-
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
-                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -20086,9 +20178,12 @@ Model.prototype.onRemove = function()
     
     // remove from any physics simulators
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
-    for (var i = 0; i < physicsSimulators.length; i++)
+    if (physicsSimulators)
     {
-        physicsSimulators[i].deletePhysicsBody(this);
+        for (var i = 0; i < physicsSimulators.length; i++)
+        {
+            physicsSimulators[i].deletePhysicsBody(this);
+        }
     }
     
     // call base-class implementation
@@ -20120,16 +20215,64 @@ Model.prototype.addSurface = function(surface)
     this.connectSurfaceAttributes(surface);
 }
 
+Model.prototype.removeSurface = function(surface)
+{
+    this.surfacesNode.removeChild(surface);
+    
+    for (var i = 0; i < this.surfaces.length; i++)
+    {
+        if (this.surfaces[i] == surface)
+        {
+            this.surfaces.splice(i, 1);
+            break;
+        }
+    }
+    
+    // unregister surface from this
+    this.unregisterAttribute(surface);
+	
+    this.disconnectSurfaceAttributes(surface);
+}
+    
 Model.prototype.addGeometry = function(geometry, indices, surface)
 {
     if (surface) surface.addGeometry(geometry);
     
     this.connectGeometryAttributes(geometry);
-    this.addGeometryBBox(geometry);
     this.geometries.push(geometry);
     if (indices) this.geometryIndices.push(indices);
+    geometry.bbox.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
         
-    this.updateBoundingTree = true;
+    this.updateBBox();
+}
+
+Model.prototype.removeGeometry = function(geometry, indices, surface)
+{
+    if (surface) surface.removeGeometry(geometry);
+    
+    this.disconnectGeometryAttributes(geometry);
+    for (var i = 0; i < this.geometries.length; i++)
+    {
+        if (this.geometries[i] == geometry)
+        {
+            this.geometries.splice(i, 1);
+            break;
+        }
+    }  
+    if (indices) 
+    {
+        for (var i = 0; i < this.geometryIndices.length; i++)
+        {
+            if (this.geometryIndices[i] == indices)
+            {
+                this.geometryIndices.splice(i, 1);
+                break;
+            }
+        }
+    }
+    geometry.bbox.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
+        
+    this.updateBBox();
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)
@@ -20156,6 +20299,29 @@ Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
+Model.prototype.disconnectSurfaceAttributes = function(surface)
+{
+    this.disconnectSurfaceAttribute(surface, this.color, "color");
+    this.disconnectSurfaceAttribute(surface, this.ambientLevel, "ambientLevel");
+    this.disconnectSurfaceAttribute(surface, this.diffuseLevel, "diffuseLevel");
+    this.disconnectSurfaceAttribute(surface, this.specularLevel, "specularLevel");
+    this.disconnectSurfaceAttribute(surface, this.emissiveLevel, "emissiveLevel");
+    this.disconnectSurfaceAttribute(surface, this.ambient, "ambient");
+    this.disconnectSurfaceAttribute(surface, this.diffuse, "diffuse");
+    this.disconnectSurfaceAttribute(surface, this.specular, "specular");
+    this.disconnectSurfaceAttribute(surface, this.emissive, "emissive");
+    this.disconnectSurfaceAttribute(surface, this.glossiness, "glossiness");
+    this.disconnectSurfaceAttribute(surface, this.opacity, "opacity");
+    this.disconnectSurfaceAttribute(surface, this.doubleSided, "doubleSided");
+    this.disconnectSurfaceAttribute(surface, this.texturesEnabled, "texturesEnabled");
+    this.disconnectSurfaceAttribute(surface, this.enabled, "enabled");
+}
+
+Model.prototype.disconnectSurfaceAttribute = function(surface, attribute, name)
+{
+    attribute.removeTarget(surface.getAttribute(name));
+}
+
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
     this.connectGeometryAttribute(geometry, this.name, "name");
@@ -20177,60 +20343,43 @@ Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Model.prototype.addGeometryBBox = function(geometry)
+Model.prototype.disconnectGeometryAttributes = function(geometry)
 {
-    if (geometry == null ||
-        geometry == undefined)
-        return;
-    
-    geometry.bbox.min.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
-    geometry.bbox.max.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
-
-    this.updateGeometryBBox(geometry);
+    this.disconnectGeometryAttribute(geometry, this.name, "name");
+    this.disconnectGeometryAttribute(geometry, this.selectable, "selectable");
+    this.disconnectGeometryAttribute(geometry, this.cullable, "cullable");
+    this.disconnectGeometryAttribute(geometry, this.show, "show");
+    this.disconnectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
+    this.disconnectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
+    this.disconnectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
+    this.disconnectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
+    this.disconnectGeometryAttribute(geometry, this.shadowTarget, "shadowTarget");
+    this.disconnectGeometryAttribute(geometry, this.renderSequenceSlot, "renderSequenceSlot");
+    this.disconnectGeometryAttribute(geometry, this.highlight, "highlight");
 }
 
-Model.prototype.updateGeometryBBox = function(geometry)
+Model.prototype.disconnectGeometryAttribute = function(geometry, attribute, name)
 {
-    if (geometry == null ||
-        geometry == undefined)
-        return;
-    
-    var min = geometry.bbox.min.getValueDirect();
-    var max = geometry.bbox.max.getValueDirect();
-    
-    this.geometryBBoxesMap.push(new Pair(min, max));
-    
-    this.updateBBox();
+    attribute.removeTarget(geometry.getAttribute(name));
 }
 
 Model.prototype.updateBBox = function()
 {
-    var min = new Vector3D();
-    var max = new Vector3D();
-    var first = true;
-    for (var i in this.geometryBBoxesMap)
+    var min = new Vector3D(FLT_MAX, FLT_MAX, FLT_MAX);
+    var max = new Vector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    
+    for (var i = 0; i < this.geometries.length; i++)
     {
-        if (first)
-        {
-            min.x = this.geometryBBoxesMap[i].first.x;
-            min.y = this.geometryBBoxesMap[i].first.y;
-            min.z = this.geometryBBoxesMap[i].first.z;
-            
-            max.x = this.geometryBBoxesMap[i].second.x;
-            max.y = this.geometryBBoxesMap[i].second.y;
-            max.z = this.geometryBBoxesMap[i].second.z;
-            
-            first = false;
-            continue;
-        }
+        var geometryMin = this.geometries[i].bbox.min.getValueDirect();
+        var geometryMax = this.geometries[i].bbox.max.getValueDirect();
         
-        min.x = Math.min(min.x, this.geometryBBoxesMap[i].first.x);
-        min.y = Math.min(min.y, this.geometryBBoxesMap[i].first.y);
-        min.z = Math.min(min.z, this.geometryBBoxesMap[i].first.z);
+        min.x = Math.min(min.x, geometryMin.x);
+        min.y = Math.min(min.y, geometryMin.y);
+        min.z = Math.min(min.z, geometryMin.z);
         
-        max.x = Math.max(max.x, this.geometryBBoxesMap[i].second.x);
-        max.y = Math.max(max.y, this.geometryBBoxesMap[i].second.y);
-        max.z = Math.max(max.z, this.geometryBBoxesMap[i].second.z);
+        max.x = Math.max(max.x, geometryMax.x);
+        max.y = Math.max(max.y, geometryMax.y);
+        max.z = Math.max(max.z, geometryMax.z);
     }
     
     this.bbox.min.setValueDirect(min.x, min.y, min.z);
@@ -20295,7 +20444,7 @@ function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
 {
-    container.updateGeometryBBox(attribute.getContainer().getContainer());
+    container.updateBBox();
 }
 
 function Model_SurfaceAttrModifiedCB(attribute, container)
@@ -24561,7 +24710,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         bodies.push_back(name);
     }
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
-
+    
     // update positions of models (retain inspection group's rotation)
     for (i = 0; i < models.length; i++)
     {
@@ -24619,8 +24768,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 var origin = trans.getOrigin();
                 Ammo.destroy(trans);
                 var position = new Vector3D(origin.x(), origin.y(), origin.z());
-                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
-                
+                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);               
             }
         }
     }
@@ -24676,164 +24824,33 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
-    this.detectGenericSnapConnections(collideRecs);
-    this.detectPlugSocketSnapConnections(collideRecs);
-}
-
-CollideDirective.prototype.detectGenericSnapConnections = function(collideRecs)
-{
-    var i, j;
-    var sockets = [];
-    var plugs = [];
+    var i;
+    var snapper = null;
+    var snappees = [];
     
-    // get disconnected generic sockets/plugs
     for (i in collideRecs)
     {
         // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model))
+        if (this.isSelected(collideRecs[i].model) &&
+            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
         {
-            var plugConnectors = collideRecs[i].model.getAttribute("genericConnectors");
-            for (j = 0; j < plugConnectors.Size(); j++)
-            {
-                var plugConnector = plugConnectors.getAt(j);
-                if (plugConnector.getAttribute("connected").getValueDirect() == false)
-                {
-                    plugs.push(new Pair(plugConnector, collideRecs[i]));
-                }
-            }
+            snapper = collideRecs[i].model;
         }
-        else // !selected
+        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
         {
-            var socketConnectors = collideRecs[i].model.getAttribute("genericConnectors");
-            for (j = 0; j < socketConnectors.Size(); j++)
-            {
-                var socketConnector = socketConnectors.getAt(j);
-                if (socketConnector.getAttribute("connected").getValueDirect() == false)
-                {
-                    sockets.push(new Pair(socketConnector, collideRecs[i]));
-                }
-            }
+            snappees.push(collideRecs[i].model);
         }       
     }
+    if (!snapper || snappees.length == 0) return;
 
     // test plugs for collision with sockets
-    for (i = 0; i < plugs.length; i++)
+    var snapMgr = this.registry.find("SnapMgr");
+    for (i = 0; i < snappees.length; i++)
     {
-        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
-
-        for (j = 0; j < sockets.length; j++)
-        {
-            // only test sockets/plugs between different models, and models that are not already in a motion
-            // ancestor/descendent relationship
-            if (plugs[i].second.model == sockets[j].second.model ||
-                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
-                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
-                continue;
-            
-            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
-            if (plugType != socketType)
-                continue;
-
-            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
-            if (connection > 0)
-            {
-                // remove plug from object inspection
-                var objectInspector = this.registry.find("ObjectInspector");
-                if (objectInspector)
-                {
-                    objectInspector.clearSelection(plugs[i].second.model);
-                }
-                
-                // flag plug/socket as connected
-                plugs[i].first.getAttribute("connected").setValueDirect(true);
-                sockets[j].first.getAttribute("connected").setValueDirect(true);
-                
-                // perform snap-to!
-                var snapMgr = this.registry.find("SnapMgr");
-                snapMgr.snapGenericToGeneric(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first);
-                
-                return;
-                //break;
-            }
-        }
-    }
-}
-    
-CollideDirective.prototype.detectPlugSocketSnapConnections = function(collideRecs)
-{
-    var i, j;
-    var sockets = [];
-    var plugs = [];
-
-    // get disconnected sockets/plugs
-    for (i in collideRecs)
-    {
-        // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model))
-        {
-            var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
-            for (j = 0; j < plugConnectors.Size(); j++)
-            {
-                var plugConnector = plugConnectors.getAt(j);
-                if (plugConnector.getAttribute("connected").getValueDirect() == false)
-                {
-                    plugs.push(new Pair(plugConnector, collideRecs[i]));
-                }
-            }
-        }
-        else // !selected
-        {
-            var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
-            for (j = 0; j < socketConnectors.Size(); j++)
-            {
-                var socketConnector = socketConnectors.getAt(j);
-                if (socketConnector.getAttribute("connected").getValueDirect() == false)
-                {
-                    sockets.push(new Pair(socketConnector, collideRecs[i]));
-                }
-            }
-        }       
-    }
-
-    // test plugs for collision with sockets
-    for (i = 0; i < plugs.length; i++)
-    {
-        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
-
-        for (j = 0; j < sockets.length; j++)
-        {
-            // only test sockets/plugs between different models, and models that are not already in a motion
-            // ancestor/descendent relationship
-            if (plugs[i].second.model == sockets[j].second.model ||
-                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
-                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
-                continue;
-            
-            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
-            if (plugType != socketType)
-                continue;
-
-            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
-            if (connection > 0)
-            {
-                // remove plug from object inspection
-                var objectInspector = this.registry.find("ObjectInspector");
-                if (objectInspector)
-                {
-                    objectInspector.clearSelection(plugs[i].second.model);
-                }
-                
-                // flag plug/socket as connected
-                plugs[i].first.getAttribute("connected").setValueDirect(true);
-                sockets[j].first.getAttribute("connected").setValueDirect(true);
-                
-                // perform snap-to!
-                var snapMgr = this.registry.find("SnapMgr");
-                snapMgr.snapPlugToSocket(plugs[i].second.model, sockets[j].second.model, plugs[i].first, sockets[j].first, connection);
-
-                return;
-                //break;
-            }
+        if (snapMgr.trySnap(snapper, snappees[i]))
+        {     
+            return;
+            //break;
         }
     }
 }
@@ -24851,6 +24868,7 @@ CollideDirective.prototype.isSelected = function(model)
 
     return selected;
 }
+
 function HighlightTarget()
 {
     this.projMatrix = new Matrix4x4();
@@ -26864,10 +26882,12 @@ function SnapConnector()
     this.className = "SnapConnector";
     this.attrType = eAttrType.SnapConnector;
 
+    this.name = new StringAttr();
     this.type = new StringAttr("default");
     this.normal = new Vector3DAttr(0, 0, 0);
     this.connected = new BooleanAttr(false);
 
+    this.registerAttribute(this.name, "name");
     this.registerAttribute(this.type, "type");
     this.registerAttribute(this.normal, "normal");
     this.registerAttribute(this.connected, "connected");
@@ -26914,6 +26934,21 @@ function GenericConnectors()
     this.appendParsedElements.setValueDirect(true);
 }
 
+GenericConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
+}
+    
 GenericConnectorAllocator.prototype = new Allocator();
 GenericConnectorAllocator.prototype.constructor = GenericConnectorAllocator;
 
@@ -26935,6 +26970,8 @@ function SocketConnector()
     this.className = "SocketConnector";
     this.attrType = eAttrType.SocketConnector;
 
+    this.slot = 0;
+    
     this.slot1 = new SphereAttr();
     this.slot2 = new SphereAttr();
 
@@ -26952,6 +26989,21 @@ function SocketConnectors()
     this.attrType = eAttrType.SocketConnectors;
 
     this.appendParsedElements.setValueDirect(true);
+}
+
+SocketConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
 }
 
 SocketConnectorAllocator.prototype = new Allocator();
@@ -27016,6 +27068,21 @@ function PlugConnectors()
     this.attrType = eAttrType.PlugConnectors;
 
     this.appendParsedElements.setValueDirect(true);
+}
+
+PlugConnectors.prototype.get = function(name)
+{
+    var length = this.Size();
+    for (var i = 0; i < length; i++)
+    {
+        var connector = this.getAt(i);
+        if (connector.getAttribute("name").getValueDirect().join("") == name)
+        {
+            return connector;
+        }
+    }
+    
+    return null;
 }
 
 PlugConnectorAllocator.prototype = new Allocator();
@@ -27109,7 +27176,8 @@ PhysicsSimulator.prototype.evaluate = function()
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        if (!this.bodyAdded[i])
+        var physicsEnabled = this.bodyModels[i].physicsEnabled.getValueDirect();
+        if (!this.bodyAdded[i] || !physicsEnabled)
             continue;
 
         this.physicsBodies[i].getMotionState().getWorldTransform(trans);
@@ -27336,6 +27404,7 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     // watch for changes in parent
     model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
     // watch for changes in enabled
+    model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
     model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
 
     // if model is disabled, don't create
@@ -27401,7 +27470,7 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.bodyModels[i].getAttribute("vertices").removeModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-            this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
+            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());
@@ -27429,21 +27498,26 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    var shape = this.getCollisionShape(model, scale);
+    var center = model.getAttribute("center").getValueDirect();
+    
+    for (var i = 0; i < model.surfaces.length; i++)
+    {
+        var shape = this.getCollisionShape(model.surfaces[i], center, scale);
 
-    var transform = new Ammo.btTransform();
-    transform.setIdentity();
-    var origin = new Ammo.btVector3(position.x, position.y, position.z);
-    transform.setOrigin(origin);
-    Ammo.destroy(origin);
-    var quat = new Quaternion();
-    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-    transform.setRotation(quaternion);
-    Ammo.destroy(quaternion);
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
 
-    compoundShape.addChildShape(transform, shape);
-    Ammo.destroy(transform);
+        compoundShape.addChildShape(transform, shape);
+        Ammo.destroy(transform);
+    }
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -27455,7 +27529,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
         childPosition.y += position.y;
         childPosition.z += position.z;
 
-        childRotation = child.getAttribute("rotation").getValueDirect();
+        var childRotation = child.getAttribute("rotation").getValueDirect();
         childRotation.x += rotation.x;
         childRotation.y += rotation.y;
         childRotation.z += rotation.z;
@@ -27469,10 +27543,8 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
 {
-    //var center = model.getAttribute("center").getValueDirect();
-    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
@@ -27480,10 +27552,10 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     var matrix = scaleMatrix;
     
     var shape = new Ammo.btConvexHullShape();
-    var verts = model.getAttribute("vertices").getValueDirect();
+    var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
+        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
         var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
@@ -27674,7 +27746,7 @@ PhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
     }
     else // !enabled
     {
-        this.deletePhysicsBody(model); 
+        this.deletePhysicsBody(model);
     }
 }
 
@@ -27708,6 +27780,309 @@ function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
 }
 
+function SnapRec()
+{
+    this.model = null;
+    this.matrix = null;
+    this.surfaces = [];
+    this.geometries = [];
+    this.vertices_start = 0;
+    this.vertices_count = 0;
+    this.genericConnectors = [];
+    this.plugConnectors = [];
+    this.socketConnectors = [];
+}
+
+SnapModel.prototype = new Model();
+SnapModel.prototype.constructor = SnapModel;
+
+function SnapModel()
+{
+    Model.call(this);
+    this.className = "SnapModel";
+    this.attrType = eAttrType.SnapModel;
+    
+    this.snaps = [];
+}
+
+SnapModel.prototype.snap = function(model, matrix)
+{
+    var i, j, k;
+    var vertices, xvertices, xvertex;
+    var normals, xnormals, normal, xnormal;
+    var center, xcenter;
+    
+    var snapRec = new SnapRec();
+    snapRec.model = model;
+    snapRec.matrix = matrix;
+    
+    // disable (hide) model
+    model.enabled.setValueDirect(false);
+    
+    // copy model surfaces to this
+    var surfaces = model.surfaces;
+    for (i = 0; i < surfaces.length; i++)
+    {
+        var surface = surfaces[i].clone();
+        this.addSurface(surface);
+        surface.snappedModel = model;
+        snapRec.surfaces.push(surface);
+
+        // transform vertices
+        xvertices = [];
+        vertices = surface.getAttribute("vertices").getValueDirect();
+        for (j = 0; j < vertices.length; j += 3)
+        {
+            xvertex = matrix.transform(vertices[j], vertices[j + 1], vertices[j + 2], 1);
+            xvertices.push(xvertex.x);
+            xvertices.push(xvertex.y);
+            xvertices.push(xvertex.z);
+        }
+        surface.getAttribute("vertices").setValueDirect(xvertices);
+    
+        // copy geometry
+        var geometries = surfaces[i].geometries;
+        for (j = 0; j < geometries.length; j++)
+        {
+            var geometry = geometries[j].clone();
+            geometry.surface = surface;
+
+            // transform vertices/normals
+            xvertices = [];
+            vertices = geometry.getAttribute("vertices").getValueDirect();
+            for (k = 0; k < vertices.length; k += 3)
+            {
+                xvertex = matrix.transform(vertices[k], vertices[k + 1], vertices[k + 2], 1);
+                xvertices.push(xvertex.x);
+                xvertices.push(xvertex.y);
+                xvertices.push(xvertex.z);
+            }
+            geometry.getAttribute("vertices").setValueDirect(xvertices);
+
+            xnormals = [];
+            normals = geometry.getAttribute("normals").getValueDirect();
+            for (k = 0; k < normals.length; k += 3)
+            {
+                xnormal = matrix.transform(normals[k], normals[k + 1], normals[k + 2], 0);
+                xnormals.push(xnormal.x);
+                xnormals.push(xnormal.y);
+                xnormals.push(xnormal.z);
+            }
+            geometry.getAttribute("normals").setValueDirect(xnormals);
+
+            this.addGeometry(geometry, null, surface);
+            snapRec.geometries.push(geometry);
+        }
+    }
+    
+    // append (transformed) model vertices to snappee
+    xvertices = [];
+    vertices = model.vertices.getValueDirect();
+    for (i = 0; i < vertices.length; i += 3)
+    {
+        xvertex = matrix.transform(vertices[i], vertices[i + 1], vertices[i + 2], 1);
+        xvertices.push(xvertex.x);
+        xvertices.push(xvertex.y);
+        xvertices.push(xvertex.z);
+    }
+    vertices = this.vertices.getValueDirect();   
+    snapRec.vertices_start = vertices.length;
+    snapRec.vertices_count = xvertices.length;
+    vertices = vertices.concat(xvertices);
+    this.vertices.setValueDirect(vertices);
+   
+    // copy (transformed) snap connectors to snappee
+    
+    // generics
+    var genericConnectors = model.genericConnectors;
+    for (i = 0; i < genericConnectors.Size(); i++)
+    {
+        var genericConnector = genericConnectors.getAt(i);
+        var xgenericConnector = new GenericConnector();
+        xgenericConnector.synchronize(genericConnector);
+        
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
+        
+        center = xgenericConnector.point.center.getValueDirect();
+        xcenter = matrix.transform(center.x, center.y, center.z, 1);
+        xgenericConnector.point.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
+        
+        this.genericConnectors.push_back(xgenericConnector);
+        snapRec.genericConnectors.push(xgenericConnector);
+    }
+    
+    // plugs  
+    var plugConnectors = model.plugConnectors;
+    for (i = 0; i < plugConnectors.Size(); i++)
+    {
+        var plugConnector = plugConnectors.getAt(i);
+        var xplugConnector = new PlugConnector();
+        xplugConnector.synchronize(plugConnector);
+        
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
+        
+        center = xplugConnector.pin1.center.getValueDirect();
+        xcenter = matrix.transform(center.x, center.y, center.z, 1);
+        xplugConnector.pin1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
+        
+        center = xplugConnector.pin2.center.getValueDirect();
+        xcenter = matrix.transform(center.x, center.y, center.z, 1);
+        xplugConnector.pin2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
+        
+        this.plugConnectors.push_back(xplugConnector);
+        snapRec.plugConnectors.push(xplugConnector);
+    }
+    
+    // sockets
+    var socketConnectors = model.socketConnectors;
+    for (i = 0; i < socketConnectors.Size(); i++)
+    {
+        var socketConnector = socketConnectors.getAt(i);
+        var xsocketConnector = new SocketConnector();
+        xsocketConnector.synchronize(socketConnector);
+        
+        normal = xgenericConnector.normal.getValueDirect();
+        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
+        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
+        
+        center = xsocketConnector.slot1.center.getValueDirect();
+        xcenter = matrix.transform(center.x, center.y, center.z, 1);
+        xsocketConnector.slot1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
+        
+        center = xsocketConnector.slot2.center.getValueDirect();
+        xcenter = matrix.transform(center.x, center.y, center.z, 1);
+        xsocketConnector.slot2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
+        
+        this.socketConnectors.push_back(xsocketConnector);
+        snapRec.socketConnectors.push(xsocketConnector);
+    }
+    
+    // append name
+    //var name = this.name.getValueDirect().join("");
+    //name += "_" + model.name.getValueDirect().join("");
+    //this.name.setValueDirect(name);
+    
+    // add snap entry
+    this.snaps[model.__nodeId__] = snapRec;
+}
+
+SnapModel.prototype.unsnap = function(model)
+{
+    var i;
+    
+    var snapRec = this.snaps[model.__nodeId__];
+    if (!snapRec) return;
+    
+    // remove model's surfaces
+    for (i = 0; i < snapRec.surfaces.length; i++)
+    {
+        this.removeSurface(snapRec.surfaces[i]);
+    }
+    
+    // remove model's geometries
+    for (i = 0; i < snapRec.geometries.length; i++)
+    {
+        this.removeGeometry(snapRec.geometries[i], null, snapRec.geometries[i].surface);
+    }
+    
+    // remove model's vertices
+    var vertices = this.vertices.getValueDirect();
+    vertices.splice(snapRec.vertices_start, snapRec.vertices_count);
+    this.vertices.setValueDirect(vertices);
+    
+    // remove model's snapConnectors
+    for (i = 0; i < snapRec.genericConnectors.length; i++)
+    {
+        this.genericConnectors.erase(snapRec.genericConnectors[i]);
+    }
+    for (i = 0; i < snapRec.plugConnectors.length; i++)
+    {
+        this.plugConnectors.erase(snapRec.plugConnectors[i]);
+    }
+    for (i = 0; i < snapRec.socketConnectors.length; i++)
+    {
+        this.socketConnectors.erase(snapRec.socketConnectors[i]);
+    }
+    
+    // clear snapConnector's connected flags
+    var genericConnectors = model.genericConnectors;
+    for (i = 0; i < genericConnectors.Size(); i++)
+    {
+        genericConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
+    }
+    var plugConnectors = model.plugConnectors;
+    for (i = 0; i < plugConnectors.Size(); i++)
+    {
+        plugConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
+    }
+    var socketConnectors = model.socketConnectors;
+    for (i = 0; i < socketConnectors.Size(); i++)
+    {
+        socketConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
+    }
+        
+    // set model's position
+    var matrix = snapRec.matrix;
+    
+    var position = matrix.transform(0, 0, 0, 1);
+    model.position.setValueDirect(position.x, position.y, position.z);
+
+    var rotationAngles = matrix.getRotationAngles();
+    model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+    model.setMotionParent(this);
+    zeroInspectionGroup(model);
+    model.updateSimpleTransform();
+    model.updateCompoundTransform();
+    model.setMotionParent(null);
+
+    matrix = model.sectorTransformCompound;
+
+    position = matrix.transform(0, 0, 0, 1);
+    model.position.setValueDirect(position.x, position.y, position.z);
+
+    var quaternion = matrix.getQuaternion();
+    model.quaternion.setValueDirect(quaternion);
+        
+    // enable (show) model
+    model.enabled.setValueDirect(true);
+    
+    // clear snap entry
+    this.snaps[model.__nodeId__] = undefined;
+}
+
+SnapModel.prototype.unsnapAll = function()
+{
+    var unsnapped = [];
+    
+    var snaps = this.snaps.slice();
+    for (var i in snaps)
+    {
+        this.unsnap(snaps[i].model);
+        unsnapped.push(snaps[i].model);
+    }
+    
+    // remove this
+    this.getParent(0).removeChild(this);
+    // invoke onRemove
+    this.onRemove();
+    // remove from registry
+    this.registry.unregister(this);
+    // delete
+    this.destroy();
+    
+    return unsnapped;
+}
+
+SnapModel.prototype.apply = function(directive, params, visitChildren)
+{
+    // call base-class implementation
+    Model.prototype.apply.call(this, directive, params, visitChildren);
+}
 var eEventType = {
     Unknown                     :-1,
     
@@ -27729,20 +28104,20 @@ var eEventType = {
     MouseLeftUp                 :110,
     MouseRightUp                :111,
     MouseMiddleUp               :112,
-	MouseWheelUp                :113,
-	MouseLeftClick              :114,
-	MouseMiddleClick            :115,
-	MouseRightClick             :116,
+    MouseWheelUp                :113,
+    MouseLeftClick              :114,
+    MouseMiddleClick            :115,
+    MouseRightClick             :116,
     MouseLeftDblClick           :117,
-	MouseMiddleDblClick         :118,
+    MouseMiddleDblClick         :118,
     MouseRightDblClick          :119,
     MouseDrag                   :120,
     MouseWheelForward           :121,
     MouseWheelBackward          :122,
-	MouseHover                  :123,
-	MouseLeave                  :124,	// fires when the mouse leaves the client area of the window
-	MouseOver                   :125,	// fires when the mouse is moved onto an element
-	MouseOut                    :126,	// fires when the mouse is moved off an element
+    MouseHover                  :123,
+    MouseLeave                  :124,	// fires when the mouse leaves the client area of the window
+    MouseOver                   :125,	// fires when the mouse is moved onto an element
+    MouseOut                    :126,	// fires when the mouse is moved off an element
     Mouse_Last                  :199,
 
     Key_First                   :200,
@@ -27770,30 +28145,30 @@ var eEventNameMap = {
     "MButton3"                  : eEventType.MouseRightDown,
     "MButton3.Down"             : eEventType.MouseRightDown,
     "MButton1+MButton2.Down"    : eEventType.MouseBothDown,
-	"MButton2+MButton3.Down"    : eEventType.MouseBothDown,
-	"MButton1+MButton3.Down"    : eEventType.MouseBothDown,
+    "MButton2+MButton3.Down"    : eEventType.MouseBothDown,
+    "MButton1+MButton3.Down"    : eEventType.MouseBothDown,
     "MButton1.Click"            : eEventType.MouseLeftClick,
-	"MButton1.DoubleClick"      : eEventType.MouseLeftDblClick,
-	"MButton1.Up"               : eEventType.MouseLeftUp,
+    "MButton1.DoubleClick"      : eEventType.MouseLeftDblClick,
+    "MButton1.Up"               : eEventType.MouseLeftUp,
     "MButton2.Click"            : eEventType.MouseMiddleClick,
-	"MButton2.DoubleClick"      : eEventType.MouseMiddleDblClick,
-	"MButton2.Up"               : eEventType.MouseMiddleUp,
-	"MButton3.Click"            : eEventType.MouseRightClick,
-	"MButton3.DoubleClick"      : eEventType.MouseRightDblClick,
-	"MButton3.Up"               : eEventType.MouseRightUp,
+    "MButton2.DoubleClick"      : eEventType.MouseMiddleDblClick,
+    "MButton2.Up"               : eEventType.MouseMiddleUp,
+    "MButton3.Click"            : eEventType.MouseRightClick,
+    "MButton3.DoubleClick"      : eEventType.MouseRightDblClick,
+    "MButton3.Up"               : eEventType.MouseRightUp,
     "MWheel"                    : eEventType.MouseWheelDown,
-	"MWheel.Down"               : eEventType.MouseWheelDown,
+    "MWheel.Down"               : eEventType.MouseWheelDown,
     "MWheel.Click"              : eEventType.MouseWheelUp,
-	"MWheel.Up"                 : eEventType.MouseWheelUp,
-	"Mouse.Move"                : eEventType.MouseMove,
-	"Mouse.Hover"               : eEventType.MouseHover,
-	"Mouse.Leave"               : eEventType.MouseLeave,
-	"Mouse.Over"                : eEventType.MouseOver,
-	"Mouse.Out"                 : eEventType.MouseOut,
-	"Element.Selected"          : eEventType.ElementSelected,
-	"Element.Unselected"        : eEventType.ElementUnselected,
-	"Element.Focus"             : eEventType.ElementFocus,
-	"Element.Blur"              : eEventType.ElementBlur
+    "MWheel.Up"                 : eEventType.MouseWheelUp,
+    "Mouse.Move"                : eEventType.MouseMove,
+    "Mouse.Hover"               : eEventType.MouseHover,
+    "Mouse.Leave"               : eEventType.MouseLeave,
+    "Mouse.Over"                : eEventType.MouseOver,
+    "Mouse.Out"                 : eEventType.MouseOut,
+    "Element.Selected"          : eEventType.ElementSelected,
+    "Element.Unselected"        : eEventType.ElementUnselected,
+    "Element.Focus"             : eEventType.ElementFocus,
+    "Element.Blur"              : eEventType.ElementBlur
 };
 
 // map of VK_* strings to javascript key codes
@@ -28200,7 +28575,7 @@ EventListener.prototype.eventPerformed = function(event)
 }
 EventListener.prototype.getTrigger = function()
 {
-        this.trigger;
+    this.trigger;
 }
 EventListener.prototype.setTrigger = function(trigger)
 {
@@ -31274,20 +31649,12 @@ ObjectInspector.prototype.runSelectionOccurred = function()
             values[1] = pivotNeg.y;
             values[2] = pivotNeg.z;
             pRotGroup.getChild(4).translation.setValue(values, params);
-            
-            // stop on collision
-            pSelected.getAttribute("stopOnCollision").setValueDirect(true);
         }
     }   
 }
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
-    for (var i = 0; i < this.selectedObjects.length; i++)
-    {
-        this.getInspectionObject(this.selectedObjects[i]).getAttribute("stopOnCollision").setValueDirect(false);    
-    }
-    
     this.selectedObjects = [];
 }
 
@@ -31970,7 +32337,9 @@ function SelectionListener()
 
     this.rayPick = null;
     this.selections = new Selections();
+    this.selectionEvent = null;
     this.selected = null;
+    this.unsnapped = null;
     
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
@@ -32021,6 +32390,8 @@ SelectionListener.prototype.setRayPick = function(rayPick)
 
 SelectionListener.prototype.eventPerformed = function(event)
 {
+    this.selectionEvent = event;
+    
     // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
     switch (event.type)
     {
@@ -32041,7 +32412,7 @@ SelectionListener.prototype.eventPerformed = function(event)
 }
 
 SelectionListener.prototype.registerSelection = function(node, element)
-{
+{ 
     // only register first item
     if (this.selected) return;
     
@@ -32071,12 +32442,15 @@ SelectionListener.prototype.registerSelection = function(node, element)
 }
 
 SelectionListener.prototype.clearSelections = function()
-{
+{    
     this.selections.clear();
    
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
+        this.selected.highlight.setValueDirect(false);
+        this.selected.getAttribute("stopOnCollision").setValueDirect(false);
+        
         var selected = this.selected.getAttribute("selected");
         if (selected)
         {
@@ -32132,6 +32506,7 @@ SelectionListener.prototype.processPick = function(pick)
             break;
 		    
             case eAttrType.Model:
+            case eAttrType.SnapModel:
             {
                 this.selections.models.push(node);
                 this.registerSelection(node, element);
@@ -32154,6 +32529,59 @@ SelectionListener.prototype.processPick = function(pick)
     
     if (this.selected)
     {
+        // resnap if previously unsnapped
+        if (this.unsnapped != this.selected)
+        {
+            if (this.unsnapped)
+            {
+                // restore unsnapped snapEnabled state
+                this.unsnapped.snapEnabled.setValueDirect(true);
+                
+                // resnap previously-unsapped models (if still touching)
+                var snapMgr = this.registry.find("SnapMgr");
+                snapMgr.resnap(this.unsnappedModels);
+               
+                // mark all unsnapped models as physics-enabled and restore stopOnCollision flag (so they repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
+                {
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(true);
+                    //this.unsnappedModels[i].stopOnCollision.setValueDirect(true);
+                }
+                
+                this.unsnappedModels = null;
+                this.unsnapped = null;
+            }
+        }
+    
+        // set stopOnCollision for the selected object (do this here because it needs to be 
+        // cleared by the unsnap block below (if unsnapping)
+        this.selected.getAttribute("stopOnCollision").setValueDirect(true);
+        
+        // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
+        // corresponding to the snapped surface selected
+        if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
+        {          
+            if (this.selected.attrType == eAttrType.SnapModel)
+            {
+                // unsnap models
+                this.unsnappedModels = this.selected.unsnapAll();
+                // select selected unsnapped model
+                this.unsnapped = this.selections.surfaces[0].snappedModel;
+                this.unsnapped.snapEnabled.setValueDirect(false);
+                this.selected = null // clear previous
+                this.registerSelection(this.unsnapped, -1);
+                
+                // mark all unsnapped models as physics-disabled and clear stopOnCollision flag (so they won't repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
+                {
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(false);
+                    this.unsnappedModels[i].stopOnCollision.setValueDirect(false);
+                }              
+            }
+        }
+        
+        this.selected.highlight.setValueDirect(true);
+        
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
         this.pointView.setValueDirect(pick.intersectRecord.pointView.x, pick.intersectRecord.pointView.y, pick.intersectRecord.pointView.z);
@@ -33550,11 +33978,16 @@ SnapMgr.prototype.snapGenericToGeneric = function(snapper, snappee, snapperConne
     translationMatrix.loadTranslation(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z);
     matrix = matrix.multiply(translationMatrix);
     
+    snapperConnector.getAttribute("connected").setValueDirect(true);
+    snappeeConnector.getAttribute("connected").setValueDirect(true);
+    
     // perform snap
-    this.snap(snapper, snappee, matrix);
+    var snapped = this.snap(snapper, snappee, matrix);
+    
+    return snapped;
 }
 
-SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socketConnector, slot)
+SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socketConnector)
 {
     // set rotation
     var matrix = new Matrix4x4();
@@ -33592,7 +34025,7 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
 
     var pinToPin, slotToSlot;
-    switch (slot)
+    switch (socketConnector.slot)
     {
         case 1:
             pinToPin = new Vector3D(pin2.x - pin1.x, pin2.y - pin1.y, pin2.z - pin1.z);
@@ -33622,7 +34055,7 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
 
     // get positions of pin and slot to connect 
     var pin, slot;
-    switch (slot)
+    switch (socketConnector.slot)
     {
         case 1:
             pin = plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
@@ -33643,149 +34076,195 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
     translationMatrix.loadTranslation(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
     matrix = matrix.multiply(translationMatrix);
     
+    plugConnector.getAttribute("connected").setValueDirect(true);
+    socketConnector.getAttribute("connected").setValueDirect(true);
+    
     // perform snap
-    this.snap(plug, socket, matrix);
+    var snapped = this.snap(plug, socket, matrix);
+    
+    return snapped;
 }
 
 SnapMgr.prototype.snap = function(snapper, snappee, matrix)
 {
-    var i, j, k;
-    var vertices, xvertices, xvertex;
-    var normals, xnormals, normal, xnormal;
-    var center, xcenter;
-
-    // copy snapper surfaces to snappee
-    var surfaces = snapper.surfaces;
-    for (i = 0; i < surfaces.length; i++)
+    // if snappee is not a SnapModel, create one and snap snappee onto it first
+    if (snappee.attrType != eAttrType.SnapModel)
     {
-        var surface = surfaces[i].clone();
-        snappee.addSurface(surface);
-
-        // copy geometry
-        var geometries = surfaces[i].geometries;
-        for (j = 0; j < geometries.length; j++)
+        var factory = this.registry.find("AttributeFactory");
+        var snapModel = factory.create("SnapModel");
+        snapModel.synchronize(snappee, true);
+        // reset modification counts for surface attributes so they aren't set to snapped surfaces
+        snapModel.color.modificationCount = 0;
+        snapModel.ambientLevel.modificationCount = 0;
+        snapModel.diffuseLevel.modificationCount = 0;
+        snapModel.specularLevel.modificationCount = 0;
+        snapModel.emissiveLevel.modificationCount = 0;
+        snapModel.ambient.modificationCount = 0;
+        snapModel.diffuse.modificationCount = 0;
+        snapModel.specular.modificationCount = 0;
+        snapModel.emissive.modificationCount = 0;
+        snapModel.glossiness.modificationCount = 0;
+        snapModel.opacity.modificationCount = 0;
+        snapModel.doubleSided.modificationCount = 0;
+        snapModel.texturesEnabled.modificationCount = 0;
+        // don't copy vertices/snapConnectors
+        snapModel.vertices.setValueDirect(new Array());
+        snapModel.genericConnectors.clear();
+        snapModel.plugConnectors.clear();
+        snapModel.socketConnectors.clear();
+        // set name
+        var name = "CompoundModel_" + snapModel.__nodeId__;
+        snapModel.name.setValueDirect(name);
+        // enable physics
+        snapModel.physicsEnabled.setValueDirect(true);
+        // update transforms
+        snapModel.updateSimpleTransform();
+        snapModel.updateCompoundTransform();
+        
+        snapModel.snap(snappee, new Matrix4x4());
+        snappee.getParent(0).addChild(snapModel);
+        snappee = snapModel;
+        
+        // add to physics simulator
+        var physicsSimulator = this.registry.find("PhysicsSimulator");
+        physicsSimulator.createPhysicsBody(snappee);
+    }
+    
+    if (snapper.attrType == eAttrType.SnapModel)
+    {
+        // snap snapper's snaps onto snappee
+        var snaps = snapper.snaps;
+        
+        // remove snapper first
+        snapper.getParent(0).removeChild(snapper);
+        // invoke onRemove
+        snapper.onRemove();
+        // remove from registry
+        this.registry.unregister(snapper);
+        // delete
+        snapper.destroy();
+        
+        // snap snapper's snaps
+        for (var i in snaps)
         {
-            var geometry = geometries[j].clone();
-
-            // transform vertices/normals
-            xvertices = [];
-            vertices = geometry.getAttribute("vertices").getValueDirect();
-            for (k = 0; k < vertices.length; k += 3)
+            if (snaps[i])
             {
-                xvertex = matrix.transform(vertices[k], vertices[k + 1], vertices[k + 2], 1);
-                xvertices.push(xvertex.x);
-                xvertices.push(xvertex.y);
-                xvertices.push(xvertex.z);
+                this.snap(snaps[i].model, snappee, snaps[i].matrix.multiply(matrix));
             }
-            geometry.getAttribute("vertices").setValueDirect(xvertices);
+        }
+    }
+    else // simple model (not a SnapModel)
+    {
+        snappee.snap(snapper, matrix);
+    }
+    
+    return snappee;
+}
 
-            xnormals = [];
-            normals = geometry.getAttribute("normals").getValueDirect();
-            for (k = 0; k < normals.length; k += 3)
+SnapMgr.prototype.resnap = function(models)
+{
+    var i, j;
+    var rootSnaps = [];
+    
+    var snapModels = [];
+    for (i = 0; i < models.length; i++)
+    {
+        snapModels.push(null);
+    }
+    
+    for (i = 0; i < models.length; i++)
+    {
+        if (snapModels[i] != null) continue; // already snapped
+        var snapper = models[i];
+        
+        for (j = 0; j < models.length; j++)
+        {
+            if (i == j) continue; // don't test model against itself          
+            var snappee = snapModels[j] ? snapModels[j] : models[j];
+            
+            var snapped = this.trySnap(snapper, snappee);
+            if (snapped)
             {
-                xnormal = matrix.transform(normals[k], normals[k + 1], normals[k + 2], 0);
-                xnormals.push(xnormal.x);
-                xnormals.push(xnormal.y);
-                xnormals.push(xnormal.z);
+                snapModels[i] = snapped;
+                snapModels[j] = snapped;
+                // if snappee is a snapModel, remove from root-level snapped shapes, because it
+                // is now a part of snapped
+                for (k = 0; k < rootSnaps.length; k++)
+                {
+                    if (rootSnaps[k] == snappee)
+                    {
+                        rootSnaps.splice(k, 1);
+                        break;
+                    }
+                }
+                rootSnaps.push(snapped);
+                break;
             }
-            geometry.getAttribute("normals").setValueDirect(xnormals);
-
-            snappee.addGeometry(geometry, null, surface);
         }
     }
     
-    // append (transformed) snapper vertices to snappee
-    xvertices = [];
-    vertices = snapper.getAttribute("vertices").getValueDirect();
-    for (i = 0; i < vertices.length; i += 3)
+    // recurse on root-level snapped shapes
+    if (rootSnaps.length > 1)
     {
-        xvertex = matrix.transform(vertices[i], vertices[i + 1], vertices[i + 2], 1);
-        xvertices.push(xvertex.x);
-        xvertices.push(xvertex.y);
-        xvertices.push(xvertex.z);
+        this.resnap(rootSnaps);
     }
-    vertices = snappee.getAttribute("vertices").getValueDirect();   
-    vertices = vertices.concat(xvertices);
-    snappee.getAttribute("vertices").setValueDirect(vertices);
-   
-    // copy (transformed) snap connectors to snappee
-    
-    // generics
-    var snappeeGenericConnectors = snappee.getAttribute("genericConnectors");  
-    var snapperGenericConnectors = snapper.getAttribute("genericConnectors");
-    for (i = 0; i < snapperGenericConnectors.Size(); i++)
-    {
-        var genericConnector = snapperGenericConnectors.getAt(i);
-        var xgenericConnector = new GenericConnector();
-        xgenericConnector.synchronize(genericConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xgenericConnector.point.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xgenericConnector.point.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeeGenericConnectors.push_back(xgenericConnector);
-    }
-    
-    // plugs
-    var snappeePlugConnectors = snappee.getAttribute("plugConnectors");  
-    var snapperPlugConnectors = snapper.getAttribute("plugConnectors");
-    for (i = 0; i < snapperPlugConnectors.Size(); i++)
-    {
-        var plugConnector = snapperPlugConnectors.getAt(i);
-        var xplugConnector = new PlugConnector();
-        xplugConnector.synchronize(plugConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xplugConnector.pin1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xplugConnector.pin2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeePlugConnectors.push_back(xplugConnector);
-    }
-    
-    // sockets
-    var snappeeSocketConnectors = snappee.getAttribute("socketConnectors");
-    var snapperSocketConnectors = snapper.getAttribute("socketConnectors");
-    for (i = 0; i < snapperSocketConnectors.Size(); i++)
-    {
-        var socketConnector = snapperSocketConnectors.getAt(i);
-        var xsocketConnector = new SocketConnector();
-        xsocketConnector.synchronize(socketConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xsocketConnector.slot1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xsocketConnector.slot2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeeSocketConnectors.push_back(xsocketConnector);
-    }
-    
-    // disable (hide) snapper
-    snapper.getAttribute("enabled").setValueDirect(false);
-    
-    // TODO: track these updates for unsnap
 }
 
-SnapMgr.prototype.unsnap = function(snapper, snappee)
+SnapMgr.prototype.trySnap = function(snapper, snappee)
 {
+    var i, j;
+    
+    if (snapper.snapEnabled.getValueDirect() == false ||
+        snappee.snapEnabled.getValueDirect() == false)
+        return null;
+
+    var snapperMatrix = snapper.sectorTransformCompound;
+    var snappeeMatrix = snappee.sectorTransformCompound;
+    
+    // generics
+    var snapperGenerics = snapper.genericConnectors;
+    var snappeeGenerics = snappee.genericConnectors;
+    for (i = 0; i < snapperGenerics.Size(); i++)
+    {
+        var snapperGeneric = snapperGenerics.getAt(i);
+        if (snapperGeneric.connected.getValueDirect() == true) continue;
+        
+        for (j = 0; j < snappeeGenerics.Size(); j++)
+        {
+            var snappeeGeneric = snappeeGenerics.getAt(j);
+            if (snappeeGeneric.connected.getValueDirect() == true) continue;
+            if (snapperGeneric.type.getValueDirect().join("") != snappeeGeneric.type.getValueDirect().join("")) continue; // only test same types
+            
+            if (snapperGeneric.collides(snappeeGeneric, snapperMatrix, snappeeMatrix))
+            {
+                return this.snapGenericToGeneric(snapper, snappee, snapperGeneric, snappeeGeneric);
+            }
+        }
+    }
+    
+    // plugs/sockets
+    // TODO: might need to test snapper's sockets to snappee's plugs (?)
+    var snapperPlugs = snapper.plugConnectors;
+    var snappeeSockets = snappee.socketConnectors;
+    for (i = 0; i < snapperPlugs.Size(); i++)
+    {
+        var snapperPlug = snapperPlugs.getAt(i);
+        if (snapperPlug.connected.getValueDirect() == true) continue;
+        
+        for (j = 0; j < snappeeSockets.Size(); j++)
+        {
+            var snappeeSocket = snappeeSockets.getAt(j);
+            if (snappeeSocket.connected.getValueDirect() == true) continue;
+            if (snapperPlug.type.getValueDirect().join("") != snappeeSocket.type.getValueDirect().join("")) continue; // only test same types
+            
+            if ((snappeeSocket.slot = snapperPlug.collides(snappeeSocket, snapperMatrix, snappeeMatrix)) > 0)
+            {
+                return this.snapPlugToSocket(snapper, snappee, snapperPlug, snappeeSocket);
+            }
+        }
+    }
+    
+    return null;
 }
 // TODO
 var eLWObjectTokens = 
@@ -34968,6 +35447,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     {
         var vertices = [];
         var normals = [];
+        var surfacePnts = []; // for setting surface's layer vertices to surface
         vertexNormals[surfIndex] = []
         vertexOrder[surfIndex] = [];
         vertexMinMax[surfIndex] = new Pair();
@@ -34985,6 +35465,8 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < poly.length; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
+                surfacePnts[poly[vertex]] = point;
+                
                 vertices.push([point.x, point.y, point.z]);
 
                 jsmPolygon.AddVertex(point.x, point.y, point.z);
@@ -35013,6 +35495,8 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 3; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
+                surfacePnts[poly[vertex]] = point;
+                
                 vertices.push(point.x);
                 vertices.push(point.y);
                 vertices.push(point.z);
@@ -35095,6 +35579,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 2; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
+                surfacePnts[poly[vertex]] = point;
                 
                 vertices.push(point.x);
                 vertices.push(point.y);
@@ -35122,6 +35607,7 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             var poly = layer.pols[polyIndex];
             
             var point = layer.pnts[poly[0]];
+            surfacePnts[poly[0]] = point;
             
             vertices.push(point.x);
             vertices.push(point.y);
@@ -35137,6 +35623,16 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             
             pointList.getAttribute("vertices").setValue(vertices);
         }
+        
+        // set surface's layer vertices to surface
+        var surfaceVertices = [];
+        for (var surfacePnt in surfacePnts)
+        {
+            surfaceVertices.push(surfacePnts[surfacePnt].x);
+            surfaceVertices.push(surfacePnts[surfacePnt].y);
+            surfaceVertices.push(surfacePnts[surfacePnt].z);
+        }
+        surfaces[surfIndex].getAttribute("vertices").setValue(surfaceVertices);
     }
 
     // calculate smooth normals for tris
@@ -36556,7 +37052,8 @@ LWSceneBuilder.prototype.finalize = function()
     for (var i=0; i < this.models.length; i++)
     {
         var model = this.models[i];
-        if (model.bones.length > 0)
+        if (model.bones && 
+            model.bones.length > 0)
         {
             this.attachBoneEffectors(model, model.bones);
         }
@@ -36723,9 +37220,9 @@ LWSceneBuilder.prototype.attachDissolveInterpolator = function(kfi, target)
 LWSceneBuilder.prototype.attachBoneEffectors = function(model, bones)
 {
     // for each geometry set in model...
-    for (var i=0; i < model.geometry.length; i++)
+    for (var i=0; i < model.geometries.length; i++)
     {
-        var geometry = model.geometry[i];
+        var geometry = model.geometries[i];
         
         // allocate bone effector
         var boneEffector = this.factory.create("BoneEffector");
@@ -36943,6 +37440,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
     this.newResourceProcs["ScreenRect"] = newSGNode;
+    this.newResourceProcs["SnapModel"] = newSnapModel;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -37302,6 +37800,16 @@ function newModel(name, factory)
     var resource = new Model();
     resource.setGraphMgr(factory.graphMgr);
     registerParentableAttributes(resource, factory);
+    addInspectionGroup(resource, factory);
+    return resource;
+}
+
+function newSnapModel(name, factory)
+{
+    var resource = new SnapModel();
+    resource.setGraphMgr(factory.graphMgr);
+    registerParentableAttributes(resource, factory);
+    addInspectionGroup(resource, factory);
     return resource;
 }
 
@@ -37572,8 +38080,6 @@ function finalizeModel(model, factory)
 
         contentHandler.parseFileStream(pathInfo[0]);
     }
-
-    addInspectionGroup(model, factory);
 }
 
 function finalizeDirective(directive, factory)
@@ -37926,6 +38432,7 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseLeftDblClick, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);
