@@ -49,11 +49,16 @@ SnapMgr.prototype.snapGenericToGeneric = function(snapper, snappee, snapperConne
     translationMatrix.loadTranslation(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z);
     matrix = matrix.multiply(translationMatrix);
     
+    snapperConnector.getAttribute("connected").setValueDirect(true);
+    snappeeConnector.getAttribute("connected").setValueDirect(true);
+    
     // perform snap
-    this.snap(snapper, snappee, matrix);
+    var snapped = this.snap(snapper, snappee, matrix);
+    
+    return snapped;
 }
 
-SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socketConnector, slot)
+SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socketConnector)
 {
     // set rotation
     var matrix = new Matrix4x4();
@@ -91,7 +96,7 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
 
     var pinToPin, slotToSlot;
-    switch (slot)
+    switch (socketConnector.slot)
     {
         case 1:
             pinToPin = new Vector3D(pin2.x - pin1.x, pin2.y - pin1.y, pin2.z - pin1.z);
@@ -121,7 +126,7 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
 
     // get positions of pin and slot to connect 
     var pin, slot;
-    switch (slot)
+    switch (socketConnector.slot)
     {
         case 1:
             pin = plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
@@ -142,147 +147,193 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
     translationMatrix.loadTranslation(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
     matrix = matrix.multiply(translationMatrix);
     
+    plugConnector.getAttribute("connected").setValueDirect(true);
+    socketConnector.getAttribute("connected").setValueDirect(true);
+    
     // perform snap
-    this.snap(plug, socket, matrix);
+    var snapped = this.snap(plug, socket, matrix);
+    
+    return snapped;
 }
 
 SnapMgr.prototype.snap = function(snapper, snappee, matrix)
 {
-    var i, j, k;
-    var vertices, xvertices, xvertex;
-    var normals, xnormals, normal, xnormal;
-    var center, xcenter;
-
-    // copy snapper surfaces to snappee
-    var surfaces = snapper.surfaces;
-    for (i = 0; i < surfaces.length; i++)
+    // if snappee is not a SnapModel, create one and snap snappee onto it first
+    if (snappee.attrType != eAttrType.SnapModel)
     {
-        var surface = surfaces[i].clone();
-        snappee.addSurface(surface);
-
-        // copy geometry
-        var geometries = surfaces[i].geometries;
-        for (j = 0; j < geometries.length; j++)
+        var factory = this.registry.find("AttributeFactory");
+        var snapModel = factory.create("SnapModel");
+        snapModel.synchronize(snappee, true);
+        // reset modification counts for surface attributes so they aren't set to snapped surfaces
+        snapModel.color.modificationCount = 0;
+        snapModel.ambientLevel.modificationCount = 0;
+        snapModel.diffuseLevel.modificationCount = 0;
+        snapModel.specularLevel.modificationCount = 0;
+        snapModel.emissiveLevel.modificationCount = 0;
+        snapModel.ambient.modificationCount = 0;
+        snapModel.diffuse.modificationCount = 0;
+        snapModel.specular.modificationCount = 0;
+        snapModel.emissive.modificationCount = 0;
+        snapModel.glossiness.modificationCount = 0;
+        snapModel.opacity.modificationCount = 0;
+        snapModel.doubleSided.modificationCount = 0;
+        snapModel.texturesEnabled.modificationCount = 0;
+        // don't copy vertices/snapConnectors
+        snapModel.vertices.setValueDirect(new Array());
+        snapModel.genericConnectors.clear();
+        snapModel.plugConnectors.clear();
+        snapModel.socketConnectors.clear();
+        // set name
+        var name = "CompoundModel_" + snapModel.__nodeId__;
+        snapModel.name.setValueDirect(name);
+        // enable physics
+        snapModel.physicsEnabled.setValueDirect(true);
+        // update transforms
+        snapModel.updateSimpleTransform();
+        snapModel.updateCompoundTransform();
+        
+        snapModel.snap(snappee, new Matrix4x4());
+        snappee.getParent(0).addChild(snapModel);
+        snappee = snapModel;
+        
+        // add to physics simulator
+        var physicsSimulator = this.registry.find("PhysicsSimulator");
+        physicsSimulator.createPhysicsBody(snappee);
+    }
+    
+    if (snapper.attrType == eAttrType.SnapModel)
+    {
+        // snap snapper's snaps onto snappee
+        var snaps = snapper.snaps;
+        
+        // remove snapper first
+        snapper.getParent(0).removeChild(snapper);
+        // invoke onRemove
+        snapper.onRemove();
+        // remove from registry
+        this.registry.unregister(snapper);
+        // delete
+        snapper.destroy();
+        
+        // snap snapper's snaps
+        for (var i in snaps)
         {
-            var geometry = geometries[j].clone();
-
-            // transform vertices/normals
-            xvertices = [];
-            vertices = geometry.getAttribute("vertices").getValueDirect();
-            for (k = 0; k < vertices.length; k += 3)
+            if (snaps[i])
             {
-                xvertex = matrix.transform(vertices[k], vertices[k + 1], vertices[k + 2], 1);
-                xvertices.push(xvertex.x);
-                xvertices.push(xvertex.y);
-                xvertices.push(xvertex.z);
+                this.snap(snaps[i].model, snappee, snaps[i].matrix.multiply(matrix));
             }
-            geometry.getAttribute("vertices").setValueDirect(xvertices);
+        }
+    }
+    else // simple model (not a SnapModel)
+    {
+        snappee.snap(snapper, matrix);
+    }
+    
+    return snappee;
+}
 
-            xnormals = [];
-            normals = geometry.getAttribute("normals").getValueDirect();
-            for (k = 0; k < normals.length; k += 3)
+SnapMgr.prototype.resnap = function(models)
+{
+    var i, j;
+    var rootSnaps = [];
+    
+    var snapModels = [];
+    for (i = 0; i < models.length; i++)
+    {
+        snapModels.push(null);
+    }
+    
+    for (i = 0; i < models.length; i++)
+    {
+        if (snapModels[i] != null) continue; // already snapped
+        var snapper = models[i];
+        
+        for (j = 0; j < models.length; j++)
+        {
+            if (i == j) continue; // don't test model against itself          
+            var snappee = snapModels[j] ? snapModels[j] : models[j];
+            
+            var snapped = this.trySnap(snapper, snappee);
+            if (snapped)
             {
-                xnormal = matrix.transform(normals[k], normals[k + 1], normals[k + 2], 0);
-                xnormals.push(xnormal.x);
-                xnormals.push(xnormal.y);
-                xnormals.push(xnormal.z);
+                snapModels[i] = snapped;
+                snapModels[j] = snapped;
+                // if snappee is a snapModel, remove from root-level snapped shapes, because it
+                // is now a part of snapped
+                for (k = 0; k < rootSnaps.length; k++)
+                {
+                    if (rootSnaps[k] == snappee)
+                    {
+                        rootSnaps.splice(k, 1);
+                        break;
+                    }
+                }
+                rootSnaps.push(snapped);
+                break;
             }
-            geometry.getAttribute("normals").setValueDirect(xnormals);
-
-            snappee.addGeometry(geometry, null, surface);
         }
     }
     
-    // append (transformed) snapper vertices to snappee
-    xvertices = [];
-    vertices = snapper.getAttribute("vertices").getValueDirect();
-    for (i = 0; i < vertices.length; i += 3)
+    // recurse on root-level snapped shapes
+    if (rootSnaps.length > 1)
     {
-        xvertex = matrix.transform(vertices[i], vertices[i + 1], vertices[i + 2], 1);
-        xvertices.push(xvertex.x);
-        xvertices.push(xvertex.y);
-        xvertices.push(xvertex.z);
+        this.resnap(rootSnaps);
     }
-    vertices = snappee.getAttribute("vertices").getValueDirect();   
-    vertices = vertices.concat(xvertices);
-    snappee.getAttribute("vertices").setValueDirect(vertices);
-   
-    // copy (transformed) snap connectors to snappee
-    
-    // generics
-    var snappeeGenericConnectors = snappee.getAttribute("genericConnectors");  
-    var snapperGenericConnectors = snapper.getAttribute("genericConnectors");
-    for (i = 0; i < snapperGenericConnectors.Size(); i++)
-    {
-        var genericConnector = snapperGenericConnectors.getAt(i);
-        var xgenericConnector = new GenericConnector();
-        xgenericConnector.synchronize(genericConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xgenericConnector.point.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xgenericConnector.point.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeeGenericConnectors.push_back(xgenericConnector);
-    }
-    
-    // plugs
-    var snappeePlugConnectors = snappee.getAttribute("plugConnectors");  
-    var snapperPlugConnectors = snapper.getAttribute("plugConnectors");
-    for (i = 0; i < snapperPlugConnectors.Size(); i++)
-    {
-        var plugConnector = snapperPlugConnectors.getAt(i);
-        var xplugConnector = new PlugConnector();
-        xplugConnector.synchronize(plugConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xplugConnector.pin1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xplugConnector.pin2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeePlugConnectors.push_back(xplugConnector);
-    }
-    
-    // sockets
-    var snappeeSocketConnectors = snappee.getAttribute("socketConnectors");
-    var snapperSocketConnectors = snapper.getAttribute("socketConnectors");
-    for (i = 0; i < snapperSocketConnectors.Size(); i++)
-    {
-        var socketConnector = snapperSocketConnectors.getAt(i);
-        var xsocketConnector = new SocketConnector();
-        xsocketConnector.synchronize(socketConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xsocketConnector.slot1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xsocketConnector.slot2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        snappeeSocketConnectors.push_back(xsocketConnector);
-    }
-    
-    // disable (hide) snapper
-    snapper.getAttribute("enabled").setValueDirect(false);
-    
-    // TODO: track these updates for unsnap
 }
 
-SnapMgr.prototype.unsnap = function(snapper, snappee)
+SnapMgr.prototype.trySnap = function(snapper, snappee)
 {
+    var i, j;
+    
+    if (snapper.snapEnabled.getValueDirect() == false ||
+        snappee.snapEnabled.getValueDirect() == false)
+        return null;
+
+    var snapperMatrix = snapper.sectorTransformCompound;
+    var snappeeMatrix = snappee.sectorTransformCompound;
+    
+    // generics
+    var snapperGenerics = snapper.genericConnectors;
+    var snappeeGenerics = snappee.genericConnectors;
+    for (i = 0; i < snapperGenerics.Size(); i++)
+    {
+        var snapperGeneric = snapperGenerics.getAt(i);
+        if (snapperGeneric.connected.getValueDirect() == true) continue;
+        
+        for (j = 0; j < snappeeGenerics.Size(); j++)
+        {
+            var snappeeGeneric = snappeeGenerics.getAt(j);
+            if (snappeeGeneric.connected.getValueDirect() == true) continue;
+            if (snapperGeneric.type.getValueDirect().join("") != snappeeGeneric.type.getValueDirect().join("")) continue; // only test same types
+            
+            if (snapperGeneric.collides(snappeeGeneric, snapperMatrix, snappeeMatrix))
+            {
+                return this.snapGenericToGeneric(snapper, snappee, snapperGeneric, snappeeGeneric);
+            }
+        }
+    }
+    
+    // plugs/sockets
+    // TODO: might need to test snapper's sockets to snappee's plugs (?)
+    var snapperPlugs = snapper.plugConnectors;
+    var snappeeSockets = snappee.socketConnectors;
+    for (i = 0; i < snapperPlugs.Size(); i++)
+    {
+        var snapperPlug = snapperPlugs.getAt(i);
+        if (snapperPlug.connected.getValueDirect() == true) continue;
+        
+        for (j = 0; j < snappeeSockets.Size(); j++)
+        {
+            var snappeeSocket = snappeeSockets.getAt(j);
+            if (snappeeSocket.connected.getValueDirect() == true) continue;
+            if (snapperPlug.type.getValueDirect().join("") != snappeeSocket.type.getValueDirect().join("")) continue; // only test same types
+            
+            if ((snappeeSocket.slot = snapperPlug.collides(snappeeSocket, snapperMatrix, snappeeMatrix)) > 0)
+            {
+                return this.snapPlugToSocket(snapper, snappee, snapperPlug, snappeeSocket);
+            }
+        }
+    }
+    
+    return null;
 }

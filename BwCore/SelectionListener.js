@@ -30,7 +30,9 @@ function SelectionListener()
 
     this.rayPick = null;
     this.selections = new Selections();
+    this.selectionEvent = null;
     this.selected = null;
+    this.unsnapped = null;
     
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
@@ -81,6 +83,8 @@ SelectionListener.prototype.setRayPick = function(rayPick)
 
 SelectionListener.prototype.eventPerformed = function(event)
 {
+    this.selectionEvent = event;
+    
     // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
     switch (event.type)
     {
@@ -101,7 +105,7 @@ SelectionListener.prototype.eventPerformed = function(event)
 }
 
 SelectionListener.prototype.registerSelection = function(node, element)
-{
+{ 
     // only register first item
     if (this.selected) return;
     
@@ -131,12 +135,15 @@ SelectionListener.prototype.registerSelection = function(node, element)
 }
 
 SelectionListener.prototype.clearSelections = function()
-{
+{    
     this.selections.clear();
    
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
+        this.selected.highlight.setValueDirect(false);
+        this.selected.getAttribute("stopOnCollision").setValueDirect(false);
+        
         var selected = this.selected.getAttribute("selected");
         if (selected)
         {
@@ -192,6 +199,7 @@ SelectionListener.prototype.processPick = function(pick)
             break;
 		    
             case eAttrType.Model:
+            case eAttrType.SnapModel:
             {
                 this.selections.models.push(node);
                 this.registerSelection(node, element);
@@ -214,6 +222,59 @@ SelectionListener.prototype.processPick = function(pick)
     
     if (this.selected)
     {
+        // resnap if previously unsnapped
+        if (this.unsnapped != this.selected)
+        {
+            if (this.unsnapped)
+            {
+                // restore unsnapped snapEnabled state
+                this.unsnapped.snapEnabled.setValueDirect(true);
+                
+                // resnap previously-unsapped models (if still touching)
+                var snapMgr = this.registry.find("SnapMgr");
+                snapMgr.resnap(this.unsnappedModels);
+               
+                // mark all unsnapped models as physics-enabled and restore stopOnCollision flag (so they repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
+                {
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(true);
+                    //this.unsnappedModels[i].stopOnCollision.setValueDirect(true);
+                }
+                
+                this.unsnappedModels = null;
+                this.unsnapped = null;
+            }
+        }
+    
+        // set stopOnCollision for the selected object (do this here because it needs to be 
+        // cleared by the unsnap block below (if unsnapping)
+        this.selected.getAttribute("stopOnCollision").setValueDirect(true);
+        
+        // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
+        // corresponding to the snapped surface selected
+        if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
+        {          
+            if (this.selected.attrType == eAttrType.SnapModel)
+            {
+                // unsnap models
+                this.unsnappedModels = this.selected.unsnapAll();
+                // select selected unsnapped model
+                this.unsnapped = this.selections.surfaces[0].snappedModel;
+                this.unsnapped.snapEnabled.setValueDirect(false);
+                this.selected = null // clear previous
+                this.registerSelection(this.unsnapped, -1);
+                
+                // mark all unsnapped models as physics-disabled and clear stopOnCollision flag (so they won't repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
+                {
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(false);
+                    this.unsnappedModels[i].stopOnCollision.setValueDirect(false);
+                }              
+            }
+        }
+        
+        this.selected.highlight.setValueDirect(true);
+        
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
         this.pointView.setValueDirect(pick.intersectRecord.pointView.x, pick.intersectRecord.pointView.y, pick.intersectRecord.pointView.z);

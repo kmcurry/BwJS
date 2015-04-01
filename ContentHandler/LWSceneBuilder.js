@@ -1,4 +1,4 @@
-﻿function TLWSCSceneData()
+function TLWSCSceneData()
 {
     var fps = 0;
     var backgroundColorR = 0;
@@ -812,7 +812,8 @@ LWSceneBuilder.prototype.finalize = function()
     for (var i=0; i < this.models.length; i++)
     {
         var model = this.models[i];
-        if (model.bones.length > 0)
+        if (model.bones && 
+            model.bones.length > 0)
         {
             this.attachBoneEffectors(model, model.bones);
         }
@@ -979,9 +980,9 @@ LWSceneBuilder.prototype.attachDissolveInterpolator = function(kfi, target)
 LWSceneBuilder.prototype.attachBoneEffectors = function(model, bones)
 {
     // for each geometry set in model...
-    for (var i=0; i < model.geometry.length; i++)
+    for (var i=0; i < model.geometries.length; i++)
     {
-        var geometry = model.geometry[i];
+        var geometry = model.geometries[i];
         
         // allocate bone effector
         var boneEffector = this.factory.create("BoneEffector");

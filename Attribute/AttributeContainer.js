@@ -219,6 +219,7 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
     {
         for (var j=0; j < src.attrNameMap[i].length; j++)
         {
+            if (!this.attrNameMap[i] || this.attrNameMap[i].length <= j) continue;
             var attr = this.attrNameMap[i][j];
             if (!attr)
             {

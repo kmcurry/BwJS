@@ -413,20 +413,12 @@ ObjectInspector.prototype.runSelectionOccurred = function()
             values[1] = pivotNeg.y;
             values[2] = pivotNeg.z;
             pRotGroup.getChild(4).translation.setValue(values, params);
-            
-            // stop on collision
-            pSelected.getAttribute("stopOnCollision").setValueDirect(true);
         }
     }   
 }
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
-    for (var i = 0; i < this.selectedObjects.length; i++)
-    {
-        this.getInspectionObject(this.selectedObjects[i]).getAttribute("stopOnCollision").setValueDirect(false);    
-    }
-    
     this.selectedObjects = [];
 }
 

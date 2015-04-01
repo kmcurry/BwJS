@@ -35,6 +35,18 @@ AttributeVector.prototype.push_back = function(item)
     this.addElement(this.vector.length, item);
 }
 
+AttributeVector.prototype.erase = function(item)
+{
+    for (var i=0; i < this.vector.length; i++)
+    {
+        if (this.vector[i] == item)
+        { 
+            this.removeElement(i);
+            return;
+        }
+    }
+}
+
 AttributeVector.prototype.resize = function(size)
 {
     this.size.setValueDirect(size);

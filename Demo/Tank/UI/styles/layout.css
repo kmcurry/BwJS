@@ -1,0 +1,486 @@
+@charset "utf-8";
+/* Simple fluid media
+   Note: Fluid media requires that you remove the media's height and width attributes from the HTML
+   http://www.alistapart.com/articles/fluid-images/ 
+*/
+img, object, embed, video {
+	max-width: 100%;
+}
+/* IE 6 does not support max-width so default to width 100% */
+.ie6 img {
+	width:100%;
+	
+}
+
+/*
+	Dreamweaver Fluid Grid Properties
+	----------------------------------
+	dw-num-cols-mobile:		5;
+	dw-num-cols-tablet:		8;
+	dw-num-cols-desktop:	12;
+	dw-gutter-percentage:	20;
+	
+	Inspiration from "Responsive Web Design" by Ethan Marcotte 
+	http://www.alistapart.com/articles/responsive-web-design
+	
+	and Golden Grid System by Joni Korpi
+	http://goldengridsystem.com/
+*/
+
+/* Mobile Layout: 650px and below. */
+
+.gridContainer {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	padding-left: 0%;
+	padding-right: 0%;
+}
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	overflow:visible;
+	}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.navLinks {
+	font-size: 10px;
+	color: #f9f9f9;
+	text-decoration: none !important;
+}	
+.navLinks:hover {
+	font-size: 10px;
+	color: #666666;
+	text-decoration: none !important;
+}	
+a.active {
+	font-size: 10px;
+	color: #f9f9f9;
+	text-decoration: none !important;
+}
+.materialsLink {
+	font-size: 10px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.materialsLink:hover {
+	font-size: 10px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.materialsLink {
+	font-size: 10px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.footerLink {
+	font-size: 9px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.footerLink:hover {
+	font-size: 9px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.footerLink {
+	font-size: 9px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.bodyHeader { 
+	color: #a41128; 
+	font-size: 16px; 
+	font-weight: bold; 
+}
+.bodySubHeader { 
+	color: #444444; 
+	font-size: 14px; 
+	font-weight: bold; 
+}
+.bodyText { 
+	color: #444444; 
+	font-size: 14px; 
+}
+.bodyText:hover { 
+	color: #aea07d; 
+	font-size: 14px; 
+}
+.tableText { 
+	color: #ffffff; 
+	font-size: 16px; 
+}
+.tableText2 { 
+	color: #555555; 
+	font-size: 16px;
+}
+.tableText3 { 
+	color: #55555; 
+	font-size: 14px;
+}
+.footer { 
+	font-size: 9px;
+	}
+#Wrap {
+	clear: both;
+	float: left;
+	width: 100%;
+	background-color: #ffffff;
+}
+#Header {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background: #1a1a1a;
+}
+#StatementDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#222222;
+	background: #f4f4f4;
+}
+#ImageDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+#Content1 {
+	clear: both;
+	float: center;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background-color: #f4f4f4;
+}
+#Content2 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#ffffff;
+	background-color: #aea07d;
+	font-size: 12px;
+}
+#Footer {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background-color: #999999;
+	
+}
+
+
+/* Tablet Layout: 641px to 768px. Inherits styles from: Mobile Layout. */
+
+@media only screen and (min-width: 675px) {
+.gridContainer {
+	width: 100%;
+	padding-left: 0%;
+	padding-right: 0%;
+}
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	height:0;
+	overflow:visible;
+	}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.navLinks {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+.navLinks:hover {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+a.active {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+.materialsLink {
+	font-size: 16px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.materialsLink:hover {
+	font-size: 16px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.materialsLink {
+	font-size: 16px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.footerLink {
+	font-size: 12px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.footerLink:hover {
+	font-size: 12px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.footerLink {
+	font-size: 12px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.bodyHeader { 
+	color: #a41128; 
+	font-size: 18px; 
+	font-weight: bold; 
+}
+.bodySubHeader { 
+	color: #444444; 
+	font-size: 16px; 
+	font-weight: bold; 
+}
+.bodyText { 
+	color: #444444; 
+	font-size: 16px; 
+}
+.bodyText:hover { 
+	color: #aea07d; 
+	font-size: 16px; 
+}
+.tableText { 
+	color: #ffffff; 
+	font-size: 20px;
+}
+.tableText2 { 
+	color: #555555; 
+	font-size: 20px;
+}
+.tableText3 { 
+	color: #55555; 
+	font-size: 16px;
+}
+.footer { 
+	font-size: 12px; 
+}
+#Header {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background: #1a1a1a;
+}
+#StatementDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#222222;
+	background: #f4f4f4;
+}
+#ImageDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+#Content1 {
+	clear: both;
+	float: center;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background-color: #f4f4f4;
+}
+#Content2 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#ffffff;
+	background-color: #aea07d;
+	font-size: 18px;
+}
+#Footer {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background: #999999;
+}
+
+
+/* Desktop Layout: 769px to a max of 1232px.  Inherits styles from: Mobile Layout and Tablet Layout. */
+
+@media only screen and (min-width: 769px) {
+.gridContainer {
+	width: 100%;
+	max-width: 1232px;
+	padding-left: 0;
+	padding-right: 0;
+	margin: auto;
+}
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+	overflow:visible;
+	}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.navLinks {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+.navLinks:hover {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+a.active {
+	font-size: 16px;
+	text-decoration: none !important;
+}	
+.materialsLink {
+	font-size: 16px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.materialsLink:hover {
+	font-size: 16px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.materialsLink {
+	font-size: 16px;
+	color: #a41128;
+	text-decoration: none !important;
+}
+.footerLink {
+	font-size: 14px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.footerLink:hover {
+	font-size: 14px;
+	color: #444444;
+	text-decoration: none !important;
+}
+a.footerLink {
+	font-size: 14px;
+	color: #ffffff;
+	text-decoration: none !important;
+}
+.bodyHeader { 
+	color: #a41128; 
+	font-size: 20px; 
+	font-weight: bold; 
+}
+.bodySubHeader { 
+	color: #444444; 
+	font-size: 18px; 
+}
+.bodyText {
+	color: #444444;
+	font-size: 18px;
+}
+.bodyText:hover { 
+	color: #aea07d; 
+	font-size: 18px; 
+}
+.tableText { 
+	color: #ffffff; 
+	font-size: 28px;
+}
+.tableText2 { 
+	color: #555555; 
+	font-size: 28px;
+}
+.tableText3 { 
+	color: #55555; 
+	font-size: 22px;
+}
+.footer { 
+	font-size: 14px; 
+}
+#Header {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background: #1a1a1a;
+}
+#StatementDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#222222;
+	background: #f4f4f4;
+}
+#ImageDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+#Content1 {
+	clear: both;
+	float: center;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background-color: #f4f4f4;
+}
+#Content2 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	color:#ffffff;
+	background-color: #aea07d;
+	font-size: 24px;
+}
+#Footer {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+	background: #999999;
+}
+}

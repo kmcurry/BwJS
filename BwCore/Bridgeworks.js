@@ -145,6 +145,7 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
+    this.eventMgr.addListener(eEventType.MouseLeftDblClick, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);

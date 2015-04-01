@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?bw onLoad="initialize"?>
+<?bwinclude url="DefaultPreferences.xml"?>
+<Scene>
+    <Isolator name="Root">
+        <Selector name="Cameras">
+            <PerspectiveCamera name="Camera" zoom="3.2" nearDistance="20" farDistance="200000">
+                <position x="-668.647" y="418" z="-864.402"/>
+                <rotation x="17.2" y="39.8" z="0"/>
+            </PerspectiveCamera>
+        </Selector>
+        <Group name="Lights">
+            <GlobalIllumination name="AmbientLight">
+                <ambient r="0.5" g="0.5" b="0.5"/>
+            </GlobalIllumination>
+            <PointLight name="Light" range="3.40282e+038" parent="Camera">
+                <position x="270.372" y="4828.73" z="-4719.77"/>
+                <rotation x="35.607" y="-5.78644" z="2.60121"/>
+                <ambient r="0.05" g="0.05" b="0.05" a="1"/>
+                <diffuse r="1" g="1" b="1" a="1"/>
+                <specular r="1" g="1" b="1" a="1"/>
+            </PointLight>
+        </Group>
+        <Group name="Models">
+            <Model name="Tank" url="objects/Tank.lwo"/>
+            <!--<NullObject name="Tank.lwo (2) (1)"/>-->
+            <Model name="Tank_Shadow" url="objects/Tank_Shadow.lwo"/>
+            <!--<NullObject name="Tank.lwo (2) (2)"/>-->
+        </Group>
+    </Isolator>
+    <RenderDirective name="RenderDirective">
+        <backgroundColor r="1" g="1" b="1" a="1"/>
+    </RenderDirective>
+    <!--<Animations>
+        <KeyframeInterpolator name="LightMotion" url="motions/Light.mot" target="Light"/>
+        <KeyframeInterpolator name="CameraMotion" url="motions/Camera.mot" target="Camera"/>
+        <KeyframeInterpolator name="TankMotion" url="motions/Tank.mot" target="Tank"/>
+        <KeyframeInterpolator name="Tank.lwo (2) (1)Motion" url="motions/Tank.lwo (2) (1).mot" target="Tank.lwo (2) (1)"/>
+        <KeyframeInterpolator name="Tank_ShadowMotion" url="motions/Tank_Shadow.mot" target="Tank_Shadow"/>
+        <KeyframeInterpolator name="Tank.lwo (2) (2)Motion" url="motions/Tank.lwo (2) (2).mot" target="Tank.lwo (2) (2)"/>
+    </Animations>-->
+    <ConnectOutputs sourceEvaluator="SceneInspector" targetContainer="Camera" connectionType="sceneInspection"/>
+    <ConnectOutputs targetContainer="Camera" sourceEvaluator="SceneInspector" connectionType="sceneInspection"/>
+    <Set target="Selector" computePivotDistance="true"/>
+</Scene>

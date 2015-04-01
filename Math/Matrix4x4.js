@@ -397,6 +397,33 @@ Matrix4x4.prototype.getRotationAngles = function()
     return { x: toDegrees(x), y: toDegrees(y), z: toDegrees(z) };
 }
 
+Matrix4x4.prototype.getQuaternion = function()
+{
+    var m = new Matrix4x4();
+    m.loadMatrix(this);
+    
+    // remove scale
+    var scalingFactors = m.getScalingFactors();
+    var scale = new Matrix4x4();
+    scale.loadScale(1 / scalingFactors.x, 1 / scalingFactors.y, 1 / scalingFactors.z);
+    m = m.multiply(scale);
+    
+    m.transpose();
+    
+    var q = new Quaternion();
+    
+    q.w = Math.sqrt( Math.max( 0, 1 + m._11 + m._22 + m._33 ) ) / 2; 
+    q.x = Math.sqrt( Math.max( 0, 1 + m._11 - m._22 - m._33 ) ) / 2; 
+    q.y = Math.sqrt( Math.max( 0, 1 - m._11 + m._22 - m._33 ) ) / 2; 
+    q.z = Math.sqrt( Math.max( 0, 1 - m._11 - m._22 + m._33 ) ) / 2; 
+    
+    q.x *= SIGN( m._32 - m._23 );
+    q.y *= SIGN( m._13 - m._31 );
+    q.z *= SIGN( m._21 - m._12 );
+    
+    return q;
+}
+
 Matrix4x4.prototype.loadScale = function(x, y, z)
 {
     this.loadIdentity();

@@ -32,6 +32,7 @@ function Surface()
     this.numLuminosityTextures = new NumberAttr(0);
     this.numSpecularityTextures = new NumberAttr(0);
     this.numTransparencyTextures = new NumberAttr(0);
+    this.vertices = new NumberArrayAttr();
     
     this.colorTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
     this.diffuseTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
@@ -62,6 +63,7 @@ function Surface()
     this.registerAttribute(this.numLuminosityTextures, "numLuminosityTextures");
     this.registerAttribute(this.numSpecularityTextures, "numSpecularityTextures");
     this.registerAttribute(this.numTransparencyTextures, "numTransparencyTextures");
+    this.registerAttribute(this.vertices, "vertices");
 
     this.isolateTextures.setValueDirect(true);
 
@@ -165,6 +167,19 @@ Surface.prototype.addGeometry = function(geometry)
     this.geometries.push(geometry);
 }
 
+Surface.prototype.removeGeometry = function(geometry)
+{
+    this.removeChild(geometry);
+    for (var i = 0; i < this.geometries.length; i++)
+    {
+        if (this.geometries[i] == geometry)
+        {
+            this.geometries.splice(i, 1);
+            break;
+        }
+    }
+}
+    
 Surface.prototype.addTexture = function(texture)
 {
     texture.getAttribute("modified").addTarget(this.modified);
