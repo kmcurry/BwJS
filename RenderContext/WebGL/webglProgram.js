@@ -77,18 +77,18 @@ function webglProgram(rc, gl, source_vs, source_fs)
     {
         this.lightSource[i] = new gl_LightSourceParameters();
 
-        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
-        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
-        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
-        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
-        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
-        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
-        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
-        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
-        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
-        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
-        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
-        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
+        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource[" + i + "].enabled");
+        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource[" + i + "].ambient");
+        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource[" + i + "].diffuse");
+        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource[" + i + "].specular");
+        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource[" + i + "].position");
+        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource[" + i + "].spotDirection");
+        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource[" + i + "].spotExponent");
+        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource[" + i + "].spotCutoff");
+        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].constantAttenuation");
+        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].linearAttenuation");
+        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].quadraticAttenuation");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource[" + i + "].range");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
@@ -96,11 +96,11 @@ function webglProgram(rc, gl, source_vs, source_fs)
 
     // materials
     this.frontMaterial = new gl_MaterialParameters();
-    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
-    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
-    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
-    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
-    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
+    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial.ambient");
+    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial.diffuse");
+    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial.specular");
+    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial.emission");
+    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial.shininess");
 
     // textures
     this.textureSamplerColor = new Array(gl_MaxTextureStages);

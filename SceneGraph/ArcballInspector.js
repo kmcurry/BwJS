@@ -1,4 +1,4 @@
-﻿ArcballInspector.prototype = new Evaluator();
+ArcballInspector.prototype = new Evaluator();
 ArcballInspector.prototype.constructor = ArcballInspector;
 
 function ArcballInspector()

@@ -41,11 +41,14 @@ var eAttrType = {
     RenderableElementStyleAttr  :32,
     Bone                        :33,
     SnapConnector               :34,
-    SnapConnectors              :35,
-    SocketConnector             :36,
-    PlugConnector               :37,
-    SphereAttr                  :38,
-    PhysicalPropertiesAttr      :39,
+    GenericConnector            :36,
+    GenericConnectors           :37,
+    SocketConnector             :38,
+    SocketConnectors            :39,
+    PlugConnector               :40,
+    PlugConnectors              :41,
+    SphereAttr                  :42,
+    PhysicalPropertiesAttr      :43,
     
     Node                        :1000,
        
@@ -84,6 +87,7 @@ var eAttrType = {
     Bone                        :1033,
     Selector                    :1034,
     ScreenRect                  :1035,
+    SnapModel                   :1036,
     
     Evaluator                   :1100,
     SceneInspector              :1101,

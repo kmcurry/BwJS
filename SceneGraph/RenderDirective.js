@@ -41,7 +41,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(true);
+    this.shadowsEnabled = new BooleanAttr(false);//true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
@@ -114,7 +114,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     }
     else
     {
-        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
     }
 
     // call base-class implementation
@@ -243,6 +243,6 @@ function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
     }
     else
     {
-        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
+        container.program = container.graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
     }
 }

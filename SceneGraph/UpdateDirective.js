@@ -33,10 +33,12 @@ function UpdateDirective()
 
 UpdateDirective.prototype.setRegistry = function(registry)
 {
-    this.collideDirective.setRegistry(registry);
+    this.collideDirective.setRegistry(registry);    
     
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);    
+    
+    this.registry.register(this.collideDirective);
 }
 
 UpdateDirective.prototype.setGraphMgr = function(graphMgr)

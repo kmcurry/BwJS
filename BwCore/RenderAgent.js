@@ -1,4 +1,4 @@
-﻿RenderAgent.prototype = new Agent();
+RenderAgent.prototype = new Agent();
 RenderAgent.prototype.constructor = RenderAgent;
 
 var ePlayState = {

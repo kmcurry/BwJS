@@ -55,12 +55,7 @@ PhysicsSimulator.prototype.evaluate = function()
                     // if not added, restore
                     if (!this.bodyAdded[i])
                     {
-                        // it's unclear why every model needs to be updated here, but if this step is not taken, 
-                        // other models might not react to the changes from the unselected model
-                        for (var j = 0; j < this.physicsBodies.length; j++)
-                        {
-                            this.updatePhysicsBody(j);
-                        }
+                        this.updatePhysicsBody(i);
                     }
                 }
                 break;
@@ -80,7 +75,8 @@ PhysicsSimulator.prototype.evaluate = function()
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        if (!this.bodyAdded[i])
+        var physicsEnabled = this.bodyModels[i].physicsEnabled.getValueDirect();
+        if (!this.bodyAdded[i] || !physicsEnabled)
             continue;
 
         this.physicsBodies[i].getMotionState().getWorldTransform(trans);
@@ -300,11 +296,20 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     if (!model)
         return;
 
+    // watch for changes in vertices
+    model.getAttribute("vertices").addModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
     // watch for changes in scale
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
     model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+    // watch for changes in enabled
+    model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
+    model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
 
+    // if model is disabled, don't create
+    if (model.getAttribute("enabled").getValueDirect() == false)
+        return;
+    
     // if model is parented, don't add here; it will be added as a shape to the parent model's body
     if (model.motionParent)
         return;
@@ -361,8 +366,10 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
     {
         if (this.bodyModels[i] == model)
         {
+            this.bodyModels[i].getAttribute("vertices").removeModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
+            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());
@@ -390,21 +397,26 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    var shape = this.getCollisionShape(model, scale);
+    var center = model.getAttribute("center").getValueDirect();
+    
+    for (var i = 0; i < model.surfaces.length; i++)
+    {
+        var shape = this.getCollisionShape(model.surfaces[i], center, scale);
 
-    var transform = new Ammo.btTransform();
-    transform.setIdentity();
-    var origin = new Ammo.btVector3(position.x, position.y, position.z);
-    transform.setOrigin(origin);
-    Ammo.destroy(origin);
-    var quat = new Quaternion();
-    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-    transform.setRotation(quaternion);
-    Ammo.destroy(quaternion);
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
 
-    compoundShape.addChildShape(transform, shape);
-    Ammo.destroy(transform);
+        compoundShape.addChildShape(transform, shape);
+        Ammo.destroy(transform);
+    }
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -416,7 +428,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
         childPosition.y += position.y;
         childPosition.z += position.z;
 
-        childRotation = child.getAttribute("rotation").getValueDirect();
+        var childRotation = child.getAttribute("rotation").getValueDirect();
         childRotation.x += rotation.x;
         childRotation.y += rotation.y;
         childRotation.z += rotation.z;
@@ -430,10 +442,8 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
 {
-    var center = model.getAttribute("center").getValueDirect();
-    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
@@ -441,11 +451,11 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
     var matrix = scaleMatrix;
     
     var shape = new Ammo.btConvexHullShape();
-    var verts = model.getAttribute("vertices").getValueDirect();
+    var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
-        //var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
+        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
         Ammo.destroy(point);
@@ -475,7 +485,7 @@ PhysicsSimulator.prototype.getNetMass = function(model)
 
 PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 {
-    // locate array position of body
+    // locate array position of model
     var n = -1;
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -523,6 +533,9 @@ PhysicsSimulator.prototype.updatePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.removePhysicsBody = function(n)
 {
+    //if (!this.bodyAdded[n]) 
+    //    return; // don't re-remove
+    
     var body = this.physicsBodies[n];
     if (!body)
         return;
@@ -535,6 +548,9 @@ PhysicsSimulator.prototype.removePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
+    //if (this.bodyAdded[n]) 
+    //    return; // don't re-restore
+    
     var model = this.bodyModels[n];
     if (!model)
         return;
@@ -620,6 +636,19 @@ PhysicsSimulator.prototype.bodiesModified = function()
     this.updateBodies = true;
 }
 
+PhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
+{
+    if (enabled)
+    {
+        this.deletePhysicsBody(model); // ensure model is not added multiple times
+        this.createPhysicsBody(model);
+    }
+    else // !enabled
+    {
+        this.deletePhysicsBody(model);
+    }
+}
+
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     container.updateWorld = true;
@@ -630,6 +659,11 @@ function PhysicsSimulator_BodiesModifiedCB(attribute, container)
     container.bodiesModified();
 }
 
+function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
+{
+    container.updatePhysicsShape(attribute.getContainer());
+}
+
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
@@ -638,4 +672,9 @@ function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
 function PhysicsSimulator_ModelParentModifiedCB(attribute, container)
 {
     container.updateBodies = true;
+}
+
+function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
+{
+    container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
 }
