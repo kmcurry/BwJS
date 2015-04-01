@@ -78,7 +78,7 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-   
+
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
@@ -250,7 +250,7 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
     var panVelocity = this.panVelocity.getValueDirect();
     var linearVelocity = this.linearVelocity.getValueDirect();
     if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
-        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+            linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
     {
         // position
         var position = this.position.getValueDirect();
@@ -263,20 +263,20 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // update position
         position.x = position.x + (directionVectors.right.x * panVelocity.x * timeIncrement) +
-                                  (directionVectors.up.x * panVelocity.y * timeIncrement) +
-                                  (directionVectors.forward.x * panVelocity.z * timeIncrement) +
-                                  (linearVelocity.x * timeIncrement);
+                (directionVectors.up.x * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.x * panVelocity.z * timeIncrement) +
+                (linearVelocity.x * timeIncrement);
         if (linearVelocity_affectPosition_Y)
         {
             position.y = position.y + (directionVectors.right.y * panVelocity.x * timeIncrement) +
-                                      (directionVectors.up.y * panVelocity.y * timeIncrement) +
-                                      (directionVectors.forward.y * panVelocity.z * timeIncrement) +
-                                      (linearVelocity.y * timeIncrement);
+                    (directionVectors.up.y * panVelocity.y * timeIncrement) +
+                    (directionVectors.forward.y * panVelocity.z * timeIncrement) +
+                    (linearVelocity.y * timeIncrement);
         }
         position.z = position.z + (directionVectors.right.z * panVelocity.x * timeIncrement) +
-                                  (directionVectors.up.z * panVelocity.y * timeIncrement) +
-                                  (directionVectors.forward.z * panVelocity.z * timeIncrement) +
-                                  (linearVelocity.z * timeIncrement);
+                (directionVectors.up.z * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.z * panVelocity.z * timeIncrement) +
+                (linearVelocity.z * timeIncrement);
 
         this.position.setValueDirect(position.x, position.y, position.z);
     }
@@ -337,8 +337,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             values = this.rotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            //this.quaternion.setValueDirect(quat);
-            this.rotationMatrix = quat.getMatrix();
+            this.quaternion.setValueDirect(quat);
 
             modified = true;
         }
@@ -348,7 +347,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateQuaternion = false;
             
             var quat = this.quaternion.getValueDirect();
-            this.rotationMatrix = quat.getMatrix();
+            this.rotationMatrix = quat.getMatrix();     
 
             modified = true;
         }
@@ -601,17 +600,9 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
         this.parent.copyValue(parent.name);
         this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
     }
-    else
-    {
-        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
-        this.parent.setValueDirect("");
-        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
-    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
-    
-    this.setModified();
 }
 
 ParentableMotionElement.prototype.isMotionAncestor = function(pme)

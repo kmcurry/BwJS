@@ -1,9 +1,4 @@
-var EPSILON = 0.00000001;
-
-function SIGN(x)
-{
-    return ((x >= 0) ? 1 : -1);
-}
+﻿var EPSILON = 0.00000001;
 
 function SIGN3(v) 
 {

@@ -30,11 +30,6 @@ function magnitude(x, y, z)
     return Math.sqrt(((x) * (x)) + ((y) * (y)) + ((z) * (z)));
 }
 
-function magnitude4(w, x, y, z)
-{
-    return Math.sqrt(((w) * (w)) + ((x) * (x)) + ((y) * (y)) + ((z) * (z)));
-}
-
 function clamp(value, min, max)
 {
     if (value < min) return min;
