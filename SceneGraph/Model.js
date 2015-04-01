@@ -69,6 +69,7 @@ function Model()
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
     this.physicalProperties = new PhysicalPropertiesAttr();
+    this.physicsEnabled = new BooleanAttr(true);
     
     this.show.addTarget(this.enabled);
     
@@ -153,6 +154,7 @@ function Model()
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
     this.registerAttribute(this.physicalProperties, "physicalProperties");
+    this.registerAttribute(this.physicsEnabled, "physicsEnabled");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -170,6 +172,15 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
+}
+
+Model.prototype.synchronize = function(src, syncValues)
+{
+    // call base-class implementation
+    ParentableMotionElement.prototype.synchronize.call(this, src, syncValues);
+    
+    // sectorPosition is overwriting position
+    this.position.copyValue(src.getAttribute("position"));
 }
 
 Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
@@ -310,16 +321,12 @@ Model.prototype.apply = function(directive, params, visitChildren)
             {
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);
-                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
-
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
-                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
-                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -459,8 +466,9 @@ Model.prototype.addGeometry = function(geometry, indices, surface)
     this.connectGeometryAttributes(geometry);
     this.geometries.push(geometry);
     if (indices) this.geometryIndices.push(indices);
+    geometry.bbox.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
         
-    this.updateBoundingTree = true;
+    this.updateBBox();
 }
 
 Model.prototype.removeGeometry = function(geometry, indices, surface)
@@ -475,8 +483,7 @@ Model.prototype.removeGeometry = function(geometry, indices, surface)
             this.geometries.splice(i, 1);
             break;
         }
-    }
-    this.removeGeometryBBox(geometry);  
+    }  
     if (indices) 
     {
         for (var i = 0; i < this.geometryIndices.length; i++)
@@ -488,8 +495,9 @@ Model.prototype.removeGeometry = function(geometry, indices, surface)
             }
         }
     }
+    geometry.bbox.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
         
-    this.updateBoundingTree = true;
+    this.updateBBox();
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)
@@ -580,66 +588,23 @@ Model.prototype.disconnectGeometryAttribute = function(geometry, attribute, name
     attribute.removeTarget(geometry.getAttribute(name));
 }
 
-Model.prototype.addGeometryBBox = function(geometry)
-{
-    if (geometry == null ||
-        geometry == undefined)
-        return;
-    
-    geometry.bbox.min.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
-    geometry.bbox.max.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
-
-    this.updateGeometryBBox(geometry);
-}
-
-Model.prototype.removeGeometryBBox = function(geometry)
-{
-    if (geometry == null ||
-        geometry == undefined)
-        return;
-    
-    geometry.bbox.min.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
-    geometry.bbox.max.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
-
-    this.updateGeometryBBox(geometry);
-}
-
-Model.prototype.updateGeometryBBox = function(geometry)
-{
-    if (geometry == null ||
-        geometry == undefined)
-        return;
-    
-    var min = geometry.bbox.min.getValueDirect();
-    var max = geometry.bbox.max.getValueDirect();
-    
-    this.geometryBBoxesMap.push(new Pair(min, max));
-    
-    this.updateBBox();
-}
-
 Model.prototype.updateBBox = function()
 {
-    var min = new Vector3D();
-    var max = new Vector3D();
-    var first = true;
-    for (var i in this.geometryBBoxesMap)
+    var min = new Vector3D(FLT_MAX, FLT_MAX, FLT_MAX);
+    var max = new Vector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    
+    for (var i = 0; i < this.geometries.length; i++)
     {
-        if (first)
-        {
-            min.x = this.geometryBBoxesMap[i].first.x;
-            min.y = this.geometryBBoxesMap[i].first.y;
-            min.z = this.geometryBBoxesMap[i].first.z;
-            
-            max.x = this.geometryBBoxesMap[i].second.x;
-            max.y = this.geometryBBoxesMap[i].second.y;
-            max.z = this.geometryBBoxesMap[i].second.z;
-            
-            first = false;
-            continue;
-        }
+        var geometryMin = this.geometries[i].bbox.min.getValueDirect();
+        var geometryMax = this.geometries[i].bbox.max.getValueDirect();
         
+        min.x = Math.min(min.x, geometryMin.x);
+        min.y = Math.min(min.y, geometryMin.y);
+        min.z = Math.min(min.z, geometryMin.z);
         
+        max.x = Math.max(max.x, geometryMax.x);
+        max.y = Math.max(max.y, geometryMax.y);
+        max.z = Math.max(max.z, geometryMax.z);
     }
     
     this.bbox.min.setValueDirect(min.x, min.y, min.z);
@@ -704,6 +669,7 @@ function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
 {
+    container.updateBBox();
 }
 
 function Model_SurfaceAttrModifiedCB(attribute, container)

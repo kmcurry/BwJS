@@ -87,6 +87,7 @@ var eAttrType = {
     Bone                        :1033,
     Selector                    :1034,
     ScreenRect                  :1035,
+    SnapModel                   :1036,
     
     Evaluator                   :1100,
     SceneInspector              :1101,

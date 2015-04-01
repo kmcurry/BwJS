@@ -115,6 +115,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
     this.newResourceProcs["ScreenRect"] = newSGNode;
+    this.newResourceProcs["SnapModel"] = newSnapModel;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -474,6 +475,16 @@ function newModel(name, factory)
     var resource = new Model();
     resource.setGraphMgr(factory.graphMgr);
     registerParentableAttributes(resource, factory);
+    addInspectionGroup(resource, factory);
+    return resource;
+}
+
+function newSnapModel(name, factory)
+{
+    var resource = new SnapModel();
+    resource.setGraphMgr(factory.graphMgr);
+    registerParentableAttributes(resource, factory);
+    addInspectionGroup(resource, factory);
     return resource;
 }
 
@@ -744,8 +755,6 @@ function finalizeModel(model, factory)
 
         contentHandler.parseFileStream(pathInfo[0]);
     }
-
-    addInspectionGroup(model, factory);
 }
 
 function finalizeDirective(directive, factory)

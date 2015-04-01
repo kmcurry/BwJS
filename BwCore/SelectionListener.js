@@ -142,6 +142,7 @@ SelectionListener.prototype.clearSelections = function()
     if (this.selected)
     {
         this.selected.highlight.setValueDirect(false);
+        this.selected.getAttribute("stopOnCollision").setValueDirect(false);
         
         var selected = this.selected.getAttribute("selected");
         if (selected)
@@ -198,6 +199,7 @@ SelectionListener.prototype.processPick = function(pick)
             break;
 		    
             case eAttrType.Model:
+            case eAttrType.SnapModel:
             {
                 this.selections.models.push(node);
                 this.registerSelection(node, element);
@@ -221,20 +223,25 @@ SelectionListener.prototype.processPick = function(pick)
     if (this.selected)
     {
         // resnap if previously unsnapped
-        if (this.unsnappedModel != this.selected)
+        if (this.unsnapped != this.selected)
         {
             if (this.unsnapped)
             {
-                // mark all as unselected (for physics interruption)
-                for (var i = 0; i < this.unsnapped.length; i++)
-                {
-                    this.unsnapped[i].snapper.getAttribute("selected").setValueDirect(0);
-                }
-                this.snappedModel.getAttribute("selected").setValueDirect(0);
-                this.selected.getAttribute("selected").setValueDirect(1); // make sure previous steps didn't clear selected state
+                // restore unsnapped snapEnabled state
+                this.unsnapped.snapEnabled.setValueDirect(true);
                 
+                // resnap previously-unsapped models (if still touching)
                 var snapMgr = this.registry.find("SnapMgr");
-                snapMgr.resnap(this.snappedModel, this.unsnapped);
+                snapMgr.resnap(this.unsnappedModels);
+               
+                // mark all unsnapped models as physics-enabled and restore stopOnCollision flag (so they repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
+                {
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(true);
+                    //this.unsnappedModels[i].stopOnCollision.setValueDirect(true);
+                }
+                
+                this.unsnappedModels = null;
                 this.unsnapped = null;
             }
         }
@@ -247,29 +254,22 @@ SelectionListener.prototype.processPick = function(pick)
         // corresponding to the snapped surface selected
         if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
         {          
-            var snapMgr = this.registry.find("SnapMgr");
-            if (snapMgr.isSnapped(this.selected))
+            if (this.selected.attrType == eAttrType.SnapModel)
             {
-                this.unsnapped = snapMgr.unsnap(this.selected);
-                this.snappedModel = this.selected;
-                this.unsnappedModel = this.selected;
-                // if snappedModel has been set on the surface, the selected object is from a snapped model; 
-                // register that as the selected object
-                if (this.selections.surfaces[0].snappedModel)
-                {
-                    this.unsnappedModel = this.selections.surfaces[0].snappedModel;
-                    this.selected = null; // clear previous
-                    this.registerSelection(this.unsnappedModel, -1);
-                }
+                // unsnap models
+                this.unsnappedModels = this.selected.unsnapAll();
+                // select selected unsnapped model
+                this.unsnapped = this.selections.surfaces[0].snappedModel;
+                this.unsnapped.snapEnabled.setValueDirect(false);
+                this.selected = null // clear previous
+                this.registerSelection(this.unsnapped, -1);
                 
-                // mark all as selected (for physics interruption)
-                for (var i = 0; i < this.unsnapped.length; i++)
+                // mark all unsnapped models as physics-disabled and clear stopOnCollision flag (so they won't repel)
+                for (var i = 0; i < this.unsnappedModels.length; i++)
                 {
-                    this.unsnapped[i].snapper.getAttribute("selected").setValueDirect(1);
-                    this.unsnapped[i].snapper.getAttribute("stopOnCollision").setValueDirect(false);
-                }
-                this.snappedModel.getAttribute("selected").setValueDirect(1);
-                this.snappedModel.getAttribute("stopOnCollision").setValueDirect(false);
+                    this.unsnappedModels[i].physicsEnabled.setValueDirect(false);
+                    this.unsnappedModels[i].stopOnCollision.setValueDirect(false);
+                }              
             }
         }
         

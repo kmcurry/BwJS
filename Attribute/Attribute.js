@@ -287,8 +287,12 @@ Attribute.prototype.addModifiedCB = function(callback, data)
 
 Attribute.prototype.removeModifiedCB = function(callback, data)
 {   
-    this.modifiedCBs.splice(this.modifiedCBs.indexOf(callback), 1);
-    this.modifiedCBsData.splice(this.modifiedCBsData.indexOf(data), 1);
+    var index = this.modifiedCBsData.indexOf(data);
+    if (index >= 0)
+    {
+        this.modifiedCBs.splice(index, 1);
+        this.modifiedCBsData.splice(index, 1);
+    }
 }
 
 Attribute.prototype.addTarget = function(target, op, converter, setValueOnTargeting)

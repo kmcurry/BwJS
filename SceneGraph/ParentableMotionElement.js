@@ -337,7 +337,8 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             values = this.rotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            this.quaternion.setValueDirect(quat);
+            //this.quaternion.setValueDirect(quat);
+            this.rotationMatrix = quat.getMatrix();
 
             modified = true;
         }
@@ -598,6 +599,12 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
         // make sure this' parent attribute is updated (would not be if this method is called directly); don't invoke modified CB
         this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
         this.parent.copyValue(parent.name);
+        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+    }
+    else
+    {
+        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
+        this.parent.setValueDirect("");
         this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
     }
 

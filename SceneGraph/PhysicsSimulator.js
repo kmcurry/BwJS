@@ -75,7 +75,8 @@ PhysicsSimulator.prototype.evaluate = function()
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        if (!this.bodyAdded[i])
+        var physicsEnabled = this.bodyModels[i].physicsEnabled.getValueDirect();
+        if (!this.bodyAdded[i] || !physicsEnabled)
             continue;
 
         this.physicsBodies[i].getMotionState().getWorldTransform(trans);
@@ -453,8 +454,8 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
     var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
-        //var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
+        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
         Ammo.destroy(point);
