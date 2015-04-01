@@ -23,13 +23,6 @@ BooleanAttr.prototype.getValueDirect = function()
     return values[0];
 }
 
-BooleanAttr.prototype.getLastValueDirect = function()
-{
-    var lastValues = [];
-    this.getLastValue(lastValues);
-    return lastValues;
-}
-
 BooleanAttr.prototype.setValueDirect = function(value, params)
 {
     var values = [value];

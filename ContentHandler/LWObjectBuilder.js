@@ -1,4 +1,4 @@
-LWObjectBuilder.prototype = new ContentBuilder();
+﻿LWObjectBuilder.prototype = new ContentBuilder();
 LWObjectBuilder.prototype.constructor = LWObjectBuilder;
 
 function LWObjectBuilder()
@@ -170,7 +170,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     {
         var vertices = [];
         var normals = [];
-        var surfacePnts = []; // for setting surface's layer vertices to surface
         vertexNormals[surfIndex] = []
         vertexOrder[surfIndex] = [];
         vertexMinMax[surfIndex] = new Pair();
@@ -188,8 +187,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < poly.length; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push([point.x, point.y, point.z]);
 
                 jsmPolygon.AddVertex(point.x, point.y, point.z);
@@ -218,8 +215,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 3; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push(point.x);
                 vertices.push(point.y);
                 vertices.push(point.z);
@@ -302,7 +297,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 2; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
                 
                 vertices.push(point.x);
                 vertices.push(point.y);
@@ -330,7 +324,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             var poly = layer.pols[polyIndex];
             
             var point = layer.pnts[poly[0]];
-            surfacePnts[poly[0]] = point;
             
             vertices.push(point.x);
             vertices.push(point.y);
@@ -346,16 +339,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             
             pointList.getAttribute("vertices").setValue(vertices);
         }
-        
-        // set surface's layer vertices to surface
-        var surfaceVertices = [];
-        for (var surfacePnt in surfacePnts)
-        {
-            surfaceVertices.push(surfacePnts[surfacePnt].x);
-            surfaceVertices.push(surfacePnts[surfacePnt].y);
-            surfaceVertices.push(surfacePnts[surfacePnt].z);
-        }
-        surfaces[surfIndex].getAttribute("vertices").setValue(surfaceVertices);
     }
 
     // calculate smooth normals for tris

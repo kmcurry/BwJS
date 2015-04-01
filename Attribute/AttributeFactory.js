@@ -22,7 +22,7 @@ function AttributeFactory()
     this.initializeFinalizeMap();
 }
 
-AttributeFactory.prototype.create = function(name)
+AttributeFactory.prototype.create = function (name)
 {
     var resource = null;
 
@@ -63,7 +63,7 @@ AttributeFactory.prototype.create = function(name)
     return resource;
 }
 
-AttributeFactory.prototype.finalize = function(name, attribute)
+AttributeFactory.prototype.finalize = function (name, attribute)
 {
     // invoke finalize proc
     var finalizeProc = this.finalizeProcs[name];
@@ -73,7 +73,7 @@ AttributeFactory.prototype.finalize = function(name, attribute)
     }
 }
 
-AttributeFactory.prototype.initializeNewResourceMap = function()
+AttributeFactory.prototype.initializeNewResourceMap = function ()
 {
     // attributes
     this.newResourceProcs["Styles"] = newAttribute;
@@ -115,7 +115,6 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
     this.newResourceProcs["ScreenRect"] = newSGNode;
-    this.newResourceProcs["SnapModel"] = newSnapModel;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -165,7 +164,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
-AttributeFactory.prototype.initializeConfigureMap = function()
+AttributeFactory.prototype.initializeConfigureMap = function ()
 {
     // nodes
     this.configureProcs["Model"] = configureModel;
@@ -180,7 +179,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["HighlightDirective"] = configureDirective;
 }
 
-AttributeFactory.prototype.initializeFinalizeMap = function()
+AttributeFactory.prototype.initializeFinalizeMap = function ()
 {
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
@@ -223,12 +222,12 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
-AttributeFactory.prototype.setRegistry = function(registry)
+AttributeFactory.prototype.setRegistry = function (registry)
 {
     this.registry = registry;
 }
 
-AttributeFactory.prototype.setGraphMgr = function(graphMgr)
+AttributeFactory.prototype.setGraphMgr = function (graphMgr)
 {
     this.graphMgr = graphMgr;
 }
@@ -475,16 +474,6 @@ function newModel(name, factory)
     var resource = new Model();
     resource.setGraphMgr(factory.graphMgr);
     registerParentableAttributes(resource, factory);
-    addInspectionGroup(resource, factory);
-    return resource;
-}
-
-function newSnapModel(name, factory)
-{
-    var resource = new SnapModel();
-    resource.setGraphMgr(factory.graphMgr);
-    registerParentableAttributes(resource, factory);
-    addInspectionGroup(resource, factory);
     return resource;
 }
 
@@ -755,6 +744,8 @@ function finalizeModel(model, factory)
 
         contentHandler.parseFileStream(pathInfo[0]);
     }
+
+    addInspectionGroup(model, factory);
 }
 
 function finalizeDirective(directive, factory)

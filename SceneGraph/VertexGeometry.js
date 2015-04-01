@@ -23,21 +23,7 @@ function VertexGeometry()
     this.registerAttribute(this.colors, "colors");
 }
 
-VertexGeometry.prototype.clone = function()
-{
-    // call base-class implementation
-    var clone = Geometry.prototype.clone.call(this);
-    
-    // set up uv coords
-    for (var i = 0; i < this.uvCoords.length; i++)
-    {
-        clone.getUVCoords(this.uvCoords[i].first).copyValue(this.uvCoords[i].second);
-    }
-    
-    return clone;
-}
-
-VertexGeometry.prototype.postCloneChild = function(childClone, pathSrc, pathClone)
+VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
 {
     var i;
     var node;
@@ -102,7 +88,6 @@ VertexGeometry.prototype.getUVCoords = function(texture)
     
     return uvCoords;
 }
-
 VertexGeometry.prototype.findUVCoords = function(texture)
 {
     if (!texture)
@@ -129,6 +114,8 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.vertexBuffer.setVertices(vertices);
         
         this.updateBoundingTree = true;
+        
+        this.calculateBBox();
     }
     
     if (this.updateColors)
@@ -565,7 +552,6 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
-    container.calculateBBox();
     container.setModified();
 }
 

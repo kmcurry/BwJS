@@ -37,7 +37,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout = new GridLayout();
     this.mapProjectionCalculator = new MapProjectionCalculator();
     this.rasterComponentEventListener = new RasterComponentEventListener();
-    this.snapMgr = new SnapMgr();
 
     // set registry to allocated objects
     this.graphMgr.setRegistry(this.registry);
@@ -52,7 +51,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout.setRegistry(this.registry);
     this.mapProjectionCalculator.setRegistry(this.registry);
     this.rasterComponentEventListener.setRegistry(this.registry);
-    this.snapMgr.setRegistry(this.registry);
 
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);
@@ -134,8 +132,6 @@ Bridgeworks.prototype.initRegistry = function()
     this.registry.register(this.renderAgent);
     this.registry.register(this.layout);
     this.registry.register(this.mapProjectionCalculator);
-    this.registry.register(this.rasterComponentEventListener);
-    this.registry.register(this.snapMgr);
 
     // backward compatibility
     this.registry.registerByName(this.renderAgent, "AnimationAgent");
@@ -145,7 +141,6 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseLeftDblClick, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);

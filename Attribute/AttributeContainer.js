@@ -10,18 +10,6 @@ function AttributeContainer()
     this.attrNameMap = [];
 }
 
-AttributeContainer.prototype.clone = function()
-{
-    var factory = this.registry.find("AttributeFactory");
-    var clone = factory.create(this.className);
-    if (clone)
-    {
-        clone.synchronize(this, true);
-    }
-    
-    return clone;
-}
-
 AttributeContainer.prototype.destroy = function()
 {
     // destroy all registered attributes with this as the container
@@ -217,9 +205,8 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
 
     for (var i in src.attrNameMap)
     {
-        for (var j=0; j < src.attrNameMap[i].length; j++)
+        for (var j=0; j < src.attrNameMap.length; j++)
         {
-            if (!this.attrNameMap[i] || this.attrNameMap[i].length <= j) continue;
             var attr = this.attrNameMap[i][j];
             if (!attr)
             {
@@ -231,7 +218,7 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
     
             if (attr && syncValues)
             {
-                attr.copyValue(src.attrNameMap[i][j]);
+                attr.copyValue(src.attrNameMap[i]);
             }
         }
     }

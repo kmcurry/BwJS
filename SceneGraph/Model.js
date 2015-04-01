@@ -7,8 +7,7 @@ function Model()
     this.className = "Model";
     this.attrType = eAttrType.Model;
     
-    this.surfaces = [];
-    this.geometries = [];
+    this.geometry = [];
     this.geometryIndices = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
@@ -64,12 +63,9 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
-    this.snapEnabled = new BooleanAttr(true);
-    this.genericConnectors = new GenericConnectors();
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
     this.physicalProperties = new PhysicalPropertiesAttr();
-    this.physicsEnabled = new BooleanAttr(true);
     
     this.show.addTarget(this.enabled);
     
@@ -149,12 +145,9 @@ function Model()
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
-    this.registerAttribute(this.snapEnabled, "snapEnabled");
-    this.registerAttribute(this.genericConnectors, "genericConnectors");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
     this.registerAttribute(this.physicalProperties, "physicalProperties");
-    this.registerAttribute(this.physicsEnabled, "physicsEnabled");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -172,15 +165,6 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
-}
-
-Model.prototype.synchronize = function(src, syncValues)
-{
-    // call base-class implementation
-    ParentableMotionElement.prototype.synchronize.call(this, src, syncValues);
-    
-    // sectorPosition is overwriting position
-    this.position.copyValue(src.getAttribute("position"));
 }
 
 Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
@@ -321,12 +305,16 @@ Model.prototype.apply = function(directive, params, visitChildren)
             {
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);
+                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
+
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -403,12 +391,9 @@ Model.prototype.onRemove = function()
     
     // remove from any physics simulators
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
-    if (physicsSimulators)
+    for (var i = 0; i < physicsSimulators.length; i++)
     {
-        for (var i = 0; i < physicsSimulators.length; i++)
-        {
-            physicsSimulators[i].deletePhysicsBody(this);
-        }
+        physicsSimulators[i].deleteModel(this);
     }
     
     // call base-class implementation
@@ -432,72 +417,22 @@ Model.prototype.addSurface = function(surface)
 {
     this.surfacesNode.addChild(surface);
     
-    this.surfaces.push(surface);
-    
     // register surface to this for accessiblity with Set
     this.registerAttribute(surface, surface.getAttribute("name").getValueDirect().join(""));
 	
     this.connectSurfaceAttributes(surface);
 }
 
-Model.prototype.removeSurface = function(surface)
-{
-    this.surfacesNode.removeChild(surface);
-    
-    for (var i = 0; i < this.surfaces.length; i++)
-    {
-        if (this.surfaces[i] == surface)
-        {
-            this.surfaces.splice(i, 1);
-            break;
-        }
-    }
-    
-    // unregister surface from this
-    this.unregisterAttribute(surface);
-	
-    this.disconnectSurfaceAttributes(surface);
-}
-    
 Model.prototype.addGeometry = function(geometry, indices, surface)
 {
-    if (surface) surface.addGeometry(geometry);
+    surface.addChild(geometry);
     
     this.connectGeometryAttributes(geometry);
-    this.geometries.push(geometry);
-    if (indices) this.geometryIndices.push(indices);
-    geometry.bbox.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+    this.addGeometryBBox(geometry);
+    this.geometry.push(geometry);
+    this.geometryIndices.push(indices);
         
-    this.updateBBox();
-}
-
-Model.prototype.removeGeometry = function(geometry, indices, surface)
-{
-    if (surface) surface.removeGeometry(geometry);
-    
-    this.disconnectGeometryAttributes(geometry);
-    for (var i = 0; i < this.geometries.length; i++)
-    {
-        if (this.geometries[i] == geometry)
-        {
-            this.geometries.splice(i, 1);
-            break;
-        }
-    }  
-    if (indices) 
-    {
-        for (var i = 0; i < this.geometryIndices.length; i++)
-        {
-            if (this.geometryIndices[i] == indices)
-            {
-                this.geometryIndices.splice(i, 1);
-                break;
-            }
-        }
-    }
-    geometry.bbox.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
-        
-    this.updateBBox();
+    this.updateBoundingTree = true;
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)
@@ -524,29 +459,6 @@ Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Model.prototype.disconnectSurfaceAttributes = function(surface)
-{
-    this.disconnectSurfaceAttribute(surface, this.color, "color");
-    this.disconnectSurfaceAttribute(surface, this.ambientLevel, "ambientLevel");
-    this.disconnectSurfaceAttribute(surface, this.diffuseLevel, "diffuseLevel");
-    this.disconnectSurfaceAttribute(surface, this.specularLevel, "specularLevel");
-    this.disconnectSurfaceAttribute(surface, this.emissiveLevel, "emissiveLevel");
-    this.disconnectSurfaceAttribute(surface, this.ambient, "ambient");
-    this.disconnectSurfaceAttribute(surface, this.diffuse, "diffuse");
-    this.disconnectSurfaceAttribute(surface, this.specular, "specular");
-    this.disconnectSurfaceAttribute(surface, this.emissive, "emissive");
-    this.disconnectSurfaceAttribute(surface, this.glossiness, "glossiness");
-    this.disconnectSurfaceAttribute(surface, this.opacity, "opacity");
-    this.disconnectSurfaceAttribute(surface, this.doubleSided, "doubleSided");
-    this.disconnectSurfaceAttribute(surface, this.texturesEnabled, "texturesEnabled");
-    this.disconnectSurfaceAttribute(surface, this.enabled, "enabled");
-}
-
-Model.prototype.disconnectSurfaceAttribute = function(surface, attribute, name)
-{
-    attribute.removeTarget(surface.getAttribute(name));
-}
-
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
     this.connectGeometryAttribute(geometry, this.name, "name");
@@ -568,43 +480,60 @@ Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Model.prototype.disconnectGeometryAttributes = function(geometry)
+Model.prototype.addGeometryBBox = function(geometry)
 {
-    this.disconnectGeometryAttribute(geometry, this.name, "name");
-    this.disconnectGeometryAttribute(geometry, this.selectable, "selectable");
-    this.disconnectGeometryAttribute(geometry, this.cullable, "cullable");
-    this.disconnectGeometryAttribute(geometry, this.show, "show");
-    this.disconnectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
-    this.disconnectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
-    this.disconnectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
-    this.disconnectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
-    this.disconnectGeometryAttribute(geometry, this.shadowTarget, "shadowTarget");
-    this.disconnectGeometryAttribute(geometry, this.renderSequenceSlot, "renderSequenceSlot");
-    this.disconnectGeometryAttribute(geometry, this.highlight, "highlight");
+    if (geometry == null ||
+        geometry == undefined)
+        return;
+    
+    geometry.bbox.min.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+    geometry.bbox.max.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+
+    this.updateGeometryBBox(geometry);
 }
 
-Model.prototype.disconnectGeometryAttribute = function(geometry, attribute, name)
+Model.prototype.updateGeometryBBox = function(geometry)
 {
-    attribute.removeTarget(geometry.getAttribute(name));
+    if (geometry == null ||
+        geometry == undefined)
+        return;
+    
+    var min = geometry.bbox.min.getValueDirect();
+    var max = geometry.bbox.max.getValueDirect();
+    
+    this.geometryBBoxesMap.push(new Pair(min, max));
+    
+    this.updateBBox();
 }
 
 Model.prototype.updateBBox = function()
 {
-    var min = new Vector3D(FLT_MAX, FLT_MAX, FLT_MAX);
-    var max = new Vector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    
-    for (var i = 0; i < this.geometries.length; i++)
+    var min = new Vector3D();
+    var max = new Vector3D();
+    var first = true;
+    for (var i in this.geometryBBoxesMap)
     {
-        var geometryMin = this.geometries[i].bbox.min.getValueDirect();
-        var geometryMax = this.geometries[i].bbox.max.getValueDirect();
+        if (first)
+        {
+            min.x = this.geometryBBoxesMap[i].first.x;
+            min.y = this.geometryBBoxesMap[i].first.y;
+            min.z = this.geometryBBoxesMap[i].first.z;
+            
+            max.x = this.geometryBBoxesMap[i].second.x;
+            max.y = this.geometryBBoxesMap[i].second.y;
+            max.z = this.geometryBBoxesMap[i].second.z;
+            
+            first = false;
+            continue;
+        }
         
-        min.x = Math.min(min.x, geometryMin.x);
-        min.y = Math.min(min.y, geometryMin.y);
-        min.z = Math.min(min.z, geometryMin.z);
+        min.x = Math.min(min.x, this.geometryBBoxesMap[i].first.x);
+        min.y = Math.min(min.y, this.geometryBBoxesMap[i].first.y);
+        min.z = Math.min(min.z, this.geometryBBoxesMap[i].first.z);
         
-        max.x = Math.max(max.x, geometryMax.x);
-        max.y = Math.max(max.y, geometryMax.y);
-        max.z = Math.max(max.z, geometryMax.z);
+        max.x = Math.max(max.x, this.geometryBBoxesMap[i].second.x);
+        max.y = Math.max(max.y, this.geometryBBoxesMap[i].second.y);
+        max.z = Math.max(max.z, this.geometryBBoxesMap[i].second.z);
     }
     
     this.bbox.min.setValueDirect(min.x, min.y, min.z);
@@ -622,9 +551,9 @@ Model.prototype.updateBBox = function()
 Model.prototype.buildBoundingTree = function()
 {
     var tris = [];
-    for (var i = 0; i < this.geometries.length; i++)
+    for (var i = 0; i < this.geometry.length; i++)
     {
-        tris = tris.concat(this.geometries[i].getTriangles());
+        tris = tris.concat(this.geometry[i].getTriangles());
     }
     
     this.boundingTree = new Octree();
@@ -669,7 +598,7 @@ function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
 {
-    container.updateBBox();
+    container.updateGeometryBBox(attribute.getContainer().getContainer());
 }
 
 function Model_SurfaceAttrModifiedCB(attribute, container)

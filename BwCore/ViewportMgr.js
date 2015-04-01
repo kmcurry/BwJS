@@ -1,4 +1,4 @@
-ViewportMgr.prototype = new AttributeContainer();
+﻿ViewportMgr.prototype = new AttributeContainer();
 ViewportMgr.prototype.constructor = ViewportMgr;
 
 function ViewportMgr()

@@ -1,4 +1,4 @@
-EventListener.prototype = new Agent();
+﻿EventListener.prototype = new Agent();
 EventListener.prototype.constructor = EventListener;
 
 function EventListener()
@@ -49,7 +49,7 @@ EventListener.prototype.eventPerformed = function(event)
 }
 EventListener.prototype.getTrigger = function()
 {
-    this.trigger;
+        this.trigger;
 }
 EventListener.prototype.setTrigger = function(trigger)
 {

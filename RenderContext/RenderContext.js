@@ -426,7 +426,7 @@ function newRenderContext(api, canvas, background)
             // load default program
             if (rc.valid)
             {
-                var program = rc.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+                var program = rc.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
                 rc.useProgram(program);
             }
         }

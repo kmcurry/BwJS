@@ -158,8 +158,6 @@ function formatPath(url)
             },
             success: function()
             {
-                var href = document.location.href;
-                
                 validPath = url;
                 
                 var ndx = validPath.lastIndexOf("objects/");
@@ -167,8 +165,7 @@ function formatPath(url)
                 if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
                 if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
                 
-                //validDir = validPath.substring(0, ndx);
-                validDir = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir;
+                validDir = validPath.substring(0, ndx);
                 
                 console.debug("File found: " + validPath);
             }
@@ -3060,11 +3057,6 @@ function magnitude(x, y, z)
     return Math.sqrt(((x) * (x)) + ((y) * (y)) + ((z) * (z)));
 }
 
-function magnitude4(w, x, y, z)
-{
-    return Math.sqrt(((w) * (w)) + ((x) * (x)) + ((y) * (y)) + ((z) * (z)));
-}
-
 function clamp(value, min, max)
 {
     if (value < min) return min;
@@ -3844,33 +3836,6 @@ Matrix4x4.prototype.getRotationAngles = function()
     return { x: toDegrees(x), y: toDegrees(y), z: toDegrees(z) };
 }
 
-Matrix4x4.prototype.getQuaternion = function()
-{
-    var m = new Matrix4x4();
-    m.loadMatrix(this);
-    
-    // remove scale
-    var scalingFactors = m.getScalingFactors();
-    var scale = new Matrix4x4();
-    scale.loadScale(1 / scalingFactors.x, 1 / scalingFactors.y, 1 / scalingFactors.z);
-    m = m.multiply(scale);
-    
-    m.transpose();
-    
-    var q = new Quaternion();
-    
-    q.w = Math.sqrt( Math.max( 0, 1 + m._11 + m._22 + m._33 ) ) / 2; 
-    q.x = Math.sqrt( Math.max( 0, 1 + m._11 - m._22 - m._33 ) ) / 2; 
-    q.y = Math.sqrt( Math.max( 0, 1 - m._11 + m._22 - m._33 ) ) / 2; 
-    q.z = Math.sqrt( Math.max( 0, 1 - m._11 - m._22 + m._33 ) ) / 2; 
-    
-    q.x *= SIGN( m._32 - m._23 );
-    q.y *= SIGN( m._13 - m._31 );
-    q.z *= SIGN( m._21 - m._12 );
-    
-    return q;
-}
-
 Matrix4x4.prototype.loadScale = function(x, y, z)
 {
     this.loadIdentity();
@@ -4618,11 +4583,6 @@ ViewVolume.prototype.setOrthographic = function(left, right, top, bottom, near, 
 }
 var EPSILON = 0.00000001;
 
-function SIGN(x)
-{
-    return ((x >= 0) ? 1 : -1);
-}
-
 function SIGN3(v) 
 {
     (((v).x < 0 ) ? 4 : 0 | ((v).y < 0) ? 2 : 0 | ((v).z < 0) ? 1 : 0);
@@ -5037,14 +4997,11 @@ var eAttrType = {
     RenderableElementStyleAttr  :32,
     Bone                        :33,
     SnapConnector               :34,
-    GenericConnector            :36,
-    GenericConnectors           :37,
-    SocketConnector             :38,
-    SocketConnectors            :39,
-    PlugConnector               :40,
-    PlugConnectors              :41,
-    SphereAttr                  :42,
-    PhysicalPropertiesAttr      :43,
+    SnapConnectors              :35,
+    SocketConnector             :36,
+    PlugConnector               :37,
+    SphereAttr                  :38,
+    PhysicalPropertiesAttr      :39,
     
     Node                        :1000,
        
@@ -5083,7 +5040,6 @@ var eAttrType = {
     Bone                        :1033,
     Selector                    :1034,
     ScreenRect                  :1035,
-    SnapModel                   :1036,
     
     Evaluator                   :1100,
     SceneInspector              :1101,
@@ -5368,7 +5324,6 @@ Attribute.prototype.setValue = function(values, params)
         }
         else // values.length > 0
         {
-            this.values.length = values.length;
             for (var i = 0; i < values.length; i++)
             {
                 switch (op)
@@ -5469,12 +5424,8 @@ Attribute.prototype.addModifiedCB = function(callback, data)
 
 Attribute.prototype.removeModifiedCB = function(callback, data)
 {   
-    var index = this.modifiedCBsData.indexOf(data);
-    if (index >= 0)
-    {
-        this.modifiedCBs.splice(index, 1);
-        this.modifiedCBsData.splice(index, 1);
-    }
+    this.modifiedCBs.splice(this.modifiedCBs.indexOf(callback), 1);
+    this.modifiedCBsData.splice(this.modifiedCBsData.indexOf(data), 1);
 }
 
 Attribute.prototype.addTarget = function(target, op, converter, setValueOnTargeting)
@@ -5711,18 +5662,6 @@ function AttributeContainer()
     this.attrNameMap = [];
 }
 
-AttributeContainer.prototype.clone = function()
-{
-    var factory = this.registry.find("AttributeFactory");
-    var clone = factory.create(this.className);
-    if (clone)
-    {
-        clone.synchronize(this, true);
-    }
-    
-    return clone;
-}
-
 AttributeContainer.prototype.destroy = function()
 {
     // destroy all registered attributes with this as the container
@@ -5918,9 +5857,8 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
 
     for (var i in src.attrNameMap)
     {
-        for (var j=0; j < src.attrNameMap[i].length; j++)
+        for (var j=0; j < src.attrNameMap.length; j++)
         {
-            if (!this.attrNameMap[i] || this.attrNameMap[i].length <= j) continue;
             var attr = this.attrNameMap[i][j];
             if (!attr)
             {
@@ -5932,7 +5870,7 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
     
             if (attr && syncValues)
             {
-                attr.copyValue(src.attrNameMap[i][j]);
+                attr.copyValue(src.attrNameMap[i]);
             }
         }
     }
@@ -6212,13 +6150,6 @@ BooleanAttr.prototype.getValueDirect = function()
     var values = [];
     this.getValue(values);
     return values[0];
-}
-
-BooleanAttr.prototype.getLastValueDirect = function()
-{
-    var lastValues = [];
-    this.getLastValue(lastValues);
-    return lastValues;
 }
 
 BooleanAttr.prototype.setValueDirect = function(value, params)
@@ -6666,18 +6597,6 @@ AttributeVector.prototype.allocatesElements = function() // TODO: necessary (?)
 AttributeVector.prototype.push_back = function(item)
 {
     this.addElement(this.vector.length, item);
-}
-
-AttributeVector.prototype.erase = function(item)
-{
-    for (var i=0; i < this.vector.length; i++)
-    {
-        if (this.vector[i] == item)
-        { 
-            this.removeElement(i);
-            return;
-        }
-    }
 }
 
 AttributeVector.prototype.resize = function(size)
@@ -7841,13 +7760,10 @@ function RayIntersectRecord()
     this.pointModel = new Vector3D();
     this.pointWorld = new Vector3D();
     this.pointView = new Vector3D();
-    this.normalModel = new Vector3D();
-    this.normalWorld = new Vector3D();
-    this.normalView = new Vector3D();
     this.triIndex = 0;
 }
 
-function RayIntersectParams(rayOrigin,
+function RayIntersectParams(rayOrigin, 
                             rayDir,
                             nearDistance,
                             farDistance,
@@ -7892,7 +7808,7 @@ Sphere.prototype.setTransform = function(matrix)
     this.xcenter.x = result.x;
     this.xcenter.y = result.y;
     this.xcenter.z = result.z;
-
+    
     var scale = matrix.getScalingFactors();
     this.xradius = this.radius * max3(scale.x, scale.y, scale.z);
 }
@@ -7901,15 +7817,14 @@ Sphere.prototype.intersects = function(sphere)
 {
     // compare squared distances to keep from calling sqrt
     /*return (((this.xcenter.x - sphere.xcenter.x) * (this.xcenter.x - sphere.xcenter.x) + 
-     (this.xcenter.y - sphere.xcenter.y) * (this.xcenter.y - sphere.xcenter.y) +
-     (this.xcenter.z - sphere.xcenter.z) * (this.xcenter.z - sphere.xcenter.z)) < ((this.xradius + sphere.xradius) * (this.xradius + sphere.xradius)) ? true : false);
-     */
+             (this.xcenter.y - sphere.xcenter.y) * (this.xcenter.y - sphere.xcenter.y) +
+             (this.xcenter.z - sphere.xcenter.z) * (this.xcenter.z - sphere.xcenter.z)) < ((this.xradius + sphere.xradius) * (this.xradius + sphere.xradius)) ? true : false);
+    */
     var distanceBetweenCenters = distanceBetween(this.xcenter, sphere.xcenter);
     var combinedRadii = this.xradius + sphere.xradius;
-
-    if (distanceBetweenCenters < combinedRadii)
-        return true;
-
+    
+    if (distanceBetweenCenters < combinedRadii) return true;
+    
     return false;
 }
 
@@ -7917,14 +7832,14 @@ function Region(minX, minY, minZ, maxX, maxY, maxZ)
 {
     this.min = new Vector3D(minX, minY, minZ);
     this.max = new Vector3D(maxX, maxY, maxZ);
-
+    
     this.xpos = new Plane();
     this.xneg = new Plane();
     this.ypos = new Plane();
     this.yneg = new Plane();
     this.zpos = new Plane();
     this.zneg = new Plane();
-
+    
     this.xpos_ypos_zpos = new Plane();
     this.xpos_ypos_zneg = new Plane();
     this.xpos_yneg_zpos = new Plane();
@@ -7933,19 +7848,19 @@ function Region(minX, minY, minZ, maxX, maxY, maxZ)
     this.xneg_ypos_zneg = new Plane();
     this.xneg_yneg_zpos = new Plane();
     this.xneg_yneg_zneg = new Plane();
-
+    
     this.setPlanes();
 }
 
 Region.prototype.setPlanes = function()
 {
     // generate axis planes
-    this.xpos = new Plane(this.max, new Vector3D(1, 0, 0));
-    this.xneg = new Plane(this.min, new Vector3D(-1, 0, 0));
-    this.ypos = new Plane(this.max, new Vector3D(0, 1, 0));
-    this.yneg = new Plane(this.min, new Vector3D(0, -1, 0));
-    this.zpos = new Plane(this.max, new Vector3D(0, 0, 1));
-    this.zneg = new Plane(this.min, new Vector3D(0, 0, -1));
+    this.xpos = new Plane(this.max, new Vector3D( 1,  0,  0));
+    this.xneg = new Plane(this.min, new Vector3D(-1,  0,  0));
+    this.ypos = new Plane(this.max, new Vector3D( 0,  1,  0));
+    this.yneg = new Plane(this.min, new Vector3D( 0, -1,  0));
+    this.zpos = new Plane(this.max, new Vector3D( 0,  0,  1));
+    this.zneg = new Plane(this.min, new Vector3D( 0,  0, -1));
 
     // define corner points of region
     var xp_yp_zp = new Vector3D(this.max.x, this.max.y, this.max.z);
@@ -7965,21 +7880,21 @@ Region.prototype.setPlanes = function()
     this.xneg_ypos_zpos = new Plane(xn_yp_zp, xn_yp_zp - xp_yn_zn);
     this.xneg_ypos_zneg = new Plane(xn_yp_zn, xn_yp_zn - xp_yn_zp);
     this.xneg_yneg_zpos = new Plane(xn_yn_zp, xn_yn_zp - xp_yp_zn);
-    this.xneg_yneg_zneg = new Plane(xn_yn_zn, xn_yn_zn - xp_yp_zp);
+    this.xneg_yneg_zneg = new Plane(xn_yn_zn, xn_yn_zn - xp_yp_zp);   
 }
 
 Region.prototype.containsGeometry = function(tris, triIndices)
 {
     var result = [];
-
-    for (var i = 0; i < triIndices.length; i++)
+    
+    for (var i=0; i < triIndices.length; i++)
     {
         if (this.containsTriangle(tris[triIndices[i]]))
         {
             result.push(triIndices[i]);
         }
     }
-
+    
     return result;
 }
 
@@ -7989,9 +7904,9 @@ Region.prototype.containsTriangle = function(tri)
     verts[0] = tri.v0;
     verts[1] = tri.v1;
     verts[2] = tri.v2;
-
+    
     // check if any vertices are within the region bounds (quick accept)
-    for (var i = 0; i < 3; i++)
+    for (var i=0; i < 3; i++)
     {
         if (verts[i].x >= this.min.x &&
             verts[i].y >= this.min.y &&
@@ -8003,7 +7918,7 @@ Region.prototype.containsTriangle = function(tri)
             return true;
         }
     }
-
+    
     // check if all vertices are outside a region plane (quick reject)
     if (triangleOnPositiveSideOfPlane(verts[0], verts[1], verts[2], this.xpos) ||
         triangleOnPositiveSideOfPlane(verts[0], verts[1], verts[2], this.xneg) ||
@@ -8022,20 +7937,20 @@ Region.prototype.containsTriangle = function(tri)
     {
         return false;
     }
-
+    
     // triangle has survived trivial acceptance/rejection tests...
 
     // test triangle line segments for cube face penetration
     // (only test segments if they span the face plane)
     var result;
-    for (var i = 0; i < 3; i++)
+    for (var i=0; i < 3; i++)
     {
         var a = verts[i];
-        var b = verts[(i + 1) % 3];
+        var b = verts[(i+1)%3];
 
         // +X face
         result = lineSegmentPlaneIntersection(a, b, this.xpos);
-        if (result.count > 0)
+        if (result.count > 0) 
         {
             // if point lies within region face, triangle intersects region
             if (result.point.y >= this.min.y && result.point.y <= this.max.y &&
@@ -8047,7 +7962,7 @@ Region.prototype.containsTriangle = function(tri)
 
         // -X face
         result = lineSegmentPlaneIntersection(a, b, this.xneg);
-        if (result.count > 0)
+        if (result.count > 0) 
         {
             if (result.point.y >= this.min.y && result.point.y <= this.max.y &&
                 result.point.z >= this.min.z && result.point.z <= this.max.z)
@@ -8100,34 +8015,30 @@ Region.prototype.containsTriangle = function(tri)
             }
         }
     }
-
+    
     // triangle and region may still intersect if a region corner is poking
     // through the interior of the triangle; check for this case by
     // determining if any of the four region diagonals intersect the triangle
     // 0
-    result = lineSegmentTriangleIntersection(this.min,
-            this.max,
-            verts[0], verts[1], verts[2]);
-    if (result.count > 0)
-        return true;
+    result = lineSegmentTriangleIntersection(this.min, 
+                                             this.max, 
+                                             verts[0], verts[1], verts[2]);
+    if (result.count > 0) return true;    
     // 1
-    result = lineSegmentTriangleIntersection(new Vector3D(this.min.x, this.max.y, this.min.z),
-            new Vector3D(this.max.x, this.min.y, this.max.z),
-            verts[0], verts[1], verts[2]);
-    if (result.count > 0)
-        return true;
+    result = lineSegmentTriangleIntersection(new Vector3D(this.min.x, this.max.y, this.min.z), 
+                                             new Vector3D(this.max.x, this.min.y, this.max.z),
+                                             verts[0], verts[1], verts[2]);
+    if (result.count > 0) return true;
     // 2
-    result = lineSegmentTriangleIntersection(new Vector3D(this.max.x, this.min.y, this.min.z),
-            new Vector3D(this.min.x, this.max.y, this.max.z),
-            verts[0], verts[1], verts[2]);
-    if (result.count > 0)
-        return true;
+    result = lineSegmentTriangleIntersection(new Vector3D(this.max.x, this.min.y, this.min.z), 
+                                             new Vector3D(this.min.x, this.max.y, this.max.z),
+                                             verts[0], verts[1], verts[2]);
+    if (result.count > 0) return true;
     // 3                                        
-    result = lineSegmentTriangleIntersection(new Vector3D(this.min.x, this.min.y, this.max.z),
-            new Vector3D(this.max.x, this.max.y, this.min.z),
-            verts[0], verts[1], verts[2]);
-    if (result.count > 0)
-        return true;
+    result = lineSegmentTriangleIntersection(new Vector3D(this.min.x, this.min.y, this.max.z), 
+                                             new Vector3D(this.max.x, this.max.y, this.min.z),
+                                             verts[0], verts[1], verts[2]);
+    if (result.count > 0) return true;
 
     // triangle and region do not intersect
     return false;
@@ -8140,12 +8051,12 @@ function SphereTreeNode(tree)
     this.level = 0;
     this.parent = null;
     this.children = [];
-    this.triIndices = [];
+    this.triIndices = [];    
 }
 
 SphereTreeNode.prototype.isLeaf = function()
 {
-    return this.children.length == 0 ? true : false;
+    return this.children.length == 0 ? true : false;    
 }
 
 SphereTreeNode.prototype.addChild = function(child)
@@ -8156,54 +8067,53 @@ SphereTreeNode.prototype.addChild = function(child)
 
 SphereTreeNode.prototype.intersects = function(sphereTreeNode)
 {
-    return (this.sphere.intersects(sphereTreeNode.sphere));
+    return (this.sphere.intersects(sphereTreeNode.sphere));    
 }
 
 SphereTreeNode.prototype.trisIntersect = function(sphereTreeNode)
 {
     return true;
     /*
-     var triVerts1 = [];
-     for (var i = 0; i < this.triIndices.length; i++)
-     {
-     var index = this.triIndices[i];
-     var tri = this.tree.tris[index];
+    var triVerts1 = [];
+    for (var i = 0; i < this.triIndices.length; i++)
+    {
+        var index = this.triIndices[i];
+        var tri = this.tree.tris[index];
+        
+        triVerts1.push(this.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
+        triVerts1.push(this.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
+        triVerts1.push(this.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
+    }   
      
-     triVerts1.push(this.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
-     triVerts1.push(this.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
-     triVerts1.push(this.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
-     }   
-     
-     var triVerts2 = [];
-     for (var i = 0; i < sphereTreeNode.triIndices.length; i++)
-     {
-     var index = sphereTreeNode.triIndices[i];
-     var tri = sphereTreeNode.tree.tris[index];
-     
-     triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
-     triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
-     triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
-     } 
-     
-     for (var i = 0; i < triVerts1.length; i += 3)
-     {
-     for (var j = 0; j < triVerts2.length; j += 3)
-     {
-     if (triangleTriangleIntersection(triVerts1[i], triVerts1[i+1], triVerts1[i+2],
-     triVerts2[j], triVerts2[j+1], triVerts2[j+2]))
-     return true;
-     }    
-     }
-     
-     return false;*/
+    var triVerts2 = [];
+    for (var i = 0; i < sphereTreeNode.triIndices.length; i++)
+    {
+        var index = sphereTreeNode.triIndices[i];
+        var tri = sphereTreeNode.tree.tris[index];
+        
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v0.x, tri.v0.y, tri.v0.z, 1));
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v1.x, tri.v1.y, tri.v1.z, 1));
+        triVerts2.push(sphereTreeNode.tree.xform.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1));
+    } 
+    
+    for (var i = 0; i < triVerts1.length; i += 3)
+    {
+        for (var j = 0; j < triVerts2.length; j += 3)
+        {
+            if (triangleTriangleIntersection(triVerts1[i], triVerts1[i+1], triVerts1[i+2],
+                                             triVerts2[j], triVerts2[j+1], triVerts2[j+2]))
+                return true;
+        }    
+    }
+    
+    return false;*/ 
 }
 
 function SphereHitRec()
 {
     this.target = null;
     this.testList = [];
-}
-;
+};
 
 function BoundingTree()
 {
@@ -8212,7 +8122,7 @@ function BoundingTree()
     this.max = new Vector3D();
     this.tris = [];
     this.visited = [];
-    this.xform = new Matrix4x4();
+    this.xform = new Matrix4x4();    
 }
 
 BoundingTree.prototype.setTriangles = function(tris, min, max)
@@ -8237,9 +8147,8 @@ function SphereTree()
 
 SphereTree.prototype.setTransform = function(matrix)
 {
-    if (this.root)
-        this.transformNode(matrix, this.root);
-
+    if (this.root) this.transformNode(matrix, this.root);
+    
     // call base-class implementation
     BoundingTree.prototype.setTransform.call(this, matrix);
 }
@@ -8247,7 +8156,7 @@ SphereTree.prototype.setTransform = function(matrix)
 SphereTree.prototype.transformNode = function(matrix, node)
 {
     node.sphere.setTransform(matrix);
-
+    
     // recurse on node children
     for (var i = 0; i < node.children.length; i++)
     {
@@ -8283,12 +8192,12 @@ SphereTree.prototype.collides = function(tree)
         {
             sphereHit.target = this.root;
             sphereHit.testList = tree.root.children;
-        }
+        }       
         sphereHits.push(sphereHit);
 
         return this.testSphereHits(sphereHits);
     }
-
+    
     // root nodes do not collide
     return false;
 }
@@ -8299,28 +8208,28 @@ SphereTree.prototype.obstructs = function(tree, forward)
     {
         return 0; // indicates no obstruction
     }
-
+    
     // construct cylinder representing tree's root sphere extruded along the forward vector
     var cylA = tree.root.sphere.xcenter;
-    var cylB = new Vector3D(cylA.x + forward.x,
-            cylA.y + forward.y,
-            cylA.z + forward.z);
+    var cylB = new Vector3D(cylA.x + forward.x, 
+                            cylA.y + forward.y,
+                            cylA.z + forward.z);
     var cylRadius = tree.root.sphere.xradius;
-
+    
     // find distance between cylinder center segment and this' center
-    var distance = distanceBetweenLineSegmentAndPoint(cylA, cylB, this.root.sphere.xcenter);
-
+    var distance = distanceBetweenLineSegmentAndPoint(cylA, cylB, this.root.sphere.xcenter);   
+ 
     if (distance < (this.root.sphere.xradius + cylRadius))
     {
-        return distance;
+        return distance;         
     }
-
+    
     return 0; // indicates no obstruction
 }
 
 SphereTree.prototype.nodesCollide = function(node1, node2)
 {
-    return (node1.intersects(node2));
+    return (node1.intersects(node2));    
 }
 
 SphereTree.prototype.testSphereHits = function(sphereHits)
@@ -8331,7 +8240,7 @@ SphereTree.prototype.testSphereHits = function(sphereHits)
         {
             return true;
         }
-
+        
         sphereHits.splice(0, 1);
     }
 
@@ -8373,7 +8282,7 @@ SphereTree.prototype.rayIntersectsTree = function(params)
     if (this.root)
     {
         this.visited.length = this.tris.length;
-        for (var i = 0; i < this.visited.length; i++)
+        for (var i=0; i < this.visited.length; i++)
         {
             this.visited[i] = false;
         }
@@ -8400,7 +8309,7 @@ SphereTree.prototype.rayIntersectsTreeNode = function(root, params)
 
         // sphere tree node is intersected by the ray, recurse on children nodes
         var childIntersects = false;
-        for (var i = 0; i < root.children.length; i++)
+        for (var i=0; i < root.children.length; i++)
         {
             if (this.rayIntersectsTreeNode(root.children[i], params) == true)
             {
@@ -8418,7 +8327,7 @@ SphereTree.prototype.rayIntersectsTreeNode = function(root, params)
         }
     }
     else // root.children.empty()
-    {
+    {   
         // lowest sphere tree node level (no children); check against tris
         return this.rayIntersectsTriangleList(root.triIndices, params);
     }
@@ -8436,26 +8345,26 @@ SphereTree.prototype.rayIntersectsSphere = function(node, params)
     var roots = raySphereIntersection(params.rayOrigin, params.rayDir, center, radius);
     switch (roots.count)
     {
-        case 2:
-            // two intersection points; accept if one root is positive
-            if (roots.root1 <= 0 && roots.root2 <= 0)
-            {
-                return false;
-            }
-            break;
-
-        case 1:
-            // one intersection point (ray grazes sphere); accept if root is positive
-            if (roots.root1 <= 0)
-            {
-                return false;
-            }
-            break;
-
-        case 0:
-        default:
-            // no intersection
+    case 2:
+        // two intersection points; accept if one root is positive
+        if (roots.root1 <= 0 && roots.root2 <= 0)
+        {
             return false;
+        }
+        break;
+
+    case 1:
+        // one intersection point (ray grazes sphere); accept if root is positive
+        if (roots.root1 <= 0)
+        {
+            return false;
+        }
+        break;
+
+    case 0:
+    default:
+        // no intersection
+        return false;
     }
 
     return true;
@@ -8466,7 +8375,7 @@ SphereTree.prototype.rayIntersectsTriangleList = function(triIndices, params)
     var distance, u, v;
 
     // determine closest triangle intersected by ray (closest to ray origin)
-    for (var i = 0; i < triIndices.length; i++)
+    for (var i=0; i < triIndices.length; i++)
     {
         var index = triIndices[i];
 
@@ -8484,59 +8393,38 @@ SphereTree.prototype.rayIntersectsTriangleList = function(triIndices, params)
         var v2 = params.worldViewMatrix.transform(tri.v2.x, tri.v2.y, tri.v2.z, 1);
 
         var result = rayTriangleIntersection(params.rayOrigin, params.rayDir, v0, v1, v2, false,
-                (params.doubleSided ? false : true));
+                                            (params.doubleSided ? false : true));
         if (result.result)
         {
             if (result.t >= params.nearDistance &&
-                    result.t <= params.farDistance &&
-                    result.t < params.intersectRecord.distance)
+                result.t <= params.farDistance && 
+                result.t <  params.intersectRecord.distance)
             {
-                var pointModel = new Vector3D(tri.v0.x * (1 - result.u - result.v) + tri.v1.x * result.u + tri.v2.x * result.v,
-                        tri.v0.y * (1 - result.u - result.v) + tri.v1.y * result.u + tri.v2.y * result.v,
-                        tri.v0.z * (1 - result.u - result.v) + tri.v1.z * result.u + tri.v2.z * result.v);
-                var pointWorld = params.worldMatrix.transform(pointModel.x, pointModel.y, pointModel.z, 1);
-                var pointView = params.worldViewMatrix.transform(pointModel.x, pointModel.y, pointModel.z, 1);
+				var pointModel = new Vector3D(tri.v0.x * (1 - result.u - result.v) + tri.v1.x * result.u + tri.v2.x * result.v,
+				                              tri.v0.y * (1 - result.u - result.v) + tri.v1.y * result.u + tri.v2.y * result.v,
+				                              tri.v0.z * (1 - result.u - result.v) + tri.v1.z * result.u + tri.v2.z * result.v);				
+				var pointWorld = params.worldMatrix.transform(pointModel.x, pointModel.y, pointModel.z, 1);
+				var pointView = params.worldViewMatrix.transform(pointModel.x, pointModel.y, pointModel.z, 1);
 
-                // test for intersection point on negative side of clip plane(s), if any (would hence be clipped)
-                for (var c = 0; c < params.clipPlanes.length; c++)
-                {
-                    if (pointOnNegativeSideOfPlane(pointWorld, params.clipPlanes[c]))
-                    {
-                        // mark triangle as tested
-                        this.visited[index] = true;
-                        break;
-                    }
-                }
-                if (this.visited[index]) // clipped by clip plane(s)
-                {
-                    continue;
-                }
+				// test for intersection point on negative side of clip plane(s), if any (would hence be clipped)
+				for (var c=0; c < params.clipPlanes.length; c++)
+				{
+					if (pointOnNegativeSideOfPlane(pointWorld, params.clipPlanes[c]))
+					{
+						// mark triangle as tested
+						this.visited[index] = true;
+						break;
+					}
+				}
+				if (this.visited[index]) // clipped by clip plane(s)
+				{
+					continue;
+				}
 
-                // calculate polygon normal
-                var leg1 = new Vector3D();
-                var leg2 = new Vector3D();     
-                leg1.load(tri.v1.x - tri.v0.x,
-                          tri.v1.y - tri.v0.y,
-                          tri.v1.z - tri.v0.z);
-                leg2.load(tri.v2.x - tri.v0.x,
-                          tri.v2.y - tri.v0.y,
-                          tri.v2.z - tri.v0.z);
-                var normalModel = crossProduct(leg1, leg2);
-                normalModel.normalize();
-                var normalWorld = params.worldMatrix.transform(normalModel.x, normalModel.y, normalModel.z, 0);
-                normalWorld = new Vector3D(normalWorld.x, normalWorld.y, normalWorld.z);
-                normalWorld.normalize();
-                var normalView = params.worldViewMatrix.transform(normalModel.x, normalModel.y, normalModel.z, 0);
-                normalView = new Vector3D(normalView.x, normalView.y, normalView.z);
-                normalView.normalize();
-            
                 params.intersectRecord.distance = result.t;
-                params.intersectRecord.pointModel.copy(pointModel);
+				params.intersectRecord.pointModel.copy(pointModel);
                 params.intersectRecord.pointWorld.copy(pointWorld);
                 params.intersectRecord.pointView.copy(pointView);
-                params.intersectRecord.normalModel.copy(normalModel);
-                params.intersectRecord.normalWorld.copy(normalWorld);
-                params.intersectRecord.normalView.copy(normalView);
                 params.intersectRecord.triIndex = index;
                 params.intersects = true;
             }
@@ -8545,7 +8433,7 @@ SphereTree.prototype.rayIntersectsTriangleList = function(triIndices, params)
         // mark triangle as tested
         this.visited[index] = true;
     }
-
+    
     return params.intersects;
 }
 
@@ -8559,12 +8447,11 @@ function Octree()
 
 Octree.prototype.buildTree = function(levels)
 {
-    if (levels < 0)
-        return;
-
+    if (levels < 0) return;
+    
     // define root sphere
     var root = new SphereTreeNode(this);
-
+    
     // sphere center is the midpoint of min/max extents
     root.sphere.center.copy(midpoint(this.min, this.max));
     root.sphere.xcenter.copy(root.sphere.center);
@@ -8572,10 +8459,10 @@ Octree.prototype.buildTree = function(levels)
     // sphere radius is the distance between the midpoint of min/max extents and min/max extent
     root.sphere.radius = distanceBetween(root.sphere.center, this.max);
     root.sphere.xradius = root.sphere.radius;
-
+    
     // set triIndices
     root.triIndices.length = this.tris.length;
-    for (var i = 0; i < this.tris.length; i++)
+    for (var i=0; i < this.tris.length; i++)
     {
         root.triIndices[i] = i;
     }
@@ -8586,7 +8473,7 @@ Octree.prototype.buildTree = function(levels)
         this.buildTreeLevels(levels, this.min, this.max, root, root.triIndices);
     }
 
-    this.root = root;
+    this.root = root;    
 }
 
 Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
@@ -8596,12 +8483,12 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
         // requested levels have been generated
         return;
     }
-
+    
     // define 8 equal sub-regions occupying the span from min to max
-    var mid = new Vector3D(min.x + ((max.x - min.x) / 2),
-            min.y + ((max.y - min.y) / 2),
-            min.z + ((max.z - min.z) / 2));
-
+    var mid = new Vector3D(min.x + ((max.x - min.x) / 2), 
+                           min.y + ((max.y - min.y) / 2),
+                           min.z + ((max.z - min.z) / 2));
+                           
     var regions = new Array(8);
     regions[0] = new Region(min.x, min.y, min.z, mid.x, mid.y, mid.z);
     regions[1] = new Region(mid.x, min.y, min.z, max.x, mid.y, mid.z);
@@ -8611,18 +8498,18 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
     regions[5] = new Region(mid.x, mid.y, min.z, max.x, max.y, mid.z);
     regions[6] = new Region(min.x, mid.y, mid.z, mid.x, max.y, max.z);
     regions[7] = new Region(mid.x, mid.y, mid.z, max.x, max.y, max.z);
-
+    
     // for each sub-region containing geometry, create a bounding sphere for the sub-region, 
     // add to the list of the root sphere node's children, and recursively call for the child 
     // sub-region
-    for (var i = 0; i < 8; i++)
+    for (var i=0; i < 8; i++)
     {
         var triIndicesContainedByRegion = regions[i].containsGeometry(this.tris, triIndices);
         if (triIndicesContainedByRegion.length > 0)
         {
             // create sphere node
             var node = new SphereTreeNode(this);
-
+          
             // set level
             node.level = root.level + 1;
 
@@ -8633,7 +8520,7 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
             // set radius
             node.sphere.radius = distanceBetween(node.sphere.center, regions[i].max);
             node.sphere.xradius = node.sphere.radius;
-
+            
             // set triIndices
             node.triIndices = triIndicesContainedByRegion.slice();
 
@@ -8647,23 +8534,23 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
 }
 
 function rayPick(tree,
-        rayOrigin,
-        rayDir,
-        nearDistance,
-        farDistance,
-        worldMatrix,
-        viewMatrix,
-        scale,
-        doubleSided,
-        clipPlanes)
+                 rayOrigin, 
+                 rayDir,
+                 nearDistance,
+                 farDistance,
+                 worldMatrix,
+                 viewMatrix,
+                 scale,
+                 doubleSided,
+			     clipPlanes)
 {
-    var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes);
+	var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes);
     tree.rayIntersectsTree(params);
     if (params.intersects == true)
     {
         return params.intersectRecord;
     }
-
+    
     return null;
 }
 function Context()
@@ -9613,7 +9500,7 @@ function newRenderContext(api, canvas, background)
             // load default program
             if (rc.valid)
             {
-                var program = rc.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+                var program = rc.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
                 rc.useProgram(program);
             }
         }
@@ -10601,18 +10488,18 @@ function webglProgram(rc, gl, source_vs, source_fs)
     {
         this.lightSource[i] = new gl_LightSourceParameters();
 
-        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource[" + i + "].enabled");
-        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource[" + i + "].ambient");
-        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource[" + i + "].diffuse");
-        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource[" + i + "].specular");
-        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource[" + i + "].position");
-        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource[" + i + "].spotDirection");
-        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource[" + i + "].spotExponent");
-        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource[" + i + "].spotCutoff");
-        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].constantAttenuation");
-        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].linearAttenuation");
-        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource[" + i + "].quadraticAttenuation");
-        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource[" + i + "].range");
+        this.lightSource[i].enabled = gl.getUniformLocation(program, "uLightSource_enabled[" + i + "]");
+        this.lightSource[i].ambient = gl.getUniformLocation(program, "uLightSource_ambient[" + i + "]");
+        this.lightSource[i].diffuse = gl.getUniformLocation(program, "uLightSource_diffuse[" + i + "]");
+        this.lightSource[i].specular = gl.getUniformLocation(program, "uLightSource_specular[" + i + "]");
+        this.lightSource[i].position = gl.getUniformLocation(program, "uLightSource_position[" + i + "]");
+        this.lightSource[i].spotDirection = gl.getUniformLocation(program, "uLightSource_spotDirection[" + i + "]");
+        this.lightSource[i].spotExponent = gl.getUniformLocation(program, "uLightSource_spotExponent[" + i + "]");
+        this.lightSource[i].spotCutoff = gl.getUniformLocation(program, "uLightSource_spotCutoff[" + i + "]");
+        this.lightSource[i].constantAttenuation = gl.getUniformLocation(program, "uLightSource_constantAttenuation[" + i + "]");
+        this.lightSource[i].linearAttenuation = gl.getUniformLocation(program, "uLightSource_linearAttenuation[" + i + "]");
+        this.lightSource[i].quadraticAttenuation = gl.getUniformLocation(program, "uLightSource_quadraticAttenuation[" + i + "]");
+        this.lightSource[i].range = gl.getUniformLocation(program, "uLightSource_range[" + i + "]");
 
         // set initially disabled
         gl.uniform1i(this.lightSource[i].enabled, 0);
@@ -10620,11 +10507,11 @@ function webglProgram(rc, gl, source_vs, source_fs)
 
     // materials
     this.frontMaterial = new gl_MaterialParameters();
-    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial.ambient");
-    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial.diffuse");
-    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial.specular");
-    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial.emission");
-    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial.shininess");
+    this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial_ambient");
+    this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial_diffuse");
+    this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial_specular");
+    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial_emission");
+    this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial_shininess");
 
     // textures
     this.textureSamplerColor = new Array(gl_MaxTextureStages);
@@ -10721,9 +10608,9 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
-var gl_MaxLights = 4;
+var gl_MaxLights = 8;
 var gl_MaxTextureStages = 2;
-var gl_MaxClipPlanes = 4;
+var gl_MaxClipPlanes = 8;
 
 webglRC.prototype = new RenderContext();
 webglRC.prototype.constructor = webglRC;
@@ -11327,18 +11214,25 @@ function webglRC(canvas, background)
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
+        
+        // get current view transform
+        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
-            var values = [desc.position.x, desc.position.y, desc.position.z, 1];
+            // transform to view space
+            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var values = [position.x, position.y, position.z, position.w];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
-            var values = [desc.direction.x, desc.direction.y, desc.direction.z, 0];
+            // transform to view space
+            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
             {
@@ -12205,32 +12099,26 @@ var default_fragment_lighting_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"struct lightSource",
-"{",
-"   int enabled;",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 position;",
-"   vec4 spotDirection;",
-"   float spotExponent;",
-"   float spotCutoff;",
-"   float constantAttenuation;",
-"   float linearAttenuation;",
-"   float quadraticAttenuation;",
-"   float range;",
-"};",
-"uniform lightSource uLightSource[" + gl_MaxLights + "];",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
-"struct material",
-"{",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 emission;",
-"   float shininess;",
-"};",
-"uniform material uFrontMaterial;",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -12266,12 +12154,12 @@ var default_fragment_lighting_fs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial.ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial.specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12308,12 +12196,12 @@ var default_fragment_lighting_fs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12327,20 +12215,20 @@ var default_fragment_lighting_fs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource[i].enabled != 0)",
+"           if (uLightSource_enabled[i] != 0)",
 "           {",
-"               if (uLightSource[i].position[3] == 0.0)", // directional light
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
-"                       uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
-"                       normalize(vec3(vViewDirection) + vec3(uLightSource[i].position)));",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
 "               }",
-"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
-"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
-"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12350,11 +12238,11 @@ var default_fragment_lighting_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",
@@ -12440,32 +12328,26 @@ var default_vertex_lighting_vs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",
 "",
-"struct lightSource",
-"{",
-"   int enabled;",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 position;",
-"   vec4 spotDirection;",
-"   float spotExponent;",
-"   float spotCutoff;",
-"   float constantAttenuation;",
-"   float linearAttenuation;",
-"   float quadraticAttenuation;",
-"   float range;",
-"};",
-"uniform lightSource uLightSource[" + gl_MaxLights + "];",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
-"struct material",
-"{",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 emission;",
-"   float shininess;",
-"};",
-"uniform material uFrontMaterial;",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
 "",
 "uniform int uLightingEnabled;",
 "",
@@ -12490,12 +12372,12 @@ var default_vertex_lighting_vs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial.ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial.specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12532,12 +12414,12 @@ var default_vertex_lighting_vs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12560,20 +12442,20 @@ var default_vertex_lighting_vs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource[i].enabled != 0)",
+"           if (uLightSource_enabled[i] != 0)",
 "           {",
-"               if (uLightSource[i].position[3] == 0.0)", // directional light
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
-"                       uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(transformedNormal)),",
-"                       normalize(vec3(viewDirection) + vec3(uLightSource[i].position)));",
+"                       normalize(vec3(viewDirection) + vec3(uLightSource_position[i])));",
 "               }",
-"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
-"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
-"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(transformedNormal)),",
 "                       vec3(viewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12583,11 +12465,11 @@ var default_vertex_lighting_vs = [
 "           }",
 "       }",
 "",
-"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       vLightingFactor.a = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",  
@@ -12768,32 +12650,26 @@ var pcf_shadow_mapping_render_pass_fs = [
 "",
 "uniform vec4 uGlobalAmbientLight;",                    
 "",
-"struct lightSource",
-"{",
-"   int enabled;",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 position;",
-"   vec4 spotDirection;",
-"   float spotExponent;",
-"   float spotCutoff;",
-"   float constantAttenuation;",
-"   float linearAttenuation;",
-"   float quadraticAttenuation;",
-"   float range;",
-"};",
-"uniform lightSource uLightSource[" + gl_MaxLights + "];",
+"uniform int uLightSource_enabled[" + gl_MaxLights + "];",
+"uniform vec4 uLightSource_ambient["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_diffuse["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_specular["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_position["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_halfVector["  + gl_MaxLights + "];",
+"uniform vec4 uLightSource_spotDirection["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotExponent["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_spotCosCutoff["  + gl_MaxLights + "];",
+"uniform float uLightSource_constantAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_linearAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_quadraticAttenuation["  + gl_MaxLights + "];",
+"uniform float uLightSource_range["  + gl_MaxLights + "];",
 "",
-"struct material",
-"{",
-"   vec4 ambient;",
-"   vec4 diffuse;",
-"   vec4 specular;",
-"   vec4 emission;",
-"   float shininess;",
-"};",
-"uniform material uFrontMaterial;",
+"uniform vec4 uFrontMaterial_ambient;",
+"uniform vec4 uFrontMaterial_diffuse;",
+"uniform vec4 uFrontMaterial_specular;",
+"uniform vec4 uFrontMaterial_emission;",
+"uniform float uFrontMaterial_shininess;",
 "",
 "uniform int uLightingEnabled;",
 "uniform int uTexturesEnabled;",
@@ -12856,12 +12732,12 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   else",
 "   {",
 "       nDotHV = max(0.0, dot(normal, halfVector));",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",
-"   gAmbient  += ambient * uFrontMaterial.ambient;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL;",
-"   gSpecular += specular * uFrontMaterial.specular * pf;",
+"   gAmbient  += ambient * uFrontMaterial_ambient;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL;",
+"   gSpecular += specular * uFrontMaterial_specular * pf;",
 "}",
 "",
 "void pointLight(vec4 position, float constantAttenuation, float linearAttenuation, float quadraticAttenuation, float range,",
@@ -12899,12 +12775,12 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   }",
 "   else",
 "   {",
-"       pf = pow(nDotHV, uFrontMaterial.shininess);",
+"       pf = pow(nDotHV, uFrontMaterial_shininess);",
 "   }",
 "",    
-"   gAmbient  += ambient * uFrontMaterial.ambient * attenuation;",
-"   gDiffuse  += diffuse * uFrontMaterial.diffuse * nDotL * attenuation;",
-"   gSpecular += specular * uFrontMaterial.specular * pf * attenuation;",
+"   gAmbient  += ambient * uFrontMaterial_ambient * attenuation;",
+"   gDiffuse  += diffuse * uFrontMaterial_diffuse * nDotL * attenuation;",
+"   gSpecular += specular * uFrontMaterial_specular * pf * attenuation;",
 "}",
 "",
 "void main()",
@@ -12918,20 +12794,20 @@ var pcf_shadow_mapping_render_pass_fs = [
 "",
 "       for (int i=0; i < " + gl_MaxLights + "; i++)",
 "       {",
-"           if (uLightSource[i].enabled != 0)",
+"           if (uLightSource_enabled[i] != 0)",
 "           {",
-"               if (uLightSource[i].position[3] == 0.0)", // directional light
+"               if (uLightSource_position[i][3] == 0.0)", // directional light
 "               {",
-"                   directionalLight(uLightSource[i].position, uLightSource[i].ambient,",
-"                       uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   directionalLight(uLightSource_position[i], uLightSource_ambient[i],",
+"                       uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
-"                       normalize(vec3(vViewDirection) + vec3(uLightSource[i].position)));",
+"                       normalize(vec3(vViewDirection) + vec3(uLightSource_position[i])));",
 "               }",
-"               else if (uLightSource[i].spotCutoff > 90.0)", // point light
+"               else if (uLightSource_spotCutoff[i] > 90.0)", // point light
 "               {",
-"                   pointLight(uLightSource[i].position, uLightSource[i].constantAttenuation,",
-"                       uLightSource[i].linearAttenuation, uLightSource[i].quadraticAttenuation, uLightSource[i].range,",
-"                       uLightSource[i].ambient, uLightSource[i].diffuse, uLightSource[i].specular,",
+"                   pointLight(uLightSource_position[i], uLightSource_constantAttenuation[i],",
+"                       uLightSource_linearAttenuation[i], uLightSource_quadraticAttenuation[i], uLightSource_range[i],",
+"                       uLightSource_ambient[i], uLightSource_diffuse[i], uLightSource_specular[i],",
 "                       normalize(vec3(vTransformedNormal)),",
 "                       vec3(vViewDirection), vec3(vVertexPosition));",
 "               }",
@@ -12941,11 +12817,11 @@ var pcf_shadow_mapping_render_pass_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial_ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       lightingFactor.a  = uFrontMaterial_ambient.a / 3.0 + ",
+"                           uFrontMaterial_diffuse.a / 3.0 + ",
+"                           uFrontMaterial_specular.a / 3.0;",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",
@@ -13671,7 +13547,7 @@ Serializer.prototype.serializeAttribute = function(attribute, item, attrName)
         else if (attribute.isContainer())
         {
             var ctr = attribute;
-            this.serializeAttributeContainer(ctr, attrName);
+            this.serializeAttributeContainer(ctr);
         }
         else if (attrName && this.DOM)
         {
@@ -14033,34 +13909,21 @@ Serializer.prototype.serializeCommand = function(command)
     }
 }
 
-Serializer.prototype.serializeAttributeContainer = function(container, name)
+Serializer.prototype.serializeAttributeContainer = function(container)
 {
     // 1. create the start tag.
 
     if (container && this.DOM)
     {
         var element = null;
-        var pcszType = name || container.className;
-        // TODO: is this the right way to do this?
+        var pcszType = container.className;
         if (pcszType == "BwSceneInspector")
         {
-            pcszType = "SceneInspector";
+        	pcszType = "SceneInspector";
         }
-        else if (pcszType == "GenericConnector")
-        {
-            pcszType = "genericConnector";
-        }
-        else if (pcszType == "PhysicalPropertiesAttr") 
+        else if (pcszType == "PhysicalPropertiesAttr") // TODO: is this the right way to do this?
         {
             pcszType = "physicalProperties";
-        }
-        else if (pcszType == "PlugConnector")
-        {
-            pcszType = "plugConnector";
-        }
-        else if (pcszType == "SocketConnector")
-        {
-            pcszType = "socketConnector";
         }
 
         var bstr = pcszType;
@@ -15891,7 +15754,7 @@ function ParentableMotionElement()
     this.inheritPivot_Y = new BooleanAttr(true);
     this.inheritPivot_Z = new BooleanAttr(true);
     this.transformModified = new PulseAttr();               // pulsed when transform has been modified
-   
+
     this.position.addModifiedCB(ParentableMotionElement_PositionModifiedCB, this);
     this.rotation.addModifiedCB(ParentableMotionElement_RotationModifiedCB, this);
     this.quaternion.addModifiedCB(ParentableMotionElement_QuaternionModifiedCB, this);
@@ -16063,7 +15926,7 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
     var panVelocity = this.panVelocity.getValueDirect();
     var linearVelocity = this.linearVelocity.getValueDirect();
     if (panVelocity.x != 0 || panVelocity.y != 0 || panVelocity.z != 0 ||
-        linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
+            linearVelocity.x != 0 || linearVelocity.y != 0 || linearVelocity.z != 0)
     {
         // position
         var position = this.position.getValueDirect();
@@ -16076,20 +15939,20 @@ ParentableMotionElement.prototype.updateVelocityMotion = function(timeIncrement)
 
         // update position
         position.x = position.x + (directionVectors.right.x * panVelocity.x * timeIncrement) +
-                                  (directionVectors.up.x * panVelocity.y * timeIncrement) +
-                                  (directionVectors.forward.x * panVelocity.z * timeIncrement) +
-                                  (linearVelocity.x * timeIncrement);
+                (directionVectors.up.x * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.x * panVelocity.z * timeIncrement) +
+                (linearVelocity.x * timeIncrement);
         if (linearVelocity_affectPosition_Y)
         {
             position.y = position.y + (directionVectors.right.y * panVelocity.x * timeIncrement) +
-                                      (directionVectors.up.y * panVelocity.y * timeIncrement) +
-                                      (directionVectors.forward.y * panVelocity.z * timeIncrement) +
-                                      (linearVelocity.y * timeIncrement);
+                    (directionVectors.up.y * panVelocity.y * timeIncrement) +
+                    (directionVectors.forward.y * panVelocity.z * timeIncrement) +
+                    (linearVelocity.y * timeIncrement);
         }
         position.z = position.z + (directionVectors.right.z * panVelocity.x * timeIncrement) +
-                                  (directionVectors.up.z * panVelocity.y * timeIncrement) +
-                                  (directionVectors.forward.z * panVelocity.z * timeIncrement) +
-                                  (linearVelocity.z * timeIncrement);
+                (directionVectors.up.z * panVelocity.y * timeIncrement) +
+                (directionVectors.forward.z * panVelocity.z * timeIncrement) +
+                (linearVelocity.z * timeIncrement);
 
         this.position.setValueDirect(position.x, position.y, position.z);
     }
@@ -16150,8 +16013,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             values = this.rotation.getValueDirect();
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(values.x, values.y, values.z);
-            //this.quaternion.setValueDirect(quat);
-            this.rotationMatrix = quat.getMatrix();
+            this.quaternion.setValueDirect(quat);
 
             modified = true;
         }
@@ -16161,7 +16023,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
             this.updateQuaternion = false;
             
             var quat = this.quaternion.getValueDirect();
-            this.rotationMatrix = quat.getMatrix();
+            this.rotationMatrix = quat.getMatrix();     
 
             modified = true;
         }
@@ -16414,17 +16276,9 @@ ParentableMotionElement.prototype.setMotionParent = function(parent)
         this.parent.copyValue(parent.name);
         this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
     }
-    else
-    {
-        this.parent.removeModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
-        this.parent.setValueDirect("");
-        this.parent.addModifiedCB(ParentableMotionElement_ParentModifiedCB, this);
-    }
 
     // set sector position to account for parenting
     this.synchronizeSectorPosition();
-    
-    this.setModified();
 }
 
 ParentableMotionElement.prototype.isMotionAncestor = function(pme)
@@ -16601,12 +16455,10 @@ function UpdateDirective()
 
 UpdateDirective.prototype.setRegistry = function(registry)
 {
-    this.collideDirective.setRegistry(registry);    
+    this.collideDirective.setRegistry(registry);
     
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);    
-    
-    this.registry.register(this.collideDirective);
 }
 
 UpdateDirective.prototype.setGraphMgr = function(graphMgr)
@@ -18033,7 +17885,7 @@ function RenderDirective()
     this.foregroundAlphaFilename = new StringAttr("");
     this.foregroundFadeEnabled = new BooleanAttr(false);
     this.texturesEnabled = new BooleanAttr(true);
-    this.shadowsEnabled = new BooleanAttr(false);//true);
+    this.shadowsEnabled = new BooleanAttr(true);
     this.timeIncrement = new NumberAttr(0);
     this.highlightType = new NumberAttr(eHighlightType.None);
     
@@ -18106,7 +17958,7 @@ RenderDirective.prototype.setGraphMgr = function(graphMgr)
     }
     else
     {
-        this.program = graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+        this.program = graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 
     // call base-class implementation
@@ -18235,7 +18087,7 @@ function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
     }
     else
     {
-        container.program = container.graphMgr.renderContext.createProgram(default_vertex_lighting_vs, default_vertex_lighting_fs);
+        container.program = container.graphMgr.renderContext.createProgram(default_fragment_lighting_vs, default_fragment_lighting_fs);
     }
 }
 RayPickParams.prototype = new DirectiveParams();
@@ -18640,21 +18492,7 @@ function VertexGeometry()
     this.registerAttribute(this.colors, "colors");
 }
 
-VertexGeometry.prototype.clone = function()
-{
-    // call base-class implementation
-    var clone = Geometry.prototype.clone.call(this);
-    
-    // set up uv coords
-    for (var i = 0; i < this.uvCoords.length; i++)
-    {
-        clone.getUVCoords(this.uvCoords[i].first).copyValue(this.uvCoords[i].second);
-    }
-    
-    return clone;
-}
-
-VertexGeometry.prototype.postCloneChild = function(childClone, pathSrc, pathClone)
+VertexGeometry.prototype.postCloneChild = function(childClone,pathSrc,pathClone)
 {
     var i;
     var node;
@@ -18719,7 +18557,6 @@ VertexGeometry.prototype.getUVCoords = function(texture)
     
     return uvCoords;
 }
-
 VertexGeometry.prototype.findUVCoords = function(texture)
 {
     if (!texture)
@@ -18746,6 +18583,8 @@ VertexGeometry.prototype.update = function(params, visitChildren)
         this.vertexBuffer.setVertices(vertices);
         
         this.updateBoundingTree = true;
+        
+        this.calculateBBox();
     }
     
     if (this.updateColors)
@@ -19182,7 +19021,6 @@ VertexGeometry.prototype.calculateBBox = function()
 function VertexGeometry_VerticesModifiedCB(attribute, container)
 {
     container.updateVertices = true;
-    container.calculateBBox();
     container.setModified();
 }
 
@@ -19589,8 +19427,6 @@ function Surface()
     this.className = "Surface";
     this.attrType = eAttrType.Surface;
     
-    this.geometries = [];
-    
     this.color = new ColorAttr(1, 1, 1, 1);
     this.ambientLevel = new NumberAttr(1);
     this.diffuseLevel = new NumberAttr(1);
@@ -19614,7 +19450,6 @@ function Surface()
     this.numLuminosityTextures = new NumberAttr(0);
     this.numSpecularityTextures = new NumberAttr(0);
     this.numTransparencyTextures = new NumberAttr(0);
-    this.vertices = new NumberArrayAttr();
     
     this.colorTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
     this.diffuseTexturesPresent.addModifiedCB(Surface_TexturesPresentModifiedCB, this);
@@ -19645,7 +19480,6 @@ function Surface()
     this.registerAttribute(this.numLuminosityTextures, "numLuminosityTextures");
     this.registerAttribute(this.numSpecularityTextures, "numSpecularityTextures");
     this.registerAttribute(this.numTransparencyTextures, "numTransparencyTextures");
-    this.registerAttribute(this.vertices, "vertices");
 
     this.isolateTextures.setValueDirect(true);
 
@@ -19680,20 +19514,9 @@ function Surface()
     this.addChild(this.transparencyTexturesNode);
 
     this.connectMaterialAttributes(this.materialNode);
-}
-
-Surface.prototype.clone = function()
-{
-    // call base-class implementation
-    var clone = Isolator.prototype.clone.call(this);
     
-    // set up texture references
-    for (var i = 0; i < this.colorTexturesNode.children.length; i++)
-    {
-        clone.addTexture(this.colorTexturesNode.children[i]);
-    }
-    
-    return clone;
+    this.autoDisplayList.setValueDirect(true);
+    this.enableDisplayList.setValueDirect(true);
 }
 
 Surface.prototype.setGraphMgr = function(graphMgr)
@@ -19743,25 +19566,6 @@ Surface.prototype.connectMaterialAttribute = function(material, attribute, name)
     attribute.addTarget(material.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Surface.prototype.addGeometry = function(geometry)
-{
-    this.addChild(geometry);
-    this.geometries.push(geometry);
-}
-
-Surface.prototype.removeGeometry = function(geometry)
-{
-    this.removeChild(geometry);
-    for (var i = 0; i < this.geometries.length; i++)
-    {
-        if (this.geometries[i] == geometry)
-        {
-            this.geometries.splice(i, 1);
-            break;
-        }
-    }
-}
-    
 Surface.prototype.addTexture = function(texture)
 {
     texture.getAttribute("modified").addTarget(this.modified);
@@ -19782,8 +19586,7 @@ function Model()
     this.className = "Model";
     this.attrType = eAttrType.Model;
     
-    this.surfaces = [];
-    this.geometries = [];
+    this.geometry = [];
     this.geometryIndices = [];
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
@@ -19839,12 +19642,9 @@ function Model()
     this.highlightColor = new ColorAttr(1, 1, 0, 1);
     this.highlightWidth = new NumberAttr(5);
     this.disableOnDissolve = new BooleanAttr(true);
-    this.snapEnabled = new BooleanAttr(true);
-    this.genericConnectors = new GenericConnectors();
     this.socketConnectors = new SocketConnectors();
     this.plugConnectors = new PlugConnectors();
     this.physicalProperties = new PhysicalPropertiesAttr();
-    this.physicsEnabled = new BooleanAttr(true);
     
     this.show.addTarget(this.enabled);
     
@@ -19924,12 +19724,9 @@ function Model()
     this.registerAttribute(this.highlightColor, "highlightColor");
     this.registerAttribute(this.highlightWidth, "highlightWidth");
     this.registerAttribute(this.disableOnDissolve, "disableOnDissolve");
-    this.registerAttribute(this.snapEnabled, "snapEnabled");
-    this.registerAttribute(this.genericConnectors, "genericConnectors");
     this.registerAttribute(this.socketConnectors, "socketConnectors");
     this.registerAttribute(this.plugConnectors, "plugConnectors");
     this.registerAttribute(this.physicalProperties, "physicalProperties");
-    this.registerAttribute(this.physicsEnabled, "physicsEnabled");
         
     this.isolatorNode = new Isolator();
     this.isolatorNode.getAttribute("name").setValueDirect("Isolator");
@@ -19947,15 +19744,6 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
-}
-
-Model.prototype.synchronize = function(src, syncValues)
-{
-    // call base-class implementation
-    ParentableMotionElement.prototype.synchronize.call(this, src, syncValues);
-    
-    // sectorPosition is overwriting position
-    this.position.copyValue(src.getAttribute("position"));
 }
 
 Model.prototype.copyModel = function(clone,cloneChildren,pathSrc,pathClone)
@@ -20096,12 +19884,16 @@ Model.prototype.apply = function(directive, params, visitChildren)
             {
                 var lastWorldMatrix = new Matrix4x4();
                 lastWorldMatrix.loadMatrix(params.worldMatrix);
+                var lastSectorOrigin = new Vector3D(params.sectorOrigin.x, params.sectorOrigin.y, params.sectorOrigin.z);
+
                 params.worldMatrix = params.worldMatrix.multiply(this.sectorTransformCompound);
+                params.sectorOrigin.load(this.sectorOrigin.getValueDirect());
 
                 // call base-class implementation
                 ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);
 
                 params.worldMatrix.loadMatrix(lastWorldMatrix);
+                params.sectorOrigin.copy(lastSectorOrigin);
             }
             break;
 
@@ -20178,12 +19970,9 @@ Model.prototype.onRemove = function()
     
     // remove from any physics simulators
     var physicsSimulators = this.registry.getByType(eAttrType.PhysicsSimulator);
-    if (physicsSimulators)
+    for (var i = 0; i < physicsSimulators.length; i++)
     {
-        for (var i = 0; i < physicsSimulators.length; i++)
-        {
-            physicsSimulators[i].deletePhysicsBody(this);
-        }
+        physicsSimulators[i].deleteModel(this);
     }
     
     // call base-class implementation
@@ -20207,72 +19996,22 @@ Model.prototype.addSurface = function(surface)
 {
     this.surfacesNode.addChild(surface);
     
-    this.surfaces.push(surface);
-    
     // register surface to this for accessiblity with Set
     this.registerAttribute(surface, surface.getAttribute("name").getValueDirect().join(""));
 	
     this.connectSurfaceAttributes(surface);
 }
 
-Model.prototype.removeSurface = function(surface)
-{
-    this.surfacesNode.removeChild(surface);
-    
-    for (var i = 0; i < this.surfaces.length; i++)
-    {
-        if (this.surfaces[i] == surface)
-        {
-            this.surfaces.splice(i, 1);
-            break;
-        }
-    }
-    
-    // unregister surface from this
-    this.unregisterAttribute(surface);
-	
-    this.disconnectSurfaceAttributes(surface);
-}
-    
 Model.prototype.addGeometry = function(geometry, indices, surface)
 {
-    if (surface) surface.addGeometry(geometry);
+    surface.addChild(geometry);
     
     this.connectGeometryAttributes(geometry);
-    this.geometries.push(geometry);
-    if (indices) this.geometryIndices.push(indices);
-    geometry.bbox.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+    this.addGeometryBBox(geometry);
+    this.geometry.push(geometry);
+    this.geometryIndices.push(indices);
         
-    this.updateBBox();
-}
-
-Model.prototype.removeGeometry = function(geometry, indices, surface)
-{
-    if (surface) surface.removeGeometry(geometry);
-    
-    this.disconnectGeometryAttributes(geometry);
-    for (var i = 0; i < this.geometries.length; i++)
-    {
-        if (this.geometries[i] == geometry)
-        {
-            this.geometries.splice(i, 1);
-            break;
-        }
-    }  
-    if (indices) 
-    {
-        for (var i = 0; i < this.geometryIndices.length; i++)
-        {
-            if (this.geometryIndices[i] == indices)
-            {
-                this.geometryIndices.splice(i, 1);
-                break;
-            }
-        }
-    }
-    geometry.bbox.removeModifiedCB(Model_GeometryBBoxModifiedCB, this);
-        
-    this.updateBBox();
+    this.updateBoundingTree = true;
 }
 
 Model.prototype.connectSurfaceAttributes = function(surface)
@@ -20299,29 +20038,6 @@ Model.prototype.connectSurfaceAttribute = function(surface, attribute, name)
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Model.prototype.disconnectSurfaceAttributes = function(surface)
-{
-    this.disconnectSurfaceAttribute(surface, this.color, "color");
-    this.disconnectSurfaceAttribute(surface, this.ambientLevel, "ambientLevel");
-    this.disconnectSurfaceAttribute(surface, this.diffuseLevel, "diffuseLevel");
-    this.disconnectSurfaceAttribute(surface, this.specularLevel, "specularLevel");
-    this.disconnectSurfaceAttribute(surface, this.emissiveLevel, "emissiveLevel");
-    this.disconnectSurfaceAttribute(surface, this.ambient, "ambient");
-    this.disconnectSurfaceAttribute(surface, this.diffuse, "diffuse");
-    this.disconnectSurfaceAttribute(surface, this.specular, "specular");
-    this.disconnectSurfaceAttribute(surface, this.emissive, "emissive");
-    this.disconnectSurfaceAttribute(surface, this.glossiness, "glossiness");
-    this.disconnectSurfaceAttribute(surface, this.opacity, "opacity");
-    this.disconnectSurfaceAttribute(surface, this.doubleSided, "doubleSided");
-    this.disconnectSurfaceAttribute(surface, this.texturesEnabled, "texturesEnabled");
-    this.disconnectSurfaceAttribute(surface, this.enabled, "enabled");
-}
-
-Model.prototype.disconnectSurfaceAttribute = function(surface, attribute, name)
-{
-    attribute.removeTarget(surface.getAttribute(name));
-}
-
 Model.prototype.connectGeometryAttributes = function(geometry)
 {
     this.connectGeometryAttribute(geometry, this.name, "name");
@@ -20343,43 +20059,60 @@ Model.prototype.connectGeometryAttribute = function(geometry, attribute, name)
     attribute.addTarget(geometry.getAttribute(name), eAttrSetOp.Replace, null, modified);
 }
 
-Model.prototype.disconnectGeometryAttributes = function(geometry)
+Model.prototype.addGeometryBBox = function(geometry)
 {
-    this.disconnectGeometryAttribute(geometry, this.name, "name");
-    this.disconnectGeometryAttribute(geometry, this.selectable, "selectable");
-    this.disconnectGeometryAttribute(geometry, this.cullable, "cullable");
-    this.disconnectGeometryAttribute(geometry, this.show, "show");
-    this.disconnectGeometryAttribute(geometry, this.approximationLevels, "approximationLevels");
-    this.disconnectGeometryAttribute(geometry, this.sortPolygons, "sortPolygons");
-    this.disconnectGeometryAttribute(geometry, this.flipPolygons, "flipPolygons");
-    this.disconnectGeometryAttribute(geometry, this.shadowCaster, "shadowCaster");
-    this.disconnectGeometryAttribute(geometry, this.shadowTarget, "shadowTarget");
-    this.disconnectGeometryAttribute(geometry, this.renderSequenceSlot, "renderSequenceSlot");
-    this.disconnectGeometryAttribute(geometry, this.highlight, "highlight");
+    if (geometry == null ||
+        geometry == undefined)
+        return;
+    
+    geometry.bbox.min.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+    geometry.bbox.max.addModifiedCB(Model_GeometryBBoxModifiedCB, this);
+
+    this.updateGeometryBBox(geometry);
 }
 
-Model.prototype.disconnectGeometryAttribute = function(geometry, attribute, name)
+Model.prototype.updateGeometryBBox = function(geometry)
 {
-    attribute.removeTarget(geometry.getAttribute(name));
+    if (geometry == null ||
+        geometry == undefined)
+        return;
+    
+    var min = geometry.bbox.min.getValueDirect();
+    var max = geometry.bbox.max.getValueDirect();
+    
+    this.geometryBBoxesMap.push(new Pair(min, max));
+    
+    this.updateBBox();
 }
 
 Model.prototype.updateBBox = function()
 {
-    var min = new Vector3D(FLT_MAX, FLT_MAX, FLT_MAX);
-    var max = new Vector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    
-    for (var i = 0; i < this.geometries.length; i++)
+    var min = new Vector3D();
+    var max = new Vector3D();
+    var first = true;
+    for (var i in this.geometryBBoxesMap)
     {
-        var geometryMin = this.geometries[i].bbox.min.getValueDirect();
-        var geometryMax = this.geometries[i].bbox.max.getValueDirect();
+        if (first)
+        {
+            min.x = this.geometryBBoxesMap[i].first.x;
+            min.y = this.geometryBBoxesMap[i].first.y;
+            min.z = this.geometryBBoxesMap[i].first.z;
+            
+            max.x = this.geometryBBoxesMap[i].second.x;
+            max.y = this.geometryBBoxesMap[i].second.y;
+            max.z = this.geometryBBoxesMap[i].second.z;
+            
+            first = false;
+            continue;
+        }
         
-        min.x = Math.min(min.x, geometryMin.x);
-        min.y = Math.min(min.y, geometryMin.y);
-        min.z = Math.min(min.z, geometryMin.z);
+        min.x = Math.min(min.x, this.geometryBBoxesMap[i].first.x);
+        min.y = Math.min(min.y, this.geometryBBoxesMap[i].first.y);
+        min.z = Math.min(min.z, this.geometryBBoxesMap[i].first.z);
         
-        max.x = Math.max(max.x, geometryMax.x);
-        max.y = Math.max(max.y, geometryMax.y);
-        max.z = Math.max(max.z, geometryMax.z);
+        max.x = Math.max(max.x, this.geometryBBoxesMap[i].second.x);
+        max.y = Math.max(max.y, this.geometryBBoxesMap[i].second.y);
+        max.z = Math.max(max.z, this.geometryBBoxesMap[i].second.z);
     }
     
     this.bbox.min.setValueDirect(min.x, min.y, min.z);
@@ -20397,9 +20130,9 @@ Model.prototype.updateBBox = function()
 Model.prototype.buildBoundingTree = function()
 {
     var tris = [];
-    for (var i = 0; i < this.geometries.length; i++)
+    for (var i = 0; i < this.geometry.length; i++)
     {
-        tris = tris.concat(this.geometries[i].getTriangles());
+        tris = tris.concat(this.geometry[i].getTriangles());
     }
     
     this.boundingTree = new Octree();
@@ -20444,7 +20177,7 @@ function Model_Surface_NumTransparencyTexturesModifiedCB(attribute, container)
 
 function Model_GeometryBBoxModifiedCB(attribute, container)
 {
-    container.updateBBox();
+    container.updateGeometryBBox(attribute.getContainer().getContainer());
 }
 
 function Model_SurfaceAttrModifiedCB(attribute, container)
@@ -22108,37 +21841,37 @@ function RasterComponent()
     ParentableMotionElement.call(this);
     this.className = "RasterComponent";
     this.attrType = eAttrType.RasterComponent;
-
+    
     this.rcEventListener = null;
-
+    
     this.opacity = new NumberAttr(1);				// opaque
-    this.anchor = new Vector2DAttr(0, 0);			// 0, 0
-    this.origin = new StringAttr("bottomLeft");		// bottom-left
-    this.show = new BooleanAttr(true);				// true
-    this.selectable = new BooleanAttr(true);		// true
-    this.cullable = new BooleanAttr(true);			// true
-    this.clampToViewport = new BooleanAttr(false);	// false
-    this.rasterPosition = new Vector3DAttr();
-    this.inspectionOffset = new Vector3DAttr();
-    this.componentRect = new RectAttr();
-    this.screenRect = new RectAttr();
+	this.anchor = new Vector2DAttr(0, 0);			// 0, 0
+	this.origin = new StringAttr("bottomLeft");		// bottom-left
+	this.show = new BooleanAttr(true);				// true
+	this.selectable = new BooleanAttr(true);		// true
+	this.cullable = new BooleanAttr(true);			// true
+	this.clampToViewport = new BooleanAttr(false);	// false
+	this.rasterPosition = new Vector3DAttr();
+	this.inspectionOffset = new Vector3DAttr();
+	this.componentRect = new RectAttr();
+	this.screenRect = new RectAttr();
 
-    this.stylesMap.size.addModifiedCB(RasterComponent_StylesMapSizeModifiedCB, this);
-    this.show.addModifiedCB(RasterComponent_ShowModifiedCB, this);
+	this.stylesMap.size.addModifiedCB(RasterComponent_StylesMapSizeModifiedCB, this);
+	this.show.addModifiedCB(RasterComponent_ShowModifiedCB, this);
+	
+	this.registerAttribute(this.opacity, "opacity");
+	this.registerAttribute(this.anchor, "anchor");
+	this.registerAttribute(this.origin, "origin");
+	this.registerAttribute(this.show, "show");
+	this.registerAttribute(this.selectable, "selectable");
+	this.registerAttribute(this.cullable, "cullable");
+	this.registerAttribute(this.rasterPosition, "rasterPosition");
+	this.registerAttribute(this.inspectionOffset, "inspectionOffset");
+	this.registerAttribute(this.clampToViewport, "clampToViewport");
+	this.registerAttribute(this.componentRect, "componentRect");
+	this.registerAttribute(this.screenRect, "screenRect");
 
-    this.registerAttribute(this.opacity, "opacity");
-    this.registerAttribute(this.anchor, "anchor");
-    this.registerAttribute(this.origin, "origin");
-    this.registerAttribute(this.show, "show");
-    this.registerAttribute(this.selectable, "selectable");
-    this.registerAttribute(this.cullable, "cullable");
-    this.registerAttribute(this.rasterPosition, "rasterPosition");
-    this.registerAttribute(this.inspectionOffset, "inspectionOffset");
-    this.registerAttribute(this.clampToViewport, "clampToViewport");
-    this.registerAttribute(this.componentRect, "componentRect");
-    this.registerAttribute(this.screenRect, "screenRect");
-
-    this.renderSequenceSlot.setValueDirect(0xffff);
+	this.renderSequenceSlot.setValueDirect(0xffff);
 }
 
 RasterComponent.prototype.setRegistry = function(registry)
@@ -22204,7 +21937,7 @@ function RasterComponent_StylesMapSizeModifiedCB(attribute, container)
 
 function RasterComponent_StylesMapElementEventModifiedCB(attribute, container)
 {
-    container.stylesMapElementEventModified(attribute.getValueDirect().join(""));
+    container.stylesMapElementEventModified(attribute.getValueDirect().join(""));    
 }
 
 function RasterComponent_ShowModifiedCB(attribute, container)
@@ -22222,20 +21955,20 @@ function Label()
 
     this.iconRect = new Rect(0, 0, 0, 0);
     this.labelRect = new Rect(0, 0, 0, 0);
-
+    
     this.text = new StringAttr("");
     this.description = new StringAttr("");
     this.depthShadingEnabled = new BooleanAttr(true);
     this.labelStyle = new LabelStyleAttr();
     this.iconStyle = new IconStyleAttr();
     this.balloonTipLabelStyle = new BalloonTipLabelStyleAttr();
-
+    
     this.text.addModifiedCB(Label_TextModifiedCB, this);
     this.description.addModifiedCB(Label_DescriptionModifiedCB, this);
     this.labelStyle.backgroundColor.addModifiedCB(Label_LabelStyleBackgroundColorModifiedCB, this);
     this.labelStyle.backgroundOpacity.addModifiedCB(Label_LabelStyleBackgroundOpacityModifiedCB, this);
     this.labelStyle.fontStyle.borderColor.addModifiedCB(Label_LabelStyleFontBorderModifiedCB, this);
-    this.labelStyle.fontStyle.borderWidth.addModifiedCB(Label_LabelStyleFontBorderModifiedCB, this);
+    this.labelStyle.fontStyle.borderWidth.addModifiedCB(Label_LabelStyleFontBorderModifiedCB, this);    
     this.labelStyle.fontStyle.color.addModifiedCB(Label_LabelStyleFontStyleColorModifiedCB, this);
     this.labelStyle.fontStyle.font.addModifiedCB(Label_LabelStyleFontStyleFontModifiedCB, this);
     this.labelStyle.fontStyle.opacity.addModifiedCB(Label_LabelStyleFontStyleOpacityModifiedCB, this);
@@ -22245,39 +21978,39 @@ function Label()
     this.labelStyle.padding.addModifiedCB(Label_LabelStylePaddingModifiedCB, this);
     this.iconStyle.url.addModifiedCB(Label_IconStyleUrlModifiedCB, this);
     this.balloonTipLabelStyle.addModifiedCB(Label_BalloonTipLabelStyleModifiedCB, this);
-
+    
     this.registerAttribute(this.text, "text");
     this.registerAttribute(this.description, "description");
     this.registerAttribute(this.depthShadingEnabled, "depthShadingEnabled");
     this.registerAttribute(this.labelStyle, "labelStyle");
     this.registerAttribute(this.iconStyle, "iconStyle");
     this.registerAttribute(this.balloonTipLabelStyle, "balloonTipLabelStyle");
-
+    
     this.styles.registerStyle(this.iconStyle, "iconStyle");
-    this.styles.registerStyle(this.labelStyle, "labelStyle");
-    this.styles.registerStyle(this.balloonTipLabelStyle, "balloonTipLabelStyle");
+	this.styles.registerStyle(this.labelStyle, "labelStyle");
+	this.styles.registerStyle(this.balloonTipLabelStyle, "balloonTipLabelStyle");
 }
 
 Label.prototype.setGraphMgr = function(graphMgr)
 {
     // call base-class implementation
     RasterComponent.prototype.setGraphMgr.call(this, graphMgr);
-
+    
     // create id
     this.id = "Label" + this.graphMgr.getNextLabelIndex();
     this.labelId = this.id + "_label";
     this.iconId = this.id + "_icon";
-
+    
     // create html div for canvas overlay
     var htmlLabel = CreateHTMLLabel(this.id, this.labelId, this.iconId);
     this.htmlLabel = htmlLabel.label;
     this.htmlIconImg = htmlLabel.iconImg;
     this.htmlIconDiv = htmlLabel.iconDiv;
-
+    
     // initialize base dimensions of icon (used for scaling)
     this.htmlIconImg.baseWidth = 0;
     this.htmlIconImg.baseHeight = 0;
-
+    
     // set initial style
     Label_LabelStyleBackgroundColorModifiedCB(this.labelStyle.backgroundColor, this);
     Label_LabelStyleBackgroundOpacityModifiedCB(this.labelStyle.backgroundOpacity, this);
@@ -22305,14 +22038,14 @@ Label.prototype.update = function(params, visitChildren)
 Label.prototype.updateIconScale = function()
 {
     var scale = this.iconStyle.scale.getValueDirect();
-
+        
     // obtain original dimensions
     if (this.htmlIconImg.baseWidth == 0)
     {
         this.htmlIconImg.baseWidth = this.htmlIconImg.offsetWidth;
         this.htmlIconImg.baseHeight = this.htmlIconImg.offsetHeight;
     }
-
+    
     // scale
     if (this.htmlIconImg.baseWidth)
     {
@@ -22330,34 +22063,34 @@ Label.prototype.apply = function(directive, params, visitChildren)
         RasterComponent.prototype.apply.call(this, directive, params, visitChildren);
         return;
     }
-
+    
     switch (directive)
     {
-        case "render":
+    case "render":
+        {
+            this.draw(params.viewport);
+        }
+        break;
+        
+    case "rayPick":
+        {
+            if (this.selectable.getValueDirect() == true &&
+                this.show.getValueDirect() == true)
             {
-                this.draw(params.viewport);
-            }
-            break;
-
-        case "rayPick":
-            {
-                if (this.selectable.getValueDirect() == true &&
-                        this.show.getValueDirect() == true)
+                if (this.isSelected(params.clickPoint.x, params.clickPoint.y))
                 {
-                    if (this.isSelected(params.clickPoint.x, params.clickPoint.y))
-                    {
-                        var intersectRecord = new RayIntersectRecord();
-                        intersectRecord.distance = 0;
-
-                        params.currentNodePath.push(this);
-                        params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));
-                        params.currentNodePath.pop();
-                    }
+                    var intersectRecord = new RayIntersectRecord();
+                    intersectRecord.distance = 0;
+                    
+                    params.currentNodePath.push(this);           
+                    params.directive.addPickRecord(new RayPickRecord(params.currentNodePath, intersectRecord, params.camera));                   
+                    params.currentNodePath.pop();
                 }
-            }
-            break;
+            }    
+        }
+        break;
     }
-
+    
     // call base-class implementation
     RasterComponent.prototype.apply.call(this, directive, params, visitChildren);
 }
@@ -22383,7 +22116,8 @@ Label.prototype.draw = function(viewport)
         this.htmlLabel.style.visibility = "hidden";
     }
     var iconColor = this.iconStyle.color.getValueDirect();
-    if (iconColor.a == 0 || this.iconStyle.opacity.getValueDirect() == 0)
+    if (iconColor.a == 0 ||
+        this.iconStyle.opacity.getValueDirect() == 0)
     {
         this.htmlIconImg.style.visibility = "hidden";
     }
@@ -22398,18 +22132,18 @@ Label.prototype.draw = function(viewport)
 
     // determine if label is fully contained within viewport
     if (positions.labelX < 0 ||
-        positions.labelY < 0 ||
-        positions.labelX + labelWidth > bworks.canvas.width ||
-        positions.labelY + labelHeight > bworks.canvas.height)
+	    positions.labelY < 0 ||
+	    positions.labelX + labelWidth > bworks.canvas.width ||
+	    positions.labelY + labelHeight > bworks.canvas.height)
     {
         this.htmlLabel.style.visibility = "hidden";
     }
 
     // determine if icon is fully contained within viewport
     if (positions.iconX < 0 ||
-        positions.iconY < 0 ||
-        positions.iconX + iconWidth > bworks.canvas.width ||
-        positions.iconY + iconHeight > bworks.canvas.height)
+	    positions.iconY < 0 ||
+	    positions.iconX + iconWidth > bworks.canvas.width ||
+	    positions.iconY + iconHeight > bworks.canvas.height)
     {
         this.htmlIconImg.style.visibility = "hidden";
     }
@@ -22421,9 +22155,9 @@ Label.prototype.draw = function(viewport)
         this.htmlLabel.style.top = bworks.canvas.offsetTop + positions.labelY;
 
         this.labelRect.load(bworks.canvas.offsetLeft + positions.labelX,
-                bworks.canvas.offsetTop + positions.labelY,
-                this.labelRect.left + labelWidth,
-                this.labelRect.top + labelHeight);
+                            bworks.canvas.offsetTop + positions.labelY,
+                            this.labelRect.left + labelWidth,
+                            this.labelRect.top + labelHeight);
     }
     else
     {
@@ -22435,9 +22169,9 @@ Label.prototype.draw = function(viewport)
         this.htmlIconDiv.style.top = bworks.canvas.offsetTop + positions.iconY;
 
         this.iconRect.load(bworks.canvas.offsetLeft + positions.iconX,
-                bworks.canvas.offsetTop + positions.iconY,
-                this.iconRect.left + iconWidth,
-                this.iconRect.top + iconHeight);
+                           bworks.canvas.offsetTop + positions.iconY,
+                           this.iconRect.left + iconWidth,
+                           this.iconRect.top + iconHeight);
     }
     else
     {
@@ -22447,7 +22181,7 @@ Label.prototype.draw = function(viewport)
     // update screen rect
     var screenRect = new Rect(0, 0, 0, 0);
     if (this.htmlLabel.style.visibility == "visible" &&
-            this.htmlIconImg.style.visibility == "visible")
+        this.htmlIconImg.style.visibility == "visible")
     {
         screenRect.left = Math.min(this.labelRect.left, this.iconRect.left);
         screenRect.top = Math.min(this.labelRect.top, this.iconRect.top);
@@ -22472,152 +22206,152 @@ Label.prototype.getRenderingPositions = function()
     var labelY = 0;
     var iconX = 0;
     var iconY = 0;
-
+    
     // get screen position
     var screen = this.screenPosition.getValueDirect();
-
+    
     // get anchor position
     var anchor = this.anchor.getValueDirect();
-
+    
     // get label offset
     var offset = this.labelStyle.offset.getValueDirect();
-
-    if (this.htmlIconImg.offsetWidth > 0 &&
-            this.htmlLabel.offsetWidth > 0) // icon and label present
-    {
+    
+    if (this.htmlIconImg.offsetWidth > 0 && 
+        this.htmlLabel.offsetWidth > 0) // icon and label present
+    {	
         var labelWidth = this.htmlLabel.offsetWidth;// * this.htmlLabel.style.zoom;
         var labelHeight = this.htmlLabel.offsetHeight;// * this.htmlLabel.style.zoom;
         var iconWidth = this.htmlIconImg.offsetWidth;
         var iconHeight = this.htmlIconImg.offsetHeight;
-
+        
         // measure from origin
         if (this.origin.getValueDirect().join("") == "bottomLeft")
         {
             anchor.y = iconHeight - anchor.y;
         }
-
+        
         // 
-        iconX = screen.x - anchor.x;
-        iconY = screen.y - anchor.y;
-        labelX = iconX + offset.x;
-        labelY = iconY + offset.y;
-
-        // adjust according to alignment
-        switch (this.labelStyle.textAlign.getValueDirect().join(""))
+        iconX  = screen.x - anchor.x;
+		iconY  = screen.y - anchor.y;
+		labelX = iconX + offset.x;
+		labelY = iconY + offset.y;
+        
+		// adjust according to alignment
+		switch (this.labelStyle.textAlign.getValueDirect().join(""))
         {
-            case "topLeft":
-                labelX -= labelWidth;
-                labelY -= labelHeight / 2;
-                break;
-
-            case "middleLeft":
-                labelX -= labelWidth;
-                labelY += iconHeight / 2 - labelHeight / 2;
-                break;
-
-            case "bottomLeft":
-                labelX -= labelWidth;
-                labelY += iconHeight - labelHeight / 2;
-                break;
-
-            case "topCenter":
-                labelX += iconWidth / 2 - labelWidth / 2;
-                labelY -= labelHeight;
-                break;
-
-            case "middleCenter":
-                labelX += iconWidth / 2 - labelWidth / 2;
-                labelY += iconHeight / 2 - labelHeight / 2;
-                break;
-
-            case "bottomCenter":
-                labelX += iconWidth / 2 - labelWidth / 2;
-                labelY += iconHeight;
-                break;
-
-            case "topRight":
-                labelX += iconWidth;
-                labelY -= labelHeight / 2;
-                break;
-
-            case "bottomRight":
-                labelX += iconWidth;
-                labelY += iconHeight - labelHeight / 2;
-                break;
-
-            case "middleRight": // default
-            default:
-                labelX += iconWidth;
-                labelY += iconHeight / 2 - labelHeight / 2;
-                break;
-        }
+        case "topLeft":
+			labelX -= labelWidth;
+			labelY -= labelHeight / 2;
+			break;
+			
+		case "middleLeft":
+			labelX -= labelWidth;
+			labelY += iconHeight / 2 - labelHeight / 2;
+		    break;
+		    
+		case "bottomLeft":
+			labelX -= labelWidth;
+			labelY += iconHeight - labelHeight / 2;
+			break;
+			
+		case "topCenter":
+			labelX += iconWidth / 2 - labelWidth / 2;
+			labelY -= labelHeight;
+		    break;
+		    
+	    case "middleCenter":
+			labelX += iconWidth / 2 - labelWidth / 2;
+			labelY += iconHeight / 2 - labelHeight / 2;
+			break;
+			
+		case "bottomCenter":
+			labelX += iconWidth / 2 - labelWidth / 2;
+			labelY += iconHeight;
+		    break;
+		    
+		case "topRight":
+			labelX += iconWidth;
+			labelY -= labelHeight / 2;
+		    break;
+		    
+		case "bottomRight":
+			labelX += iconWidth;
+			labelY += iconHeight - labelHeight / 2;
+			break;
+			
+		case "middleRight": // default
+		default:
+			labelX += iconWidth;
+			labelY += iconHeight / 2 - labelHeight / 2;
+			break;
+		}
     }
     else if (this.htmlLabel.offsetWidth > 0)
-    {
+    {   
         var labelWidth = this.htmlLabel.offsetWidth;// * this.htmlLabel.style.zoom;
         var labelHeight = this.htmlLabel.offsetHeight;// * this.htmlLabel.style.zoom;
-
+        
         // 
         labelX = screen.x + anchor.x + offset.x;
         labelY = screen.y - anchor.y + offset.y;
-
+        
         // adjust according to alignment
         switch (this.labelStyle.textAlign.getValueDirect().join(""))
         {
-            case "topLeft":
-                labelX -= labelWidth;
-                labelY -= labelHeight;
-                break;
-
-            case "middleLeft":
-                labelX -= labelWidth;
-                labelY -= labelHeight / 2;
-                break;
-
-            case "bottomLeft":
-                labelX -= labelWidth;
-                break;
-
-            case "topCenter":
-                labelX -= labelWidth / 2;
-                labelY -= labelHeight;
-                break;
-
-            case "middleCenter":
-                labelX -= labelWidth / 2;
-                labelY -= labelHeight / 2;
-                break;
-
-            case "bottomCenter":
-                labelX -= labelWidth / 2;
-                break;
-
-            case "topRight":
-                labelY -= labelHeight;
-                break;
-
-            case "bottomRight":
-                break;
-
-            case "middleRight": // default
-            default:
-                labelY -= labelHeight / 2;
-                break;
+        case "topLeft":
+	        labelX -= labelWidth;
+		    labelY -= labelHeight;
+		    break;
+    		
+	    case "middleLeft":
+	        labelX -= labelWidth;
+		    labelY -= labelHeight / 2;	
+		    break;
+    		
+	    case "bottomLeft":
+		    labelX -= labelWidth;
+	        break;
+    	    
+	    case "topCenter":
+		    labelX -= labelWidth / 2;
+		    labelY -= labelHeight;
+		    break;
+    		
+	    case "middleCenter":
+		    labelX -= labelWidth / 2;
+		    labelY -= labelHeight / 2;
+	        break;
+    	    
+	    case "bottomCenter":
+		    labelX -= labelWidth / 2;
+		    break;
+    		
+	    case "topRight":
+		    labelY -= labelHeight;
+		    break;
+    			
+	    case "bottomRight":
+		    break;
+    		
+	    case "middleRight": // default
+	    default:
+		    labelY -= labelHeight / 2;
+		    break;
         }
     }
     else // only icon present
     {
         var iconWidth = this.htmlIconImg.offsetWidth;
         var iconHeight = this.htmlIconImg.offsetHeight;
-
+        
         // measure from bottom left
-        anchor.y = iconHeight - anchor.y;
+		anchor.y = iconHeight - anchor.y;
 
-        iconX = screen.x - anchor.x;
-        iconY = screen.y - anchor.y;
+		iconX = screen.x - anchor.x;
+		iconY = screen.y - anchor.y;
     }
-
-    return {labelX: labelX, labelY: labelY, iconX: iconX, iconY: iconY};
+    
+    return { labelX: labelX, labelY: labelY, iconX: iconX, iconY: iconY };
 }
 
 Label.prototype.eventPerformed = function(event)
@@ -22637,19 +22371,18 @@ Label.prototype.labelStyleFontBorderModified = function()
     var color = this.labelStyle.fontStyle.borderColor.getValueDirect();
     color.a *= this.labelStyle.fontStyle.opacity.getValueDirect();
     var width = this.labelStyle.fontStyle.borderWidth.getValueDirect();
-
+    
     var shadow = "";
-    for (var i = 0; i < color.a; i += 0.2)
+    for (var i=0; i < color.a; i+=0.2)
     {
-        if (i > 0)
-            shadow += ", ";
-
-        shadow += "rgba(" + color.r * 255 + ","
-                + color.g * 255 + ","
-                + color.b * 255 + ","
-                + color.a + ")" + " 0px 0px " + width * 2 + "px";
+        if (i > 0) shadow += ", ";
+        
+        shadow += "rgba(" + color.r * 255 + "," 
+                          + color.g * 255 + "," 
+                          + color.b * 255 + "," 
+                          + color.a + ")" + " 0px 0px " + width * 2 + "px";
     }
-
+ 
     this.htmlLabel.style.textShadow = shadow;
 }
 
@@ -22680,12 +22413,9 @@ function CreateHTMLLabel(id, labelId, iconId)
                 newLabel.style.position = "absolute";
                 newLabel.style.zIndex = 3;
                 //newLabel.style.zoom = 1;//.95;
-                newLabel.onmousedown = function() { /*onMouseDown();*/
-                };
-                newLabel.onmouseup = function() { /*onMouseUp();*/
-                };
-                newLabel.onmousemove = function() { /*onMouseMove();*/
-                };
+                newLabel.onmousedown = function() { /*onMouseDown();*/ };
+                newLabel.onmouseup = function() { /*onMouseUp();*/ };
+                newLabel.onmousemove = function() { /*onMouseMove();*/ };
                 // disable selection
                 newLabel.onselectstart = new Function("return false");
 
@@ -22707,14 +22437,10 @@ function CreateHTMLLabel(id, labelId, iconId)
                     newIconImg.style.visibility = "hidden";
                     newIconImg.src = "BwContent/images/1x1.png";
                     //newIconImg.onmousedown = function(){onMouseDown();};
-                    newIconImg.onmouseup = function() { /*onMouseUp();*/
-                    };
-                    newIconImg.onmousemove = function() { /*onMouseMove();*/
-                    };
+                    newIconImg.onmouseup = function() { /*onMouseUp();*/ };
+                    newIconImg.onmousemove = function() { /*onMouseMove();*/ };
                     // disable selection
-                    newIconImg.onmousedown = function() {
-                        return false;
-                    };
+                    newIconImg.onmousedown = function() { return false; };
 
                     newIconDiv.appendChild(newIconImg);
                 }
@@ -22725,7 +22451,7 @@ function CreateHTMLLabel(id, labelId, iconId)
         }
     }
 
-    return {div: newDiv, label: newLabel, iconDiv: newIconDiv, iconImg: newIconImg};
+    return { div: newDiv, label: newLabel, iconDiv: newIconDiv, iconImg: newIconImg };
 }
 
 function Label_TextModifiedCB(attribute, container)
@@ -22744,52 +22470,50 @@ function Label_DescriptionModifiedCB(attribute, container)
         if (width == 0 || height == 0)
         {
             var viewportMgr = container.registry.find("ViewportMgr");
-            if (width == 0)
-                width = viewportMgr.getAttribute("width").getValueDirect() * 0.5;
-            if (height == 0)
-                height = viewportMgr.getAttribute("height").getValueDirect() * 0.5;
+            if (width == 0) width = viewportMgr.getAttribute("width").getValueDirect() * 0.5;
+            if (height == 0) height = viewportMgr.getAttribute("height").getValueDirect() * 0.5;
         }
-
+        
         var id = '#' + container.iconId;
-        description = "<div class='gmap' style='" +
-                "width:" + (width + 12) + "px;" + // (+ 12 accounts for close button)
-                "height:12px;'>" +
-                "<a href='javascript:void($(\"" +
-                id +
-                "\").btOff());'><img src='libs/jquery/bt/close.gif' alt='close' width='12' height='12' class='gmap-close' /></a> " +
-                "</div>" +
-                "<div style='" +
-                "width:" + (width + 12) + "px;" + // (+ 12 accounts for close button)
-                "height:" + height + "px;" +
-                "overflow:auto;'>" +
-                description +
-                "</div>";
-
+        description = "<div class='gmap' style='" + 
+                      "width:" + (width + 12) + "px;" + // (+ 12 accounts for close button)
+                      "height:12px;'>" + 
+                      "<a href='javascript:void($(\"" +
+                      id + 
+                      "\").btOff());'><img src='libs/jquery/bt/close.gif' alt='close' width='12' height='12' class='gmap-close' /></a> " + 
+                      "</div>" +
+                      "<div style='" +
+                      "width:" + (width + 12) + "px;" + // (+ 12 accounts for close button)
+                      "height:" + height + "px;" + 
+                      "overflow:auto;'>" +
+                      description +
+                      "</div>";
+            
         var bgColor = container.balloonTipLabelStyle.bgColor.getValueDirect();
-        var fill = "rgba(" + bgColor.r * 255 + ","
-                + bgColor.g * 255 + ","
-                + bgColor.b * 255 + ","
-                + bgColor.a * 255 + ")";
-
+        var fill = "rgba(" + bgColor.r * 255 + "," 
+                           + bgColor.g * 255 + "," 
+                           + bgColor.b * 255 + ","
+                           + bgColor.a * 255 + ")"; 
+                                                  
         $(id).bt(description, {trigger: 'click',
-            width: width + 12 + "px", // (+ 12 accounts for close button)
-            height: height + 12 + "px", // (+ 12 accounts for close button)
-            shrinkToFit: ((width == 0 && height == 0) ? true : false),
-            centerPointX: .9,
-            spikeLength: container.balloonTipLabelStyle.balloonOffset.getValueDirect(),
-            spikeGirth: 30,
-            padding: 15,
-            cornerRadius: 25,
-            fill: fill,
-            strokeStyle: '#ABABAB',
-            strokeWidth: 1,
-            shadow: true,
-            shadowOffsetX: 3,
-            shadowOffsetY: 3,
-            shadowBlur: 8,
-            shadowColor: 'rgba(0,0,0,.9)',
-            shadowOverlap: false,
-            noShadowOpts: {strokeStyle: '#999', strokeWidth: 2}});
+                               width: width + 12 + "px", // (+ 12 accounts for close button)
+                               height: height + 12 + "px", // (+ 12 accounts for close button)
+                               shrinkToFit: ((width == 0 && height == 0) ? true : false),
+                               centerPointX: .9,
+                               spikeLength: container.balloonTipLabelStyle.balloonOffset.getValueDirect(),
+                               spikeGirth: 30,
+                               padding: 15,
+                               cornerRadius: 25,
+                               fill: fill,
+                               strokeStyle: '#ABABAB',
+                               strokeWidth: 1,
+                               shadow: true,
+                               shadowOffsetX: 3,
+                               shadowOffsetY: 3,
+                               shadowBlur: 8,
+                               shadowColor: 'rgba(0,0,0,.9)',
+                               shadowOverlap: false,
+                               noShadowOpts: {strokeStyle: '#999', strokeWidth: 2}});
     }
     else
     {
@@ -22802,10 +22526,10 @@ function Label_LabelStyleBackgroundColorModifiedCB(attribute, container)
 {
     var color = attribute.getValueDirect();
     color.a *= attribute.getContainer().getAttribute("backgroundOpacity").getValueDirect();
-    container.htmlLabel.style.backgroundColor = "rgba(" + color.r * 255 + ","
-            + color.g * 255 + ","
-            + color.b * 255 + ","
-            + color.a + ")";
+    container.htmlLabel.style.backgroundColor = "rgba(" + color.r * 255 + "," 
+                                                        + color.g * 255 + "," 
+                                                        + color.b * 255 + ","
+                                                        + color.a + ")";
 }
 
 function Label_LabelStyleBackgroundOpacityModifiedCB(attribute, container)
@@ -22822,10 +22546,10 @@ function Label_LabelStyleFontStyleColorModifiedCB(attribute, container)
 {
     var color = attribute.getValueDirect();
     color.a *= attribute.getContainer().getAttribute("opacity").getValueDirect();
-    container.htmlLabel.style.color = "rgba(" + color.r * 255 + ","
-            + color.g * 255 + ","
-            + color.b * 255 + ","
-            + color.a + ")";
+    container.htmlLabel.style.color = "rgba(" + color.r * 255 + "," 
+                                              + color.g * 255 + "," 
+                                              + color.b * 255 + ","
+                                              + color.a + ")";
 }
 
 function Label_LabelStyleFontStyleFontModifiedCB(attribute, container)
@@ -22848,21 +22572,21 @@ function Label_LabelStyleFontStyleStyleModifiedCB(attribute, container)
 {
     switch (attribute.getValueDirect().join(""))
     {
-        case "Bold":
-            container.htmlLabel.style.fontWeight = "bold";
-            break;
-
-        case "Heavy":
-            container.htmlLabel.style.fontWeight = "bolder";
-            break;
-
-        case "Normal":
-            container.htmlLabel.style.fontWeight = "normal";
-            break;
-
-        case "Thin":
-            container.htmlLabel.style.fontWeight = "lighter";
-            break;
+    case "Bold":
+        container.htmlLabel.style.fontWeight = "bold";
+        break;
+        
+    case "Heavy":
+        container.htmlLabel.style.fontWeight = "bolder";  
+        break;
+        
+    case "Normal":
+        container.htmlLabel.style.fontWeight = "normal";
+        break;
+        
+    case "Thin":
+        container.htmlLabel.style.fontWeight = "lighter";
+        break;
     }
 }
 
@@ -22879,7 +22603,7 @@ function Label_LabelStylePaddingModifiedCB(attribute, container)
     container.htmlLabel.style.paddingLeft = padding;
     container.htmlLabel.style.paddingRight = padding;
     container.htmlLabel.style.paddingTop = padding;
-    container.htmlLabel.style.paddingBottom = padding;
+    container.htmlLabel.style.paddingBottom = padding;    
 }
 
 function Label_IconStyleUrlModifiedCB(attribute, container)
@@ -22887,19 +22611,19 @@ function Label_IconStyleUrlModifiedCB(attribute, container)
     var url = attribute.getValueDirect().join("");
     switch (url)
     {
-        case "":
-            //container.htmlIconImg.src = null;
-            break;
+    case "":
+        //container.htmlIconImg.src = null;
+        break;
 
-        default:
-            container.htmlIconImg.src = document.location.href + "/../BwContent/" + url;
-            break;
+    default:
+        container.htmlIconImg.src = document.location.href + "/../BwContent/" + url;
+        break;
     }
 }
 
 function Label_BalloonTipLabelStyleModifiedCB(attribute, container)
 {
-    Label_DescriptionModifiedCB(container.description, container);
+    Label_DescriptionModifiedCB(container.description, container);   
 }
 BalloonTipLabel.prototype = new RasterComponent();
 BalloonTipLabel.prototype.constructor = BalloonTipLabel;
@@ -24710,7 +24434,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         bodies.push_back(name);
     }
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
-    
+
     // update positions of models (retain inspection group's rotation)
     for (i = 0; i < models.length; i++)
     {
@@ -24768,7 +24492,8 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
                 var origin = trans.getOrigin();
                 Ammo.destroy(trans);
                 var position = new Vector3D(origin.x(), origin.y(), origin.z());
-                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);               
+                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+                
             }
         }
     }
@@ -24824,37 +24549,85 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
-    var i;
-    var snapper = null;
-    var snappees = [];
-    
+    var i, j;
+    var sockets = [];
+    var plugs = [];
+
+    // get disconnected sockets/plugs
     for (i in collideRecs)
     {
-        // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model) &&
-            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
+        var socketConnectors = collideRecs[i].model.getAttribute("socketConnectors");
+        for (j = 0; j < socketConnectors.Size(); j++)
         {
-            snapper = collideRecs[i].model;
+            var socketConnector = socketConnectors.getAt(j);
+            if (socketConnector.getAttribute("connected").getValueDirect() == false)
+            {
+                sockets.push(new Pair(socketConnector, collideRecs[i]));
+            }
         }
-        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
+
+        // only test plugs from the currently selected (and unparented) model (can only have 1 motion parent at a time)
+        if (collideRecs[i].model.motionParent || !this.isSelected(collideRecs[i].model)) continue;
+        
+        var plugConnectors = collideRecs[i].model.getAttribute("plugConnectors");
+        for (j = 0; j < plugConnectors.Size(); j++)
         {
-            snappees.push(collideRecs[i].model);
-        }       
+            var plugConnector = plugConnectors.getAt(j);
+            if (plugConnector.getAttribute("connected").getValueDirect() == false)
+            {
+                plugs.push(new Pair(plugConnector, collideRecs[i]));
+            }
+        }
     }
-    if (!snapper || snappees.length == 0) return;
 
     // test plugs for collision with sockets
-    var snapMgr = this.registry.find("SnapMgr");
-    for (i = 0; i < snappees.length; i++)
+    for (i = 0; i < plugs.length; i++)
     {
-        if (snapMgr.trySnap(snapper, snappees[i]))
-        {     
-            return;
-            //break;
+        var plugType = plugs[i].first.getAttribute("type").getValueDirect().join("");
+
+        for (j = 0; j < sockets.length; j++)
+        {
+            // only test sockets/plugs between different models, and models that are not already in a motion
+            // ancestor/descendent relationship
+            if (plugs[i].second.model == sockets[j].second.model ||
+                plugs[i].second.model.isMotionAncestor(sockets[j].second.model) ||
+                sockets[j].second.model.isMotionAncestor(plugs[i].second.model))
+                continue;
+            
+            var socketType = sockets[j].first.getAttribute("type").getValueDirect().join("");
+            if (plugType != socketType)
+                continue;
+
+            var connection = plugs[i].first.collides(sockets[j].first, plugs[i].second.worldMatrix, sockets[j].second.worldMatrix);
+            if (connection > 0)
+            {
+                // remove plug from object inspection
+                var objectInspector = this.registry.find("ObjectInspector");
+                if (objectInspector)
+                {
+                    objectInspector.clearSelection(plugs[i].second.model);
+                }
+                
+                // perform snap-to!
+                var factory = this.registry.find("AttributeFactory");
+                var snapTo = factory.create("SnapTo");
+                snapTo.getAttribute("target").copyValue(sockets[j].second.model.getAttribute("name"));
+                snapTo.getAttribute("plug").copyValue(plugs[i].second.model.getAttribute("name"));
+                snapTo.getAttribute("socketConnector").copyValue(sockets[j].first);
+                snapTo.getAttribute("plugConnector").copyValue(plugs[i].first);
+                snapTo.getAttribute("slot").setValueDirect(connection);
+                snapTo.execute();
+
+                // flag plug/socket as connected
+                plugs[i].first.getAttribute("connected").setValueDirect(true);
+                sockets[j].first.getAttribute("connected").setValueDirect(true);
+                
+                break;
+            }
         }
     }
 }
-    
+
 CollideDirective.prototype.isSelected = function(model)
 {
     var selected = model.getAttribute("selected").getValueDirect();
@@ -24868,7 +24641,6 @@ CollideDirective.prototype.isSelected = function(model)
 
     return selected;
 }
-
 function HighlightTarget()
 {
     this.projMatrix = new Matrix4x4();
@@ -26882,83 +26654,13 @@ function SnapConnector()
     this.className = "SnapConnector";
     this.attrType = eAttrType.SnapConnector;
 
-    this.name = new StringAttr();
-    this.type = new StringAttr("default");
+    this.type = new StringAttr("");
     this.normal = new Vector3DAttr(0, 0, 0);
     this.connected = new BooleanAttr(false);
 
-    this.registerAttribute(this.name, "name");
     this.registerAttribute(this.type, "type");
     this.registerAttribute(this.normal, "normal");
     this.registerAttribute(this.connected, "connected");
-}
-
-GenericConnector.prototype = new SnapConnector();
-GenericConnector.prototype.constructor = GenericConnector;
-
-function GenericConnector()
-{
-    SnapConnector.call(this);
-    this.className = "GenericConnector";
-    this.attrType = eAttrType.GenericConnector;
-
-    this.point = new SphereAttr();
-
-    this.registerAttribute(this.point, "point");
-}
-
-GenericConnector.prototype.collides = function(genericConnector, colliderWorldMatrix, collideeWorldMatrix)
-{
-    // check point/point
-    this.point.sphere.setTransform(colliderWorldMatrix);
-    genericConnector.point.sphere.setTransform(collideeWorldMatrix);
-
-    if (this.point.sphere.intersects(genericConnector.point.sphere))
-    {
-        return 1;
-    }
-
-    // no collision detected
-    return 0;
-}
-
-GenericConnectors.prototype = new AttributeVector();
-GenericConnectors.prototype.constructor = GenericConnectors;
-
-function GenericConnectors()
-{
-    AttributeVector.call(this, new GenericConnectorAllocator());
-    this.className = "GenericConnectors";
-    this.attrType = eAttrType.GenericConnectors;
-
-    this.appendParsedElements.setValueDirect(true);
-}
-
-GenericConnectors.prototype.get = function(name)
-{
-    var length = this.Size();
-    for (var i = 0; i < length; i++)
-    {
-        var connector = this.getAt(i);
-        if (connector.getAttribute("name").getValueDirect().join("") == name)
-        {
-            return connector;
-        }
-    }
-    
-    return null;
-}
-    
-GenericConnectorAllocator.prototype = new Allocator();
-GenericConnectorAllocator.prototype.constructor = GenericConnectorAllocator;
-
-function GenericConnectorAllocator()
-{
-}
-
-GenericConnectorAllocator.prototype.allocate = function ()
-{
-    return new GenericConnector();
 }
 
 SocketConnector.prototype = new SnapConnector();
@@ -26970,52 +26672,11 @@ function SocketConnector()
     this.className = "SocketConnector";
     this.attrType = eAttrType.SocketConnector;
 
-    this.slot = 0;
-    
     this.slot1 = new SphereAttr();
     this.slot2 = new SphereAttr();
 
     this.registerAttribute(this.slot1, "slot1");
     this.registerAttribute(this.slot2, "slot2");
-}
-
-SocketConnectors.prototype = new AttributeVector();
-SocketConnectors.prototype.constructor = SocketConnectors;
-
-function SocketConnectors()
-{
-    AttributeVector.call(this, new SocketConnectorAllocator());
-    this.className = "SocketConnectors";
-    this.attrType = eAttrType.SocketConnectors;
-
-    this.appendParsedElements.setValueDirect(true);
-}
-
-SocketConnectors.prototype.get = function(name)
-{
-    var length = this.Size();
-    for (var i = 0; i < length; i++)
-    {
-        var connector = this.getAt(i);
-        if (connector.getAttribute("name").getValueDirect().join("") == name)
-        {
-            return connector;
-        }
-    }
-    
-    return null;
-}
-
-SocketConnectorAllocator.prototype = new Allocator();
-SocketConnectorAllocator.prototype.constructor = SocketConnectorAllocator;
-
-function SocketConnectorAllocator()
-{
-}
-
-SocketConnectorAllocator.prototype.allocate = function ()
-{
-    return new SocketConnector();
 }
 
 PlugConnector.prototype = new SnapConnector();
@@ -27034,7 +26695,7 @@ function PlugConnector()
     this.registerAttribute(this.pin2, "pin2");
 }
 
-PlugConnector.prototype.collides = function(socketConnector, plugWorldMatrix, socketWorldMatrix)
+PlugConnector.prototype.collides = function (socketConnector, plugWorldMatrix, socketWorldMatrix)
 {
     // check pin1/socket1
     this.pin1.sphere.setTransform(plugWorldMatrix);
@@ -27058,6 +26719,30 @@ PlugConnector.prototype.collides = function(socketConnector, plugWorldMatrix, so
     return 0;
 }
 
+SocketConnectors.prototype = new AttributeVector();
+SocketConnectors.prototype.constructor = SocketConnectors;
+
+function SocketConnectors()
+{
+    AttributeVector.call(this, new SocketConnectorAllocator());
+    this.className = "SocketConnectors";
+    this.attrType = eAttrType.SocketConnectors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SocketConnectorAllocator.prototype = new Allocator();
+SocketConnectorAllocator.prototype.constructor = SocketConnectorAllocator;
+
+function SocketConnectorAllocator()
+{
+}
+
+SocketConnectorAllocator.prototype.allocate = function ()
+{
+    return new SocketConnector();
+}
+
 PlugConnectors.prototype = new AttributeVector();
 PlugConnectors.prototype.constructor = PlugConnectors;
 
@@ -27068,21 +26753,6 @@ function PlugConnectors()
     this.attrType = eAttrType.PlugConnectors;
 
     this.appendParsedElements.setValueDirect(true);
-}
-
-PlugConnectors.prototype.get = function(name)
-{
-    var length = this.Size();
-    for (var i = 0; i < length; i++)
-    {
-        var connector = this.getAt(i);
-        if (connector.getAttribute("name").getValueDirect().join("") == name)
-        {
-            return connector;
-        }
-    }
-    
-    return null;
 }
 
 PlugConnectorAllocator.prototype = new Allocator();
@@ -27156,7 +26826,12 @@ PhysicsSimulator.prototype.evaluate = function()
                     // if not added, restore
                     if (!this.bodyAdded[i])
                     {
-                        this.updatePhysicsBody(i);
+                        // it's unclear why every model needs to be updated here, but if this step is not taken, 
+                        // other models might not react to the changes from the unselected model
+                        for (var j = 0; j < this.physicsBodies.length; j++)
+                        {
+                            this.updatePhysicsBody(j);
+                        }
                     }
                 }
                 break;
@@ -27176,8 +26851,7 @@ PhysicsSimulator.prototype.evaluate = function()
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
-        var physicsEnabled = this.bodyModels[i].physicsEnabled.getValueDirect();
-        if (!this.bodyAdded[i] || !physicsEnabled)
+        if (!this.bodyAdded[i])
             continue;
 
         this.physicsBodies[i].getMotionState().getWorldTransform(trans);
@@ -27397,20 +27071,11 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     if (!model)
         return;
 
-    // watch for changes in vertices
-    model.getAttribute("vertices").addModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
     // watch for changes in scale
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
     model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-    // watch for changes in enabled
-    model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
-    model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
 
-    // if model is disabled, don't create
-    if (model.getAttribute("enabled").getValueDirect() == false)
-        return;
-    
     // if model is parented, don't add here; it will be added as a shape to the parent model's body
     if (model.motionParent)
         return;
@@ -27467,10 +27132,8 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
     {
         if (this.bodyModels[i] == model)
         {
-            this.bodyModels[i].getAttribute("vertices").removeModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());
@@ -27498,26 +27161,21 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    var center = model.getAttribute("center").getValueDirect();
-    
-    for (var i = 0; i < model.surfaces.length; i++)
-    {
-        var shape = this.getCollisionShape(model.surfaces[i], center, scale);
+    var shape = this.getCollisionShape(model, scale);
 
-        var transform = new Ammo.btTransform();
-        transform.setIdentity();
-        var origin = new Ammo.btVector3(position.x, position.y, position.z);
-        transform.setOrigin(origin);
-        Ammo.destroy(origin);
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
+    var transform = new Ammo.btTransform();
+    transform.setIdentity();
+    var origin = new Ammo.btVector3(position.x, position.y, position.z);
+    transform.setOrigin(origin);
+    Ammo.destroy(origin);
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+    transform.setRotation(quaternion);
+    Ammo.destroy(quaternion);
 
-        compoundShape.addChildShape(transform, shape);
-        Ammo.destroy(transform);
-    }
+    compoundShape.addChildShape(transform, shape);
+    Ammo.destroy(transform);
 
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -27529,7 +27187,7 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
         childPosition.y += position.y;
         childPosition.z += position.z;
 
-        var childRotation = child.getAttribute("rotation").getValueDirect();
+        childRotation = child.getAttribute("rotation").getValueDirect();
         childRotation.x += rotation.x;
         childRotation.y += rotation.y;
         childRotation.z += rotation.z;
@@ -27543,8 +27201,10 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(model, scale)
 {
+    var center = model.getAttribute("center").getValueDirect();
+    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
@@ -27552,11 +27212,11 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
     var matrix = scaleMatrix;
     
     var shape = new Ammo.btConvexHullShape();
-    var verts = surface.getAttribute("vertices").getValueDirect();
+    var verts = model.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
-        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
-        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
+        var vert = matrix.transform(verts[i] - center.x, verts[i + 1] - center.y, verts[i + 2] - center.z, 1);
+        //var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
         var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
         shape.addPoint(point);
         Ammo.destroy(point);
@@ -27586,7 +27246,7 @@ PhysicsSimulator.prototype.getNetMass = function(model)
 
 PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 {
-    // locate array position of model
+    // locate array position of body
     var n = -1;
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -27634,9 +27294,6 @@ PhysicsSimulator.prototype.updatePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.removePhysicsBody = function(n)
 {
-    //if (!this.bodyAdded[n]) 
-    //    return; // don't re-remove
-    
     var body = this.physicsBodies[n];
     if (!body)
         return;
@@ -27649,9 +27306,6 @@ PhysicsSimulator.prototype.removePhysicsBody = function(n)
 
 PhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
-    //if (this.bodyAdded[n]) 
-    //    return; // don't re-restore
-    
     var model = this.bodyModels[n];
     if (!model)
         return;
@@ -27737,19 +27391,6 @@ PhysicsSimulator.prototype.bodiesModified = function()
     this.updateBodies = true;
 }
 
-PhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
-{
-    if (enabled)
-    {
-        this.deletePhysicsBody(model); // ensure model is not added multiple times
-        this.createPhysicsBody(model);
-    }
-    else // !enabled
-    {
-        this.deletePhysicsBody(model);
-    }
-}
-
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     container.updateWorld = true;
@@ -27758,11 +27399,6 @@ function PhysicsSimulator_GravityModifiedCB(attribute, container)
 function PhysicsSimulator_BodiesModifiedCB(attribute, container)
 {
     container.bodiesModified();
-}
-
-function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
-{
-    container.updatePhysicsShape(attribute.getContainer());
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
@@ -27775,314 +27411,6 @@ function PhysicsSimulator_ModelParentModifiedCB(attribute, container)
     container.updateBodies = true;
 }
 
-function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
-{
-    container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
-}
-
-function SnapRec()
-{
-    this.model = null;
-    this.matrix = null;
-    this.surfaces = [];
-    this.geometries = [];
-    this.vertices_start = 0;
-    this.vertices_count = 0;
-    this.genericConnectors = [];
-    this.plugConnectors = [];
-    this.socketConnectors = [];
-}
-
-SnapModel.prototype = new Model();
-SnapModel.prototype.constructor = SnapModel;
-
-function SnapModel()
-{
-    Model.call(this);
-    this.className = "SnapModel";
-    this.attrType = eAttrType.SnapModel;
-    
-    this.snaps = [];
-}
-
-SnapModel.prototype.snap = function(model, matrix)
-{
-    var i, j, k;
-    var vertices, xvertices, xvertex;
-    var normals, xnormals, normal, xnormal;
-    var center, xcenter;
-    
-    var snapRec = new SnapRec();
-    snapRec.model = model;
-    snapRec.matrix = matrix;
-    
-    // disable (hide) model
-    model.enabled.setValueDirect(false);
-    
-    // copy model surfaces to this
-    var surfaces = model.surfaces;
-    for (i = 0; i < surfaces.length; i++)
-    {
-        var surface = surfaces[i].clone();
-        this.addSurface(surface);
-        surface.snappedModel = model;
-        snapRec.surfaces.push(surface);
-
-        // transform vertices
-        xvertices = [];
-        vertices = surface.getAttribute("vertices").getValueDirect();
-        for (j = 0; j < vertices.length; j += 3)
-        {
-            xvertex = matrix.transform(vertices[j], vertices[j + 1], vertices[j + 2], 1);
-            xvertices.push(xvertex.x);
-            xvertices.push(xvertex.y);
-            xvertices.push(xvertex.z);
-        }
-        surface.getAttribute("vertices").setValueDirect(xvertices);
-    
-        // copy geometry
-        var geometries = surfaces[i].geometries;
-        for (j = 0; j < geometries.length; j++)
-        {
-            var geometry = geometries[j].clone();
-            geometry.surface = surface;
-
-            // transform vertices/normals
-            xvertices = [];
-            vertices = geometry.getAttribute("vertices").getValueDirect();
-            for (k = 0; k < vertices.length; k += 3)
-            {
-                xvertex = matrix.transform(vertices[k], vertices[k + 1], vertices[k + 2], 1);
-                xvertices.push(xvertex.x);
-                xvertices.push(xvertex.y);
-                xvertices.push(xvertex.z);
-            }
-            geometry.getAttribute("vertices").setValueDirect(xvertices);
-
-            xnormals = [];
-            normals = geometry.getAttribute("normals").getValueDirect();
-            for (k = 0; k < normals.length; k += 3)
-            {
-                xnormal = matrix.transform(normals[k], normals[k + 1], normals[k + 2], 0);
-                xnormals.push(xnormal.x);
-                xnormals.push(xnormal.y);
-                xnormals.push(xnormal.z);
-            }
-            geometry.getAttribute("normals").setValueDirect(xnormals);
-
-            this.addGeometry(geometry, null, surface);
-            snapRec.geometries.push(geometry);
-        }
-    }
-    
-    // append (transformed) model vertices to snappee
-    xvertices = [];
-    vertices = model.vertices.getValueDirect();
-    for (i = 0; i < vertices.length; i += 3)
-    {
-        xvertex = matrix.transform(vertices[i], vertices[i + 1], vertices[i + 2], 1);
-        xvertices.push(xvertex.x);
-        xvertices.push(xvertex.y);
-        xvertices.push(xvertex.z);
-    }
-    vertices = this.vertices.getValueDirect();   
-    snapRec.vertices_start = vertices.length;
-    snapRec.vertices_count = xvertices.length;
-    vertices = vertices.concat(xvertices);
-    this.vertices.setValueDirect(vertices);
-   
-    // copy (transformed) snap connectors to snappee
-    
-    // generics
-    var genericConnectors = model.genericConnectors;
-    for (i = 0; i < genericConnectors.Size(); i++)
-    {
-        var genericConnector = genericConnectors.getAt(i);
-        var xgenericConnector = new GenericConnector();
-        xgenericConnector.synchronize(genericConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xgenericConnector.point.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xgenericConnector.point.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        this.genericConnectors.push_back(xgenericConnector);
-        snapRec.genericConnectors.push(xgenericConnector);
-    }
-    
-    // plugs  
-    var plugConnectors = model.plugConnectors;
-    for (i = 0; i < plugConnectors.Size(); i++)
-    {
-        var plugConnector = plugConnectors.getAt(i);
-        var xplugConnector = new PlugConnector();
-        xplugConnector.synchronize(plugConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xplugConnector.pin1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xplugConnector.pin2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xplugConnector.pin2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        this.plugConnectors.push_back(xplugConnector);
-        snapRec.plugConnectors.push(xplugConnector);
-    }
-    
-    // sockets
-    var socketConnectors = model.socketConnectors;
-    for (i = 0; i < socketConnectors.Size(); i++)
-    {
-        var socketConnector = socketConnectors.getAt(i);
-        var xsocketConnector = new SocketConnector();
-        xsocketConnector.synchronize(socketConnector);
-        
-        normal = xgenericConnector.normal.getValueDirect();
-        xnormal = matrix.transform(normal.x, normal.y, normal.z, 0);
-        xgenericConnector.normal.setValueDirect(xnormal.x, xnormal.y, xnormal.z);
-        
-        center = xsocketConnector.slot1.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot1.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        center = xsocketConnector.slot2.center.getValueDirect();
-        xcenter = matrix.transform(center.x, center.y, center.z, 1);
-        xsocketConnector.slot2.center.setValueDirect(xcenter.x, xcenter.y, xcenter.z);
-        
-        this.socketConnectors.push_back(xsocketConnector);
-        snapRec.socketConnectors.push(xsocketConnector);
-    }
-    
-    // append name
-    //var name = this.name.getValueDirect().join("");
-    //name += "_" + model.name.getValueDirect().join("");
-    //this.name.setValueDirect(name);
-    
-    // add snap entry
-    this.snaps[model.__nodeId__] = snapRec;
-}
-
-SnapModel.prototype.unsnap = function(model)
-{
-    var i;
-    
-    var snapRec = this.snaps[model.__nodeId__];
-    if (!snapRec) return;
-    
-    // remove model's surfaces
-    for (i = 0; i < snapRec.surfaces.length; i++)
-    {
-        this.removeSurface(snapRec.surfaces[i]);
-    }
-    
-    // remove model's geometries
-    for (i = 0; i < snapRec.geometries.length; i++)
-    {
-        this.removeGeometry(snapRec.geometries[i], null, snapRec.geometries[i].surface);
-    }
-    
-    // remove model's vertices
-    var vertices = this.vertices.getValueDirect();
-    vertices.splice(snapRec.vertices_start, snapRec.vertices_count);
-    this.vertices.setValueDirect(vertices);
-    
-    // remove model's snapConnectors
-    for (i = 0; i < snapRec.genericConnectors.length; i++)
-    {
-        this.genericConnectors.erase(snapRec.genericConnectors[i]);
-    }
-    for (i = 0; i < snapRec.plugConnectors.length; i++)
-    {
-        this.plugConnectors.erase(snapRec.plugConnectors[i]);
-    }
-    for (i = 0; i < snapRec.socketConnectors.length; i++)
-    {
-        this.socketConnectors.erase(snapRec.socketConnectors[i]);
-    }
-    
-    // clear snapConnector's connected flags
-    var genericConnectors = model.genericConnectors;
-    for (i = 0; i < genericConnectors.Size(); i++)
-    {
-        genericConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
-    }
-    var plugConnectors = model.plugConnectors;
-    for (i = 0; i < plugConnectors.Size(); i++)
-    {
-        plugConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
-    }
-    var socketConnectors = model.socketConnectors;
-    for (i = 0; i < socketConnectors.Size(); i++)
-    {
-        socketConnectors.getAt(i).getAttribute("connected").setValueDirect(false);
-    }
-        
-    // set model's position
-    var matrix = snapRec.matrix;
-    
-    var position = matrix.transform(0, 0, 0, 1);
-    model.position.setValueDirect(position.x, position.y, position.z);
-
-    var rotationAngles = matrix.getRotationAngles();
-    model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
-
-    model.setMotionParent(this);
-    zeroInspectionGroup(model);
-    model.updateSimpleTransform();
-    model.updateCompoundTransform();
-    model.setMotionParent(null);
-
-    matrix = model.sectorTransformCompound;
-
-    position = matrix.transform(0, 0, 0, 1);
-    model.position.setValueDirect(position.x, position.y, position.z);
-
-    var quaternion = matrix.getQuaternion();
-    model.quaternion.setValueDirect(quaternion);
-        
-    // enable (show) model
-    model.enabled.setValueDirect(true);
-    
-    // clear snap entry
-    this.snaps[model.__nodeId__] = undefined;
-}
-
-SnapModel.prototype.unsnapAll = function()
-{
-    var unsnapped = [];
-    
-    var snaps = this.snaps.slice();
-    for (var i in snaps)
-    {
-        this.unsnap(snaps[i].model);
-        unsnapped.push(snaps[i].model);
-    }
-    
-    // remove this
-    this.getParent(0).removeChild(this);
-    // invoke onRemove
-    this.onRemove();
-    // remove from registry
-    this.registry.unregister(this);
-    // delete
-    this.destroy();
-    
-    return unsnapped;
-}
-
-SnapModel.prototype.apply = function(directive, params, visitChildren)
-{
-    // call base-class implementation
-    Model.prototype.apply.call(this, directive, params, visitChildren);
-}
 var eEventType = {
     Unknown                     :-1,
     
@@ -28104,20 +27432,20 @@ var eEventType = {
     MouseLeftUp                 :110,
     MouseRightUp                :111,
     MouseMiddleUp               :112,
-    MouseWheelUp                :113,
-    MouseLeftClick              :114,
-    MouseMiddleClick            :115,
-    MouseRightClick             :116,
+	MouseWheelUp                :113,
+	MouseLeftClick              :114,
+	MouseMiddleClick            :115,
+	MouseRightClick             :116,
     MouseLeftDblClick           :117,
-    MouseMiddleDblClick         :118,
+	MouseMiddleDblClick         :118,
     MouseRightDblClick          :119,
     MouseDrag                   :120,
     MouseWheelForward           :121,
     MouseWheelBackward          :122,
-    MouseHover                  :123,
-    MouseLeave                  :124,	// fires when the mouse leaves the client area of the window
-    MouseOver                   :125,	// fires when the mouse is moved onto an element
-    MouseOut                    :126,	// fires when the mouse is moved off an element
+	MouseHover                  :123,
+	MouseLeave                  :124,	// fires when the mouse leaves the client area of the window
+	MouseOver                   :125,	// fires when the mouse is moved onto an element
+	MouseOut                    :126,	// fires when the mouse is moved off an element
     Mouse_Last                  :199,
 
     Key_First                   :200,
@@ -28145,30 +27473,30 @@ var eEventNameMap = {
     "MButton3"                  : eEventType.MouseRightDown,
     "MButton3.Down"             : eEventType.MouseRightDown,
     "MButton1+MButton2.Down"    : eEventType.MouseBothDown,
-    "MButton2+MButton3.Down"    : eEventType.MouseBothDown,
-    "MButton1+MButton3.Down"    : eEventType.MouseBothDown,
+	"MButton2+MButton3.Down"    : eEventType.MouseBothDown,
+	"MButton1+MButton3.Down"    : eEventType.MouseBothDown,
     "MButton1.Click"            : eEventType.MouseLeftClick,
-    "MButton1.DoubleClick"      : eEventType.MouseLeftDblClick,
-    "MButton1.Up"               : eEventType.MouseLeftUp,
+	"MButton1.DoubleClick"      : eEventType.MouseLeftDblClick,
+	"MButton1.Up"               : eEventType.MouseLeftUp,
     "MButton2.Click"            : eEventType.MouseMiddleClick,
-    "MButton2.DoubleClick"      : eEventType.MouseMiddleDblClick,
-    "MButton2.Up"               : eEventType.MouseMiddleUp,
-    "MButton3.Click"            : eEventType.MouseRightClick,
-    "MButton3.DoubleClick"      : eEventType.MouseRightDblClick,
-    "MButton3.Up"               : eEventType.MouseRightUp,
+	"MButton2.DoubleClick"      : eEventType.MouseMiddleDblClick,
+	"MButton2.Up"               : eEventType.MouseMiddleUp,
+	"MButton3.Click"            : eEventType.MouseRightClick,
+	"MButton3.DoubleClick"      : eEventType.MouseRightDblClick,
+	"MButton3.Up"               : eEventType.MouseRightUp,
     "MWheel"                    : eEventType.MouseWheelDown,
-    "MWheel.Down"               : eEventType.MouseWheelDown,
+	"MWheel.Down"               : eEventType.MouseWheelDown,
     "MWheel.Click"              : eEventType.MouseWheelUp,
-    "MWheel.Up"                 : eEventType.MouseWheelUp,
-    "Mouse.Move"                : eEventType.MouseMove,
-    "Mouse.Hover"               : eEventType.MouseHover,
-    "Mouse.Leave"               : eEventType.MouseLeave,
-    "Mouse.Over"                : eEventType.MouseOver,
-    "Mouse.Out"                 : eEventType.MouseOut,
-    "Element.Selected"          : eEventType.ElementSelected,
-    "Element.Unselected"        : eEventType.ElementUnselected,
-    "Element.Focus"             : eEventType.ElementFocus,
-    "Element.Blur"              : eEventType.ElementBlur
+	"MWheel.Up"                 : eEventType.MouseWheelUp,
+	"Mouse.Move"                : eEventType.MouseMove,
+	"Mouse.Hover"               : eEventType.MouseHover,
+	"Mouse.Leave"               : eEventType.MouseLeave,
+	"Mouse.Over"                : eEventType.MouseOver,
+	"Mouse.Out"                 : eEventType.MouseOut,
+	"Element.Selected"          : eEventType.ElementSelected,
+	"Element.Unselected"        : eEventType.ElementUnselected,
+	"Element.Focus"             : eEventType.ElementFocus,
+	"Element.Blur"              : eEventType.ElementBlur
 };
 
 // map of VK_* strings to javascript key codes
@@ -28575,7 +27903,7 @@ EventListener.prototype.eventPerformed = function(event)
 }
 EventListener.prototype.getTrigger = function()
 {
-    this.trigger;
+        this.trigger;
 }
 EventListener.prototype.setTrigger = function(trigger)
 {
@@ -31649,12 +30977,20 @@ ObjectInspector.prototype.runSelectionOccurred = function()
             values[1] = pivotNeg.y;
             values[2] = pivotNeg.z;
             pRotGroup.getChild(4).translation.setValue(values, params);
+            
+            // stop on collision
+            pSelected.getAttribute("stopOnCollision").setValueDirect(true);
         }
     }   
 }
 
 ObjectInspector.prototype.runSelectionCleared = function()
 {
+    for (var i = 0; i < this.selectedObjects.length; i++)
+    {
+        this.getInspectionObject(this.selectedObjects[i]).getAttribute("stopOnCollision").setValueDirect(false);    
+    }
+    
     this.selectedObjects = [];
 }
 
@@ -32337,9 +31673,7 @@ function SelectionListener()
 
     this.rayPick = null;
     this.selections = new Selections();
-    this.selectionEvent = null;
     this.selected = null;
-    this.unsnapped = null;
     
     this.selectionOccurred = new PulseAttr();
     this.selectionCleared = new PulseAttr();
@@ -32347,9 +31681,6 @@ function SelectionListener()
     this.pointWorld = new Vector3DAttr();
     this.pointObject = new Vector3DAttr();
     this.pointGeo = new Vector3DAttr();
-    this.normalView = new Vector3DAttr();
-    this.normalWorld = new Vector3DAttr();
-    this.normalObject = new Vector3DAttr();
     this.triIndex = new NumberAttr();
     this.distance = new NumberAttr();
     this.distanceFromScreenCenter = new NumberAttr();
@@ -32366,9 +31697,6 @@ function SelectionListener()
     this.registerAttribute(this.pointWorld, "pointWorld");
     this.registerAttribute(this.pointObject, "pointObject");
     this.registerAttribute(this.pointGeo, "pointGeo");
-    this.registerAttribute(this.normalView, "normalView");
-    this.registerAttribute(this.normalWorld, "normalWorld");
-    this.registerAttribute(this.normalObject, "normalObject");
     this.registerAttribute(this.triIndex, "triIndex");
     this.registerAttribute(this.distance, "distance");
     this.registerAttribute(this.distanceFromScreenCenter, "distanceFromScreenCenter");
@@ -32390,8 +31718,6 @@ SelectionListener.prototype.setRayPick = function(rayPick)
 
 SelectionListener.prototype.eventPerformed = function(event)
 {
-    this.selectionEvent = event;
-    
     // if mouse-move event, don't process if any other mouse button is pressed (this affects object inspection)
     switch (event.type)
     {
@@ -32412,7 +31738,7 @@ SelectionListener.prototype.eventPerformed = function(event)
 }
 
 SelectionListener.prototype.registerSelection = function(node, element)
-{ 
+{
     // only register first item
     if (this.selected) return;
     
@@ -32442,15 +31768,12 @@ SelectionListener.prototype.registerSelection = function(node, element)
 }
 
 SelectionListener.prototype.clearSelections = function()
-{    
+{
     this.selections.clear();
    
     this.selectedElement.setValueDirect(-1);
     if (this.selected)
     {
-        this.selected.highlight.setValueDirect(false);
-        this.selected.getAttribute("stopOnCollision").setValueDirect(false);
-        
         var selected = this.selected.getAttribute("selected");
         if (selected)
         {
@@ -32506,7 +31829,6 @@ SelectionListener.prototype.processPick = function(pick)
             break;
 		    
             case eAttrType.Model:
-            case eAttrType.SnapModel:
             {
                 this.selections.models.push(node);
                 this.registerSelection(node, element);
@@ -32529,65 +31851,9 @@ SelectionListener.prototype.processPick = function(pick)
     
     if (this.selected)
     {
-        // resnap if previously unsnapped
-        if (this.unsnapped != this.selected)
-        {
-            if (this.unsnapped)
-            {
-                // restore unsnapped snapEnabled state
-                this.unsnapped.snapEnabled.setValueDirect(true);
-                
-                // resnap previously-unsapped models (if still touching)
-                var snapMgr = this.registry.find("SnapMgr");
-                snapMgr.resnap(this.unsnappedModels);
-               
-                // mark all unsnapped models as physics-enabled and restore stopOnCollision flag (so they repel)
-                for (var i = 0; i < this.unsnappedModels.length; i++)
-                {
-                    this.unsnappedModels[i].physicsEnabled.setValueDirect(true);
-                    //this.unsnappedModels[i].stopOnCollision.setValueDirect(true);
-                }
-                
-                this.unsnappedModels = null;
-                this.unsnapped = null;
-            }
-        }
-    
-        // set stopOnCollision for the selected object (do this here because it needs to be 
-        // cleared by the unsnap block below (if unsnapping)
-        this.selected.getAttribute("stopOnCollision").setValueDirect(true);
-        
-        // unsnap if double-clicking on a snapped model and select the appropriate unsnapped model
-        // corresponding to the snapped surface selected
-        if (this.selectionEvent.type == eEventType.MouseLeftDblClick)
-        {          
-            if (this.selected.attrType == eAttrType.SnapModel)
-            {
-                // unsnap models
-                this.unsnappedModels = this.selected.unsnapAll();
-                // select selected unsnapped model
-                this.unsnapped = this.selections.surfaces[0].snappedModel;
-                this.unsnapped.snapEnabled.setValueDirect(false);
-                this.selected = null // clear previous
-                this.registerSelection(this.unsnapped, -1);
-                
-                // mark all unsnapped models as physics-disabled and clear stopOnCollision flag (so they won't repel)
-                for (var i = 0; i < this.unsnappedModels.length; i++)
-                {
-                    this.unsnappedModels[i].physicsEnabled.setValueDirect(false);
-                    this.unsnappedModels[i].stopOnCollision.setValueDirect(false);
-                }              
-            }
-        }
-        
-        this.selected.highlight.setValueDirect(true);
-        
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
         this.pointView.setValueDirect(pick.intersectRecord.pointView.x, pick.intersectRecord.pointView.y, pick.intersectRecord.pointView.z);
-        this.normalObject.setValueDirect(pick.intersectRecord.normalModel.x, pick.intersectRecord.normalModel.y, pick.intersectRecord.normalModel.z);
-        this.normalWorld.setValueDirect(pick.intersectRecord.normalWorld.x, pick.intersectRecord.normalWorld.y, pick.intersectRecord.normalWorld.z);
-        this.normalView.setValueDirect(pick.intersectRecord.normalView.x, pick.intersectRecord.normalView.y, pick.intersectRecord.normalView.z);
         this.triIndex.setValueDirect(pick.intersectRecord.triIndex);
         this.distance.setValueDirect(pick.intersectRecord.distance);
     }
@@ -33927,84 +33193,70 @@ function MorphCommand_TargetModifiedCB(attribute, container)
     }
 }
 
-SnapMgr.prototype = new AttributeContainer();
-SnapMgr.prototype.constructor = SnapMgr;
+SnapToCommand.prototype = new Command();
+SnapToCommand.prototype.constructor = SnapToCommand;
 
-function SnapMgr()
+function SnapToCommand()
 {
-    AttributeContainer.call(this);
-    this.className = "SnapMgr";
+    Command.call(this);
+    this.className = "SnapTo";
+    this.attrType = eAttrType.SnapTo;
 
-    this.name = new StringAttr("SnapMgr");
+    this.plugModel = null;
+    this.socketModel = null;
 
-    this.registerAttribute(this.name, "name");
+    this.socket = new StringAttr("");
+    this.plug = new StringAttr("");
+    this.slot = new NumberAttr(0);
+    this.socketConnector = new SocketConnector();
+    this.plugConnector = new PlugConnector();
+
+    this.target.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
+    this.socket.addModifiedCB(SnapToCommand_TargetModifiedCB, this);
+    this.plug.addModifiedCB(SnapToCommand_PlugModifiedCB, this);
+
+    this.registerAttribute(this.socket, "socket");
+    this.registerAttribute(this.plug, "plug");
+    this.registerAttribute(this.slot, "slot");
+    this.registerAttribute(this.socketConnector, "socketConnector");
+    this.registerAttribute(this.plugConnector, "plugConnector");
+
+    this.target.addTarget(this.socket, null, null, false);
 }
 
-SnapMgr.prototype.snapGenericToGeneric = function(snapper, snappee, snapperConnector, snappeeConnector)
+SnapToCommand.prototype.execute = function()
 {
-    // set rotation
-    var matrix = new Matrix4x4();
-    
-    // rotate so that normals are coincident; do this by rotating angle between
-    // the normals degrees about the cross product of the normals
-    var snappeeNormal = snappeeConnector.getAttribute("normal").getValueDirect();
-    snappeeNormal = new Vector3D(snappeeNormal.x, snappeeNormal.y, snappeeNormal.z);
-    snappeeNormal.normalize();
-
-    var snapperNormal = snapperConnector.getAttribute("normal").getValueDirect();
-    snapperNormal = new Vector3D(snapperNormal.x, snapperNormal.y, snapperNormal.z);
-    snapperNormal.normalize();
-
-    var cross = crossProduct(snappeeNormal, snapperNormal);
-    var cosAngle = cosineAngleBetween(snappeeNormal, snapperNormal);
-    var angleBetween = 180 - toDegrees(Math.acos(cosAngle));
-    if (angleBetween > 0)
+    if (this.socketModel && this.plugModel)
     {
-        var rotationMatrix = new Matrix4x4();
-        rotationMatrix.loadRotation(cross.x, cross.y, cross.z, angleBetween);
-
-        matrix = rotationMatrix;
+        this.snapTo(this.socketModel, this.plugModel);
     }
-
-    // set position
-
-    // get positions of points to connect 
-    var point1, point2;
-    point1 = snapperConnector.getAttribute("point").getAttribute("center").getValueDirect();
-    point1 = matrix.transform(point1.x, point1.y, point1.z, 1);
-    point2 = snappeeConnector.getAttribute("point").getAttribute("center").getValueDirect();
-    
-    var translationMatrix = new Matrix4x4();
-    translationMatrix.loadTranslation(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z);
-    matrix = matrix.multiply(translationMatrix);
-    
-    snapperConnector.getAttribute("connected").setValueDirect(true);
-    snappeeConnector.getAttribute("connected").setValueDirect(true);
-    
-    // perform snap
-    var snapped = this.snap(snapper, snappee, matrix);
-    
-    return snapped;
 }
 
-SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socketConnector)
+SnapToCommand.prototype.snapTo = function(socket, plug)
 {
+    // parent plug to socket; clear its position/rotation/scale and inspection group
+    plug.setMotionParent(socket);
+    plug.getAttribute("position").setValueDirect(0, 0, 0);
+    plug.getAttribute("rotation").setValueDirect(0, 0, 0);
+    plug.getAttribute("scale").setValueDirect(1, 1, 1);
+    zeroInspectionGroup(plug);
+
     // set rotation
     var matrix = new Matrix4x4();
     
     // rotate so that normals are coincident; do this by rotating angle between
     // the normals degrees about the cross product of the normals
-    var socketNormal = socketConnector.getAttribute("normal").getValueDirect();
+    var socketNormal = this.socketConnector.getAttribute("normal").getValueDirect();
     socketNormal = new Vector3D(socketNormal.x, socketNormal.y, socketNormal.z);
     socketNormal.normalize();
 
-    var plugNormal = plugConnector.getAttribute("normal").getValueDirect();
+    var plugNormal = this.plugConnector.getAttribute("normal").getValueDirect();
     plugNormal = new Vector3D(plugNormal.x, plugNormal.y, plugNormal.z);
     plugNormal.normalize();
 
     var cross = crossProduct(socketNormal, plugNormal);
     var cosAngle = cosineAngleBetween(socketNormal, plugNormal);
-    var angleBetween = 180 - toDegrees(Math.acos(cosAngle));
+    angleBetween = 180 - toDegrees(Math.acos(cosAngle));
     if (angleBetween > 0)
     {
         var rotationMatrix = new Matrix4x4();
@@ -34016,16 +33268,16 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
     // line up the unconnected slot; do this by rotating the angle between the
     // remaining slot (socket unconnected - connected) and
     // (plug unconnected - connected) about the socket normal
-    var pin1 = plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
-    var slot1 = socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
-    var pin2 = plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
-    var slot2 = socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
+    var pin1 = this.plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
+    var slot1 = this.socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
+    var pin2 = this.plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
+    var slot2 = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
 
     pin1 = matrix.transform(pin1.x, pin1.y, pin1.z, 1);
     pin2 = matrix.transform(pin2.x, pin2.y, pin2.z, 1);
 
     var pinToPin, slotToSlot;
-    switch (socketConnector.slot)
+    switch (this.slot.getValueDirect())
     {
         case 1:
             pinToPin = new Vector3D(pin2.x - pin1.x, pin2.y - pin1.y, pin2.z - pin1.z);
@@ -34051,221 +33303,53 @@ SnapMgr.prototype.snapPlugToSocket = function(plug, socket, plugConnector, socke
         matrix = matrix.multiply(rotationMatrix);
     }
 
+    var rotationAngles = matrix.getRotationAngles();
+    plug.getAttribute("rotation").setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
     // set position
 
     // get positions of pin and slot to connect 
     var pin, slot;
-    switch (socketConnector.slot)
+    switch (this.slot.getValueDirect())
     {
         case 1:
-            pin = plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
-            slot = socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
+            pin = this.plugConnector.getAttribute("pin1").getAttribute("center").getValueDirect();
+            slot = this.socketConnector.getAttribute("slot1").getAttribute("center").getValueDirect();
             break;
 
         case 2:
-            pin = plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
-            slot = socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
+            pin = this.plugConnector.getAttribute("pin2").getAttribute("center").getValueDirect();
+            slot = this.socketConnector.getAttribute("slot2").getAttribute("center").getValueDirect();
             break;
 
         default:
             return;
     }
     pin = matrix.transform(pin.x, pin.y, pin.z, 1);
-    
-    var translationMatrix = new Matrix4x4();
-    translationMatrix.loadTranslation(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
-    matrix = matrix.multiply(translationMatrix);
-    
-    plugConnector.getAttribute("connected").setValueDirect(true);
-    socketConnector.getAttribute("connected").setValueDirect(true);
-    
-    // perform snap
-    var snapped = this.snap(plug, socket, matrix);
-    
-    return snapped;
+
+    plug.getAttribute("sectorPosition").setValueDirect(slot.x - pin.x, slot.y - pin.y, slot.z - pin.z);
 }
 
-SnapMgr.prototype.snap = function(snapper, snappee, matrix)
+function SnapToCommand_TargetModifiedCB(attribute, container)
 {
-    // if snappee is not a SnapModel, create one and snap snappee onto it first
-    if (snappee.attrType != eAttrType.SnapModel)
+    var target = attribute.getValueDirect().join("");
+    var resource = container.registry.find(target);
+    if (resource)
     {
-        var factory = this.registry.find("AttributeFactory");
-        var snapModel = factory.create("SnapModel");
-        snapModel.synchronize(snappee, true);
-        // reset modification counts for surface attributes so they aren't set to snapped surfaces
-        snapModel.color.modificationCount = 0;
-        snapModel.ambientLevel.modificationCount = 0;
-        snapModel.diffuseLevel.modificationCount = 0;
-        snapModel.specularLevel.modificationCount = 0;
-        snapModel.emissiveLevel.modificationCount = 0;
-        snapModel.ambient.modificationCount = 0;
-        snapModel.diffuse.modificationCount = 0;
-        snapModel.specular.modificationCount = 0;
-        snapModel.emissive.modificationCount = 0;
-        snapModel.glossiness.modificationCount = 0;
-        snapModel.opacity.modificationCount = 0;
-        snapModel.doubleSided.modificationCount = 0;
-        snapModel.texturesEnabled.modificationCount = 0;
-        // don't copy vertices/snapConnectors
-        snapModel.vertices.setValueDirect(new Array());
-        snapModel.genericConnectors.clear();
-        snapModel.plugConnectors.clear();
-        snapModel.socketConnectors.clear();
-        // set name
-        var name = "CompoundModel_" + snapModel.__nodeId__;
-        snapModel.name.setValueDirect(name);
-        // enable physics
-        snapModel.physicsEnabled.setValueDirect(true);
-        // update transforms
-        snapModel.updateSimpleTransform();
-        snapModel.updateCompoundTransform();
-        
-        snapModel.snap(snappee, new Matrix4x4());
-        snappee.getParent(0).addChild(snapModel);
-        snappee = snapModel;
-        
-        // add to physics simulator
-        var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.createPhysicsBody(snappee);
+        container.socketModel = resource;
     }
-    
-    if (snapper.attrType == eAttrType.SnapModel)
-    {
-        // snap snapper's snaps onto snappee
-        var snaps = snapper.snaps;
-        
-        // remove snapper first
-        snapper.getParent(0).removeChild(snapper);
-        // invoke onRemove
-        snapper.onRemove();
-        // remove from registry
-        this.registry.unregister(snapper);
-        // delete
-        snapper.destroy();
-        
-        // snap snapper's snaps
-        for (var i in snaps)
-        {
-            if (snaps[i])
-            {
-                this.snap(snaps[i].model, snappee, snaps[i].matrix.multiply(matrix));
-            }
-        }
-    }
-    else // simple model (not a SnapModel)
-    {
-        snappee.snap(snapper, matrix);
-    }
-    
-    return snappee;
 }
 
-SnapMgr.prototype.resnap = function(models)
+function SnapToCommand_PlugModifiedCB(attribute, container)
 {
-    var i, j;
-    var rootSnaps = [];
-    
-    var snapModels = [];
-    for (i = 0; i < models.length; i++)
+    var plug = attribute.getValueDirect().join("");
+    var resource = container.registry.find(plug);
+    if (resource)
     {
-        snapModels.push(null);
-    }
-    
-    for (i = 0; i < models.length; i++)
-    {
-        if (snapModels[i] != null) continue; // already snapped
-        var snapper = models[i];
-        
-        for (j = 0; j < models.length; j++)
-        {
-            if (i == j) continue; // don't test model against itself          
-            var snappee = snapModels[j] ? snapModels[j] : models[j];
-            
-            var snapped = this.trySnap(snapper, snappee);
-            if (snapped)
-            {
-                snapModels[i] = snapped;
-                snapModels[j] = snapped;
-                // if snappee is a snapModel, remove from root-level snapped shapes, because it
-                // is now a part of snapped
-                for (k = 0; k < rootSnaps.length; k++)
-                {
-                    if (rootSnaps[k] == snappee)
-                    {
-                        rootSnaps.splice(k, 1);
-                        break;
-                    }
-                }
-                rootSnaps.push(snapped);
-                break;
-            }
-        }
-    }
-    
-    // recurse on root-level snapped shapes
-    if (rootSnaps.length > 1)
-    {
-        this.resnap(rootSnaps);
+        container.plugModel = resource;
     }
 }
 
-SnapMgr.prototype.trySnap = function(snapper, snappee)
-{
-    var i, j;
-    
-    if (snapper.snapEnabled.getValueDirect() == false ||
-        snappee.snapEnabled.getValueDirect() == false)
-        return null;
-
-    var snapperMatrix = snapper.sectorTransformCompound;
-    var snappeeMatrix = snappee.sectorTransformCompound;
-    
-    // generics
-    var snapperGenerics = snapper.genericConnectors;
-    var snappeeGenerics = snappee.genericConnectors;
-    for (i = 0; i < snapperGenerics.Size(); i++)
-    {
-        var snapperGeneric = snapperGenerics.getAt(i);
-        if (snapperGeneric.connected.getValueDirect() == true) continue;
-        
-        for (j = 0; j < snappeeGenerics.Size(); j++)
-        {
-            var snappeeGeneric = snappeeGenerics.getAt(j);
-            if (snappeeGeneric.connected.getValueDirect() == true) continue;
-            if (snapperGeneric.type.getValueDirect().join("") != snappeeGeneric.type.getValueDirect().join("")) continue; // only test same types
-            
-            if (snapperGeneric.collides(snappeeGeneric, snapperMatrix, snappeeMatrix))
-            {
-                return this.snapGenericToGeneric(snapper, snappee, snapperGeneric, snappeeGeneric);
-            }
-        }
-    }
-    
-    // plugs/sockets
-    // TODO: might need to test snapper's sockets to snappee's plugs (?)
-    var snapperPlugs = snapper.plugConnectors;
-    var snappeeSockets = snappee.socketConnectors;
-    for (i = 0; i < snapperPlugs.Size(); i++)
-    {
-        var snapperPlug = snapperPlugs.getAt(i);
-        if (snapperPlug.connected.getValueDirect() == true) continue;
-        
-        for (j = 0; j < snappeeSockets.Size(); j++)
-        {
-            var snappeeSocket = snappeeSockets.getAt(j);
-            if (snappeeSocket.connected.getValueDirect() == true) continue;
-            if (snapperPlug.type.getValueDirect().join("") != snappeeSocket.type.getValueDirect().join("")) continue; // only test same types
-            
-            if ((snappeeSocket.slot = snapperPlug.collides(snappeeSocket, snapperMatrix, snappeeMatrix)) > 0)
-            {
-                return this.snapPlugToSocket(snapper, snappee, snapperPlug, snappeeSocket);
-            }
-        }
-    }
-    
-    return null;
-}
 // TODO
 var eLWObjectTokens = 
 {
@@ -35447,7 +34531,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
     {
         var vertices = [];
         var normals = [];
-        var surfacePnts = []; // for setting surface's layer vertices to surface
         vertexNormals[surfIndex] = []
         vertexOrder[surfIndex] = [];
         vertexMinMax[surfIndex] = new Pair();
@@ -35465,8 +34548,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < poly.length; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push([point.x, point.y, point.z]);
 
                 jsmPolygon.AddVertex(point.x, point.y, point.z);
@@ -35495,8 +34576,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 3; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
-                
                 vertices.push(point.x);
                 vertices.push(point.y);
                 vertices.push(point.z);
@@ -35579,7 +34658,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             for (var vertex = 0; vertex < 2; vertex++)
             {
                 var point = layer.pnts[poly[vertex]];
-                surfacePnts[poly[vertex]] = point;
                 
                 vertices.push(point.x);
                 vertices.push(point.y);
@@ -35607,7 +34685,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             var poly = layer.pols[polyIndex];
             
             var point = layer.pnts[poly[0]];
-            surfacePnts[poly[0]] = point;
             
             vertices.push(point.x);
             vertices.push(point.y);
@@ -35623,16 +34700,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
             
             pointList.getAttribute("vertices").setValue(vertices);
         }
-        
-        // set surface's layer vertices to surface
-        var surfaceVertices = [];
-        for (var surfacePnt in surfacePnts)
-        {
-            surfaceVertices.push(surfacePnts[surfacePnt].x);
-            surfaceVertices.push(surfacePnts[surfacePnt].y);
-            surfaceVertices.push(surfacePnts[surfacePnt].z);
-        }
-        surfaces[surfIndex].getAttribute("vertices").setValue(surfaceVertices);
     }
 
     // calculate smooth normals for tris
@@ -37052,8 +36119,7 @@ LWSceneBuilder.prototype.finalize = function()
     for (var i=0; i < this.models.length; i++)
     {
         var model = this.models[i];
-        if (model.bones && 
-            model.bones.length > 0)
+        if (model.bones.length > 0)
         {
             this.attachBoneEffectors(model, model.bones);
         }
@@ -37220,9 +36286,9 @@ LWSceneBuilder.prototype.attachDissolveInterpolator = function(kfi, target)
 LWSceneBuilder.prototype.attachBoneEffectors = function(model, bones)
 {
     // for each geometry set in model...
-    for (var i=0; i < model.geometries.length; i++)
+    for (var i=0; i < model.geometry.length; i++)
     {
-        var geometry = model.geometries[i];
+        var geometry = model.geometry[i];
         
         // allocate bone effector
         var boneEffector = this.factory.create("BoneEffector");
@@ -37347,7 +36413,7 @@ function AttributeFactory()
     this.initializeFinalizeMap();
 }
 
-AttributeFactory.prototype.create = function(name)
+AttributeFactory.prototype.create = function (name)
 {
     var resource = null;
 
@@ -37388,7 +36454,7 @@ AttributeFactory.prototype.create = function(name)
     return resource;
 }
 
-AttributeFactory.prototype.finalize = function(name, attribute)
+AttributeFactory.prototype.finalize = function (name, attribute)
 {
     // invoke finalize proc
     var finalizeProc = this.finalizeProcs[name];
@@ -37398,7 +36464,7 @@ AttributeFactory.prototype.finalize = function(name, attribute)
     }
 }
 
-AttributeFactory.prototype.initializeNewResourceMap = function()
+AttributeFactory.prototype.initializeNewResourceMap = function ()
 {
     // attributes
     this.newResourceProcs["Styles"] = newAttribute;
@@ -37440,7 +36506,6 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["Material"] = newSGNode;
     this.newResourceProcs["Cube"] = newSGNode;
     this.newResourceProcs["ScreenRect"] = newSGNode;
-    this.newResourceProcs["SnapModel"] = newSnapModel;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -37490,7 +36555,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["KeyboardHandler"] = newDeviceHandler;
 }
 
-AttributeFactory.prototype.initializeConfigureMap = function()
+AttributeFactory.prototype.initializeConfigureMap = function ()
 {
     // nodes
     this.configureProcs["Model"] = configureModel;
@@ -37505,7 +36570,7 @@ AttributeFactory.prototype.initializeConfigureMap = function()
     this.configureProcs["HighlightDirective"] = configureDirective;
 }
 
-AttributeFactory.prototype.initializeFinalizeMap = function()
+AttributeFactory.prototype.initializeFinalizeMap = function ()
 {
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
@@ -37548,12 +36613,12 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     this.finalizeProcs["KeyboardHandler"] = finalizeDeviceHandler;
 }
 
-AttributeFactory.prototype.setRegistry = function(registry)
+AttributeFactory.prototype.setRegistry = function (registry)
 {
     this.registry = registry;
 }
 
-AttributeFactory.prototype.setGraphMgr = function(graphMgr)
+AttributeFactory.prototype.setGraphMgr = function (graphMgr)
 {
     this.graphMgr = graphMgr;
 }
@@ -37800,16 +36865,6 @@ function newModel(name, factory)
     var resource = new Model();
     resource.setGraphMgr(factory.graphMgr);
     registerParentableAttributes(resource, factory);
-    addInspectionGroup(resource, factory);
-    return resource;
-}
-
-function newSnapModel(name, factory)
-{
-    var resource = new SnapModel();
-    resource.setGraphMgr(factory.graphMgr);
-    registerParentableAttributes(resource, factory);
-    addInspectionGroup(resource, factory);
     return resource;
 }
 
@@ -38080,6 +37135,8 @@ function finalizeModel(model, factory)
 
         contentHandler.parseFileStream(pathInfo[0]);
     }
+
+    addInspectionGroup(model, factory);
 }
 
 function finalizeDirective(directive, factory)
@@ -38324,7 +37381,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout = new GridLayout();
     this.mapProjectionCalculator = new MapProjectionCalculator();
     this.rasterComponentEventListener = new RasterComponentEventListener();
-    this.snapMgr = new SnapMgr();
 
     // set registry to allocated objects
     this.graphMgr.setRegistry(this.registry);
@@ -38339,7 +37395,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.layout.setRegistry(this.registry);
     this.mapProjectionCalculator.setRegistry(this.registry);
     this.rasterComponentEventListener.setRegistry(this.registry);
-    this.snapMgr.setRegistry(this.registry);
 
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);
@@ -38421,8 +37476,6 @@ Bridgeworks.prototype.initRegistry = function()
     this.registry.register(this.renderAgent);
     this.registry.register(this.layout);
     this.registry.register(this.mapProjectionCalculator);
-    this.registry.register(this.rasterComponentEventListener);
-    this.registry.register(this.snapMgr);
 
     // backward compatibility
     this.registry.registerByName(this.renderAgent, "AnimationAgent");
@@ -38432,7 +37485,6 @@ Bridgeworks.prototype.initEventListeners = function()
 {
     // selector
     this.eventMgr.addListener(eEventType.MouseLeftDown, this.selector);
-    this.eventMgr.addListener(eEventType.MouseLeftDblClick, this.selector);
     this.eventMgr.addListener(eEventType.MouseMiddleDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseRightDown, this.selector);
     this.eventMgr.addListener(eEventType.MouseBothDown, this.selector);

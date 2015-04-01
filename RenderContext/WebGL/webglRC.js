@@ -22,9 +22,9 @@ function gl_MaterialParameters()
     var shininess; 
 }
 
-var gl_MaxLights = 4;
+var gl_MaxLights = 8;
 var gl_MaxTextureStages = 2;
-var gl_MaxClipPlanes = 4;
+var gl_MaxClipPlanes = 8;
 
 webglRC.prototype = new RenderContext();
 webglRC.prototype.constructor = webglRC;
@@ -628,18 +628,25 @@ function webglRC(canvas, background)
     this.setLight = function(index, desc)
     {
         if (this.displayListObj) DL_ADD_METHOD_DESC(this.displayListObj, eRenderContextMethod.SetLight, [index, desc]);
+        
+        // get current view transform
+        var viewMatrix = this.viewMatrixStack.top();
 
         // position
         if (desc.validMembersMask & LIGHTDESC_POSITION_BIT)
         {
-            var values = [desc.position.x, desc.position.y, desc.position.z, 1];
+            // transform to view space
+            var position = viewMatrix.transformw(desc.position.x, desc.position.y, desc.position.z, 1);
+            var values = [position.x, position.y, position.z, position.w];
             _gl.uniform4fv(_program.lightSource[index].position, new Float32Array(values));
         }
 
         // direction
         if (desc.validMembersMask & LIGHTDESC_DIRECTION_BIT)
         {
-            var values = [desc.direction.x, desc.direction.y, desc.direction.z, 0];
+            // transform to view space
+            var direction = viewMatrix.transform(desc.direction.x, desc.direction.y, desc.direction.z, 0);
+            var values = [direction.x, direction.y, direction.z, 0];
 
             switch (desc.type)
             {
