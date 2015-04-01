@@ -39,164 +39,164 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
-                        <mass>0</mass>
-                    </physicalProperties>  
+                            <mass>0</mass>
+                        </physicalProperties>  
                     </Model>
-                    <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="CenterBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="0" y=".26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
+                        <scale x="0.25" y="0.25" z="0.25"/>
                         <genericConnectors>
-                            <genericConnector type="default" name="PositiveX">
+                            <genericConnector name="PositiveX" type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
-                                    <center x="0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveY">
+                            <genericConnector name="PositiveY" type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
-                                    <center x="0" y="0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveZ">
+                            <genericConnector name="PositiveZ" type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
-                                    <center x="0" y="0" z="0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeX">
+                            <genericConnector name="NegativeX" type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
-                                    <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="-1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeY">
+                            <genericConnector name="NegativeY" type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
-                                    <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="-1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeZ">
+                            <genericConnector name="NegativeZ" type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
-                                    <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="-1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
                         <physicalProperties>
-                        <mass>5</mass>
-                    </physicalProperties>  
+                            <mass>5</mass>
+                        </physicalProperties>  
                     </Model>
-                    <Model name="RightBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="RightBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
+                        <scale x="0.25" y="0.25" z="0.25"/>
                         <genericConnectors>
-                            <genericConnector type="default" name="PositiveX">
+                            <genericConnector name="PositiveX" type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
-                                    <center x="0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveY">
+                            <genericConnector name="PositiveY" type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
-                                    <center x="0" y="0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveZ">
+                            <genericConnector name="PositiveZ" type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
-                                    <center x="0" y="0" z="0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeX">
+                            <genericConnector name="NegativeX" type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
-                                    <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="-1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeY">
+                            <genericConnector name="NegativeY" type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
-                                    <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="-1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeZ">
+                            <genericConnector name="NegativeZ" type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
-                                    <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="-1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
                         <physicalProperties>
-                        <mass>5</mass>
-                    </physicalProperties>  
+                            <mass>5</mass>
+                        </physicalProperties>  
                     </Model>
-                    <Model name="LeftBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
+                    <Model name="LeftBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="-1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
-                        <scale x="1" y="1" z="1"/>
+                        <scale x="0.25" y="0.25" z="0.25"/>
                         <genericConnectors>
-                            <genericConnector type="default" name="PositiveX">
+                            <genericConnector name="PositiveX" type="default">
                                 <normal x="1" y="0" z="0"/>
                                 <point>
-                                    <center x="0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveY">
+                            <genericConnector name="PositiveY" type="default">
                                 <normal x="0" y="1" z="0"/>
                                 <point>
-                                    <center x="0" y="0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="PositiveZ">
+                            <genericConnector name="PositiveZ" type="default">
                                 <normal x="0" y="0" z="1"/>
                                 <point>
-                                    <center x="0" y="0" z="0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeX">
+                            <genericConnector name="NegativeX" type="default">
                                 <normal x="-1" y="0" z="0"/>
                                 <point>
-                                    <center x="-0.25" y="0" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="-1" y="0" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeY">
+                            <genericConnector name="NegativeY" type="default">
                                 <normal x="0" y="-1" z="0"/>
                                 <point>
-                                    <center x="0" y="-0.25" z="0"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="-1" z="0"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
-                            <genericConnector type="default" name="NegativeZ">
+                            <genericConnector name="NegativeZ" type="default">
                                 <normal x="0" y="0" z="-1"/>
                                 <point>
-                                    <center x="0" y="0" z="-0.25"/>
-                                    <radius>0.1</radius>
+                                    <center x="0" y="0" z="-1"/>
+                                    <radius>0.25</radius>
                                 </point>
                             </genericConnector>
                         </genericConnectors>
                         <physicalProperties>
-                        <mass>5</mass>
-                    </physicalProperties>  
+                            <mass>5</mass>
+                        </physicalProperties>  
                     </Model>
                     <!--<Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y="3.26" z="0"/>
