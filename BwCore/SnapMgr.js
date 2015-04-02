@@ -199,6 +199,9 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
         physicsSimulator.createPhysicsBody(snappee);
+        // Note: could also update the "bodies" vector to add the compound model 
+        // to the physics simulator, and this would be necessary if bodies vector needs
+        // to change during the lifetime of the compound model
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
