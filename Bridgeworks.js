@@ -5200,9 +5200,12 @@ function AttributeTargetDesc(target,
                              op,
                              converter)
 {
+    if (sourceElementIndex == undefined) sourceElementIndex = -1;
+    if (targetElementIndex == undefined) targetElementIndex = -1;
+    
     this.target = target || null;
-    this.sourceElementIndex = sourceElementIndex || -1;
-    this.targetElementIndex = targetElementIndex || -1;
+    this.sourceElementIndex = sourceElementIndex;
+    this.targetElementIndex = targetElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.converter = converter || null;
 }
@@ -5213,9 +5216,12 @@ function AttributeSourceDesc(source,
                              op,
                              converter)
 {
+    if (sourceElementIndex == undefined) sourceElementIndex = -1;
+    if (targetElementIndex == undefined) targetElementIndex = -1;
+    
     this.source = source || null;
-    this.sourceElementIndex = sourceElementIndex || -1;
-    this.targetElementIndex = targetElementIndex || -1;
+    this.sourceElementIndex = sourceElementIndex;
+    this.targetElementIndex = targetElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.converter = converter || null;
 }
@@ -5223,6 +5229,9 @@ function AttributeSourceDesc(source,
 function AttributeGetParams(elementIndex,
                             valueElementIndex)
 {
+    if (elementIndex == undefined) elementIndex = -1;
+    if (valueElementIndex == undefined) valueElementIndex = -1;
+    
     this.elementIndex = elementIndex;
     this.valueElementIndex = valueElementIndex;
 }
@@ -5234,8 +5243,11 @@ function AttributeSetParams(elementIndex,
                             alertModifiedCBs,
                             caller)
 {
-    this.elementIndex = elementIndex || -1;
-    this.valueElementIndex = valueElementIndex || -1;
+    if (elementIndex == undefined) elementIndex = -1;
+    if (valueElementIndex == undefined) valueElementIndex = -1;
+    
+    this.elementIndex = elementIndex;
+    this.valueElementIndex = valueElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.updateTargets = updateTargets != undefined ? updateTargets : true;
     this.alertModifiedCBs = alertModifiedCBs != undefined ? alertModifiedCBs : true;
@@ -34128,6 +34140,9 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
         physicsSimulator.createPhysicsBody(snappee);
+        // Note: could also update the "bodies" vector to add the compound model 
+        // to the physics simulator, and this would be necessary if bodies vector needs
+        // to change during the lifetime of the compound model
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
