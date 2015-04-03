@@ -1,4 +1,4 @@
-﻿Command.prototype = new EventListener();
+Command.prototype = new EventListener();
 Command.prototype.constructor = Command;
 
 function Command()

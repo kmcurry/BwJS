@@ -49,6 +49,8 @@ var eAttrType = {
     PlugConnectors              :41,
     SphereAttr                  :42,
     PhysicalPropertiesAttr      :43,
+    SnapModelDescriptor         :44,
+    SnapModelDescriptors        :45,
     
     Node                        :1000,
        

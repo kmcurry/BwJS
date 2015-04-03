@@ -14,6 +14,7 @@
     case eAttrType.ColorAttr:
     case eAttrType.Matrix4x4Attr:
     case eAttrType.NumberArrayAttr:
+    case eAttrType.QuaternionAttr:
     case eAttrType.Vector2DAttr:
     case eAttrType.Vector3DAttr:
     case eAttrType.ViewportAttr:

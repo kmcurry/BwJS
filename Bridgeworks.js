@@ -5045,6 +5045,8 @@ var eAttrType = {
     PlugConnectors              :41,
     SphereAttr                  :42,
     PhysicalPropertiesAttr      :43,
+    SnapModelDescriptor         :44,
+    SnapModelDescriptors        :45,
     
     Node                        :1000,
        
@@ -6796,11 +6798,14 @@ AttributeVector.prototype.synchronize = function(src, syncValues)
         length--;
     }
     
-    for (var i = 0; i < length; i++)
+    if (syncValues)
     {
-        if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+        for (var i = 0; i < length; i++)
         {
-            this.getAt(i).copyValue(src.getAt(i));
+            if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+            {
+                this.getAt(i).copyValue(src.getAt(i));
+            }
         }
     }
 }
@@ -7786,6 +7791,7 @@ function setAttributeValue(attribute, value)
     case eAttrType.ColorAttr:
     case eAttrType.Matrix4x4Attr:
     case eAttrType.NumberArrayAttr:
+    case eAttrType.QuaternionAttr:
     case eAttrType.Vector2DAttr:
     case eAttrType.Vector3DAttr:
     case eAttrType.ViewportAttr:
@@ -20194,7 +20200,7 @@ Model.prototype.onRemove = function()
     {
         for (var i = 0; i < physicsSimulators.length; i++)
         {
-            physicsSimulators[i].deletePhysicsBody(this);
+            physicsSimulators[i].bodies.erase(this.name);
         }
     }
     
@@ -24722,6 +24728,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         bodies.push_back(name);
     }
     this.physicsSim.getAttribute("bodies").synchronize(bodies);
+    this.physicsSim.update();
     
     // update positions of models (retain inspection group's rotation)
     for (i = 0; i < models.length; i++)
@@ -27792,6 +27799,48 @@ function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
 }
 
+SnapModelDescriptor.prototype = new AttributeContainer();
+SnapModelDescriptor.prototype.constructor = SnapModelDescriptor;
+
+function SnapModelDescriptor()
+{
+    AttributeContainer.call(this);
+    this.className = "SnapModelDescriptor";
+    this.attrType = eAttrType.SnapModelDescriptor;
+    
+    this.name = new StringAttr();
+    this.position = new Vector3DAttr();
+    this.quaternion = new QuaternionAttr();
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.position, "position");
+    this.registerAttribute(this.quaternion, "quaternion");
+}
+
+SnapModelDescriptors.prototype = new AttributeVector();
+SnapModelDescriptors.prototype.constructor = SnapModelDescriptors;
+
+function SnapModelDescriptors()
+{
+    AttributeVector.call(this, new SnapModelDescriptorAllocator());
+    this.className = "SnapModelDescriptors";
+    this.attrType = eAttrType.SnapModelDescriptors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SnapModelDescriptorAllocator.prototype = new Allocator();
+SnapModelDescriptorAllocator.prototype.constructor = SnapModelDescriptorAllocator;
+
+function SnapModelDescriptorAllocator()
+{
+}
+
+SnapModelDescriptorAllocator.prototype.allocate = function ()
+{
+    return new SnapModelDescriptor();
+}
+
 function SnapRec()
 {
     this.model = null;
@@ -28090,6 +28139,47 @@ SnapModel.prototype.unsnapAll = function()
     return unsnapped;
 }
 
+SnapModel.prototype.getSnapped = function()
+{
+    var i;
+    var descriptors = new SnapModelDescriptors();
+    
+    for (i in this.snaps)
+    {
+        var snapRec = this.snaps[i];
+        var model = snapRec.model;
+        
+        // get model's position
+        var matrix = snapRec.matrix;
+
+        var position = matrix.transform(0, 0, 0, 1);
+        model.position.setValueDirect(position.x, position.y, position.z);
+
+        var rotationAngles = matrix.getRotationAngles();
+        model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+        model.setMotionParent(this);
+        zeroInspectionGroup(model);
+        model.updateSimpleTransform();
+        model.updateCompoundTransform();
+        model.setMotionParent(null);
+
+        matrix = model.sectorTransformCompound;
+
+        position = matrix.transform(0, 0, 0, 1);
+        var quaternion = matrix.getQuaternion();
+        
+        var descriptor = new SnapModelDescriptor();
+        descriptor.name.copyValue(model.name);
+        descriptor.position.setValueDirect(position.x, position.y, position.z);
+        descriptor.quaternion.setValueDirect(quaternion);
+        
+        descriptors.push_back(descriptor);
+    }
+    
+    return descriptors;
+}
+    
 SnapModel.prototype.apply = function(directive, params, visitChildren)
 {
     // call base-class implementation
@@ -33432,7 +33522,7 @@ SerializeCommand.prototype.execute = function()
 //        }
 //        else // !this.target
 //        {
-            this.serializeScene();
+        this.serializeScene();
 //        }
     }
 }
@@ -33454,7 +33544,7 @@ SerializeCommand.prototype.serializeScene = function()
     {
         var factory = this.registry.find("AttributeFactory");
         var serializer = factory.create("Serializer");
-        var xmlSerializer = new XMLSerializer(); 
+        var xmlSerializer = new XMLSerializer();
         // set minimum flag so that only the minimum required for recreation is serialized
         serializer.serializeMinimum.setValueDirect(true);
 
@@ -33465,40 +33555,43 @@ SerializeCommand.prototype.serializeScene = function()
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
+            if (!container)
+                continue;
+
             // device handlers
-            if (container.attrType > eAttrType.DeviceHandler && 
-                container.attrType < eAttrType.DeviceHandler_End)
+            if (container.attrType > eAttrType.DeviceHandler &&
+                    container.attrType < eAttrType.DeviceHandler_End)
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // root nodes (nodes without parents)
-            else if (container.attrType > eAttrType.Node && 
-                	 container.attrType < eAttrType.Node_End)
+            else if (container.attrType > eAttrType.Node &&
+                    container.attrType < eAttrType.Node_End)
             {
-            	if (container.getParentCount() == 0)
-            	{
-                	this.directive.execute(container);
-                	this.serialized += this.directive.serialized;
+                if (container.getParentCount() == 0)
+                {
+                    this.directive.execute(container);
+                    this.serialized += this.directive.serialized;
                 }
             }
             // directives
             else if (container.attrType > eAttrType.Directive &&
-            		 container.attrType < eAttrType.Directive_End)
+                    container.attrType < eAttrType.Directive_End)
             {
-            	context.attribute = container;
+                context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // SelectionListener
@@ -33512,43 +33605,46 @@ SerializeCommand.prototype.serializeScene = function()
             }
             // remaining attributes not fitting other criteria and not a command (commands serialized below)
             /*else if (container.attrType < eAttrType.Command || 
-                	 container.attrType > eAttrType.Command_End)
-            {
-                context.attribute = container;
-
-                // serialize
-                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
-            }*/
+             container.attrType > eAttrType.Command_End)
+             {
+             context.attribute = container;
+             
+             // serialize
+             serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+             this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+             }*/
         }
 
-		// commands
+        // commands
 
-		// DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
-		for (i = 0; i < count; i++)
+        // DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
+        for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.className == "DisconnectAttributes")
+            if (!container)
+                continue;
+
+            if (container.className == "DisconnectAttributes")
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-        
+
         // other commands
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.attrType > eAttrType.Command && 
+            if (!container)
+                continue;
+
+            if (container.attrType > eAttrType.Command &&
                 container.attrType < eAttrType.Command_End &&
                 container.className != "DisconnectAttributes")
             {
@@ -33557,11 +33653,15 @@ SerializeCommand.prototype.serializeScene = function()
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-            		
+
+        // snapped models
+        var snapMgr = this.registry.find("SnapMgr");
+        this.serialized += snapMgr.serialize();
         /*
          // updateSectorOrigin
          const char* substr = NULL;
@@ -33576,7 +33676,7 @@ SerializeCommand.prototype.serializeScene = function()
          {
          name += *substr++;
          }
-
+         
          this.serialized += ".set target=\"";
          this.serialized += name;
          this.serialized += "\" updateSectorOrigin=\"true\"/>";
@@ -33939,6 +34039,49 @@ function MorphCommand_TargetModifiedCB(attribute, container)
     }
 }
 
+SnapToCommand.prototype = new Command();
+SnapToCommand.prototype.constructor = SnapToCommand;
+
+function SnapToCommand()
+{
+    Command.call(this);
+    this.className = "SnapTo";
+    this.attrType = eAttrType.SnapTo;
+
+    this.models = new SnapModelDescriptors();
+
+    this.registerAttribute(this.models, "models");
+    
+    this.numResponses.setValueDirect(0);
+}
+
+SnapToCommand.prototype.execute = function()
+{
+    var i;
+    var models = [];
+    
+    for (i = 0; i < this.models.Size(); i++)
+    {
+        var modelDesc = this.models.getAt(i);
+        var model = this.registry.find(modelDesc.name.getValueDirect().join(""));
+        if (model)
+        {
+            var position = modelDesc.position.getValueDirect();
+            model.position.setValueDirect(position.x, position.y, position.z);
+            
+            var quaternion = modelDesc.quaternion.getValueDirect();
+            model.quaternion.setValueDirect(quaternion);
+            
+            model.updateSimpleTransform();
+            model.updateCompoundTransform();
+            
+            models.push(model);
+        }
+    }
+    
+    var snapMgr = this.registry.find("SnapMgr");
+    snapMgr.resnap(models);
+}
 SnapMgr.prototype = new AttributeContainer();
 SnapMgr.prototype.constructor = SnapMgr;
 
@@ -34139,10 +34282,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.createPhysicsBody(snappee);
-        // Note: could also update the "bodies" vector to add the compound model 
-        // to the physics simulator, and this would be necessary if bodies vector needs
-        // to change during the lifetime of the compound model
+        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
@@ -34280,6 +34420,34 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
     }
     
     return null;
+}
+
+SnapMgr.prototype.serialize = function()
+{
+    var i;
+    var serialized = "";
+    
+    var factory = this.registry.find("AttributeFactory");
+    var serializer = factory.create("Serializer");
+    var xmlSerializer = new XMLSerializer();
+    var context = new Context();
+        
+    // get snapped models
+    var snapped = this.registry.getByType(eAttrType.SnapModel);
+    for (i = 0; i < snapped.length; i++)
+    {
+        var snapTo = new SnapToCommand();
+        var descriptors = snapped[i].getSnapped();
+        
+        snapTo.models.synchronize(descriptors, false);
+               
+        // serialize
+        context.attribute = snapTo;
+        serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+        serialized += xmlSerializer.serializeToString(serializer.DOM);
+    }
+    
+    return serialized;
 }
 // TODO
 var eLWObjectTokens = 

@@ -198,10 +198,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.createPhysicsBody(snappee);
-        // Note: could also update the "bodies" vector to add the compound model 
-        // to the physics simulator, and this would be necessary if bodies vector needs
-        // to change during the lifetime of the compound model
+        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
@@ -339,4 +336,32 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
     }
     
     return null;
+}
+
+SnapMgr.prototype.serialize = function()
+{
+    var i;
+    var serialized = "";
+    
+    var factory = this.registry.find("AttributeFactory");
+    var serializer = factory.create("Serializer");
+    var xmlSerializer = new XMLSerializer();
+    var context = new Context();
+        
+    // get snapped models
+    var snapped = this.registry.getByType(eAttrType.SnapModel);
+    for (i = 0; i < snapped.length; i++)
+    {
+        var snapTo = new SnapToCommand();
+        var descriptors = snapped[i].getSnapped();
+        
+        snapTo.models.synchronize(descriptors, false);
+               
+        // serialize
+        context.attribute = snapTo;
+        serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+        serialized += xmlSerializer.serializeToString(serializer.DOM);
+    }
+    
+    return serialized;
 }

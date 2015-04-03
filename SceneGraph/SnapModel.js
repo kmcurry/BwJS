@@ -1,3 +1,45 @@
+SnapModelDescriptor.prototype = new AttributeContainer();
+SnapModelDescriptor.prototype.constructor = SnapModelDescriptor;
+
+function SnapModelDescriptor()
+{
+    AttributeContainer.call(this);
+    this.className = "SnapModelDescriptor";
+    this.attrType = eAttrType.SnapModelDescriptor;
+    
+    this.name = new StringAttr();
+    this.position = new Vector3DAttr();
+    this.quaternion = new QuaternionAttr();
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.position, "position");
+    this.registerAttribute(this.quaternion, "quaternion");
+}
+
+SnapModelDescriptors.prototype = new AttributeVector();
+SnapModelDescriptors.prototype.constructor = SnapModelDescriptors;
+
+function SnapModelDescriptors()
+{
+    AttributeVector.call(this, new SnapModelDescriptorAllocator());
+    this.className = "SnapModelDescriptors";
+    this.attrType = eAttrType.SnapModelDescriptors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SnapModelDescriptorAllocator.prototype = new Allocator();
+SnapModelDescriptorAllocator.prototype.constructor = SnapModelDescriptorAllocator;
+
+function SnapModelDescriptorAllocator()
+{
+}
+
+SnapModelDescriptorAllocator.prototype.allocate = function ()
+{
+    return new SnapModelDescriptor();
+}
+
 function SnapRec()
 {
     this.model = null;
@@ -296,6 +338,47 @@ SnapModel.prototype.unsnapAll = function()
     return unsnapped;
 }
 
+SnapModel.prototype.getSnapped = function()
+{
+    var i;
+    var descriptors = new SnapModelDescriptors();
+    
+    for (i in this.snaps)
+    {
+        var snapRec = this.snaps[i];
+        var model = snapRec.model;
+        
+        // get model's position
+        var matrix = snapRec.matrix;
+
+        var position = matrix.transform(0, 0, 0, 1);
+        model.position.setValueDirect(position.x, position.y, position.z);
+
+        var rotationAngles = matrix.getRotationAngles();
+        model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+        model.setMotionParent(this);
+        zeroInspectionGroup(model);
+        model.updateSimpleTransform();
+        model.updateCompoundTransform();
+        model.setMotionParent(null);
+
+        matrix = model.sectorTransformCompound;
+
+        position = matrix.transform(0, 0, 0, 1);
+        var quaternion = matrix.getQuaternion();
+        
+        var descriptor = new SnapModelDescriptor();
+        descriptor.name.copyValue(model.name);
+        descriptor.position.setValueDirect(position.x, position.y, position.z);
+        descriptor.quaternion.setValueDirect(quaternion);
+        
+        descriptors.push_back(descriptor);
+    }
+    
+    return descriptors;
+}
+    
 SnapModel.prototype.apply = function(directive, params, visitChildren)
 {
     // call base-class implementation

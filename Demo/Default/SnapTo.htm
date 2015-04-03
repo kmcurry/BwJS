@@ -170,6 +170,7 @@
         <script type="text/javascript" src="../../BwCore/Serialize.js"></script>
         <script type="text/javascript" src="../../BwCore/Export.js"></script>
         <script type="text/javascript" src="../../BwCore/Morph.js"></script>
+        <script type="text/javascript" src="../../BwCore/SnapTo.js"></script>
         <script type="text/javascript" src="../../BwCore/SnapMgr.js"></script>
         <script type="text/javascript" src="../../ContentHandler/LWObjectHandler.js"></script>
         <script type="text/javascript" src="../../ContentHandler/LWObjectBuilder.js"></script>
@@ -204,11 +205,11 @@
             var x = 1.5;
             var y = 1.5;
             var z = 1.5;
-            function rotate()
+            function serialize()
             {
                 //var xml = "\<Set target='UV_BoxG''>";
                 //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "\<Set target='RenderDirective' shadowsEnabled='false'></Set>";
+                var xml = "<Serialize target='Root'/>";
                 console.debug(xml);
                 bridgeworks.updateScene(xml);
                 x += 0.5;
@@ -231,7 +232,7 @@
             <button onclick="bridgeworks.renderController.stop();">Stop</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             Object: <input id="objectname"/>
-            <button onclick="rotate();">Rotate</button>
+            <button onclick="serialize();">Serialize</button>
         </div>
     </center>
 

@@ -151,11 +151,14 @@ AttributeVector.prototype.synchronize = function(src, syncValues)
         length--;
     }
     
-    for (var i = 0; i < length; i++)
+    if (syncValues)
     {
-        if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+        for (var i = 0; i < length; i++)
         {
-            this.getAt(i).copyValue(src.getAt(i));
+            if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+            {
+                this.getAt(i).copyValue(src.getAt(i));
+            }
         }
     }
 }

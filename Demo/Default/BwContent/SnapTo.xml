@@ -318,4 +318,20 @@
             <body>cylinderRight</body>
         </bodies>
     </PhysicsSimulator>
+    <!--<SnapTo>
+        <models>
+            <model name="CenterBox">
+                <position x="-2" y="0" z="0"/>
+                <quaternion w="1" x="0" y="0" z="0"/>
+            </model>
+            <model name="RightBox">
+                <position x="0" y="0" z="0"/>
+                <quaternion w="1" x="0" y="0" z="0"/>
+            </model>
+            <model name="LeftBox">
+                <position x="-4" y="0" z="0"/>
+                <quaternion w="1" x="0" y="0" z="0"/>
+            </model>
+        </models>
+    </SnapTo>-->
 </Session>

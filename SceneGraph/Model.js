@@ -407,7 +407,7 @@ Model.prototype.onRemove = function()
     {
         for (var i = 0; i < physicsSimulators.length; i++)
         {
-            physicsSimulators[i].deletePhysicsBody(this);
+            physicsSimulators[i].bodies.erase(this.name);
         }
     }
     
