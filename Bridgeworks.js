@@ -15578,14 +15578,6 @@ Node.prototype.setModified = function()
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
 
-Node.prototype.onRemove = function()
-{
-    // recurse on children
-    for (var i = 0; i < this.children.length; i++)
-    {
-        this.children[i].onRemove();
-    }
-}
 
 SGNode.prototype = new Node();
 SGNode.prototype.constructor = SGNode;
@@ -17231,13 +17223,10 @@ Light.prototype.setLightEnabled = function()
     this.graphMgr.renderContext.enableLight(this.lightIndex, this.enabled.getValueDirect() ? 1 : 0);
 }
 
-Light.prototype.onRemove = function()
+Light.prototype.onUnregister = function()
 {
     // disable light
     this.graphMgr.renderContext.enableLight(this.lightIndex, 0);
-
-    // call base-class implementation
-    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 function Light_AmbientModifiedCB(attribute, container)
@@ -17471,14 +17460,11 @@ GlobalIllumination.prototype.applyGlobalIllumination = function()
     this.graphMgr.renderContext.setGlobalIllumination(this.ambient.getValueDirect());
 }
 
-GlobalIllumination.prototype.onRemove = function()
+GlobalIllumination.prototype.onUnregister = function()
 {
     // disable global illumination (set to black)
     var black = new Color(0, 0, 0, 0);
-    this.graphMgr.renderContext.setGlobalIllumination(black);
-    
-    // call base-class implementation
-    SGNode.prototype.onRemove.call(this);    
+    this.graphMgr.renderContext.setGlobalIllumination(black);  
 }
 
 function GlobalIllumination_AmbientModifiedCB(attribute, container)
@@ -20190,7 +20176,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     }
 }
 
-Model.prototype.onRemove = function()
+Model.prototype.onUnregister = function()
 {
     var name = this.name.getValueDirect().join("");
     
@@ -20203,9 +20189,6 @@ Model.prototype.onRemove = function()
             physicsSimulators[i].bodies.erase(this.name);
         }
     }
-    
-    // call base-class implementation
-    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 Model.prototype.pushMatrix = function()
@@ -28038,9 +28021,24 @@ SnapModel.prototype.unsnap = function(model)
     var snapRec = this.snaps[model.__nodeId__];
     if (!snapRec) return;
     
-    // remove model's surfaces
+    // remove model's surfaces and synchronize original model's corresponding 
+    // surface attributes to retain changes applied to this
     for (i = 0; i < snapRec.surfaces.length; i++)
     {
+        model.surfaces[i].color.copyValue(snapRec.surfaces[i].color);
+        model.surfaces[i].ambientLevel.copyValue(snapRec.surfaces[i].ambientLevel);
+        model.surfaces[i].diffuseLevel.copyValue(snapRec.surfaces[i].diffuseLevel);
+        model.surfaces[i].specularLevel.copyValue(snapRec.surfaces[i].specularLevel);
+        model.surfaces[i].emissiveLevel.copyValue(snapRec.surfaces[i].emissiveLevel);
+        model.surfaces[i].ambient.copyValue(snapRec.surfaces[i].ambient);
+        model.surfaces[i].diffuse.copyValue(snapRec.surfaces[i].diffuse);
+        model.surfaces[i].specular.copyValue(snapRec.surfaces[i].specular);
+        model.surfaces[i].emissive.copyValue(snapRec.surfaces[i].emissive);
+        model.surfaces[i].glossiness.copyValue(snapRec.surfaces[i].glossiness);
+        model.surfaces[i].opacity.copyValue(snapRec.surfaces[i].opacity);
+        model.surfaces[i].doubleSided.copyValue(snapRec.surfaces[i].doubleSided);
+        model.surfaces[i].texturesEnabled.copyValue(snapRec.surfaces[i].texturesEnabled);
+        
         this.removeSurface(snapRec.surfaces[i]);
     }
     
@@ -28129,12 +28127,10 @@ SnapModel.prototype.unsnapAll = function()
     
     // remove this
     this.getParent(0).removeChild(this);
-    // invoke onRemove
-    this.onRemove();
     // remove from registry
     this.registry.unregister(this);
     // delete
-    this.destroy();
+    //this.destroy();
     
     return unsnapped;
 }
@@ -30157,9 +30153,6 @@ RemoveCommand.prototype.execute = function()
             }
 
             this.removeChildren(this.targetAttribute);
-            
-            // invoke onRemove
-            this.targetAttribute.onRemove();
         }
 
         // remove from registry
@@ -34292,12 +34285,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // remove snapper first
         snapper.getParent(0).removeChild(snapper);
-        // invoke onRemove
-        snapper.onRemove();
         // remove from registry
         this.registry.unregister(snapper);
         // delete
-        snapper.destroy();
+        //snapper.destroy();
         
         // snap snapper's snaps
         for (var i in snaps)
@@ -34373,6 +34364,15 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
         snappee.snapEnabled.getValueDirect() == false)
         return null;
 
+    // if the snapper is a SnapModel, and the snappee is not a SnapModel, swap (simplifies connection)
+    if (snapper.attrType == eAttrType.SnapModel &&
+        snappee.attrType != eAttrType.SnapModel)
+    {
+        var temp = snapper;
+        snapper = snappee;
+        snappee = temp;
+    }
+        
     var snapperMatrix = snapper.sectorTransformCompound;
     var snappeeMatrix = snappee.sectorTransformCompound;
     

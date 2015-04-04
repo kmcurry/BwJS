@@ -387,11 +387,3 @@ Node.prototype.setModified = function()
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
 
-Node.prototype.onRemove = function()
-{
-    // recurse on children
-    for (var i = 0; i < this.children.length; i++)
-    {
-        this.children[i].onRemove();
-    }
-}

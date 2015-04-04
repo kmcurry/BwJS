@@ -27,9 +27,6 @@ RemoveCommand.prototype.execute = function()
             }
 
             this.removeChildren(this.targetAttribute);
-            
-            // invoke onRemove
-            this.targetAttribute.onRemove();
         }
 
         // remove from registry

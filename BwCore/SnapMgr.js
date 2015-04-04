@@ -208,12 +208,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // remove snapper first
         snapper.getParent(0).removeChild(snapper);
-        // invoke onRemove
-        snapper.onRemove();
         // remove from registry
         this.registry.unregister(snapper);
         // delete
-        snapper.destroy();
+        //snapper.destroy();
         
         // snap snapper's snaps
         for (var i in snaps)
@@ -289,6 +287,15 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
         snappee.snapEnabled.getValueDirect() == false)
         return null;
 
+    // if the snapper is a SnapModel, and the snappee is not a SnapModel, swap (simplifies connection)
+    if (snapper.attrType == eAttrType.SnapModel &&
+        snappee.attrType != eAttrType.SnapModel)
+    {
+        var temp = snapper;
+        snapper = snappee;
+        snappee = temp;
+    }
+        
     var snapperMatrix = snapper.sectorTransformCompound;
     var snappeeMatrix = snappee.sectorTransformCompound;
     

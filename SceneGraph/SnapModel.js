@@ -237,9 +237,24 @@ SnapModel.prototype.unsnap = function(model)
     var snapRec = this.snaps[model.__nodeId__];
     if (!snapRec) return;
     
-    // remove model's surfaces
+    // remove model's surfaces and synchronize original model's corresponding 
+    // surface attributes to retain changes applied to this
     for (i = 0; i < snapRec.surfaces.length; i++)
     {
+        model.surfaces[i].color.copyValue(snapRec.surfaces[i].color);
+        model.surfaces[i].ambientLevel.copyValue(snapRec.surfaces[i].ambientLevel);
+        model.surfaces[i].diffuseLevel.copyValue(snapRec.surfaces[i].diffuseLevel);
+        model.surfaces[i].specularLevel.copyValue(snapRec.surfaces[i].specularLevel);
+        model.surfaces[i].emissiveLevel.copyValue(snapRec.surfaces[i].emissiveLevel);
+        model.surfaces[i].ambient.copyValue(snapRec.surfaces[i].ambient);
+        model.surfaces[i].diffuse.copyValue(snapRec.surfaces[i].diffuse);
+        model.surfaces[i].specular.copyValue(snapRec.surfaces[i].specular);
+        model.surfaces[i].emissive.copyValue(snapRec.surfaces[i].emissive);
+        model.surfaces[i].glossiness.copyValue(snapRec.surfaces[i].glossiness);
+        model.surfaces[i].opacity.copyValue(snapRec.surfaces[i].opacity);
+        model.surfaces[i].doubleSided.copyValue(snapRec.surfaces[i].doubleSided);
+        model.surfaces[i].texturesEnabled.copyValue(snapRec.surfaces[i].texturesEnabled);
+        
         this.removeSurface(snapRec.surfaces[i]);
     }
     
@@ -328,12 +343,10 @@ SnapModel.prototype.unsnapAll = function()
     
     // remove this
     this.getParent(0).removeChild(this);
-    // invoke onRemove
-    this.onRemove();
     // remove from registry
     this.registry.unregister(this);
     // delete
-    this.destroy();
+    //this.destroy();
     
     return unsnapped;
 }
