@@ -5045,6 +5045,8 @@ var eAttrType = {
     PlugConnectors              :41,
     SphereAttr                  :42,
     PhysicalPropertiesAttr      :43,
+    SnapModelDescriptor         :44,
+    SnapModelDescriptors        :45,
     
     Node                        :1000,
        
@@ -5200,9 +5202,12 @@ function AttributeTargetDesc(target,
                              op,
                              converter)
 {
+    if (sourceElementIndex == undefined) sourceElementIndex = -1;
+    if (targetElementIndex == undefined) targetElementIndex = -1;
+    
     this.target = target || null;
-    this.sourceElementIndex = sourceElementIndex || -1;
-    this.targetElementIndex = targetElementIndex || -1;
+    this.sourceElementIndex = sourceElementIndex;
+    this.targetElementIndex = targetElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.converter = converter || null;
 }
@@ -5213,9 +5218,12 @@ function AttributeSourceDesc(source,
                              op,
                              converter)
 {
+    if (sourceElementIndex == undefined) sourceElementIndex = -1;
+    if (targetElementIndex == undefined) targetElementIndex = -1;
+    
     this.source = source || null;
-    this.sourceElementIndex = sourceElementIndex || -1;
-    this.targetElementIndex = targetElementIndex || -1;
+    this.sourceElementIndex = sourceElementIndex;
+    this.targetElementIndex = targetElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.converter = converter || null;
 }
@@ -5223,6 +5231,9 @@ function AttributeSourceDesc(source,
 function AttributeGetParams(elementIndex,
                             valueElementIndex)
 {
+    if (elementIndex == undefined) elementIndex = -1;
+    if (valueElementIndex == undefined) valueElementIndex = -1;
+    
     this.elementIndex = elementIndex;
     this.valueElementIndex = valueElementIndex;
 }
@@ -5234,8 +5245,11 @@ function AttributeSetParams(elementIndex,
                             alertModifiedCBs,
                             caller)
 {
-    this.elementIndex = elementIndex || -1;
-    this.valueElementIndex = valueElementIndex || -1;
+    if (elementIndex == undefined) elementIndex = -1;
+    if (valueElementIndex == undefined) valueElementIndex = -1;
+    
+    this.elementIndex = elementIndex;
+    this.valueElementIndex = valueElementIndex;
     this.op = op || eAttrSetOp.Replace;
     this.updateTargets = updateTargets != undefined ? updateTargets : true;
     this.alertModifiedCBs = alertModifiedCBs != undefined ? alertModifiedCBs : true;
@@ -6784,11 +6798,14 @@ AttributeVector.prototype.synchronize = function(src, syncValues)
         length--;
     }
     
-    for (var i = 0; i < length; i++)
+    if (syncValues)
     {
-        if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+        for (var i = 0; i < length; i++)
         {
-            this.getAt(i).copyValue(src.getAt(i));
+            if (src.getAt(i).getValueDirect() != this.getAt(i).getValueDirect())
+            {
+                this.getAt(i).copyValue(src.getAt(i));
+            }
         }
     }
 }
@@ -7774,6 +7791,7 @@ function setAttributeValue(attribute, value)
     case eAttrType.ColorAttr:
     case eAttrType.Matrix4x4Attr:
     case eAttrType.NumberArrayAttr:
+    case eAttrType.QuaternionAttr:
     case eAttrType.Vector2DAttr:
     case eAttrType.Vector3DAttr:
     case eAttrType.ViewportAttr:
@@ -15560,14 +15578,6 @@ Node.prototype.setModified = function()
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
 
-Node.prototype.onRemove = function()
-{
-    // recurse on children
-    for (var i = 0; i < this.children.length; i++)
-    {
-        this.children[i].onRemove();
-    }
-}
 
 SGNode.prototype = new Node();
 SGNode.prototype.constructor = SGNode;
@@ -17213,13 +17223,10 @@ Light.prototype.setLightEnabled = function()
     this.graphMgr.renderContext.enableLight(this.lightIndex, this.enabled.getValueDirect() ? 1 : 0);
 }
 
-Light.prototype.onRemove = function()
+Light.prototype.onUnregister = function()
 {
     // disable light
     this.graphMgr.renderContext.enableLight(this.lightIndex, 0);
-
-    // call base-class implementation
-    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 function Light_AmbientModifiedCB(attribute, container)
@@ -17453,14 +17460,11 @@ GlobalIllumination.prototype.applyGlobalIllumination = function()
     this.graphMgr.renderContext.setGlobalIllumination(this.ambient.getValueDirect());
 }
 
-GlobalIllumination.prototype.onRemove = function()
+GlobalIllumination.prototype.onUnregister = function()
 {
     // disable global illumination (set to black)
     var black = new Color(0, 0, 0, 0);
-    this.graphMgr.renderContext.setGlobalIllumination(black);
-    
-    // call base-class implementation
-    SGNode.prototype.onRemove.call(this);    
+    this.graphMgr.renderContext.setGlobalIllumination(black);  
 }
 
 function GlobalIllumination_AmbientModifiedCB(attribute, container)
@@ -20172,7 +20176,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     }
 }
 
-Model.prototype.onRemove = function()
+Model.prototype.onUnregister = function()
 {
     var name = this.name.getValueDirect().join("");
     
@@ -20182,12 +20186,9 @@ Model.prototype.onRemove = function()
     {
         for (var i = 0; i < physicsSimulators.length; i++)
         {
-            physicsSimulators[i].deletePhysicsBody(this);
+            physicsSimulators[i].bodies.erase(this.name);
         }
     }
-    
-    // call base-class implementation
-    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 Model.prototype.pushMatrix = function()
@@ -24709,7 +24710,8 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
         bodies.push_back(name);
     }
-    this.physicsSim.getAttribute("bodies").synchronize(bodies);
+    this.physicsSim.getAttribute("bodies").synchronize(bodies, true);
+    this.physicsSim.update();
     
     // update positions of models (retain inspection group's rotation)
     for (i = 0; i < models.length; i++)
@@ -27780,6 +27782,48 @@ function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
 }
 
+SnapModelDescriptor.prototype = new AttributeContainer();
+SnapModelDescriptor.prototype.constructor = SnapModelDescriptor;
+
+function SnapModelDescriptor()
+{
+    AttributeContainer.call(this);
+    this.className = "SnapModelDescriptor";
+    this.attrType = eAttrType.SnapModelDescriptor;
+    
+    this.name = new StringAttr();
+    this.position = new Vector3DAttr();
+    this.quaternion = new QuaternionAttr();
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.position, "position");
+    this.registerAttribute(this.quaternion, "quaternion");
+}
+
+SnapModelDescriptors.prototype = new AttributeVector();
+SnapModelDescriptors.prototype.constructor = SnapModelDescriptors;
+
+function SnapModelDescriptors()
+{
+    AttributeVector.call(this, new SnapModelDescriptorAllocator());
+    this.className = "SnapModelDescriptors";
+    this.attrType = eAttrType.SnapModelDescriptors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SnapModelDescriptorAllocator.prototype = new Allocator();
+SnapModelDescriptorAllocator.prototype.constructor = SnapModelDescriptorAllocator;
+
+function SnapModelDescriptorAllocator()
+{
+}
+
+SnapModelDescriptorAllocator.prototype.allocate = function ()
+{
+    return new SnapModelDescriptor();
+}
+
 function SnapRec()
 {
     this.model = null;
@@ -27828,6 +27872,24 @@ SnapModel.prototype.snap = function(model, matrix)
         surface.snappedModel = model;
         snapRec.surfaces.push(surface);
 
+        // enable surface (disabled by model.enabled set above)
+        surface.enabled.setValueDirect(true);
+        
+        // target original surfaces to retain changes made to snapped surface
+        surface.color.addTarget(surfaces[i].color, eAttrSetOp.Replace, null, false);
+        surface.ambientLevel.addTarget(surfaces[i].ambientLevel, eAttrSetOp.Replace, null, false);
+        surface.diffuseLevel.addTarget(surfaces[i].diffuseLevel, eAttrSetOp.Replace, null, false);
+        surface.specularLevel.addTarget(surfaces[i].specularLevel, eAttrSetOp.Replace, null, false);
+        surface.emissiveLevel.addTarget(surfaces[i].emissiveLevel, eAttrSetOp.Replace, null, false);
+        surface.ambient.addTarget(surfaces[i].ambient, eAttrSetOp.Replace, null, false);
+        surface.diffuse.addTarget(surfaces[i].diffuse, eAttrSetOp.Replace, null, false);
+        surface.specular.addTarget(surfaces[i].specular, eAttrSetOp.Replace, null, false);
+        surface.emissive.addTarget(surfaces[i].emissive, eAttrSetOp.Replace, null, false);
+        surface.glossiness.addTarget(surfaces[i].glossiness, eAttrSetOp.Replace, null, false);
+        surface.opacity.addTarget(surfaces[i].opacity, eAttrSetOp.Replace, null, false);
+        surface.doubleSided.addTarget(surfaces[i].doubleSided, eAttrSetOp.Replace, null, false);
+        surface.texturesEnabled.addTarget(surfaces[i].texturesEnabled, eAttrSetOp.Replace, null, false);
+       
         // transform vertices
         xvertices = [];
         vertices = surface.getAttribute("vertices").getValueDirect();
@@ -27977,10 +28039,28 @@ SnapModel.prototype.unsnap = function(model)
     var snapRec = this.snaps[model.__nodeId__];
     if (!snapRec) return;
     
-    // remove model's surfaces
+    // remove model's surfaces and synchronize original model's corresponding 
+    // surface attributes to retain changes applied to this
     for (i = 0; i < snapRec.surfaces.length; i++)
-    {
-        this.removeSurface(snapRec.surfaces[i]);
+    {   
+        var surface = snapRec.surfaces[i];
+        
+        // untarget original surfaces
+        surface.color.removeTarget(model.surfaces[i].color);
+        surface.ambientLevel.removeTarget(model.surfaces[i].ambientLevel);
+        surface.diffuseLevel.removeTarget(model.surfaces[i].diffuseLevel);
+        surface.specularLevel.removeTarget(model.surfaces[i].specularLevel);
+        surface.emissiveLevel.removeTarget(model.surfaces[i].emissiveLevel);
+        surface.ambient.removeTarget(model.surfaces[i].ambient);
+        surface.diffuse.removeTarget(model.surfaces[i].diffuse);
+        surface.specular.removeTarget(model.surfaces[i].specular);
+        surface.emissive.removeTarget(model.surfaces[i].emissive);
+        surface.glossiness.removeTarget(model.surfaces[i].glossiness);
+        surface.opacity.removeTarget(model.surfaces[i].opacity);
+        surface.doubleSided.removeTarget(model.surfaces[i].doubleSided);
+        surface.texturesEnabled.removeTarget(model.surfaces[i].texturesEnabled);
+        
+        this.removeSurface(surface);
     }
     
     // remove model's geometries
@@ -28068,20 +28148,65 @@ SnapModel.prototype.unsnapAll = function()
     
     // remove this
     this.getParent(0).removeChild(this);
-    // invoke onRemove
-    this.onRemove();
     // remove from registry
     this.registry.unregister(this);
     // delete
-    this.destroy();
+    //this.destroy();
     
     return unsnapped;
 }
 
+SnapModel.prototype.getSnapped = function()
+{
+    var i;
+    var descriptors = new SnapModelDescriptors();
+    
+    for (i in this.snaps)
+    {
+        var snapRec = this.snaps[i];
+        var model = snapRec.model;
+        
+        // get model's position
+        var matrix = snapRec.matrix;
+
+        var position = matrix.transform(0, 0, 0, 1);
+        model.position.setValueDirect(position.x, position.y, position.z);
+
+        var rotationAngles = matrix.getRotationAngles();
+        model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+        model.setMotionParent(this);
+        zeroInspectionGroup(model);
+        model.updateSimpleTransform();
+        model.updateCompoundTransform();
+        model.setMotionParent(null);
+
+        matrix = model.sectorTransformCompound;
+
+        position = matrix.transform(0, 0, 0, 1);
+        var quaternion = matrix.getQuaternion();
+        
+        var descriptor = new SnapModelDescriptor();
+        descriptor.name.copyValue(model.name);
+        descriptor.position.setValueDirect(position.x, position.y, position.z);
+        descriptor.quaternion.setValueDirect(quaternion);
+        
+        descriptors.push_back(descriptor);
+    }
+    
+    return descriptors;
+}
+    
 SnapModel.prototype.apply = function(directive, params, visitChildren)
 {
     // call base-class implementation
     Model.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
+{
+    // don't replace snapped surface's attribute value
+    attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
 }
 var eEventType = {
     Unknown                     :-1,
@@ -30055,9 +30180,6 @@ RemoveCommand.prototype.execute = function()
             }
 
             this.removeChildren(this.targetAttribute);
-            
-            // invoke onRemove
-            this.targetAttribute.onRemove();
         }
 
         // remove from registry
@@ -33420,7 +33542,7 @@ SerializeCommand.prototype.execute = function()
 //        }
 //        else // !this.target
 //        {
-            this.serializeScene();
+        this.serializeScene();
 //        }
     }
 }
@@ -33442,7 +33564,7 @@ SerializeCommand.prototype.serializeScene = function()
     {
         var factory = this.registry.find("AttributeFactory");
         var serializer = factory.create("Serializer");
-        var xmlSerializer = new XMLSerializer(); 
+        var xmlSerializer = new XMLSerializer();
         // set minimum flag so that only the minimum required for recreation is serialized
         serializer.serializeMinimum.setValueDirect(true);
 
@@ -33453,40 +33575,43 @@ SerializeCommand.prototype.serializeScene = function()
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
+            if (!container)
+                continue;
+
             // device handlers
-            if (container.attrType > eAttrType.DeviceHandler && 
-                container.attrType < eAttrType.DeviceHandler_End)
+            if (container.attrType > eAttrType.DeviceHandler &&
+                    container.attrType < eAttrType.DeviceHandler_End)
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // root nodes (nodes without parents)
-            else if (container.attrType > eAttrType.Node && 
-                	 container.attrType < eAttrType.Node_End)
+            else if (container.attrType > eAttrType.Node &&
+                    container.attrType < eAttrType.Node_End)
             {
-            	if (container.getParentCount() == 0)
-            	{
-                	this.directive.execute(container);
-                	this.serialized += this.directive.serialized;
+                if (container.getParentCount() == 0)
+                {
+                    this.directive.execute(container);
+                    this.serialized += this.directive.serialized;
                 }
             }
             // directives
             else if (container.attrType > eAttrType.Directive &&
-            		 container.attrType < eAttrType.Directive_End)
+                    container.attrType < eAttrType.Directive_End)
             {
-            	context.attribute = container;
+                context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // SelectionListener
@@ -33500,43 +33625,46 @@ SerializeCommand.prototype.serializeScene = function()
             }
             // remaining attributes not fitting other criteria and not a command (commands serialized below)
             /*else if (container.attrType < eAttrType.Command || 
-                	 container.attrType > eAttrType.Command_End)
-            {
-                context.attribute = container;
-
-                // serialize
-                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
-            }*/
+             container.attrType > eAttrType.Command_End)
+             {
+             context.attribute = container;
+             
+             // serialize
+             serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+             this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+             }*/
         }
 
-		// commands
+        // commands
 
-		// DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
-		for (i = 0; i < count; i++)
+        // DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
+        for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.className == "DisconnectAttributes")
+            if (!container)
+                continue;
+
+            if (container.className == "DisconnectAttributes")
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-        
+
         // other commands
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.attrType > eAttrType.Command && 
+            if (!container)
+                continue;
+
+            if (container.attrType > eAttrType.Command &&
                 container.attrType < eAttrType.Command_End &&
                 container.className != "DisconnectAttributes")
             {
@@ -33545,11 +33673,15 @@ SerializeCommand.prototype.serializeScene = function()
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-            		
+
+        // snapped models
+        var snapMgr = this.registry.find("SnapMgr");
+        this.serialized += snapMgr.serialize();
         /*
          // updateSectorOrigin
          const char* substr = NULL;
@@ -33564,7 +33696,7 @@ SerializeCommand.prototype.serializeScene = function()
          {
          name += *substr++;
          }
-
+         
          this.serialized += ".set target=\"";
          this.serialized += name;
          this.serialized += "\" updateSectorOrigin=\"true\"/>";
@@ -33927,6 +34059,49 @@ function MorphCommand_TargetModifiedCB(attribute, container)
     }
 }
 
+SnapToCommand.prototype = new Command();
+SnapToCommand.prototype.constructor = SnapToCommand;
+
+function SnapToCommand()
+{
+    Command.call(this);
+    this.className = "SnapTo";
+    this.attrType = eAttrType.SnapTo;
+
+    this.models = new SnapModelDescriptors();
+
+    this.registerAttribute(this.models, "models");
+    
+    this.numResponses.setValueDirect(0);
+}
+
+SnapToCommand.prototype.execute = function()
+{
+    var i;
+    var models = [];
+    
+    for (i = 0; i < this.models.Size(); i++)
+    {
+        var modelDesc = this.models.getAt(i);
+        var model = this.registry.find(modelDesc.name.getValueDirect().join(""));
+        if (model)
+        {
+            var position = modelDesc.position.getValueDirect();
+            model.position.setValueDirect(position.x, position.y, position.z);
+            
+            var quaternion = modelDesc.quaternion.getValueDirect();
+            model.quaternion.setValueDirect(quaternion);
+            
+            model.updateSimpleTransform();
+            model.updateCompoundTransform();
+            
+            models.push(model);
+        }
+    }
+    
+    var snapMgr = this.registry.find("SnapMgr");
+    snapMgr.resnap(models);
+}
 SnapMgr.prototype = new AttributeContainer();
 SnapMgr.prototype.constructor = SnapMgr;
 
@@ -34093,20 +34268,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var factory = this.registry.find("AttributeFactory");
         var snapModel = factory.create("SnapModel");
         snapModel.synchronize(snappee, true);
-        // reset modification counts for surface attributes so they aren't set to snapped surfaces
-        snapModel.color.modificationCount = 0;
-        snapModel.ambientLevel.modificationCount = 0;
-        snapModel.diffuseLevel.modificationCount = 0;
-        snapModel.specularLevel.modificationCount = 0;
-        snapModel.emissiveLevel.modificationCount = 0;
-        snapModel.ambient.modificationCount = 0;
-        snapModel.diffuse.modificationCount = 0;
-        snapModel.specular.modificationCount = 0;
-        snapModel.emissive.modificationCount = 0;
-        snapModel.glossiness.modificationCount = 0;
-        snapModel.opacity.modificationCount = 0;
-        snapModel.doubleSided.modificationCount = 0;
-        snapModel.texturesEnabled.modificationCount = 0;
         // don't copy vertices/snapConnectors
         snapModel.vertices.setValueDirect(new Array());
         snapModel.genericConnectors.clear();
@@ -34127,7 +34288,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.createPhysicsBody(snappee);
+        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
@@ -34137,12 +34298,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // remove snapper first
         snapper.getParent(0).removeChild(snapper);
-        // invoke onRemove
-        snapper.onRemove();
         // remove from registry
         this.registry.unregister(snapper);
         // delete
-        snapper.destroy();
+        //snapper.destroy();
         
         // snap snapper's snaps
         for (var i in snaps)
@@ -34218,6 +34377,15 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
         snappee.snapEnabled.getValueDirect() == false)
         return null;
 
+    // if the snapper is a SnapModel, and the snappee is not a SnapModel, swap (simplifies connection)
+    if (snapper.attrType == eAttrType.SnapModel &&
+        snappee.attrType != eAttrType.SnapModel)
+    {
+        var temp = snapper;
+        snapper = snappee;
+        snappee = temp;
+    }
+        
     var snapperMatrix = snapper.sectorTransformCompound;
     var snappeeMatrix = snappee.sectorTransformCompound;
     
@@ -34265,6 +34433,37 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
     }
     
     return null;
+}
+
+SnapMgr.prototype.serialize = function()
+{
+    var i;
+    var serialized = "";
+    
+    var factory = this.registry.find("AttributeFactory");
+    var serializer = factory.create("Serializer");
+    var xmlSerializer = new XMLSerializer();
+    var context = new Context();
+        
+    // get snapped models
+    var snapped = this.registry.getByType(eAttrType.SnapModel);
+    if (snapped)
+    {    
+        for (i = 0; i < snapped.length; i++)
+        {
+            var snapTo = new SnapToCommand();
+            var descriptors = snapped[i].getSnapped();
+
+            snapTo.models.synchronize(descriptors, false);
+
+            // serialize
+            context.attribute = snapTo;
+            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+            serialized += xmlSerializer.serializeToString(serializer.DOM);
+        }
+    }
+    
+    return serialized;
 }
 // TODO
 var eLWObjectTokens = 
