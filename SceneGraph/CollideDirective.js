@@ -86,7 +86,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
         bodies.push_back(name);
     }
-    this.physicsSim.getAttribute("bodies").synchronize(bodies);
+    this.physicsSim.getAttribute("bodies").synchronize(bodies, true);
     this.physicsSim.update();
     
     // update positions of models (retain inspection group's rotation)
