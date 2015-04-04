@@ -27872,6 +27872,24 @@ SnapModel.prototype.snap = function(model, matrix)
         surface.snappedModel = model;
         snapRec.surfaces.push(surface);
 
+        // enable surface (disabled by model.enabled set above)
+        surface.enabled.setValueDirect(true);
+        
+        // target original surfaces to retain changes made to snapped surface
+        surface.color.addTarget(surfaces[i].color, eAttrSetOp.Replace, null, false);
+        surface.ambientLevel.addTarget(surfaces[i].ambientLevel, eAttrSetOp.Replace, null, false);
+        surface.diffuseLevel.addTarget(surfaces[i].diffuseLevel, eAttrSetOp.Replace, null, false);
+        surface.specularLevel.addTarget(surfaces[i].specularLevel, eAttrSetOp.Replace, null, false);
+        surface.emissiveLevel.addTarget(surfaces[i].emissiveLevel, eAttrSetOp.Replace, null, false);
+        surface.ambient.addTarget(surfaces[i].ambient, eAttrSetOp.Replace, null, false);
+        surface.diffuse.addTarget(surfaces[i].diffuse, eAttrSetOp.Replace, null, false);
+        surface.specular.addTarget(surfaces[i].specular, eAttrSetOp.Replace, null, false);
+        surface.emissive.addTarget(surfaces[i].emissive, eAttrSetOp.Replace, null, false);
+        surface.glossiness.addTarget(surfaces[i].glossiness, eAttrSetOp.Replace, null, false);
+        surface.opacity.addTarget(surfaces[i].opacity, eAttrSetOp.Replace, null, false);
+        surface.doubleSided.addTarget(surfaces[i].doubleSided, eAttrSetOp.Replace, null, false);
+        surface.texturesEnabled.addTarget(surfaces[i].texturesEnabled, eAttrSetOp.Replace, null, false);
+       
         // transform vertices
         xvertices = [];
         vertices = surface.getAttribute("vertices").getValueDirect();
@@ -28024,22 +28042,25 @@ SnapModel.prototype.unsnap = function(model)
     // remove model's surfaces and synchronize original model's corresponding 
     // surface attributes to retain changes applied to this
     for (i = 0; i < snapRec.surfaces.length; i++)
-    {
-        model.surfaces[i].color.copyValue(snapRec.surfaces[i].color);
-        model.surfaces[i].ambientLevel.copyValue(snapRec.surfaces[i].ambientLevel);
-        model.surfaces[i].diffuseLevel.copyValue(snapRec.surfaces[i].diffuseLevel);
-        model.surfaces[i].specularLevel.copyValue(snapRec.surfaces[i].specularLevel);
-        model.surfaces[i].emissiveLevel.copyValue(snapRec.surfaces[i].emissiveLevel);
-        model.surfaces[i].ambient.copyValue(snapRec.surfaces[i].ambient);
-        model.surfaces[i].diffuse.copyValue(snapRec.surfaces[i].diffuse);
-        model.surfaces[i].specular.copyValue(snapRec.surfaces[i].specular);
-        model.surfaces[i].emissive.copyValue(snapRec.surfaces[i].emissive);
-        model.surfaces[i].glossiness.copyValue(snapRec.surfaces[i].glossiness);
-        model.surfaces[i].opacity.copyValue(snapRec.surfaces[i].opacity);
-        model.surfaces[i].doubleSided.copyValue(snapRec.surfaces[i].doubleSided);
-        model.surfaces[i].texturesEnabled.copyValue(snapRec.surfaces[i].texturesEnabled);
+    {   
+        var surface = snapRec.surfaces[i];
         
-        this.removeSurface(snapRec.surfaces[i]);
+        // untarget original surfaces
+        surface.color.removeTarget(model.surfaces[i].color);
+        surface.ambientLevel.removeTarget(model.surfaces[i].ambientLevel);
+        surface.diffuseLevel.removeTarget(model.surfaces[i].diffuseLevel);
+        surface.specularLevel.removeTarget(model.surfaces[i].specularLevel);
+        surface.emissiveLevel.removeTarget(model.surfaces[i].emissiveLevel);
+        surface.ambient.removeTarget(model.surfaces[i].ambient);
+        surface.diffuse.removeTarget(model.surfaces[i].diffuse);
+        surface.specular.removeTarget(model.surfaces[i].specular);
+        surface.emissive.removeTarget(model.surfaces[i].emissive);
+        surface.glossiness.removeTarget(model.surfaces[i].glossiness);
+        surface.opacity.removeTarget(model.surfaces[i].opacity);
+        surface.doubleSided.removeTarget(model.surfaces[i].doubleSided);
+        surface.texturesEnabled.removeTarget(model.surfaces[i].texturesEnabled);
+        
+        this.removeSurface(surface);
     }
     
     // remove model's geometries
@@ -28180,6 +28201,12 @@ SnapModel.prototype.apply = function(directive, params, visitChildren)
 {
     // call base-class implementation
     Model.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
+{
+    // don't replace snapped surface's attribute value
+    attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
 }
 var eEventType = {
     Unknown                     :-1,
@@ -34241,20 +34268,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var factory = this.registry.find("AttributeFactory");
         var snapModel = factory.create("SnapModel");
         snapModel.synchronize(snappee, true);
-        // reset modification counts for surface attributes so they aren't set to snapped surfaces
-        snapModel.color.modificationCount = 0;
-        snapModel.ambientLevel.modificationCount = 0;
-        snapModel.diffuseLevel.modificationCount = 0;
-        snapModel.specularLevel.modificationCount = 0;
-        snapModel.emissiveLevel.modificationCount = 0;
-        snapModel.ambient.modificationCount = 0;
-        snapModel.diffuse.modificationCount = 0;
-        snapModel.specular.modificationCount = 0;
-        snapModel.emissive.modificationCount = 0;
-        snapModel.glossiness.modificationCount = 0;
-        snapModel.opacity.modificationCount = 0;
-        snapModel.doubleSided.modificationCount = 0;
-        snapModel.texturesEnabled.modificationCount = 0;
         // don't copy vertices/snapConnectors
         snapModel.vertices.setValueDirect(new Array());
         snapModel.genericConnectors.clear();
@@ -34434,17 +34447,20 @@ SnapMgr.prototype.serialize = function()
         
     // get snapped models
     var snapped = this.registry.getByType(eAttrType.SnapModel);
-    for (i = 0; i < snapped.length; i++)
-    {
-        var snapTo = new SnapToCommand();
-        var descriptors = snapped[i].getSnapped();
-        
-        snapTo.models.synchronize(descriptors, false);
-               
-        // serialize
-        context.attribute = snapTo;
-        serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-        serialized += xmlSerializer.serializeToString(serializer.DOM);
+    if (snapped)
+    {    
+        for (i = 0; i < snapped.length; i++)
+        {
+            var snapTo = new SnapToCommand();
+            var descriptors = snapped[i].getSnapped();
+
+            snapTo.models.synchronize(descriptors, false);
+
+            // serialize
+            context.attribute = snapTo;
+            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+            serialized += xmlSerializer.serializeToString(serializer.DOM);
+        }
     }
     
     return serialized;
