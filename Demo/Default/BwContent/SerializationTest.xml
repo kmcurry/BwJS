@@ -1,154 +1,323 @@
-<Session broadcast="false">
-    <Set target="Selector" computePivotDistance="false"/>
+<?xml version="1.0" encoding="UTF-8"?><?bw onload="initialize"?><Session broadcast="false">
+    <Set target="Selector" computePivotDistance="true"/>
     <MouseHandler/>
+    <KeyboardHandler/>
     <ObjectInspector>
         <name>ObjectInspector</name>
+        <evaluate>true</evaluate>
         <rotationDelta item0="0" item1="0" item2="0"/>
-        <evaluate>false</evaluate>
     </ObjectInspector>
     <SceneInspector>
         <name>SceneInspector</name>
+        <evaluate>false</evaluate>
         <panDelta item0="0" item1="0" item2="0"/>
         <rotationDelta item0="0" item1="0" item2="0"/>
         <viewRelativeXAxisRotation>true</viewRelativeXAxisRotation>
         <viewRelativeZAxisRotation>true</viewRelativeZAxisRotation>
-        <pivotDistance>3</pivotDistance>
+        <pivotDistance>5.843755157773261</pivotDistance>
         <rotationSensitivity item0="0.5" item1="0.5" item2="0.5"/>
         <viewRelativeTranslationDelta item0="0" item1="0" item2="0"/>
-        <evaluate>true</evaluate>
     </SceneInspector>
     <Isolator>
         <name>Root</name>
         <isolateTransforms>true</isolateTransforms>
-        <PerspectiveCamera>
-            <name>Camera</name>
-            <position item0="3" item1="4.2424" item2="-3"/>
-            <rotation item0="45" item1="-45" item2="0"/>
-            <nearDistance>0.25</nearDistance>
-            <farDistance>4000</farDistance>
-            <zoom>3.2</zoom>
-        </PerspectiveCamera>
+        <Selector>
+            <name>Cameras</name>
+            <PerspectiveCamera>
+                <name>Camera</name>
+                <position item0="0" item1="4.2424" item2="-3"/>
+                <rotation item0="45" item1="0" item2="0"/>
+                <nearDistance>0.25</nearDistance>
+                <farDistance>4000</farDistance>
+                <zoom>3.2</zoom>
+            </PerspectiveCamera>
+        </Selector>
         <Group>
             <name>Lights</name>
             <GlobalIllumination>
                 <name>GlobalLight</name>
-                <ambient item0="0.25" item1="0.25" item2="0.25" item3="0.25"/>
+                <ambient item0="0.25" item1="0.25" item2="0.25"/>
             </GlobalIllumination>
-            <DirectionalLight>
+            <PointLight>
                 <name>theLight</name>
-                <enabled>true</enabled>
-                <rotation item0="0" item1="0" item2="0"/>
-                <ambient item0="0.25" item1="0.25" item2="0.25" item3="1"/>
-                <diffuse item0="1" item1="1" item2="1" item3="1"/>
-                <specular item0="1" item1="1" item2="1" item3="1"/>
-            </DirectionalLight>
+                <position item0="0" item1="1" item2="0"/>
+                <ambient item0="0.25" item1="0.25" item2="0.25"/>
+                <diffuse item0="1" item1="1" item2="1"/>
+                <specular item0="1" item1="1" item2="1"/>
+                <range>3</range>
+            </PointLight>
         </Group>
         <Group>
             <name>Effects</name>
         </Group>
         <Group>
             <name>Models</name>
+            <Isolator>
+                <name>ProjectorIsolator</name>
+                <isolateTextures>true</isolateTextures>
+                <MediaTexture>
+                    <name>ProjectionImage1</name>
+                    <opacity>1</opacity>
+                    <textureType>0</textureType>
+                </MediaTexture>
+            </Isolator>
             <ModelRoot>
                 <Model>
                     <name>grid</name>
-                    <position item0="0" item1="0" item2="0"/>
+                    <position item0="0" item1="-0.22500000894069672" item2="0"/>
                     <rotation item0="0" item1="0" item2="0"/>
                     <scale item0="1" item1="1" item2="1"/>
                     <url>/objects/GridG.lwo</url>
+                    <detectCollision>true</detectCollision>
+                    <physicalProperties>
+                        <mass>0</mass>
+                    </physicalProperties>
                 </Model>
                 <Set>
                     <target>grid</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
-                    <name>UV_BoxG</name>
-                    <position item0="0" item1="0.26" item2="0"/>
+                    <name>CenterBox</name>
+                    <position item0="0" item1="0" item2="0"/>
                     <rotation item0="0" item1="0" item2="0"/>
-                    <scale item0="1" item1="1" item2="1"/>
-                    <url>/objects/UV_BoxG.lwo</url>
+                    <scale item0="0.25" item1="0.25" item2="0.25"/>
+                    <url>/objects/Cube.lwo</url>
                     <indexedGeometry>false</indexedGeometry>
+                    <detectCollision>true</detectCollision>
+                    <genericConnectors>
+                        <item0>
+                            <name>PositiveX</name>
+                            <type>default</type>
+                            <normal item0="1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item0>
+                        <item1>
+                            <name>PositiveY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item1>
+                        <item2>
+                            <name>PositiveZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item2>
+                        <item3>
+                            <name>NegativeX</name>
+                            <type>default</type>
+                            <normal item0="-1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="-1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item3>
+                        <item4>
+                            <name>NegativeY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="-1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="-1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item4>
+                        <item5>
+                            <name>NegativeZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="-1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="-1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item5>
+                    </genericConnectors>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>
                 </Model>
                 <Set>
-                    <target>UV_BoxG</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                    <target>CenterBox</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
-                    <name>cylinderRight</name>
-                    <position item0="2" item1="0.26" item2="0"/>
+                    <name>RightBox</name>
+                    <position item0="2" item1="0" item2="0"/>
                     <rotation item0="0" item1="0" item2="0"/>
-                    <scale item0="1" item1="1" item2="1"/>
-                    <url>/objects/UV_CylinderG.lwo</url>
+                    <scale item0="0.25" item1="0.25" item2="0.25"/>
+                    <url>/objects/Cube.lwo</url>
+                    <indexedGeometry>false</indexedGeometry>
+                    <detectCollision>true</detectCollision>
+                    <genericConnectors>
+                        <item0>
+                            <name>PositiveX</name>
+                            <type>default</type>
+                            <normal item0="1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item0>
+                        <item1>
+                            <name>PositiveY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item1>
+                        <item2>
+                            <name>PositiveZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item2>
+                        <item3>
+                            <name>NegativeX</name>
+                            <type>default</type>
+                            <normal item0="-1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="-1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item3>
+                        <item4>
+                            <name>NegativeY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="-1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="-1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item4>
+                        <item5>
+                            <name>NegativeZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="-1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="-1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item5>
+                    </genericConnectors>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>
                 </Model>
                 <Set>
-                    <target>cylinderRight</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                    <target>RightBox</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
                 </Set>
             </ModelRoot>
             <ModelRoot>
                 <Model>
-                    <name>cylinderLeft</name>
-                    <position item0="-2" item1="0.26" item2="0"/>
+                    <name>LeftBox</name>
+                    <position item0="-0.22235893231033277" item1="-0.04794476602934683" item2="-0.10654902879857264"/>
                     <rotation item0="0" item1="0" item2="0"/>
-                    <scale item0="1" item1="1" item2="1"/>
-                    <url>/objects/UV_CylinderG.lwo</url>
-                    <enableSharing>false</enableSharing>
+                    <scale item0="0.25" item1="0.25" item2="0.25"/>
+                    <url>/objects/Cube.lwo</url>
+                    <indexedGeometry>false</indexedGeometry>
+                    <detectCollision>true</detectCollision>
+                    <genericConnectors>
+                        <item0>
+                            <name>PositiveX</name>
+                            <type>default</type>
+                            <normal item0="1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item0>
+                        <item1>
+                            <name>PositiveY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item1>
+                        <item2>
+                            <name>PositiveZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item2>
+                        <item3>
+                            <name>NegativeX</name>
+                            <type>default</type>
+                            <normal item0="-1" item1="0" item2="0"/>
+                            <point>
+                                <center item0="-1" item1="0" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item3>
+                        <item4>
+                            <name>NegativeY</name>
+                            <type>default</type>
+                            <normal item0="0" item1="-1" item2="0"/>
+                            <point>
+                                <center item0="0" item1="-1" item2="0"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item4>
+                        <item5>
+                            <name>NegativeZ</name>
+                            <type>default</type>
+                            <normal item0="0" item1="0" item2="-1"/>
+                            <point>
+                                <center item0="0" item1="0" item2="-1"/>
+                                <radius>0.25</radius>
+                            </point>
+                        </item5>
+                    </genericConnectors>
+                    <physicalProperties>
+                        <mass>5</mass>
+                    </physicalProperties>
                 </Model>
                 <Set>
-                    <target>cylinderLeft</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
-                </Set>
-            </ModelRoot>
-            <ModelRoot>
-                <Model>
-                    <name>sphereBack</name>
-                    <position item0="0" item1="0.25" item2="2"/>
-                    <rotation item0="0" item1="0" item2="0"/>
-                    <scale item0="1" item1="1" item2="1"/>
-                    <url>/objects/UV_SphereG.lwo</url>
-                </Model>
-                <Set>
-                    <target>sphereBack</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
-                </Set>
-            </ModelRoot>
-            <ModelRoot>
-                <Model>
-                    <name>sphereFront</name>
-                    <position item0="0" item1="0.25" item2="-2"/>
-                    <rotation item0="0" item1="0" item2="0"/>
-                    <scale item0="1" item1="1" item2="1"/>
-                    <url>/objects/UV_SphereG.lwo</url>
-                    <enableSharing>false</enableSharing>
-                </Model>
-                <Set>
-                    <target>sphereFront</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
-                </Set>
-            </ModelRoot>
-            <ModelRoot>
-                <Model>
-                    <name>F16</name>
-                    <url>/objects/F16.lwo</url>
-                </Model>
-                <Set>
-                    <target>F16</target>
-                    <inspectionGroup_rotationQuat item0="1" item1="2" item2="3" item3="4"/>
+                    <target>LeftBox</target>
+                    <inspectionGroup_rotationQuat item0="0.9999763681522802" item1="-0.006802076071223741" item2="0.00007366130528251026" item3="0.0009947221269144687"/>
                 </Set>
             </ModelRoot>
         </Group>
-        <KeyframeInterpolator>
-            <name>F16Motion1</name>
-            <url>motions/F16New.mot</url>
-            <target>F16</target>
-        </KeyframeInterpolator>
+        <PhysicsSimulator>
+            <name>PhysicsSimulator</name>
+            <evaluate>true</evaluate>
+            <bodies>
+                <item0>grid</item0>
+                <item1>CenterBox</item1>
+                <item2>RightBox</item2>
+                <item3>LeftBox</item3>
+                <item4>UV_BoxG4</item4>
+                <item5>cylinderRight</item5>
+            </bodies>
+        </PhysicsSimulator>
     </Isolator>
     <RenderDirective>
         <name>RenderDirective</name>
-        <backgroundImageFilename>http://localhost/bwjs/demo/default/BwContent/images/Sky2.jpg</backgroundImageFilename>
+        <backgroundImageFilename>http://localhost/bwjs/demo/default/BwContent/images\Sky2.jpg</backgroundImageFilename>
+        <highlightType>2</highlightType>
         <root>Root</root>
     </RenderDirective>
     <DisconnectAttributes>
@@ -553,7 +722,26 @@
         <target>RenderAgent</target>
         <desiredFrameRate>10</desiredFrameRate>
     </Set>
-    <Serialize>
-        <target>Root</target>
-    </Serialize>
+    <SnapTo>
+        <enabled>true</enabled>
+        <listen>true</listen>
+        <numResponses>0</numResponses>
+        <models>
+            <item0>
+                <name>CenterBox</name>
+                <position item0="-0.2601180076599121" item1="0.10499995946884155" item2="1.84909188747406"/>
+                <quaternion item0="0.6822184084004524" item1="0.6822184913359434" item2="-0.1859515334837559" item3="0.18595160798955845"/>
+            </item0>
+            <item1>
+                <name>RightBox</name>
+                <position item0="0.17072602091820932" item1="0.10499999921450076" item2="2.102811073268213"/>
+                <quaternion item0="0.6822184084004524" item1="0.6822184913359434" item2="-0.1859515334837559" item3="0.18595160798955845"/>
+            </item1>
+            <item2>
+                <name>LeftBox</name>
+                <position item0="-0.006398821865763793" item1="0.10500002990343682" item2="1.418247842979203"/>
+                <quaternion item0="0.35091362171573254" item1="0.3509137392251296" item2="-0.6138889071718829" item3="0.6138889047447402"/>
+            </item2>
+        </models>
+    </SnapTo>
 </Session>

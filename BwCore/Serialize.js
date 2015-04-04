@@ -26,7 +26,7 @@ SerializeCommand.prototype.execute = function()
 //        }
 //        else // !this.target
 //        {
-            this.serializeScene();
+        this.serializeScene();
 //        }
     }
 }
@@ -48,7 +48,7 @@ SerializeCommand.prototype.serializeScene = function()
     {
         var factory = this.registry.find("AttributeFactory");
         var serializer = factory.create("Serializer");
-        var xmlSerializer = new XMLSerializer(); 
+        var xmlSerializer = new XMLSerializer();
         // set minimum flag so that only the minimum required for recreation is serialized
         serializer.serializeMinimum.setValueDirect(true);
 
@@ -59,40 +59,43 @@ SerializeCommand.prototype.serializeScene = function()
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
+            if (!container)
+                continue;
+
             // device handlers
-            if (container.attrType > eAttrType.DeviceHandler && 
-                container.attrType < eAttrType.DeviceHandler_End)
+            if (container.attrType > eAttrType.DeviceHandler &&
+                    container.attrType < eAttrType.DeviceHandler_End)
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // root nodes (nodes without parents)
-            else if (container.attrType > eAttrType.Node && 
-                	 container.attrType < eAttrType.Node_End)
+            else if (container.attrType > eAttrType.Node &&
+                    container.attrType < eAttrType.Node_End)
             {
-            	if (container.getParentCount() == 0)
-            	{
-                	this.directive.execute(container);
-                	this.serialized += this.directive.serialized;
+                if (container.getParentCount() == 0)
+                {
+                    this.directive.execute(container);
+                    this.serialized += this.directive.serialized;
                 }
             }
             // directives
             else if (container.attrType > eAttrType.Directive &&
-            		 container.attrType < eAttrType.Directive_End)
+                    container.attrType < eAttrType.Directive_End)
             {
-            	context.attribute = container;
+                context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
             // SelectionListener
@@ -106,43 +109,46 @@ SerializeCommand.prototype.serializeScene = function()
             }
             // remaining attributes not fitting other criteria and not a command (commands serialized below)
             /*else if (container.attrType < eAttrType.Command || 
-                	 container.attrType > eAttrType.Command_End)
-            {
-                context.attribute = container;
-
-                // serialize
-                serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
-                this.serialized += xmlSerializer.serializeToString(serializer.DOM);
-            }*/
+             container.attrType > eAttrType.Command_End)
+             {
+             context.attribute = container;
+             
+             // serialize
+             serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+             this.serialized += xmlSerializer.serializeToString(serializer.DOM);
+             }*/
         }
 
-		// commands
+        // commands
 
-		// DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
-		for (i = 0; i < count; i++)
+        // DisconnectAttributes commands (must come before ConnectAttributes in DefaultPreferences.xml)
+        for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.className == "DisconnectAttributes")
+            if (!container)
+                continue;
+
+            if (container.className == "DisconnectAttributes")
             {
                 context.attribute = container;
 
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-        
+
         // other commands
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
-            if (!container) continue;
-            
-   			if (container.attrType > eAttrType.Command && 
+            if (!container)
+                continue;
+
+            if (container.attrType > eAttrType.Command &&
                 container.attrType < eAttrType.Command_End &&
                 container.className != "DisconnectAttributes")
             {
@@ -151,11 +157,15 @@ SerializeCommand.prototype.serializeScene = function()
                 // serialize
                 serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
                 var serialized = xmlSerializer.serializeToString(serializer.DOM);
-                if (serialized == "<__InitialRoot/>") continue;
+                if (serialized == "<__InitialRoot/>")
+                    continue;
                 this.serialized += serialized;
             }
         }
-            		
+
+        // snapped models
+        var snapMgr = this.registry.find("SnapMgr");
+        this.serialized += snapMgr.serialize();
         /*
          // updateSectorOrigin
          const char* substr = NULL;
@@ -170,7 +180,7 @@ SerializeCommand.prototype.serializeScene = function()
          {
          name += *substr++;
          }
-
+         
          this.serialized += ".set target=\"";
          this.serialized += name;
          this.serialized += "\" updateSectorOrigin=\"true\"/>";

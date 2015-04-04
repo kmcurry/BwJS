@@ -1,3 +1,45 @@
+SnapModelDescriptor.prototype = new AttributeContainer();
+SnapModelDescriptor.prototype.constructor = SnapModelDescriptor;
+
+function SnapModelDescriptor()
+{
+    AttributeContainer.call(this);
+    this.className = "SnapModelDescriptor";
+    this.attrType = eAttrType.SnapModelDescriptor;
+    
+    this.name = new StringAttr();
+    this.position = new Vector3DAttr();
+    this.quaternion = new QuaternionAttr();
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.position, "position");
+    this.registerAttribute(this.quaternion, "quaternion");
+}
+
+SnapModelDescriptors.prototype = new AttributeVector();
+SnapModelDescriptors.prototype.constructor = SnapModelDescriptors;
+
+function SnapModelDescriptors()
+{
+    AttributeVector.call(this, new SnapModelDescriptorAllocator());
+    this.className = "SnapModelDescriptors";
+    this.attrType = eAttrType.SnapModelDescriptors;
+
+    this.appendParsedElements.setValueDirect(true);
+}
+
+SnapModelDescriptorAllocator.prototype = new Allocator();
+SnapModelDescriptorAllocator.prototype.constructor = SnapModelDescriptorAllocator;
+
+function SnapModelDescriptorAllocator()
+{
+}
+
+SnapModelDescriptorAllocator.prototype.allocate = function ()
+{
+    return new SnapModelDescriptor();
+}
+
 function SnapRec()
 {
     this.model = null;
@@ -46,6 +88,24 @@ SnapModel.prototype.snap = function(model, matrix)
         surface.snappedModel = model;
         snapRec.surfaces.push(surface);
 
+        // enable surface (disabled by model.enabled set above)
+        surface.enabled.setValueDirect(true);
+        
+        // target original surfaces to retain changes made to snapped surface
+        surface.color.addTarget(surfaces[i].color, eAttrSetOp.Replace, null, false);
+        surface.ambientLevel.addTarget(surfaces[i].ambientLevel, eAttrSetOp.Replace, null, false);
+        surface.diffuseLevel.addTarget(surfaces[i].diffuseLevel, eAttrSetOp.Replace, null, false);
+        surface.specularLevel.addTarget(surfaces[i].specularLevel, eAttrSetOp.Replace, null, false);
+        surface.emissiveLevel.addTarget(surfaces[i].emissiveLevel, eAttrSetOp.Replace, null, false);
+        surface.ambient.addTarget(surfaces[i].ambient, eAttrSetOp.Replace, null, false);
+        surface.diffuse.addTarget(surfaces[i].diffuse, eAttrSetOp.Replace, null, false);
+        surface.specular.addTarget(surfaces[i].specular, eAttrSetOp.Replace, null, false);
+        surface.emissive.addTarget(surfaces[i].emissive, eAttrSetOp.Replace, null, false);
+        surface.glossiness.addTarget(surfaces[i].glossiness, eAttrSetOp.Replace, null, false);
+        surface.opacity.addTarget(surfaces[i].opacity, eAttrSetOp.Replace, null, false);
+        surface.doubleSided.addTarget(surfaces[i].doubleSided, eAttrSetOp.Replace, null, false);
+        surface.texturesEnabled.addTarget(surfaces[i].texturesEnabled, eAttrSetOp.Replace, null, false);
+       
         // transform vertices
         xvertices = [];
         vertices = surface.getAttribute("vertices").getValueDirect();
@@ -195,10 +255,28 @@ SnapModel.prototype.unsnap = function(model)
     var snapRec = this.snaps[model.__nodeId__];
     if (!snapRec) return;
     
-    // remove model's surfaces
+    // remove model's surfaces and synchronize original model's corresponding 
+    // surface attributes to retain changes applied to this
     for (i = 0; i < snapRec.surfaces.length; i++)
-    {
-        this.removeSurface(snapRec.surfaces[i]);
+    {   
+        var surface = snapRec.surfaces[i];
+        
+        // untarget original surfaces
+        surface.color.removeTarget(model.surfaces[i].color);
+        surface.ambientLevel.removeTarget(model.surfaces[i].ambientLevel);
+        surface.diffuseLevel.removeTarget(model.surfaces[i].diffuseLevel);
+        surface.specularLevel.removeTarget(model.surfaces[i].specularLevel);
+        surface.emissiveLevel.removeTarget(model.surfaces[i].emissiveLevel);
+        surface.ambient.removeTarget(model.surfaces[i].ambient);
+        surface.diffuse.removeTarget(model.surfaces[i].diffuse);
+        surface.specular.removeTarget(model.surfaces[i].specular);
+        surface.emissive.removeTarget(model.surfaces[i].emissive);
+        surface.glossiness.removeTarget(model.surfaces[i].glossiness);
+        surface.opacity.removeTarget(model.surfaces[i].opacity);
+        surface.doubleSided.removeTarget(model.surfaces[i].doubleSided);
+        surface.texturesEnabled.removeTarget(model.surfaces[i].texturesEnabled);
+        
+        this.removeSurface(surface);
     }
     
     // remove model's geometries
@@ -286,18 +364,63 @@ SnapModel.prototype.unsnapAll = function()
     
     // remove this
     this.getParent(0).removeChild(this);
-    // invoke onRemove
-    this.onRemove();
     // remove from registry
     this.registry.unregister(this);
     // delete
-    this.destroy();
+    //this.destroy();
     
     return unsnapped;
 }
 
+SnapModel.prototype.getSnapped = function()
+{
+    var i;
+    var descriptors = new SnapModelDescriptors();
+    
+    for (i in this.snaps)
+    {
+        var snapRec = this.snaps[i];
+        var model = snapRec.model;
+        
+        // get model's position
+        var matrix = snapRec.matrix;
+
+        var position = matrix.transform(0, 0, 0, 1);
+        model.position.setValueDirect(position.x, position.y, position.z);
+
+        var rotationAngles = matrix.getRotationAngles();
+        model.rotation.setValueDirect(rotationAngles.x, rotationAngles.y, rotationAngles.z);
+
+        model.setMotionParent(this);
+        zeroInspectionGroup(model);
+        model.updateSimpleTransform();
+        model.updateCompoundTransform();
+        model.setMotionParent(null);
+
+        matrix = model.sectorTransformCompound;
+
+        position = matrix.transform(0, 0, 0, 1);
+        var quaternion = matrix.getQuaternion();
+        
+        var descriptor = new SnapModelDescriptor();
+        descriptor.name.copyValue(model.name);
+        descriptor.position.setValueDirect(position.x, position.y, position.z);
+        descriptor.quaternion.setValueDirect(quaternion);
+        
+        descriptors.push_back(descriptor);
+    }
+    
+    return descriptors;
+}
+    
 SnapModel.prototype.apply = function(directive, params, visitChildren)
 {
     // call base-class implementation
     Model.prototype.apply.call(this, directive, params, visitChildren);
+}
+
+SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
+{
+    // don't replace snapped surface's attribute value
+    attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
 }

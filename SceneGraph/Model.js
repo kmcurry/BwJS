@@ -397,7 +397,7 @@ Model.prototype.apply = function(directive, params, visitChildren)
     }
 }
 
-Model.prototype.onRemove = function()
+Model.prototype.onUnregister = function()
 {
     var name = this.name.getValueDirect().join("");
     
@@ -407,12 +407,9 @@ Model.prototype.onRemove = function()
     {
         for (var i = 0; i < physicsSimulators.length; i++)
         {
-            physicsSimulators[i].deletePhysicsBody(this);
+            physicsSimulators[i].bodies.erase(this.name);
         }
     }
-    
-    // call base-class implementation
-    ParentableMotionElement.prototype.onRemove.call(this);
 }
 
 Model.prototype.pushMatrix = function()

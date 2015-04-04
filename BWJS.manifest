@@ -165,6 +165,7 @@ BwCore/Serialize.js
 BwCore/ScreenCapture.js
 BwCore/Export.js
 BwCore/Morph.js
+BwCore/SnapTo.js
 BwCore/SnapMgr.js
 ContentHandler/LWObjectHandler.js 
 ContentHandler/LWObjectBuilder.js

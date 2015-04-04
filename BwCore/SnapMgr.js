@@ -164,20 +164,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var factory = this.registry.find("AttributeFactory");
         var snapModel = factory.create("SnapModel");
         snapModel.synchronize(snappee, true);
-        // reset modification counts for surface attributes so they aren't set to snapped surfaces
-        snapModel.color.modificationCount = 0;
-        snapModel.ambientLevel.modificationCount = 0;
-        snapModel.diffuseLevel.modificationCount = 0;
-        snapModel.specularLevel.modificationCount = 0;
-        snapModel.emissiveLevel.modificationCount = 0;
-        snapModel.ambient.modificationCount = 0;
-        snapModel.diffuse.modificationCount = 0;
-        snapModel.specular.modificationCount = 0;
-        snapModel.emissive.modificationCount = 0;
-        snapModel.glossiness.modificationCount = 0;
-        snapModel.opacity.modificationCount = 0;
-        snapModel.doubleSided.modificationCount = 0;
-        snapModel.texturesEnabled.modificationCount = 0;
         // don't copy vertices/snapConnectors
         snapModel.vertices.setValueDirect(new Array());
         snapModel.genericConnectors.clear();
@@ -198,7 +184,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // add to physics simulator
         var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.createPhysicsBody(snappee);
+        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
@@ -208,12 +194,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         
         // remove snapper first
         snapper.getParent(0).removeChild(snapper);
-        // invoke onRemove
-        snapper.onRemove();
         // remove from registry
         this.registry.unregister(snapper);
         // delete
-        snapper.destroy();
+        //snapper.destroy();
         
         // snap snapper's snaps
         for (var i in snaps)
@@ -289,6 +273,15 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
         snappee.snapEnabled.getValueDirect() == false)
         return null;
 
+    // if the snapper is a SnapModel, and the snappee is not a SnapModel, swap (simplifies connection)
+    if (snapper.attrType == eAttrType.SnapModel &&
+        snappee.attrType != eAttrType.SnapModel)
+    {
+        var temp = snapper;
+        snapper = snappee;
+        snappee = temp;
+    }
+        
     var snapperMatrix = snapper.sectorTransformCompound;
     var snappeeMatrix = snappee.sectorTransformCompound;
     
@@ -336,4 +329,35 @@ SnapMgr.prototype.trySnap = function(snapper, snappee)
     }
     
     return null;
+}
+
+SnapMgr.prototype.serialize = function()
+{
+    var i;
+    var serialized = "";
+    
+    var factory = this.registry.find("AttributeFactory");
+    var serializer = factory.create("Serializer");
+    var xmlSerializer = new XMLSerializer();
+    var context = new Context();
+        
+    // get snapped models
+    var snapped = this.registry.getByType(eAttrType.SnapModel);
+    if (snapped)
+    {    
+        for (i = 0; i < snapped.length; i++)
+        {
+            var snapTo = new SnapToCommand();
+            var descriptors = snapped[i].getSnapped();
+
+            snapTo.models.synchronize(descriptors, false);
+
+            // serialize
+            context.attribute = snapTo;
+            serializer.serialize(context.attribute, context.item, context.attributeName, context.container);
+            serialized += xmlSerializer.serializeToString(serializer.DOM);
+        }
+    }
+    
+    return serialized;
 }
