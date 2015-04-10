@@ -138,6 +138,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
     this.newResourceProcs["BoneEffector"] = newBoneEffector;
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
+    this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -607,6 +608,15 @@ function newBoneEffector(name, factory)
 function newPhysicsSimulator(name, factory)
 {
     var resource = new PhysicsSimulator();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newGoblinPhysicsSimulator(name, factory)
+{
+    var resource = new GoblinPhysicsSimulator();
 
     registerEvaluatorAttributes(resource, factory);
 

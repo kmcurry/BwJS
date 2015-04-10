@@ -308,7 +308,7 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
+    <GoblinPhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>CenterBox</body>
@@ -317,7 +317,7 @@
             <body>UV_BoxG4</body>
             <body>cylinderRight</body>
         </bodies>
-    </PhysicsSimulator>
+    </GoblinPhysicsSimulator>
     <!--<SnapTo>
         <models>
             <model name="CenterBox">
