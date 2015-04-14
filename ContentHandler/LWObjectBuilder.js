@@ -131,16 +131,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         model.addSurface(surfaces[surfIndex]);
     }
 
-    // set layer vertices to model
-    var layerVertices = new Array(layer.pnts.length * 3);
-    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
-    {
-        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
-        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
-        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
-    }
-    model.getAttribute("vertices").setValue(layerVertices);
-
     // create geometry (calculate polygon normals for tris)
     var vertexPolyNormals = [];
     var vertexNormals = [];
@@ -435,6 +425,16 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         }
     }
 
+    // set layer vertices to model
+    var layerVertices = new Array(layer.pnts.length * 3);
+    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
+    {
+        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
+        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
+        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
+    }
+    model.getAttribute("vertices").setValue(layerVertices);
+    
     // TODO: index vertices if requested
 }
 
