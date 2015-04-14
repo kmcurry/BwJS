@@ -55,7 +55,7 @@ CollideDirective.prototype.execute = function(root)
     root.apply("collide", params, true);
 
     // detect collisions
-    this.detectCollisions(params.detectCollisions);
+    //this.detectCollisions(params.detectCollisions);
 
     // detect obstructions
     this.detectObstructions(params.detectCollisions);

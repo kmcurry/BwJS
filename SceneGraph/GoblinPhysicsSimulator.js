@@ -126,7 +126,7 @@ GoblinPhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSub
     maxSubSteps = maxSubSteps || 10;
     
     this.update();
-    this.world.step(timeIncrement);
+    this.world.step(timeIncrement, maxSubSteps);
 }
 
 GoblinPhysicsSimulator.prototype.isColliding = function(model)
@@ -379,7 +379,7 @@ GoblinPhysicsSimulator.prototype.getCompoundShape = function(model)
 GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
     var center = model.getAttribute("center").getValueDirect();
-    
+            
     for (var i = 0; i < model.surfaces.length; i++)
     {
         var shape = this.getCollisionShape(model.surfaces[i], center, scale);
@@ -482,7 +482,7 @@ GoblinPhysicsSimulator.prototype.updatePhysicsShape = function(model)
         return;
 
     var shape = this.getCompoundShape(model);
-
+    
     var mass = this.getNetMass(model);
 
     var body = new Goblin.RigidBody(shape, mass);

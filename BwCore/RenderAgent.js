@@ -81,6 +81,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
             case "ObjectMover":
             case "AnimalMover":
             case "PhysicsSimulator":
+            case "GoblinPhysicsSimulator":
             {
             	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
             }
