@@ -70,7 +70,6 @@ GoblinPhysicsSimulator.prototype.evaluate = function()
         }
     }
 
-    var trans = new Ammo.btTransform();
     var worldHalfExtents = this.worldHalfExtents.getValueDirect();
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -79,13 +78,13 @@ GoblinPhysicsSimulator.prototype.evaluate = function()
         if (!this.bodyAdded[i] || !physicsEnabled)
             continue;
 
-        this.physicsBodies[i].getMotionState().getWorldTransform(trans);
-        var origin = trans.getOrigin();
-        var position = new Vector3D(origin.x(), origin.y(), origin.z());
+        var body = this.physicsBodies[i];
+        
+        var position = body.position;
 
-        var rot = trans.getRotation();
+        var rotation = body.rotation;
         var quat = new Quaternion();
-        quat.load(rot.w(), rot.x(), rot.y(), rot.z());
+        quat.load(rotation.w, rotation.x, rotation.y, rotation.z);
 
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
@@ -98,7 +97,6 @@ GoblinPhysicsSimulator.prototype.evaluate = function()
             modelsOutOfBounds.push(this.bodyModels[i]);
         }
     }
-    Ammo.destroy(trans);
 
     // remove any models that have moved outside of the world boundary
     for (var i = 0; i < modelsOutOfBounds.length; i++)
@@ -128,7 +126,7 @@ GoblinPhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSub
     maxSubSteps = maxSubSteps || 10;
     
     this.update();
-    this.world.stepSimulation(timeIncrement, maxSubSteps);
+    this.world.step(timeIncrement);
 }
 
 GoblinPhysicsSimulator.prototype.isColliding = function(model)
@@ -318,37 +316,23 @@ GoblinPhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     var mass = this.getNetMass(model);
 
-    var transform = new Ammo.btTransform();
-    transform.setIdentity();
-
+    var body = new Goblin.RigidBody(shape, mass);
+    
     var position = model.getAttribute("sectorPosition").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
     if (mass == 0)
     {
-        position.y -= 0.075;
+        //position.y -= 0.075;
     }
-    var vector = new Ammo.btVector3(position.x, position.y, position.z);
-    transform.setOrigin(vector);
-    Ammo.destroy(vector);
+    body.position.x = position.x;
+    body.position.y = position.y;
+    body.position.z = position.z;
 
-    var quat = model.getAttribute("quaternion").getValueDirect();
-    var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-    transform.setRotation(quaternion);
-    Ammo.destroy(quaternion);
-
-    var isDynamic = (mass != 0);
-    var localInertia = new Ammo.btVector3(0, 0, 0);
-    if (isDynamic)
-    {
-        shape.calculateLocalInertia(mass, localInertia);
-    }
-
-    var motionState = new Ammo.btDefaultMotionState(transform);
-    Ammo.destroy(transform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInertia);
-    var body = new Ammo.btRigidBody(rbInfo);
-    Ammo.destroy(rbInfo);
+    var rotation = model.getAttribute("quaternion").getValueDirect();
+    body.rotation.x = rotation.x;
+    body.rotation.y = rotation.y;
+    body.rotation.z = rotation.z;
+    body.rotation.w = rotation.w;
 
     this.world.addRigidBody(body);
     //if (isDynamic)
@@ -371,9 +355,6 @@ GoblinPhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(GoblinPhysicsSimulator_ModelParentModifiedCB, this);
             //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(GoblinPhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
-            Ammo.destroy(this.physicsShapes[i]);
-            Ammo.destroy(this.physicsBodies[i].getMotionState());
-            Ammo.destroy(this.physicsBodies[i]);
             this.physicsBodies.splice(i, 1);
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
@@ -385,7 +366,7 @@ GoblinPhysicsSimulator.prototype.deletePhysicsBody = function(model)
 
 GoblinPhysicsSimulator.prototype.getCompoundShape = function(model)
 {
-    var compoundShape = new Ammo.btCompoundShape();
+    var compoundShape = new Goblin.CompoundShape();
 
     var position = new Vector3D();
     var rotation = new Vector3D();
@@ -402,20 +383,16 @@ GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, r
     for (var i = 0; i < model.surfaces.length; i++)
     {
         var shape = this.getCollisionShape(model.surfaces[i], center, scale);
+        if (shape)
+        {
+            var origin = new Goblin.Vector3(position.x, position.y, position.z);
 
-        var transform = new Ammo.btTransform();
-        transform.setIdentity();
-        var origin = new Ammo.btVector3(position.x, position.y, position.z);
-        transform.setOrigin(origin);
-        Ammo.destroy(origin);
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
+            var quat = new Quaternion();
+            quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+            var quaternion = new Goblin.Quaternion(quat.x, quat.y, quat.z, quat.w);
 
-        compoundShape.addChildShape(transform, shape);
-        Ammo.destroy(transform);
+            compoundShape.addChildShape(shape, origin, quaternion);
+        }
     }
 
     // recurse on motion children
@@ -444,23 +421,29 @@ GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, r
 
 GoblinPhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
 {
+    var shape = null;
+    
     // scale vertices
     var scaleMatrix = new Matrix4x4();
     scaleMatrix.loadScale(scale.x, scale.y, scale.z);
 
     var matrix = scaleMatrix;
     
-    var shape = new Ammo.btConvexHullShape();
+    var points = [];
     var verts = surface.getAttribute("vertices").getValueDirect();
     for (var i = 0; i < verts.length; i += 3)
     {
         //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
         var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
-        shape.addPoint(point);
-        Ammo.destroy(point);
+        var point = new Goblin.Vector3(vert.x, vert.y, vert.z);
+        points.push(point);
     }
 
+    if (points.length > 0)
+    {
+        shape = new Goblin.ConvexShape(points);
+    }
+    
     return shape;
 }
 
@@ -502,23 +485,10 @@ GoblinPhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var mass = this.getNetMass(model);
 
-    var isDynamic = (mass != 0);
-    var localInertia = new Ammo.btVector3(0, 0, 0);
-    if (isDynamic)
-    {
-        shape.calculateLocalInertia(mass, localInertia);
-    }
-
-    var motionState = this.physicsBodies[n].getMotionState();
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInertia);
-    var body = new Ammo.btRigidBody(rbInfo);
-    Ammo.destroy(rbInfo);
+    var body = new Goblin.RigidBody(shape, mass);
 
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
-    Ammo.destroy(this.physicsBodies[n]);
-    // don't destroy motionState because it's now being used by the new body
 
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
@@ -541,8 +511,6 @@ GoblinPhysicsSimulator.prototype.removePhysicsBody = function(n)
         return;
 
     this.world.removeRigidBody(body);
-    Ammo.destroy(body.getMotionState());
-    Ammo.destroy(body);
     this.bodyAdded[n] = false;
 }
 
@@ -558,15 +526,17 @@ GoblinPhysicsSimulator.prototype.restorePhysicsBody = function(n)
     if (!shape)
         return;
 
-    var transform = new Ammo.btTransform();
-    transform.setIdentity();
+    var mass = this.getNetMass(model);
 
+    var body = new Goblin.RigidBody(shape, mass);
+    
     var position = model.getAttribute("sectorPosition").getValueDirect();
-    var vector = new Ammo.btVector3(position.x, position.y, position.z);
-    transform.setOrigin(vector);
-    Ammo.destroy(vector);
+    body.position.x = position.x;
+    body.position.y = position.y;
+    body.position.z = position.z;
 
     // update rotation to include rotation caused by object inspection
+    var rotation = new Quaternion();
     var rotationGroup = getInspectionGroup(model);
     if (rotationGroup)
     {
@@ -579,31 +549,16 @@ GoblinPhysicsSimulator.prototype.restorePhysicsBody = function(n)
         quat2.load(modelQuat.w, modelQuat.x, modelQuat.y, modelQuat.z);
 
         var quat = quat2.multiply(quat1);
-
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
-
+        rotation.loadQuaternion(quat);
+        
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
     }
-
-    var mass = this.getNetMass(model);
-
-    var isDynamic = (mass != 0);
-    var localInertia = new Ammo.btVector3(0, 0, 0);
-    if (isDynamic)
-    {
-        shape.calculateLocalInertia(mass, localInertia);
-    }
-
-    var motionState = new Ammo.btDefaultMotionState(transform);
-    Ammo.destroy(transform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInertia);
-    var body = new Ammo.btRigidBody(rbInfo);
-    Ammo.destroy(rbInfo);
-
+    body.rotation.x = rotation.x;
+    body.rotation.y = rotation.y;
+    body.rotation.z = rotation.z;
+    body.rotation.w = rotation.w;
+    
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
     this.bodyAdded[n] = true;
@@ -639,7 +594,13 @@ GoblinPhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
 
 function GoblinPhysicsSimulator_GravityModifiedCB(attribute, container)
 {
-    container.updateWorld = true;
+    if (container.world)
+    {
+        var gravity = attribute.getValueDirect();
+        container.world.gravity.x = gravity.x;
+        container.world.gravity.y = gravity.y;
+        container.world.gravity.z = gravity.z;
+    }
 }
 
 function GoblinPhysicsSimulator_BodiesModifiedCB(attribute, container)
