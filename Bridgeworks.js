@@ -5101,6 +5101,8 @@ var eAttrType = {
     MorphEffector               :1111,
     BoneEffector                :1112,
     PhysicsSimulator            :1113,
+    GoblinPhysicsSimulator      :1114,
+    CannonPhysicsSimulator      :1115,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -16152,7 +16154,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        /*
         if (this.updateRotation)
         {
             this.updateRotation = false;
@@ -16165,7 +16167,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        */
         if (this.updateQuaternion)
         {
             this.updateQuaternion = false;
@@ -16484,8 +16486,12 @@ function ParentableMotionElement_PositionModifiedCB(attribute, container)
 
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
-    container.updateRotation = true;
-    container.setModified();
+    //container.updateRotation = true;
+    //container.setModified();
+    var values = attribute.getValueDirect();
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(values.x, values.y, values.z);
+    container.quaternion.setValueDirect(quat);
 }
 
 function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
@@ -24679,7 +24685,7 @@ CollideDirective.prototype.execute = function(root)
     root.apply("collide", params, true);
 
     // detect collisions
-    this.detectCollisions(params.detectCollisions);
+    //this.detectCollisions(params.detectCollisions);
 
     // detect obstructions
     this.detectObstructions(params.detectCollisions);
@@ -27190,9 +27196,15 @@ PhysicsSimulator.prototype.evaluate = function()
         var quat = new Quaternion();
         quat.load(rot.w(), rot.x(), rot.y(), rot.z());
 
+        this.bodyModels[i].getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+        //this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
+    
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
 
+        this.bodyModels[i].getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+        //this.bodyModels[i].getAttribute("rotation").addModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
+        
         // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
         if (position.x < -worldHalfExtents.x || position.x > worldHalfExtents.x ||
             position.y < -worldHalfExtents.y || position.y > worldHalfExtents.y ||
@@ -27347,6 +27359,19 @@ PhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
     return null;
 }
 
+PhysicsSimulator.prototype.getPhysicsBodyIndex = function(bodyModel)
+{
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == bodyModel)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 PhysicsSimulator.prototype.getBodyModel = function(physicsBody)
 {
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -27401,6 +27426,8 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     // watch for changes in vertices
     model.getAttribute("vertices").addModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
+    model.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+    model.getAttribute("rotation").addModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
     // watch for changes in scale
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
@@ -27470,6 +27497,8 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
         if (this.bodyModels[i] == model)
         {
             this.bodyModels[i].getAttribute("vertices").removeModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
+            this.bodyModels[i].getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+            this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
             //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
@@ -27765,6 +27794,16 @@ function PhysicsSimulator_BodiesModifiedCB(attribute, container)
 function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
+}
+
+function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
+{
+    container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
+}
+
+function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
+{
+    container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
@@ -32124,6 +32163,8 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
             case "ObjectMover":
             case "AnimalMover":
             case "PhysicsSimulator":
+            case "GoblinPhysicsSimulator":
+            case "CannonPhysicsSimulator":
             {
             	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
             }
@@ -35607,16 +35648,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         model.addSurface(surfaces[surfIndex]);
     }
 
-    // set layer vertices to model
-    var layerVertices = new Array(layer.pnts.length * 3);
-    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
-    {
-        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
-        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
-        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
-    }
-    model.getAttribute("vertices").setValue(layerVertices);
-
     // create geometry (calculate polygon normals for tris)
     var vertexPolyNormals = [];
     var vertexNormals = [];
@@ -35911,6 +35942,16 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         }
     }
 
+    // set layer vertices to model
+    var layerVertices = new Array(layer.pnts.length * 3);
+    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
+    {
+        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
+        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
+        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
+    }
+    model.getAttribute("vertices").setValue(layerVertices);
+    
     // TODO: index vertices if requested
 }
 
@@ -37662,6 +37703,8 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
     this.newResourceProcs["BoneEffector"] = newBoneEffector;
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
+    this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
+    this.newResourceProcs["CannonPhysicsSimulator"] = newCannonPhysicsSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -38131,6 +38174,24 @@ function newBoneEffector(name, factory)
 function newPhysicsSimulator(name, factory)
 {
     var resource = new PhysicsSimulator();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newGoblinPhysicsSimulator(name, factory)
+{
+    var resource = new GoblinPhysicsSimulator();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newCannonPhysicsSimulator(name, factory)
+{
+    var resource = new CannonPhysicsSimulator();
 
     registerEvaluatorAttributes(resource, factory);
 

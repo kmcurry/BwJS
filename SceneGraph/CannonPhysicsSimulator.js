@@ -1,11 +1,11 @@
-GoblinPhysicsSimulator.prototype = new Evaluator();
-GoblinPhysicsSimulator.prototype.constructor = GoblinPhysicsSimulator;
+CannonPhysicsSimulator.prototype = new Evaluator();
+CannonPhysicsSimulator.prototype.constructor = CannonPhysicsSimulator;
 
-function GoblinPhysicsSimulator()
+function CannonPhysicsSimulator()
 {
     Evaluator.call(this);
-    this.className = "GoblinPhysicsSimulator";
-    this.attrType = eAttrType.GoblinPhysicsSimulator;
+    this.className = "CannonPhysicsSimulator";
+    this.attrType = eAttrType.CannonPhysicsSimulator;
 
     this.collisionConfiguration = null;
     this.dispatcher = null;
@@ -13,7 +13,6 @@ function GoblinPhysicsSimulator()
     this.solver = null;
     this.world = null;
     this.physicsBodies = [];
-    this.physicsShapes = [];
     this.bodyAdded = [];
     this.bodyModels = [];
     this.updateWorld = false;
@@ -27,8 +26,8 @@ function GoblinPhysicsSimulator()
 
     this.bodies.getAttribute("appendParsedElements").setValueDirect(true);
 
-    this.gravity.addModifiedCB(GoblinPhysicsSimulator_GravityModifiedCB, this);
-    this.bodies.addModifiedCB(GoblinPhysicsSimulator_BodiesModifiedCB, this);
+    this.gravity.addModifiedCB(CannonPhysicsSimulator_GravityModifiedCB, this);
+    this.bodies.addModifiedCB(CannonPhysicsSimulator_BodiesModifiedCB, this);
 
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.timeScale, "timeScale");
@@ -39,7 +38,7 @@ function GoblinPhysicsSimulator()
     this.initPhysics();
 }
 
-GoblinPhysicsSimulator.prototype.evaluate = function()
+CannonPhysicsSimulator.prototype.evaluate = function()
 {
     var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
     this.stepSimulation(timeIncrement);
@@ -82,7 +81,7 @@ GoblinPhysicsSimulator.prototype.evaluate = function()
         
         var position = body.position;
 
-        var rotation = body.rotation;
+        var rotation = body.quaternion;
         var quat = new Quaternion();
         quat.load(rotation.w, rotation.x, rotation.y, rotation.z);
 
@@ -105,7 +104,7 @@ GoblinPhysicsSimulator.prototype.evaluate = function()
     }
 }
 
-GoblinPhysicsSimulator.prototype.update = function()
+CannonPhysicsSimulator.prototype.update = function()
 {
     if (this.updateWorld)
     {
@@ -121,15 +120,15 @@ GoblinPhysicsSimulator.prototype.update = function()
     }
 }
 
-GoblinPhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
+CannonPhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
     maxSubSteps = maxSubSteps || 10;
     
     this.update();
-    this.world.step(timeIncrement, maxSubSteps);
+    this.world.step(timeIncrement);//, maxSubSteps);
 }
 
-GoblinPhysicsSimulator.prototype.isColliding = function(model)
+CannonPhysicsSimulator.prototype.isColliding = function(model)
 {
     // if model is parented, get parent
     while (model.motionParent)
@@ -178,7 +177,7 @@ GoblinPhysicsSimulator.prototype.isColliding = function(model)
     return false;
 }
 
-GoblinPhysicsSimulator.prototype.getColliders = function(model)
+CannonPhysicsSimulator.prototype.getColliders = function(model)
 {
     var colliders = [];
 
@@ -229,7 +228,7 @@ GoblinPhysicsSimulator.prototype.getColliders = function(model)
     return colliders;
 }
 
-GoblinPhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
+CannonPhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
 {
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -242,7 +241,7 @@ GoblinPhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
     return null;
 }
 
-GoblinPhysicsSimulator.prototype.getBodyModel = function(physicsBody)
+CannonPhysicsSimulator.prototype.getBodyModel = function(physicsBody)
 {
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
@@ -255,7 +254,7 @@ GoblinPhysicsSimulator.prototype.getBodyModel = function(physicsBody)
     return null;
 }
 
-GoblinPhysicsSimulator.prototype.isSelected = function(model)
+CannonPhysicsSimulator.prototype.isSelected = function(model)
 {
     var selected = model.getAttribute("selected").getValueDirect();
     if (!selected)
@@ -269,7 +268,7 @@ GoblinPhysicsSimulator.prototype.isSelected = function(model)
     return selected;
 }
 
-GoblinPhysicsSimulator.prototype.updatePhysicsBodies = function()
+CannonPhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
     // remove existing bodies
     while (this.bodyModels.length > 0)
@@ -289,20 +288,20 @@ GoblinPhysicsSimulator.prototype.updatePhysicsBodies = function()
     }
 }
 
-GoblinPhysicsSimulator.prototype.createPhysicsBody = function(model)
+CannonPhysicsSimulator.prototype.createPhysicsBody = function(model)
 {
     if (!model)
         return;
 
     // watch for changes in vertices
-    model.getAttribute("vertices").addModifiedCB(GoblinPhysicsSimulator_ModelVerticesModifiedCB, this);
+    model.getAttribute("vertices").addModifiedCB(CannonPhysicsSimulator_ModelVerticesModifiedCB, this);
     // watch for changes in scale
-    model.getAttribute("scale").addModifiedCB(GoblinPhysicsSimulator_ModelScaleModifiedCB, this);
+    model.getAttribute("scale").addModifiedCB(CannonPhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
-    model.getAttribute("parent").addModifiedCB(GoblinPhysicsSimulator_ModelParentModifiedCB, this);
+    model.getAttribute("parent").addModifiedCB(CannonPhysicsSimulator_ModelParentModifiedCB, this);
     // watch for changes in enabled
-    model.getAttribute("enabled").removeModifiedCB(GoblinPhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
-    model.getAttribute("enabled").addModifiedCB(GoblinPhysicsSimulator_ModelEnabledModifiedCB, this);
+    model.getAttribute("enabled").removeModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
+    model.getAttribute("enabled").addModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this);
 
     // if model is disabled, don't create
     if (model.getAttribute("enabled").getValueDirect() == false)
@@ -312,11 +311,13 @@ GoblinPhysicsSimulator.prototype.createPhysicsBody = function(model)
     if (model.motionParent)
         return;
 
-    var shape = this.getCompoundShape(model);
-
     var mass = this.getNetMass(model);
 
-    var body = new Goblin.RigidBody(shape, mass);
+    var body = new CANNON.Body({
+        mass: mass
+    });
+
+    this.getCompoundShape(model, body);
     
     var position = model.getAttribute("sectorPosition").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
@@ -329,36 +330,32 @@ GoblinPhysicsSimulator.prototype.createPhysicsBody = function(model)
     body.position.z = position.z;
 
     var rotation = model.getAttribute("quaternion").getValueDirect();
-    body.rotation.x = rotation.x;
-    body.rotation.y = rotation.y;
-    body.rotation.z = rotation.z;
-    body.rotation.w = rotation.w;
+    body.quaternion.x = rotation.x;
+    body.quaternion.y = rotation.y;
+    body.quaternion.z = rotation.z;
+    body.quaternion.w = rotation.w;
 
-    body.updateDerived();
-    
-    this.world.addRigidBody(body);
+    this.world.addBody(body);
     //if (isDynamic)
     {
         this.bodyModels.push(model);
-        this.physicsShapes.push(shape);
         this.physicsBodies.push(body);
         this.bodyAdded.push(true);
     }
 }
 
-GoblinPhysicsSimulator.prototype.deletePhysicsBody = function(model)
+CannonPhysicsSimulator.prototype.deletePhysicsBody = function(model)
 {
     for (var i = 0; i < this.bodyModels.length; i++)
     {
         if (this.bodyModels[i] == model)
         {
-            this.bodyModels[i].getAttribute("vertices").removeModifiedCB(GoblinPhysicsSimulator_ModelVerticesModifiedCB, this);
-            this.bodyModels[i].getAttribute("scale").removeModifiedCB(GoblinPhysicsSimulator_ModelScaleModifiedCB, this);
-            this.bodyModels[i].getAttribute("parent").removeModifiedCB(GoblinPhysicsSimulator_ModelParentModifiedCB, this);
-            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(GoblinPhysicsSimulator_ModelEnabledModifiedCB, this);
-            this.world.removeRigidBody(this.physicsBodies[i]);
+            this.bodyModels[i].getAttribute("vertices").removeModifiedCB(CannonPhysicsSimulator_ModelVerticesModifiedCB, this);
+            this.bodyModels[i].getAttribute("scale").removeModifiedCB(CannonPhysicsSimulator_ModelScaleModifiedCB, this);
+            this.bodyModels[i].getAttribute("parent").removeModifiedCB(CannonPhysicsSimulator_ModelParentModifiedCB, this);
+            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this);
+            this.world.removeBody(this.physicsBodies[i]);
             this.physicsBodies.splice(i, 1);
-            this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
             return;
@@ -366,27 +363,15 @@ GoblinPhysicsSimulator.prototype.deletePhysicsBody = function(model)
     }
 }
 
-GoblinPhysicsSimulator.prototype.getCompoundShape = function(model)
+CannonPhysicsSimulator.prototype.getCompoundShape = function(model, body)
 {
-    if (model.name.values.join("") == "grid")
-            {
-                return new Goblin.BoxShape(10, 0.1, 10);
-            }
-            
-            
-    return this.getCollisionShape(model.geometries[0], new Vector3D(), new Vector3D(1, 1, 1));
-    /*
-    var compoundShape = new Goblin.CompoundShape();
-
     var position = new Vector3D();
     var rotation = new Vector3D();
     var scale = model.getAttribute("scale").getValueDirect();
-    this.addCollisionShape(model, position, rotation, scale, compoundShape);
-
-    return compoundShape;*/
+    this.addCollisionShape(model, position, rotation, scale, body);
 }
 
-GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
+CannonPhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, body)
 {
     var center = model.getAttribute("center").getValueDirect();
             
@@ -395,13 +380,13 @@ GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, r
         var shape = this.getCollisionShape(model.geometries[i], center, scale);
         if (shape)
         {
-            var origin = new Goblin.Vector3(position.x, position.y, position.z);
+            var offset = new CANNON.Vec3(position.x, position.y, position.z);
 
             var quat = new Quaternion();
             quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-            var quaternion = new Goblin.Quaternion(quat.x, quat.y, quat.z, quat.w);
+            var quaternion = new CANNON.Quaternion(quat.x, quat.y, quat.z, quat.w);
 
-            compoundShape.addChildShape(shape, origin, quaternion);
+            body.addShape(shape, offset, quaternion);
         }
     }
 
@@ -425,11 +410,11 @@ GoblinPhysicsSimulator.prototype.addCollisionShape = function(model, position, r
         childScale.y *= scale.y;
         childScale.z *= scale.z;
 
-        this.addCollisionShape(child, childPosition, childRotation, childScale, compoundShape);
+        this.addCollisionShape(child, childPosition, childRotation, childScale, body);
     }
 }
 
-GoblinPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, scale)
+CannonPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, scale)
 {
     var shape = null;
     
@@ -450,42 +435,30 @@ GoblinPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, 
         var v2 = tri.v2;
         
         //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
-        //var vert = matrix.transform(v0.x, v0.y, v0.z, 1);
-        vert = v0;
-        if (Math.abs(vert.x) < 0.0001) vert.x = 0;
-        if (Math.abs(vert.y) < 0.0001) vert.y = 0;
-        if (Math.abs(vert.z) < 0.0001) vert.z = 0;
-        var point = new Goblin.Vector3(vert.x, vert.y, vert.z);
+        var vert = matrix.transform(v0.x, v0.y, v0.z, 1);
+        var point = new CANNON.Vec3(vert.x, vert.y, vert.z);
         points.push(point);
         
-        //vert = matrix.transform(v1.x, v1.y, v1.z, 1);
-        vert = v1;
-        if (Math.abs(vert.x) < 0.0001) vert.x = 0;
-        if (Math.abs(vert.y) < 0.0001) vert.y = 0;
-        if (Math.abs(vert.z) < 0.0001) vert.z = 0;
-        point = new Goblin.Vector3(vert.x, vert.y, vert.z);
+        vert = matrix.transform(v1.x, v1.y, v1.z, 1);
+        point = new CANNON.Vec3(vert.x, vert.y, vert.z);
         points.push(point);
         
-        //vert = matrix.transform(v2.x, v2.y, v2.z, 1);
-        vert = v2;
-        if (Math.abs(vert.x) < 0.0001) vert.x = 0;
-        if (Math.abs(vert.y) < 0.0001) vert.y = 0;
-        if (Math.abs(vert.z) < 0.0001) vert.z = 0;
-        point = new Goblin.Vector3(vert.x, vert.y, vert.z);
+        vert = matrix.transform(v2.x, v2.y, v2.z, 1);
+        point = new CANNON.Vec3(vert.x, vert.y, vert.z);
         points.push(point);
         
-        faces.push(j, j+1, j+2);
+        faces.push([j, j+1, j+2]);
     }
 
     if (points.length > 0)
     {
-        shape = new Goblin.MeshShape(points, faces);
+        shape = new CANNON.ConvexPolyhedron(points, faces);
     }
     
     return shape;
 }
 
-GoblinPhysicsSimulator.prototype.getNetMass = function(model)
+CannonPhysicsSimulator.prototype.getNetMass = function(model)
 {
     var mass = 0;
 
@@ -504,7 +477,7 @@ GoblinPhysicsSimulator.prototype.getNetMass = function(model)
     return mass;
 }
 
-GoblinPhysicsSimulator.prototype.updatePhysicsShape = function(model)
+CannonPhysicsSimulator.prototype.updatePhysicsShape = function(model)
 {
     // locate array position of model
     var n = -1;
@@ -519,27 +492,28 @@ GoblinPhysicsSimulator.prototype.updatePhysicsShape = function(model)
     if (n == -1)
         return;
 
-    var shape = this.getCompoundShape(model);
-    
     var mass = this.getNetMass(model);
 
-    var body = new Goblin.RigidBody(shape, mass);
+    var body = new CANNON.Body({
+        mass: mass
+    });
 
+    this.getCompoundShape(model, body);
+    
     // remove previous before adding
-    this.world.removeRigidBody(this.physicsBodies[n]);
+    this.world.removeBody(this.physicsBodies[n]);
 
-    this.world.addRigidBody(body);
+    this.world.addBody(body);
     this.physicsBodies[n] = body;
-    this.physicsShapes[n] = shape;
 }
 
-GoblinPhysicsSimulator.prototype.updatePhysicsBody = function(n)
+CannonPhysicsSimulator.prototype.updatePhysicsBody = function(n)
 {
     this.removePhysicsBody(n);
     this.restorePhysicsBody(n);
 }
 
-GoblinPhysicsSimulator.prototype.removePhysicsBody = function(n)
+CannonPhysicsSimulator.prototype.removePhysicsBody = function(n)
 {
     //if (!this.bodyAdded[n]) 
     //    return; // don't re-remove
@@ -548,11 +522,11 @@ GoblinPhysicsSimulator.prototype.removePhysicsBody = function(n)
     if (!body)
         return;
 
-    this.world.removeRigidBody(body);
+    this.world.removeBody(body);
     this.bodyAdded[n] = false;
 }
 
-GoblinPhysicsSimulator.prototype.restorePhysicsBody = function(n)
+CannonPhysicsSimulator.prototype.restorePhysicsBody = function(n)
 {
     //if (this.bodyAdded[n]) 
     //    return; // don't re-restore
@@ -560,18 +534,12 @@ GoblinPhysicsSimulator.prototype.restorePhysicsBody = function(n)
     var model = this.bodyModels[n];
     if (!model)
         return;
-    var shape = this.physicsShapes[n];
-    if (!shape)
+    var body = this.physicsBodies[n];
+    if (!body)
         return;
-
-    var mass = this.getNetMass(model);
-
-    var body = new Goblin.RigidBody(shape, mass);
     
     var position = model.getAttribute("sectorPosition").getValueDirect();
-    body.position.x = position.x;
-    body.position.y = position.y;
-    body.position.z = position.z;
+    body.position = new CANNON.Vec3(position.x, position.y, position.z);
 
     // update rotation to include rotation caused by object inspection
     var rotation = new Quaternion();
@@ -591,35 +559,30 @@ GoblinPhysicsSimulator.prototype.restorePhysicsBody = function(n)
         
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
-    }
-    body.rotation.x = rotation.x;
-    body.rotation.y = rotation.y;
-    body.rotation.z = rotation.z;
-    body.rotation.w = rotation.w;
+    }   
+    body.quaternion = new CANNON.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
     
-    body.updateDerived();
-    
-    this.world.addRigidBody(body);
-    this.physicsBodies[n] = body;
+    this.world.addBody(body);
     this.bodyAdded[n] = true;
 }
 
-GoblinPhysicsSimulator.prototype.initPhysics = function()
+CannonPhysicsSimulator.prototype.initPhysics = function()
 {
-    this.world = new Goblin.World(new Goblin.BasicBroadphase(), new Goblin.NarrowPhase(), new Goblin.IterativeSolver());
-
     var gravity = this.gravity.getValueDirect();
-    this.world.gravity.x = gravity.x;
-    this.world.gravity.y = gravity.y;
-    this.world.gravity.z = gravity.z;
+    
+    this.world = new CANNON.World({
+        //gravity: new CANNON.Vec3(gravity.x, gravity.y, gravity.z)
+    });
+    
+    this.world.gravity = new CANNON.Vec3(gravity.x, gravity.y, gravity.z);
 }
 
-GoblinPhysicsSimulator.prototype.bodiesModified = function()
+CannonPhysicsSimulator.prototype.bodiesModified = function()
 {
     this.updateBodies = true;
 }
 
-GoblinPhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
+CannonPhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
 {
     if (enabled)
     {
@@ -632,38 +595,36 @@ GoblinPhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
     }
 }
 
-function GoblinPhysicsSimulator_GravityModifiedCB(attribute, container)
+function CannonPhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     if (container.world)
     {
         var gravity = attribute.getValueDirect();
-        container.world.gravity.x = gravity.x;
-        container.world.gravity.y = gravity.y;
-        container.world.gravity.z = gravity.z;
+        container.world.gravity = new CANNON.Vec3(gravity.x, gravity.y, gravity.z);
     }
 }
 
-function GoblinPhysicsSimulator_BodiesModifiedCB(attribute, container)
+function CannonPhysicsSimulator_BodiesModifiedCB(attribute, container)
 {
     container.bodiesModified();
 }
 
-function GoblinPhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
+function CannonPhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
 }
 
-function GoblinPhysicsSimulator_ModelScaleModifiedCB(attribute, container)
+function CannonPhysicsSimulator_ModelScaleModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
 }
 
-function GoblinPhysicsSimulator_ModelParentModifiedCB(attribute, container)
+function CannonPhysicsSimulator_ModelParentModifiedCB(attribute, container)
 {
     container.updateBodies = true;
 }
 
-function GoblinPhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
+function CannonPhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
 {
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
 }

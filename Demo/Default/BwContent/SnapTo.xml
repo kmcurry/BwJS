@@ -42,9 +42,9 @@
                             <mass>0</mass>
                         </physicalProperties>  
                     </Model>
-                    <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
-                        <position x="0" y="5.26" z="0"/>
-                        <rotation x="0" y="0" z="0"/>
+                    <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                        <position x="0" y="0.26" z="0"/>
+                        <rotation x="40" y="40" z="40"/>
                         <scale x="1" y="1" z="1"/>
                         <genericConnectors>
                             <genericConnector name="PositiveX" type="default">
@@ -94,6 +94,14 @@
                             <mass>5</mass>
                         </physicalProperties>  
                     </Model>
+                    <!--<Model name="CenterBox2" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                        <position x="0" y="10.26" z="0"/>
+                        <rotation x="40" y="40" z="40"/>
+                        <scale x="1" y="1" z="1"/>
+                        <physicalProperties>
+                            <mass>5</mass>
+                        </physicalProperties>  
+                    </Model>-->
                     <!--<Model name="RightBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
@@ -308,16 +316,18 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <GoblinPhysicsSimulator name="PhysicsSimulator" evaluate="true">
+    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>CenterBox</body>
+            <body>CenterBox2</body>
             <!--<body>RightBox</body>
             <body>LeftBox</body>
             <body>UV_BoxG4</body>
             <body>cylinderRight</body>-->
         </bodies>
-    </GoblinPhysicsSimulator>
+    </PhysicsSimulator>
+    <AnimalMover name="CowMover1" target="CenterBox" linearSpeed="0.75" angularSpeed="25"/>
     <!--<SnapTo>
         <models>
             <model name="CenterBox">

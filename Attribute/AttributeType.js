@@ -106,6 +106,7 @@ var eAttrType = {
     BoneEffector                :1112,
     PhysicsSimulator            :1113,
     GoblinPhysicsSimulator      :1114,
+    CannonPhysicsSimulator      :1115,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
