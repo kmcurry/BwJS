@@ -174,10 +174,12 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
     var minDistance = FLT_MAX;
     for (i = 0; i < trees.length; i++)
     {
+        var scale = models[i].scale.getValueDirect();
+        
         var directionVectors = models[i].getDirectionVectors();
-        directionVectors.forward.x *= MAX_SEE_AHEAD;
-        directionVectors.forward.y *= MAX_SEE_AHEAD;
-        directionVectors.forward.z *= MAX_SEE_AHEAD;
+        directionVectors.forward.x *= MAX_SEE_AHEAD * scale.x;
+        directionVectors.forward.y *= MAX_SEE_AHEAD * scale.y;
+        directionVectors.forward.z *= MAX_SEE_AHEAD * scale.z;
 
         for (j = 0; j < trees.length; j++)
         {
