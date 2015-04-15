@@ -18,6 +18,7 @@ function PhysicsSimulator()
     this.bodyModels = [];
     this.updateWorld = false;
     this.updateBodies = false;
+    this.updateBodyPositions = [];
 
     this.timeIncrement = new NumberAttr(0);
     this.timeScale = new NumberAttr(1);
@@ -127,6 +128,12 @@ PhysicsSimulator.prototype.update = function()
         this.updateBodies = false;
         this.updatePhysicsBodies();
     }
+    
+    for (var i in this.updateBodyPositions)
+    {
+        this.updatePhysicsBody(this.updateBodyPositions[i]);
+    }
+    this.updateBodyPositions = [];
 }
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
@@ -689,12 +696,14 @@ function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 {
-    container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
+    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
 }
 
 function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 {
-    container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updatePhysicsBody(container.getPhysicsBodyIndex(attribute.getContainer()));
+    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
