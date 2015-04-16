@@ -97,7 +97,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         var rotationGroup = getInspectionGroup(model);
         var rotationQuat = rotationGroup ? rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect() : new Quaternion();
 
-        this.physicsSim.updatePhysicsBody(i);
+        this.physicsSim.updatePhysicsBodyPosition(i);
 
         if (rotationGroup) rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
     }
@@ -174,10 +174,12 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
     var minDistance = FLT_MAX;
     for (i = 0; i < trees.length; i++)
     {
+        var scale = models[i].scale.getValueDirect();
+        
         var directionVectors = models[i].getDirectionVectors();
-        directionVectors.forward.x *= MAX_SEE_AHEAD;
-        directionVectors.forward.y *= MAX_SEE_AHEAD;
-        directionVectors.forward.z *= MAX_SEE_AHEAD;
+        directionVectors.forward.x *= MAX_SEE_AHEAD * scale.x;
+        directionVectors.forward.y *= MAX_SEE_AHEAD * scale.y;
+        directionVectors.forward.z *= MAX_SEE_AHEAD * scale.z;
 
         for (j = 0; j < trees.length; j++)
         {

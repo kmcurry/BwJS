@@ -329,7 +329,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        /*
         if (this.updateRotation)
         {
             this.updateRotation = false;
@@ -342,7 +342,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        */
         if (this.updateQuaternion)
         {
             this.updateQuaternion = false;
@@ -661,8 +661,12 @@ function ParentableMotionElement_PositionModifiedCB(attribute, container)
 
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
-    container.updateRotation = true;
-    container.setModified();
+    //container.updateRotation = true;
+    //container.setModified();
+    var values = attribute.getValueDirect();
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(values.x, values.y, values.z);
+    container.quaternion.setValueDirect(quat);
 }
 
 function ParentableMotionElement_QuaternionModifiedCB(attribute, container)

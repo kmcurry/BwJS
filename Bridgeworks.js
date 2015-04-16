@@ -5101,6 +5101,8 @@ var eAttrType = {
     MorphEffector               :1111,
     BoneEffector                :1112,
     PhysicsSimulator            :1113,
+    GoblinPhysicsSimulator      :1114,
+    CannonPhysicsSimulator      :1115,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -16152,7 +16154,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        /*
         if (this.updateRotation)
         {
             this.updateRotation = false;
@@ -16165,7 +16167,7 @@ ParentableMotionElement.prototype.updateSimpleTransform = function()
 
             modified = true;
         }
-
+        */
         if (this.updateQuaternion)
         {
             this.updateQuaternion = false;
@@ -16484,8 +16486,12 @@ function ParentableMotionElement_PositionModifiedCB(attribute, container)
 
 function ParentableMotionElement_RotationModifiedCB(attribute, container)
 {
-    container.updateRotation = true;
-    container.setModified();
+    //container.updateRotation = true;
+    //container.setModified();
+    var values = attribute.getValueDirect();
+    var quat = new Quaternion();
+    quat.loadXYZAxisRotation(values.x, values.y, values.z);
+    container.quaternion.setValueDirect(quat);
 }
 
 function ParentableMotionElement_QuaternionModifiedCB(attribute, container)
@@ -24721,7 +24727,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         var rotationGroup = getInspectionGroup(model);
         var rotationQuat = rotationGroup ? rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect() : new Quaternion();
 
-        this.physicsSim.updatePhysicsBody(i);
+        this.physicsSim.updatePhysicsBodyPosition(i);
 
         if (rotationGroup) rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
     }
@@ -24798,10 +24804,12 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
     var minDistance = FLT_MAX;
     for (i = 0; i < trees.length; i++)
     {
+        var scale = models[i].scale.getValueDirect();
+        
         var directionVectors = models[i].getDirectionVectors();
-        directionVectors.forward.x *= MAX_SEE_AHEAD;
-        directionVectors.forward.y *= MAX_SEE_AHEAD;
-        directionVectors.forward.z *= MAX_SEE_AHEAD;
+        directionVectors.forward.x *= MAX_SEE_AHEAD * scale.x;
+        directionVectors.forward.y *= MAX_SEE_AHEAD * scale.y;
+        directionVectors.forward.z *= MAX_SEE_AHEAD * scale.z;
 
         for (j = 0; j < trees.length; j++)
         {
@@ -25613,7 +25621,7 @@ function ObjectMover_TargetObstructionDetectedModifiedCB(attribute, container)
     container.obstructionDetected(obstructionList);
 }
 
-var ANIMALMOVER_MAX_QUEUE_LENGTH	= 2;
+var ANIMALMOVER_MAX_QUEUE_LENGTH = 2;
 
 AnimalMover.prototype = new ObjectMover();
 AnimalMover.prototype.constructor = AnimalMover;
@@ -25623,81 +25631,83 @@ function AnimalMover()
     ObjectMover.call(this);
     this.className = "AnimalMover";
     this.attrType = eAttrType.AnimalMover;
-    
+
     this.linearDirection = null;
 }
 
 AnimalMover.prototype.evaluate = function()
 {
-	if (this.motionQueue.length() == 0)
-	{
-	    var rand = Math.random();
-	    var negateAngle = rand < 0.5 ? -1 : 1;
-	    var walk = new ObjectMotionDesc();
-		walk.duration = 5 * rand; // 
-		walk.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect() * rand * negateAngle , 0);
-		walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
-		
-		this.motionQueue.push(walk);
-	}
-	
-	// call base-class implementation
-	ObjectMover.prototype.evaluate.call(this);
+    if (this.motionQueue.length() == 0)
+    {
+        var rand = Math.random();
+        var negateAngle = rand < 0.5 ? -1 : 1;
+        var walk = new ObjectMotionDesc();
+        walk.duration = 5 * rand; // 
+        walk.angularVelocity = new Vector3D(0, this.angularSpeed.getValueDirect() * rand * negateAngle, 0);
+        walk.panVelocity = new Vector3D(0, 0, this.linearSpeed.getValueDirect());
+
+        this.motionQueue.push(walk);
+    }
+
+    // call base-class implementation
+    ObjectMover.prototype.evaluate.call(this);
 }
 
 AnimalMover.prototype.collisionDetected = function(collisionList)
-{   
+{
 }
 
 AnimalMover.prototype.obstructionDetected = function(obstructionList)
-{   
+{
     if (obstructionList.Size() > 0) // obstructions(s) occurred
     {
-       this.motionQueue.clear();
-       this.activeMotion = null;
+        this.motionQueue.clear();
+        this.activeMotion = null;
 
-       // determine vector to avoid obstruction
-       var directionVectors = this.targetObject.getDirectionVectors();
-       var thisPos = this.targetObject.getAttribute("sectorPosition").getValueDirect();
-       var linearDirection = new Vector3D(directionVectors.forward.x, directionVectors.forward.y, directionVectors.forward.z);
-       var obstructorPos = obstructionList.getAt(0).getAttribute("sectorPosition").getValueDirect();
-       var angleBetween = toDegrees(Math.acos(cosineAngleBetween(directionVectors.forward, 
-                                                                 new Vector3D(obstructorPos.x - thisPos.x, 
-                                                                              obstructorPos.y - thisPos.y, 
-                                                                              obstructorPos.z - thisPos.z))));
-       // if angleBetween is 0, offset obstructorPos so that deltaPos is not (0, 0, 0)
-       if (angleBetween == 0)
-       {
-           obstructorPos.x += 0.1;
-           obstructorPos.z += 0.1;
-       }
-       var mag = distanceBetween(thisPos, obstructorPos);       
-       var deltaPos = new Vector3D(((directionVectors.forward.x * mag) - (obstructorPos.x)), 
-                                   ((directionVectors.forward.y * mag) - (obstructorPos.y)), 
-                                   ((directionVectors.forward.z * mag) - (obstructorPos.z)));
-       deltaPos.normalize();
-       //deltaPos.multiplyScalar(MAX_AVOID_FORCE);
-       linearDirection.addVector(deltaPos);
-       linearDirection.normalize();
-       
-       // scale by linear speed   
-       linearDirection.multiplyScalar(this.linearSpeed.getValueDirect());
-       this.linearDirection = linearDirection;
-       
-       // turn so this will travel in direction of this vector
-       var cosAngle = cosineAngleBetween(directionVectors.forward, this.linearDirection);
-       angleBetween = toDegrees(Math.acos(cosAngle));
-       if (angleBetween > 0)
-       {
-           if (cosAngle < 0) angleBetween = -angleBetween;
-           var rotation = this.targetObject.getAttribute("rotation").getValueDirect();
-           //this.targetObject.getAttribute("rotation").setValueDirect(rotation.x, angleBetween + rotation.y, rotation.z);
-           
-           var turn = new ObjectMotionDesc();
-           turn.angularVelocity = new Vector3D(0, angleBetween, 0);
-           turn.duration = angleBetween / this.angularSpeed.getValueDirect();
-           this.motionQueue.push(turn);
-       }
+        // determine vector to avoid obstruction
+        var directionVectors = this.targetObject.getDirectionVectors();
+        var thisPos = this.targetObject.getAttribute("sectorPosition").getValueDirect();
+        var linearDirection = new Vector3D(directionVectors.forward.x, directionVectors.forward.y, directionVectors.forward.z);
+        var obstructorPos = obstructionList.getAt(0).getAttribute("sectorPosition").getValueDirect();
+        var angleBetween = toDegrees(Math.acos(cosineAngleBetween(directionVectors.forward,
+                new Vector3D(obstructorPos.x - thisPos.x,
+                        obstructorPos.y - thisPos.y,
+                        obstructorPos.z - thisPos.z))));
+        // if angleBetween is 0, offset obstructorPos so that deltaPos is not (0, 0, 0)
+        if (angleBetween == 0)
+        {
+            obstructorPos.x += 0.1;
+            obstructorPos.z += 0.1;
+        }
+        var mag = distanceBetween(thisPos, obstructorPos);
+        var deltaPos = new Vector3D(((directionVectors.forward.x * mag) - (obstructorPos.x)),
+                ((directionVectors.forward.y * mag) - (obstructorPos.y)),
+                ((directionVectors.forward.z * mag) - (obstructorPos.z)));
+        deltaPos.normalize();
+        //deltaPos.multiplyScalar(MAX_AVOID_FORCE);
+        linearDirection.addVector(deltaPos);
+        linearDirection.normalize();
+
+        // scale by linear speed   
+        linearDirection.multiplyScalar(this.linearSpeed.getValueDirect());
+        this.linearDirection = linearDirection;
+
+        // turn so this will travel in direction of this vector
+        var cosAngle = cosineAngleBetween(directionVectors.forward, this.linearDirection);
+        angleBetween = toDegrees(Math.acos(cosAngle));
+        if (angleBetween > 0)
+        {
+            if (cosAngle < 0)
+                angleBetween = -angleBetween;
+            var rotation = this.targetObject.getAttribute("rotation").getValueDirect();
+            this.targetObject.getAttribute("rotation").setValueDirect(rotation.x, angleBetween + rotation.y, rotation.z);
+            
+            // this code can result in endless turning
+            /*var turn = new ObjectMotionDesc();
+            turn.angularVelocity = new Vector3D(0, angleBetween, 0);
+            turn.duration = angleBetween / this.angularSpeed.getValueDirect();
+            this.motionQueue.push(turn);*/
+        }
     }
     else // no obstruction(s)
     {
@@ -27121,6 +27131,7 @@ function PhysicsSimulator()
     this.bodyModels = [];
     this.updateWorld = false;
     this.updateBodies = false;
+    this.updateBodyPositions = [];
 
     this.timeIncrement = new NumberAttr(0);
     this.timeScale = new NumberAttr(1);
@@ -27155,10 +27166,11 @@ PhysicsSimulator.prototype.evaluate = function()
             case 0:
                 // unselected
                 {
-                    // if not added, restore
+                    // if not added, update its position and add
                     if (!this.bodyAdded[i])
                     {
-                        this.updatePhysicsBody(i);
+                        this.updatePhysicsBodyPosition(i);
+                        this.bodyAdded[i] = true;
                     }
                 }
                 break;
@@ -27190,9 +27202,15 @@ PhysicsSimulator.prototype.evaluate = function()
         var quat = new Quaternion();
         quat.load(rot.w(), rot.x(), rot.y(), rot.z());
 
+        this.bodyModels[i].getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+        //this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
+    
         this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
 
+        this.bodyModels[i].getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+        //this.bodyModels[i].getAttribute("rotation").addModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
+        
         // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
         if (position.x < -worldHalfExtents.x || position.x > worldHalfExtents.x ||
             position.y < -worldHalfExtents.y || position.y > worldHalfExtents.y ||
@@ -27224,6 +27242,12 @@ PhysicsSimulator.prototype.update = function()
         this.updateBodies = false;
         this.updatePhysicsBodies();
     }
+    
+    for (var i in this.updateBodyPositions)
+    {
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[i]);
+    }
+    this.updateBodyPositions = [];
 }
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
@@ -27347,6 +27371,19 @@ PhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
     return null;
 }
 
+PhysicsSimulator.prototype.getPhysicsBodyIndex = function(bodyModel)
+{
+    for (var i = 0; i < this.bodyModels.length; i++)
+    {
+        if (this.bodyModels[i] == bodyModel)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 PhysicsSimulator.prototype.getBodyModel = function(physicsBody)
 {
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -27401,6 +27438,8 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     // watch for changes in vertices
     model.getAttribute("vertices").addModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
+    model.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+    model.getAttribute("rotation").addModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
     // watch for changes in scale
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
@@ -27470,6 +27509,8 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
         if (this.bodyModels[i] == model)
         {
             this.bodyModels[i].getAttribute("vertices").removeModifiedCB(PhysicsSimulator_ModelVerticesModifiedCB, this);
+            this.bodyModels[i].getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
+            this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
             //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
@@ -27628,39 +27669,15 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     this.physicsShapes[n] = shape;
 }
 
-PhysicsSimulator.prototype.updatePhysicsBody = function(n)
+PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
 {
-    this.removePhysicsBody(n);
-    this.restorePhysicsBody(n);
-}
-
-PhysicsSimulator.prototype.removePhysicsBody = function(n)
-{
-    //if (!this.bodyAdded[n]) 
-    //    return; // don't re-remove
-    
-    var body = this.physicsBodies[n];
-    if (!body)
-        return;
-
-    this.world.removeRigidBody(body);
-    Ammo.destroy(body.getMotionState());
-    Ammo.destroy(body);
-    this.bodyAdded[n] = false;
-}
-
-PhysicsSimulator.prototype.restorePhysicsBody = function(n)
-{
-    //if (this.bodyAdded[n]) 
-    //    return; // don't re-restore
-    
     var model = this.bodyModels[n];
     if (!model)
         return;
-    var shape = this.physicsShapes[n];
-    if (!shape)
+    var body = this.physicsBodies[n];
+    if (!body)
         return;
-
+    
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
@@ -27690,26 +27707,11 @@ PhysicsSimulator.prototype.restorePhysicsBody = function(n)
         // clear inspection group's rotation
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
     }
-
-    var mass = this.getNetMass(model);
-
-    var isDynamic = (mass != 0);
-    var localInertia = new Ammo.btVector3(0, 0, 0);
-    if (isDynamic)
-    {
-        shape.calculateLocalInertia(mass, localInertia);
-    }
-
-    var motionState = new Ammo.btDefaultMotionState(transform);
+    
+    body.setWorldTransform(transform);
+    body.getMotionState().setWorldTransform(transform);
+    body.activate(true);
     Ammo.destroy(transform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    Ammo.destroy(localInertia);
-    var body = new Ammo.btRigidBody(rbInfo);
-    Ammo.destroy(rbInfo);
-
-    this.world.addRigidBody(body);
-    this.physicsBodies[n] = body;
-    this.bodyAdded[n] = true;
 }
 
 PhysicsSimulator.prototype.initPhysics = function()
@@ -27765,6 +27767,18 @@ function PhysicsSimulator_BodiesModifiedCB(attribute, container)
 function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
+}
+
+function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
+{
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
+    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+}
+
+function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
+{
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
+    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
@@ -32124,6 +32138,8 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
             case "ObjectMover":
             case "AnimalMover":
             case "PhysicsSimulator":
+            case "GoblinPhysicsSimulator":
+            case "CannonPhysicsSimulator":
             {
             	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
             }
@@ -35607,16 +35623,6 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         model.addSurface(surfaces[surfIndex]);
     }
 
-    // set layer vertices to model
-    var layerVertices = new Array(layer.pnts.length * 3);
-    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
-    {
-        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
-        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
-        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
-    }
-    model.getAttribute("vertices").setValue(layerVertices);
-
     // create geometry (calculate polygon normals for tris)
     var vertexPolyNormals = [];
     var vertexNormals = [];
@@ -35911,6 +35917,16 @@ LWObjectBuilder.prototype.describeModel = function(data, layer, model)
         }
     }
 
+    // set layer vertices to model
+    var layerVertices = new Array(layer.pnts.length * 3);
+    for (var layerVertex = 0; layerVertex < layer.pnts.length; layerVertex++)
+    {
+        layerVertices[layerVertex * 3] = layer.pnts[layerVertex].x;
+        layerVertices[layerVertex * 3 + 1] = layer.pnts[layerVertex].y;
+        layerVertices[layerVertex * 3 + 2] = layer.pnts[layerVertex].z;
+    }
+    model.getAttribute("vertices").setValue(layerVertices);
+    
     // TODO: index vertices if requested
 }
 
@@ -37662,6 +37678,8 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["MorphEffector"] = newMorphEffector;
     this.newResourceProcs["BoneEffector"] = newBoneEffector;
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
+    this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
+    this.newResourceProcs["CannonPhysicsSimulator"] = newCannonPhysicsSimulator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -38131,6 +38149,24 @@ function newBoneEffector(name, factory)
 function newPhysicsSimulator(name, factory)
 {
     var resource = new PhysicsSimulator();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newGoblinPhysicsSimulator(name, factory)
+{
+    var resource = new GoblinPhysicsSimulator();
+
+    registerEvaluatorAttributes(resource, factory);
+
+    return resource;
+}
+
+function newCannonPhysicsSimulator(name, factory)
+{
+    var resource = new CannonPhysicsSimulator();
 
     registerEvaluatorAttributes(resource, factory);
 
