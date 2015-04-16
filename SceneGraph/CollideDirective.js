@@ -97,7 +97,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         var rotationGroup = getInspectionGroup(model);
         var rotationQuat = rotationGroup ? rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect() : new Quaternion();
 
-        this.physicsSim.updatePhysicsBody(i);
+        this.physicsSim.updatePhysicsBodyPosition(i);
 
         if (rotationGroup) rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
     }

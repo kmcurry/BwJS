@@ -327,7 +327,7 @@
             <body>cylinderRight</body>-->
         </bodies>
     </PhysicsSimulator>
-    <AnimalMover name="CowMover1" target="CenterBox" linearSpeed="0.75" angularSpeed="25"/>
+   <!--<AnimalMover name="CowMover1" target="CenterBox" linearSpeed="0.15" angularSpeed="25"/>-->
     <!--<SnapTo>
         <models>
             <model name="CenterBox">
