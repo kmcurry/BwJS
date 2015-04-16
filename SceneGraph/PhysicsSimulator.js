@@ -597,7 +597,7 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
     
     body.setWorldTransform(transform);
     body.getMotionState().setWorldTransform(transform);
-    //body.activate(true);
+    body.activate(true);
     Ammo.destroy(transform);
 }
 
