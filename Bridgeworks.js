@@ -29478,7 +29478,9 @@ AutoInterpolateCommand.prototype.buildMotion = function()
     this.kfi.getAttribute("enabled").setValueDirect(false);
     this.kfi.getAttribute("renderAndRelease").copyValue(this.renderAndRelease);
 
-    // TODO: name the interpolator based on the target
+    var name = this.name.getValueDirect().join("");
+    name += "_AutoInterpolator";
+    this.kfi.getAttribute("name").setValueDirect(name);
 
     for (var i = 0; i < this.attributeValuePairs.length; i++)
     {
