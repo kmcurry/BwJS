@@ -94,6 +94,7 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
     {
         case "MouseEvent":
         case "MouseEventConstructor": // Safari
+        case "WheelEvent":
             {
                 var absPos = getElementAbsolutePos(this.canvas);
                 event.canvasX = event.clientX - absPos.x;

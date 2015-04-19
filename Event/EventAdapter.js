@@ -170,6 +170,12 @@ EventAdapter.prototype.createMouseEvent = function(event)
         }
         break;
         
+        case "mousewheel":
+        {
+            type = eEventType.MouseWheelBackward;
+        }
+        break;
+
     default:
         {
             type = eEventType.UserDefined; // TEMPTEST (?)
