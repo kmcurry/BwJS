@@ -5103,6 +5103,8 @@ var eAttrType = {
     PhysicsSimulator            :1113,
     GoblinPhysicsSimulator      :1114,
     CannonPhysicsSimulator      :1115,
+    Animator                    :1116,
+    Spinner                     :1117,
     Evaluator_End               :1199, // all evaluator types must be given a type between Evaluator and Evaluator_End
 
     Node_End                    :1999,
@@ -7772,9 +7774,13 @@ function PhysicalPropertiesAttr()
 
     this.mass = new NumberAttr(0);
     this.radius = new NumberAttr(0);
+    this.friction = new NumberAttr(0);
+    this.restitution = new NumberAttr(0);
 
     this.registerAttribute(this.mass, "mass");
     this.registerAttribute(this.radius, "radius");
+    this.registerAttribute(this.friction, "friction");
+    this.registerAttribute(this.restitution, "restitution");
 }
 
 function setAttributeValue(attribute, value)
@@ -27458,14 +27464,14 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     var shape = this.getCompoundShape(model);
 
-    var mass = this.getNetMass(model);
+    var properties = this.getNetProperties(model);
 
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
     var position = model.getAttribute("sectorPosition").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
-    if (mass == 0)
+    if (properties.mass == 0)
     {
         position.y -= 0.075;
     }
@@ -27478,16 +27484,18 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     transform.setRotation(quaternion);
     Ammo.destroy(quaternion);
 
-    var isDynamic = (mass != 0);
+    var isDynamic = (properties.mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        shape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(properties.mass, localInertia);
     }
 
     var motionState = new Ammo.btDefaultMotionState(transform);
     Ammo.destroy(transform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
+    rbInfo.set_m_friction(properties.friction);
+    rbInfo.set_m_restitution(properties.restitution);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
@@ -27608,23 +27616,30 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
     return shape;
 }
 
-PhysicsSimulator.prototype.getNetMass = function(model)
+PhysicsSimulator.prototype.getNetProperties = function(model)
 {
-    var mass = 0;
+    var mass = 0;  
+    var friction = 0;
+    var restitution = 0;
 
     // calculate scaled mass for model
     var scale = model.getAttribute("scale").getValueDirect();
     var avgScale = (scale.x + scale.y + scale.z) / 3;
     var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect() * avgScale;
-
-    // add children's mass (if any)
+    var friction = physicalProperties.getAttribute("friction").getValueDirect();
+    var restitution = physicalProperties.getAttribute("restitution").getValueDirect();
+    
+    // add children's properties (if any)
     for (var i = 0; i < model.motionChildren.length; i++)
     {
-        mass += this.getNetMass(model.motionChildren[i]);
+        var childProperties = this.getNetProperties(model.motionChildren[i]);
+        mass += childProperties.mass;
+        friction += childProperties.friction;
+        restitution += childProperties.restitution;
     }
 
-    return mass;
+    return { mass: mass, friction: friction, restitution: restitution };
 }
 
 PhysicsSimulator.prototype.updatePhysicsShape = function(model)
@@ -27644,7 +27659,7 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var shape = this.getCompoundShape(model);
 
-    var mass = this.getNetMass(model);
+    var properties = this.getNetProperties(model);
 
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
@@ -27654,7 +27669,9 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     }
 
     var motionState = this.physicsBodies[n].getMotionState();
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
+    rbInfo.set_m_friction(properties.friction);
+    rbInfo.set_m_restitution(properties.restitution);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
@@ -28222,6 +28239,96 @@ SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
     // don't replace snapped surface's attribute value
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
 }
+Animator.prototype = new Evaluator();
+Animator.prototype.constructor = Animator;
+    
+function Animator()
+{
+    Evaluator.call(this);
+    this.className = "Animator";
+    this.attrType = eAttrType.Animator;
+    
+    this.targetObject = null;
+    
+    this.timeIncrement = new NumberAttr();
+    this.target = new StringAttr("");
+    
+    this.target.addModifiedCB(Animator_TargetModifiedCB, this);
+    
+    this.registerAttribute(this.timeIncrement, "timeIncrement");
+    this.registerAttribute(this.target, "target");
+}
+
+Animator.prototype.evaluate = function()
+{    
+}
+
+Animator.prototype.targetModified = function(targetObject)
+{
+    this.targetObject = targetObject;
+}
+
+function Animator_TargetModifiedCB(attribute, container)
+{
+    var target = attribute.getValueDirect().join("");
+    var resource = container.registry.find(target);
+    if (resource)
+    {
+        container.targetModified(resource);
+    }
+}
+
+
+Spinner.prototype = new Animator();
+Spinner.prototype.constructor = Spinner;
+    
+function Spinner()
+{
+    Animator.call(this);
+    this.className = "Spinner";
+    this.attrType = eAttrType.Spinner;
+    
+    this.targetCenter = new Vector3D();
+    
+    this.axisEndpoint = new Vector3DAttr(0, 0, 0);
+    this.angularVelocity = new NumberAttr(0);
+    
+    this.registerAttribute(this.axisEndpoint, "axisEndpoint");
+    this.registerAttribute(this.angularVelocity, "angularVelocity");
+}
+
+Spinner.prototype.evaluate = function()
+{
+    if (!this.targetObject) return;
+    
+    var timeIncrement = this.timeIncrement.getValueDirect()
+    var angularVelocity = this.targetObject.angularVelocity.getValueDirect();
+    
+    var axisEndpoint = this.axisEndpoint.getValueDirect();   
+    var axis = new Vector3D(axisEndpoint.x - this.targetCenter.x,
+        axisEndpoint.y - this.targetCenter.y, 
+        axisEndpoint.z - this.targetCenter.z);
+    
+    var spinQuat = new Quaternion();
+    spinQuat.loadXYZAxisRotation(axis.x, axis.y, axis.z, this.angularVelocity.getValueDirect() * timeIncrement);
+    
+    var quaternion = this.targetObject.quaternion.getValueDirect();
+    quaternion = spinQuat.multiply(quaternion);
+    
+    this.targetObject.quaternion.setValueDirect(quaternion);
+}
+
+Spinner.prototype.targetModified = function(targetObject)
+{
+    this.targetObject = targetObject;
+    if (targetObject)
+    {    
+        // get center
+        this.targetCenter = targetObject.center.getValueDirect();
+    }
+}
+
+
 var eEventType = {
     Unknown                     :-1,
     
@@ -28647,6 +28754,12 @@ EventAdapter.prototype.createMouseEvent = function(event)
         }
         break;
         
+        case "mousewheel":
+        {
+            type = eEventType.MouseWheelBackward;
+        }
+        break;
+
     default:
         {
             type = eEventType.UserDefined; // TEMPTEST (?)
@@ -32142,6 +32255,7 @@ RenderAgent.prototype.animateEvaluator = function(evaluator, timeIncrement)
             case "PhysicsSimulator":
             case "GoblinPhysicsSimulator":
             case "CannonPhysicsSimulator":
+            case "Spinner":
             {
             	evaluator.getAttribute("timeIncrement").setValueDirect(timeIncrement);
             }
@@ -37682,6 +37796,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
     this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
     this.newResourceProcs["CannonPhysicsSimulator"] = newCannonPhysicsSimulator;
+    this.newResourceProcs["Spinner"] = newAnimator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -38172,6 +38287,20 @@ function newCannonPhysicsSimulator(name, factory)
 
     registerEvaluatorAttributes(resource, factory);
 
+    return resource;
+}
+
+function newAnimator(name, factory)
+{
+    var resource = null;
+    
+    switch (name)
+    {
+        case "Spinner":
+            resource = new Spinner();
+            break;
+    }
+    
     return resource;
 }
 

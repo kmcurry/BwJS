@@ -345,14 +345,14 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     var shape = this.getCompoundShape(model);
 
-    var mass = this.getNetMass(model);
+    var properties = this.getNetProperties(model);
 
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
     var position = model.getAttribute("sectorPosition").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
-    if (mass == 0)
+    if (properties.mass == 0)
     {
         position.y -= 0.075;
     }
@@ -365,16 +365,18 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     transform.setRotation(quaternion);
     Ammo.destroy(quaternion);
 
-    var isDynamic = (mass != 0);
+    var isDynamic = (properties.mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        shape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(properties.mass, localInertia);
     }
 
     var motionState = new Ammo.btDefaultMotionState(transform);
     Ammo.destroy(transform);
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
+    rbInfo.set_m_friction(properties.friction);
+    rbInfo.set_m_restitution(properties.restitution);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
@@ -495,23 +497,30 @@ PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
     return shape;
 }
 
-PhysicsSimulator.prototype.getNetMass = function(model)
+PhysicsSimulator.prototype.getNetProperties = function(model)
 {
-    var mass = 0;
+    var mass = 0;  
+    var friction = 0;
+    var restitution = 0;
 
     // calculate scaled mass for model
     var scale = model.getAttribute("scale").getValueDirect();
     var avgScale = (scale.x + scale.y + scale.z) / 3;
     var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect() * avgScale;
-
-    // add children's mass (if any)
+    var friction = physicalProperties.getAttribute("friction").getValueDirect();
+    var restitution = physicalProperties.getAttribute("restitution").getValueDirect();
+    
+    // add children's properties (if any)
     for (var i = 0; i < model.motionChildren.length; i++)
     {
-        mass += this.getNetMass(model.motionChildren[i]);
+        var childProperties = this.getNetProperties(model.motionChildren[i]);
+        mass += childProperties.mass;
+        friction += childProperties.friction;
+        restitution += childProperties.restitution;
     }
 
-    return mass;
+    return { mass: mass, friction: friction, restitution: restitution };
 }
 
 PhysicsSimulator.prototype.updatePhysicsShape = function(model)
@@ -531,7 +540,7 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var shape = this.getCompoundShape(model);
 
-    var mass = this.getNetMass(model);
+    var properties = this.getNetProperties(model);
 
     var isDynamic = (mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
@@ -541,7 +550,9 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     }
 
     var motionState = this.physicsBodies[n].getMotionState();
-    var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
+    rbInfo.set_m_friction(properties.friction);
+    rbInfo.set_m_restitution(properties.restitution);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);

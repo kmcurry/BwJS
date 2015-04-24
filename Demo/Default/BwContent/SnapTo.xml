@@ -40,6 +40,8 @@
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
                             <mass>0</mass>
+                            <restitution>2.3</restitution>
+                            <friction>1.2</friction>
                         </physicalProperties>  
                     </Model>
                     <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
@@ -92,6 +94,8 @@
                         </genericConnectors>
                         <physicalProperties>
                             <mass>5</mass>
+                            <restitution>0.3</restitution>
+                            <friction>1.2</friction>
                         </physicalProperties>  
                     </Model>
                     <!--<Model name="CenterBox2" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
@@ -316,7 +320,7 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="false">
+    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>CenterBox</body>
@@ -327,9 +331,9 @@
             <body>cylinderRight</body>-->
         </bodies>
     </PhysicsSimulator>
-    <Spinner name="Spinner" target="CenterBox" angularVelocity="10">
+    <!--<Spinner name="Spinner" target="CenterBox" angularVelocity="10">
         <axisEndpoint x="1" y="0" z="0"/>
-    </Spinner>
+    </Spinner>-->
    <!--<AnimalMover name="CowMover1" target="CenterBox" linearSpeed="0.15" angularSpeed="25"/>-->
     <!--<SnapTo>
         <models>
