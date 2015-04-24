@@ -140,6 +140,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
     this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
     this.newResourceProcs["CannonPhysicsSimulator"] = newCannonPhysicsSimulator;
+    this.newResourceProcs["Spinner"] = newAnimator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -630,6 +631,20 @@ function newCannonPhysicsSimulator(name, factory)
 
     registerEvaluatorAttributes(resource, factory);
 
+    return resource;
+}
+
+function newAnimator(name, factory)
+{
+    var resource = null;
+    
+    switch (name)
+    {
+        case "Spinner":
+            resource = new Spinner();
+            break;
+    }
+    
     return resource;
 }
 
