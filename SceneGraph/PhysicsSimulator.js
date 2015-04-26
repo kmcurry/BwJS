@@ -56,7 +56,7 @@ PhysicsSimulator.prototype.evaluate = function()
                     // if not added, update its position and add
                     if (!this.bodyAdded[i])
                     {
-                        this.updatePhysicsBodyPosition(i);
+                        this.updatePhysicsBodyPosition(i, true);
                         this.bodyAdded[i] = true;
                     }
                 }
@@ -134,7 +134,7 @@ PhysicsSimulator.prototype.update = function()
     
     for (var i in this.updateBodyPositions)
     {
-        this.updatePhysicsBodyPosition(this.updateBodyPositions[i]);
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[i], true);
     }
     this.updateBodyPositions = [];
 }
@@ -546,11 +546,11 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var properties = this.getNetProperties(model);
 
-    var isDynamic = (mass != 0);
+    var isDynamic = (properties.mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        shape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(properties.mass, localInertia);
     }
 
     var motionState = this.physicsBodies[n].getMotionState();
@@ -571,7 +571,7 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     this.physicsShapes[n] = shape;
 }
 
-PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
+PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, clearRotationQuat)
 {
     var model = this.bodyModels[n];
     if (!model)
@@ -607,7 +607,10 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
         Ammo.destroy(quaternion);
 
         // clear inspection group's rotation
-        rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        if (clearRotationQuat)
+        {
+            rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        }
     }
     
     body.setWorldTransform(transform);
@@ -674,19 +677,40 @@ function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelQuaternionModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)

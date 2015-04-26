@@ -251,6 +251,16 @@ Model.prototype.clearGeometryAttrConnectionsMap = function()
     this.initializeGeometryAttrConnectionsMap();
 }
 
+Model.prototype.setRegistry = function(registry)
+{
+    // add this to Bridgeworks' physics simulator
+    var bworks = registry.find("Bridgeworks");
+    bworks.physicsSimulator.bodies.push_back(this.name);
+    
+    // call base-class implementation
+    ParentableMotionElement.prototype.setRegistry.call(this, registry);
+}
+
 Model.prototype.setGraphMgr = function(graphMgr)
 {
     this.isolatorNode.setGraphMgr(graphMgr);
