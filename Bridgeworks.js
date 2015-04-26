@@ -5481,6 +5481,14 @@ Attribute.prototype.setLength = function(length)
 
 Attribute.prototype.addModifiedCB = function(callback, data)
 {
+    // don't add dups
+    var indexCB = this.modifiedCBs.indexOf(callback);
+    var indexData = this.modifiedCBsData.indexOf(data);
+    if (indexCB >= 0 && indexCB == indexData) 
+    {
+        return;
+    }
+        
     this.modifiedCBs.push(callback);
     this.modifiedCBsData.push(data);
 }
@@ -24666,15 +24674,14 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
 
-    this.physicsSim = new PhysicsSimulator();
-    this.physicsSim.getAttribute("gravity").setValueDirect(0, 0, 0);
-
     this.name.setValueDirect("CollideDirective");
 }
 
 CollideDirective.prototype.setRegistry = function(registry)
 {
-    this.physicsSim.setRegistry(registry);
+    // use Bridgeworks' physics simulator for collision detection
+    var bworks = registry.find("Bridgeworks");
+    this.physicsSimulator = bworks.physicsSimulator;
 
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);
@@ -24702,88 +24709,48 @@ CollideDirective.prototype.execute = function(root)
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
-    var i, j;
-    
-    // synchronize models with physics simulator
-    var models = [];
-    var bodies = new AttributeVector();
-    for (i in collideRecs)
+    if (!this.physicsSimulator) return;
+        
+    // reset model's collision attributes; get selected model
+    var selected = null;
+    for (var i in collideRecs)
     {
         var model = collideRecs[i].model;
 
         model.getAttribute("collisionDetected").setValueDirect(false);
         model.getAttribute("collisionList").clear();
 
-        if (model.motionParent)
-            continue;
-        // physics simulator uses parents for child models
-
-        models.push(model);
-        var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
-        bodies.push_back(name);
-    }
-    this.physicsSim.getAttribute("bodies").synchronize(bodies, true);
-    this.physicsSim.update();
-    
-    // update positions of models (retain inspection group's rotation)
-    for (i = 0; i < models.length; i++)
-    {
-        var model = models[i];
-
-        var rotationGroup = getInspectionGroup(model);
-        var rotationQuat = rotationGroup ? rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect() : new Quaternion();
-
-        this.physicsSim.updatePhysicsBodyPosition(i);
-
-        if (rotationGroup) rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(rotationQuat);
-    }
-
-    // update physics simulation
-    this.physicsSim.stepSimulation(1, 1);
-
-    // get collisions
-    for (i = 0; i < models.length; i++)
-    {
-        var model = models[i];
-        if (!this.isSelected(model)) continue; // for now only test currently selected model
-            
-        /*
-        var colliders = this.physicsSim.getColliders(model);
-        if (colliders.length > 0)
+        if (this.isSelected(model))
         {
-            // TODO: should parent's collision be propagated to child models?
-            for (j = 0; j < colliders.length; j++)
-            {
-                model.getAttribute("collisionList").push_back(colliders[j]);
-            }
-            model.getAttribute("collisionDetected").setValueDirect(true);
-
-            // if model is set to stop on collision, update its position from the physics simulator
-            if (model.getAttribute("stopOnCollision").getValueDirect())
-            {
-                var trans = new Ammo.btTransform();
-                this.physicsSim.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
-                var origin = trans.getOrigin();
-                Ammo.destroy(trans);
-                var position = new Vector3D(origin.x(), origin.y(), origin.z());
-                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
-                
-            }
+            selected = model;
         }
-        */
-        var colliding = this.physicsSim.isColliding(model);
-        if (colliding)
+    }
+    // currently only detecting collisions on selected model
+    if (!selected) return;
+
+    // update position of selectd model with physics simulator
+    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), false);
+    
+    // evaluate physics simulator
+    this.physicsSimulator.evaluate();
+
+    // check collision status
+    var colliding = this.physicsSimulator.isColliding(selected);
+    if (colliding)
+    {
+        // if model is set to stop on collision, update its position from the physics simulator
+        if (selected.getAttribute("stopOnCollision").getValueDirect())
         {
-            // if model is set to stop on collision, update its position from the physics simulator
-            if (model.getAttribute("stopOnCollision").getValueDirect())
-            {
-                var trans = new Ammo.btTransform();
-                this.physicsSim.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
-                var origin = trans.getOrigin();
-                Ammo.destroy(trans);
-                var position = new Vector3D(origin.x(), origin.y(), origin.z());
-                model.getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);               
-            }
+            var trans = new Ammo.btTransform();
+            this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
+            var origin = trans.getOrigin();
+            var rot = trans.getRotation();
+            var quaternion = new Quaternion();
+            quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+            Ammo.destroy(trans);
+
+            selected.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
+            selected.getAttribute("quaternion").setValueDirect(quaternion);
         }
     }
 }
@@ -27175,7 +27142,7 @@ PhysicsSimulator.prototype.evaluate = function()
                     // if not added, update its position and add
                     if (!this.bodyAdded[i])
                     {
-                        this.updatePhysicsBodyPosition(i);
+                        this.updatePhysicsBodyPosition(i, true);
                         this.bodyAdded[i] = true;
                     }
                 }
@@ -27253,7 +27220,7 @@ PhysicsSimulator.prototype.update = function()
     
     for (var i in this.updateBodyPositions)
     {
-        this.updatePhysicsBodyPosition(this.updateBodyPositions[i]);
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[i], true);
     }
     this.updateBodyPositions = [];
 }
@@ -27665,11 +27632,11 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
     var properties = this.getNetProperties(model);
 
-    var isDynamic = (mass != 0);
+    var isDynamic = (properties.mass != 0);
     var localInertia = new Ammo.btVector3(0, 0, 0);
     if (isDynamic)
     {
-        shape.calculateLocalInertia(mass, localInertia);
+        shape.calculateLocalInertia(properties.mass, localInertia);
     }
 
     var motionState = this.physicsBodies[n].getMotionState();
@@ -27690,7 +27657,7 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     this.physicsShapes[n] = shape;
 }
 
-PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
+PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, clearRotationQuat)
 {
     var model = this.bodyModels[n];
     if (!model)
@@ -27726,7 +27693,10 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
         Ammo.destroy(quaternion);
 
         // clear inspection group's rotation
-        rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        if (clearRotationQuat)
+        {
+            rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        }
     }
     
     body.setWorldTransform(transform);
@@ -27793,19 +27763,40 @@ function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelQuaternionModifiedCB(attribute, container)
 {
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
-    container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    for (var i = 0 ; i < container.updateBodyPositions.length; i++)
+    {
+        if (container.updateBodyPositions[i] == index)
+            return;
+    }
+    container.updateBodyPositions.push(index);
 }
 
 function PhysicsSimulator_ModelScaleModifiedCB(attribute, container)
@@ -33714,12 +33705,19 @@ SerializeCommand.prototype.serializeScene = function()
 
         // serialize
         var i;
+        var physicsSimulators = [];
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
             if (!container)
                 continue;
 
+            // physics simulator (serialize at end)
+            if (container.attrType == eAttrType.PhysicsSimulator)
+            {
+                physicsSimulators.push(container);
+                continue;
+            }
             // device handlers
             if (container.attrType > eAttrType.DeviceHandler &&
                     container.attrType < eAttrType.DeviceHandler_End)
@@ -33824,34 +33822,19 @@ SerializeCommand.prototype.serializeScene = function()
         // snapped models
         var snapMgr = this.registry.find("SnapMgr");
         this.serialized += snapMgr.serialize();
-        /*
-         // updateSectorOrigin
-         const char* substr = NULL;
-         std.prototype.string name = "";
-         if ((substr = strstr(this.serialized.c_str(), "PerspectiveCamera")) ||
-         (substr = strstr(this.serialized.c_str(), "OrthographicCamera")))
-         {
-         if (substr = strstr(substr, "<name>"))
-         {
-         substr += 6; // skip "<name>"
-         while (*substr != '<')
-         {
-         name += *substr++;
-         }
-         
-         this.serialized += ".set target=\"";
-         this.serialized += name;
-         this.serialized += "\" updateSectorOrigin=\"true\"/>";
-         }
-         }
-         */
-        // TODO: pivotCone
+        
+        // physicsSimulators
+        for (i = 0; i < physicsSimulators.length; i++)
+        {
+            this.directive.execute(physicsSimulators[i]);
+            this.serialized += this.directive.serialized;
+        }
     }
 
     // root element close tag
     this.serialized += "</Session>";
     serializedScene += this.serialized;
-    //console.log(this.serialized);
+    console.log(this.serialized);
 
     return;
 }
@@ -34409,6 +34392,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
     {
         var factory = this.registry.find("AttributeFactory");
         var snapModel = factory.create("SnapModel");
+        factory.finalize("Model", snapModel);
         snapModel.synchronize(snappee, true);
         // don't copy vertices/snapConnectors
         snapModel.vertices.setValueDirect(new Array());
@@ -34427,10 +34411,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         snapModel.snap(snappee, new Matrix4x4());
         snappee.getParent(0).addChild(snapModel);
         snappee = snapModel;
-        
-        // add to physics simulator
-        var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)
@@ -38456,6 +38436,13 @@ function finalizeModel(model, factory)
 
         contentHandler.parseFileStream(pathInfo[0]);
     }
+    
+    // if physicsEnabled, add this to Bridgeworks' physics simulator
+    if (model.physicsEnabled.getValueDirect())
+    {
+        var bworks = factory.registry.find("Bridgeworks");
+        bworks.physicsSimulator.bodies.push_back(model.name);
+    }
 }
 
 function finalizeDirective(directive, factory)
@@ -38701,6 +38688,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.mapProjectionCalculator = new MapProjectionCalculator();
     this.rasterComponentEventListener = new RasterComponentEventListener();
     this.snapMgr = new SnapMgr();
+    this.physicsSimulator = new PhysicsSimulator();
 
     // set registry to allocated objects
     this.graphMgr.setRegistry(this.registry);
@@ -38716,12 +38704,14 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.mapProjectionCalculator.setRegistry(this.registry);
     this.rasterComponentEventListener.setRegistry(this.registry);
     this.snapMgr.setRegistry(this.registry);
+    this.physicsSimulator.setRegistry(this.registry);
 
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);
     this.selector.setRayPick(this.rayPick);
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
+    this.physicsSimulator.orphan.setValueDirect(true);
 
     this.name = new StringAttr("Bridgeworks");
     this.onLoad = new StringAttr();
@@ -38800,6 +38790,7 @@ Bridgeworks.prototype.initRegistry = function()
     this.registry.register(this.mapProjectionCalculator);
     this.registry.register(this.rasterComponentEventListener);
     this.registry.register(this.snapMgr);
+    this.registry.register(this.physicsSimulator);
 
     // backward compatibility
     this.registry.registerByName(this.renderAgent, "AnimationAgent");

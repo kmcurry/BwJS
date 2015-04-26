@@ -56,12 +56,19 @@ SerializeCommand.prototype.serializeScene = function()
 
         // serialize
         var i;
+        var physicsSimulators = [];
         for (i = 0; i < count; i++)
         {
             container = attrContainerRegistry.getObject(i);
             if (!container)
                 continue;
 
+            // physics simulator (serialize at end)
+            if (container.attrType == eAttrType.PhysicsSimulator)
+            {
+                physicsSimulators.push(container);
+                continue;
+            }
             // device handlers
             if (container.attrType > eAttrType.DeviceHandler &&
                     container.attrType < eAttrType.DeviceHandler_End)
@@ -166,34 +173,19 @@ SerializeCommand.prototype.serializeScene = function()
         // snapped models
         var snapMgr = this.registry.find("SnapMgr");
         this.serialized += snapMgr.serialize();
-        /*
-         // updateSectorOrigin
-         const char* substr = NULL;
-         std.prototype.string name = "";
-         if ((substr = strstr(this.serialized.c_str(), "PerspectiveCamera")) ||
-         (substr = strstr(this.serialized.c_str(), "OrthographicCamera")))
-         {
-         if (substr = strstr(substr, "<name>"))
-         {
-         substr += 6; // skip "<name>"
-         while (*substr != '<')
-         {
-         name += *substr++;
-         }
-         
-         this.serialized += ".set target=\"";
-         this.serialized += name;
-         this.serialized += "\" updateSectorOrigin=\"true\"/>";
-         }
-         }
-         */
-        // TODO: pivotCone
+        
+        // physicsSimulators
+        for (i = 0; i < physicsSimulators.length; i++)
+        {
+            this.directive.execute(physicsSimulators[i]);
+            this.serialized += this.directive.serialized;
+        }
     }
 
     // root element close tag
     this.serialized += "</Session>";
     serializedScene += this.serialized;
-    //console.log(this.serialized);
+    console.log(this.serialized);
 
     return;
 }
