@@ -63,14 +63,14 @@ PhysicsSimulator.prototype.evaluate = function()
                 // selected
                 {
                     // stop positional updates
-                    this.updatePhysicsBodyPosition(i, false);
+                    //this.updatePhysicsBodyPosition(i, false);
                     this.bodyAdded[i] = false;
                 }
                 break;
         }
     }
 
-    var timeIncrement = 0.01;//this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
+    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
     this.stepSimulation(timeIncrement);
     
     var trans = new
@@ -134,11 +134,10 @@ PhysicsSimulator.prototype.update = function()
         this.updatePhysicsBodies();
     }
     
-    for (var i in this.updateBodyPositions)
+    while (this.updateBodyPositions.length > 0)
     {
-        this.updatePhysicsBodyPosition(this.updateBodyPositions[i], true);
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[0], true);
     }
-    this.updateBodyPositions = [];
 }
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
@@ -624,6 +623,12 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, clearRotation
     body.getMotionState().setWorldTransform(transform);
     body.activate(true);
     Ammo.destroy(transform);
+    
+    var index = this.updateBodyPositions.indexOf(n);
+    if (index >= 0)
+    {
+        this.updateBodyPositions.splice(index, 1);
+    }
 }
 
 PhysicsSimulator.prototype.initPhysics = function()

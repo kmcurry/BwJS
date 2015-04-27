@@ -24674,14 +24674,15 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
 
+    this.physicsSimulator = new PhysicsSimulator();
+    this.physicsSimulator.getAttribute("gravity").setValueDirect(0, 0, 0);
+
     this.name.setValueDirect("CollideDirective");
 }
 
 CollideDirective.prototype.setRegistry = function(registry)
 {
-    // use Bridgeworks' physics simulator for collision detection
-    var bworks = registry.find("Bridgeworks");
-    this.physicsSimulator = bworks.physicsSimulator;
+    this.physicsSimulator.setRegistry(registry);
 
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);
@@ -24709,48 +24710,59 @@ CollideDirective.prototype.execute = function(root)
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
-    if (!this.physicsSimulator) return;
-        
-    // reset model's collision attributes; get selected model
-    var selected = null;
-    for (var i in collideRecs)
+    var i, j;
+    
+    // synchronize models with physics simulator
+    var models = [];
+    var bodies = new AttributeVector();
+    for (i in collideRecs)
     {
         var model = collideRecs[i].model;
 
         model.getAttribute("collisionDetected").setValueDirect(false);
         model.getAttribute("collisionList").clear();
 
-        if (this.isSelected(model))
-        {
-            selected = model;
-        }
+        if (model.motionParent)
+            continue;
+        // physics simulator uses parents for child models
+
+        models.push(model);
+        var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
+        bodies.push_back(name);
     }
-    // currently only detecting collisions on selected model
-    if (!selected) return;
-
-    // update position of selectd model with physics simulator
-    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), false);
+    this.physicsSimulator.getAttribute("bodies").synchronize(bodies, true);
+    this.physicsSimulator.update();
     
-    // evaluate physics simulator
-    this.physicsSimulator.evaluate();
-
-    // check collision status
-    var colliding = this.physicsSimulator.isColliding(selected);
-    if (colliding)
+    // update positions of models (retain inspection group's rotation)
+    for (i = 0; i < models.length; i++)
     {
-        // if model is set to stop on collision, update its position from the physics simulator
-        if (selected.getAttribute("stopOnCollision").getValueDirect())
+        var model = models[i];
+
+        this.physicsSimulator.updatePhysicsBodyPosition(i, !this.isSelected(model));
+    }
+    
+    // update physics simulation
+    this.physicsSimulator.stepSimulation(1, 1);
+
+    // get collisions
+    for (i = 0; i < models.length; i++)
+    {
+        var model = models[i];
+        if (!this.isSelected(model)) continue; // for now only test currently selected model
+            
+        var colliding = this.physicsSimulator.isColliding(model);
+        if (colliding)
         {
             var trans = new Ammo.btTransform();
-            this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
+            this.physicsSimulator.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
             var origin = trans.getOrigin();
             var rot = trans.getRotation();
             var quaternion = new Quaternion();
             quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
             Ammo.destroy(trans);
 
-            selected.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
-            selected.getAttribute("quaternion").setValueDirect(quaternion);
+            model.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
+            model.getAttribute("quaternion").setValueDirect(quaternion);
         }
     }
 }
@@ -24851,7 +24863,6 @@ CollideDirective.prototype.isSelected = function(model)
 
     return selected;
 }
-
 function HighlightTarget()
 {
     this.projMatrix = new Matrix4x4();
@@ -27128,9 +27139,6 @@ function PhysicsSimulator()
 
 PhysicsSimulator.prototype.evaluate = function()
 {
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement);
-
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -27152,13 +27160,18 @@ PhysicsSimulator.prototype.evaluate = function()
                 // selected
                 {
                     // stop positional updates
+                    //this.updatePhysicsBodyPosition(i, false);
                     this.bodyAdded[i] = false;
                 }
                 break;
         }
     }
 
-    var trans = new Ammo.btTransform();
+    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
+    this.stepSimulation(timeIncrement);
+    
+    var trans = new
+    Ammo.btTransform();
     var worldHalfExtents = this.worldHalfExtents.getValueDirect();
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -27218,11 +27231,10 @@ PhysicsSimulator.prototype.update = function()
         this.updatePhysicsBodies();
     }
     
-    for (var i in this.updateBodyPositions)
+    while (this.updateBodyPositions.length > 0)
     {
-        this.updatePhysicsBodyPosition(this.updateBodyPositions[i], true);
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[0], true);
     }
-    this.updateBodyPositions = [];
 }
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
@@ -27385,14 +27397,11 @@ PhysicsSimulator.prototype.isSelected = function(model)
 
     return selected;
 }
-
+    
 PhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
     // remove existing bodies
-    while (this.bodyModels.length > 0)
-    {
-        this.deletePhysicsBody(this.bodyModels[0]);
-    }
+    this.deletePhysicsBodies();
 
     // add bodies to world (if not already present)
     for (var i = 0; i < this.bodies.Size(); i++)
@@ -27469,7 +27478,7 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
-
+    
     this.world.addRigidBody(body);
     //if (isDynamic)
     {
@@ -27477,6 +27486,14 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
         this.physicsShapes.push(shape);
         this.physicsBodies.push(body);
         this.bodyAdded.push(true);
+    }
+}
+
+PhysicsSimulator.prototype.deletePhysicsBodies = function()
+{
+    while (this.bodyModels.length > 0)
+    {
+        this.deletePhysicsBody(this.bodyModels[0]);
     }
 }
 
@@ -27703,6 +27720,12 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, clearRotation
     body.getMotionState().setWorldTransform(transform);
     body.activate(true);
     Ammo.destroy(transform);
+    
+    var index = this.updateBodyPositions.indexOf(n);
+    if (index >= 0)
+    {
+        this.updateBodyPositions.splice(index, 1);
+    }
 }
 
 PhysicsSimulator.prototype.initPhysics = function()
@@ -38711,7 +38734,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.selector.setRayPick(this.rayPick);
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
-    this.physicsSimulator.orphan.setValueDirect(true);
+    //this.physicsSimulator.orphan.setValueDirect(true);
 
     this.name = new StringAttr("Bridgeworks");
     this.onLoad = new StringAttr();
@@ -38856,7 +38879,10 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.iscetAgent.start(); There is no isectAgent in javascript version
     this.selector.start();
     this.rasterComponentEventListener.start();
-
+    
+    this.physicsSimulator.bodies.clear();
+    this.physicsSimulator.deletePhysicsBodies();
+    
     // TODO
     console.debug("TODO: " + arguments.callee.name);
 }
