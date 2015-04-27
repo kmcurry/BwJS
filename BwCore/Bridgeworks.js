@@ -206,7 +206,10 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.iscetAgent.start(); There is no isectAgent in javascript version
     this.selector.start();
     this.rasterComponentEventListener.start();
-
+    
+    this.physicsSimulator.bodies.clear();
+    this.physicsSimulator.deletePhysicsBodies();
+    
     // TODO
     console.debug("TODO: " + arguments.callee.name);
 }

@@ -42,9 +42,6 @@ function PhysicsSimulator()
 
 PhysicsSimulator.prototype.evaluate = function()
 {
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement);
-
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -66,13 +63,18 @@ PhysicsSimulator.prototype.evaluate = function()
                 // selected
                 {
                     // stop positional updates
+                    this.updatePhysicsBodyPosition(i, false);
                     this.bodyAdded[i] = false;
                 }
                 break;
         }
     }
 
-    var trans = new Ammo.btTransform();
+    var timeIncrement = 0.01;//this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
+    this.stepSimulation(timeIncrement);
+    
+    var trans = new
+    Ammo.btTransform();
     var worldHalfExtents = this.worldHalfExtents.getValueDirect();
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -299,14 +301,11 @@ PhysicsSimulator.prototype.isSelected = function(model)
 
     return selected;
 }
-
+    
 PhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
     // remove existing bodies
-    while (this.bodyModels.length > 0)
-    {
-        this.deletePhysicsBody(this.bodyModels[0]);
-    }
+    this.deletePhysicsBodies();
 
     // add bodies to world (if not already present)
     for (var i = 0; i < this.bodies.Size(); i++)
@@ -383,7 +382,7 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
-
+    
     this.world.addRigidBody(body);
     //if (isDynamic)
     {
@@ -391,6 +390,14 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
         this.physicsShapes.push(shape);
         this.physicsBodies.push(body);
         this.bodyAdded.push(true);
+    }
+}
+
+PhysicsSimulator.prototype.deletePhysicsBodies = function()
+{
+    while (this.bodyModels.length > 0)
+    {
+        this.deletePhysicsBody(this.bodyModels[0]);
     }
 }
 

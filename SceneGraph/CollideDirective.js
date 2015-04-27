@@ -85,7 +85,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     if (!selected) return;
 
     // update position of selectd model with physics simulator
-    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), false);
+    //this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), false);
     
     // evaluate physics simulator
     this.physicsSimulator.evaluate();
