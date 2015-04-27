@@ -24806,7 +24806,7 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
             if (i == j)
                 continue;
 
-            if (( distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 && distance < minDistance)
+            if ((distance = trees[j].obstructs(trees[i], directionVectors.forward)) > 0 && distance < minDistance)
             {
                 models[i].getAttribute("obstructionList").clear();
                 models[i].getAttribute("obstructionList").push_back(models[j]);
@@ -24847,7 +24847,8 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     var snapMgr = this.registry.find("SnapMgr");
     for (i = 0; i < snappees.length; i++)
     {
-        if (snapMgr.trySnap(snapper, snappees[i]))
+        if (snapper.boundingTree.collides(snappees[i].boundingTree) &&
+            snapMgr.trySnap(snapper, snappees[i]))
         {     
             return;
             //break;
