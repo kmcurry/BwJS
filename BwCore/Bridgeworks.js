@@ -249,7 +249,13 @@ Bridgeworks.prototype.updateScene = function(xml)
         xml = loadXMLResource(this.contentDir + "/" + xml);
     }
 
+    // disable physics while parsing
+    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+    
     this.parser.parse(xml);
+    
+    // restore physics evaluate state
+    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)

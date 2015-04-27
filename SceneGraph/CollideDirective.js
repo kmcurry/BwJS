@@ -190,7 +190,8 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     var snapMgr = this.registry.find("SnapMgr");
     for (i = 0; i < snappees.length; i++)
     {
-        if (snapMgr.trySnap(snapper, snappees[i]))
+        if (snapper.boundingTree.collides(snappees[i].boundingTree) &&
+            snapMgr.trySnap(snapper, snappees[i]))
         {     
             return;
             //break;

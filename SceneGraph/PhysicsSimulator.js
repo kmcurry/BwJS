@@ -446,6 +446,7 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
+            this.bodies.removeElement(i);
             return;
         }
     }

@@ -24847,7 +24847,8 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     var snapMgr = this.registry.find("SnapMgr");
     for (i = 0; i < snappees.length; i++)
     {
-        if (snapMgr.trySnap(snapper, snappees[i]))
+        if (snapper.boundingTree.collides(snappees[i].boundingTree) &&
+            snapMgr.trySnap(snapper, snappees[i]))
         {     
             return;
             //break;
@@ -27548,6 +27549,7 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
+            this.bodies.removeElement(i);
             return;
         }
     }
@@ -39017,7 +39019,13 @@ Bridgeworks.prototype.updateScene = function(xml)
         xml = loadXMLResource(this.contentDir + "/" + xml);
     }
 
+    // disable physics while parsing
+    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+    
     this.parser.parse(xml);
+    
+    // restore physics evaluate state
+    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)
