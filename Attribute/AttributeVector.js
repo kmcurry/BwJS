@@ -57,6 +57,19 @@ AttributeVector.prototype.clear = function()
     this.resize(0);
 }
 
+AttributeVector.prototype.indexOf = function(item)
+{
+    for (var i = 0; i < this.vector.length; i++)
+    {
+        if (this.vector[i] == item)
+        {
+            return i;
+        }
+    }
+    
+    return -1;
+}
+
 AttributeVector.prototype.getAt = function(index)
 {
     if (this.vector.length > index)
@@ -77,7 +90,7 @@ AttributeVector.prototype.setAt = function(index, item)
 
 AttributeVector.prototype.prev = function(element)
 {
-    for (var i=0; i < this.vector.length; i++)
+    for (var i = 0; i < this.vector.length; i++)
     {
         if (this.vector[i] == element)
         {
@@ -91,7 +104,7 @@ AttributeVector.prototype.prev = function(element)
 
 AttributeVector.prototype.next = function(element)
 {
-    for (var i=0; i < this.vector.length; i++)
+    for (var i = 0; i < this.vector.length; i++)
     {
         if (this.vector[i] == element)
         {

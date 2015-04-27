@@ -30,15 +30,14 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
 
-    this.physicsSimulator = new PhysicsSimulator();
-    this.physicsSimulator.getAttribute("gravity").setValueDirect(0, 0, 0);
-
     this.name.setValueDirect("CollideDirective");
 }
 
 CollideDirective.prototype.setRegistry = function(registry)
 {
-    this.physicsSimulator.setRegistry(registry);
+    // use Bridgeworks' physics simulator for collision detection
+    var bworks = registry.find("Bridgeworks");
+    this.physicsSimulator = bworks.physicsSimulator;
 
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);
@@ -66,59 +65,52 @@ CollideDirective.prototype.execute = function(root)
 
 CollideDirective.prototype.detectCollisions = function(collideRecs)
 {
-    var i, j;
-    
-    // synchronize models with physics simulator
-    var models = [];
-    var bodies = new AttributeVector();
-    for (i in collideRecs)
+    if (!this.physicsSimulator) return;
+        
+    // reset model's collision attributes; get selected model
+    var selected = null;
+    for (var i in collideRecs)
     {
         var model = collideRecs[i].model;
 
         model.getAttribute("collisionDetected").setValueDirect(false);
         model.getAttribute("collisionList").clear();
 
-        if (model.motionParent)
-            continue;
-        // physics simulator uses parents for child models
-
-        models.push(model);
-        var name = new StringAttr(model.getAttribute("name").getValueDirect().join(""));
-        bodies.push_back(name);
+        if (this.isSelected(model))
+        {
+            selected = model;
+        }
     }
-    this.physicsSimulator.getAttribute("bodies").synchronize(bodies, true);
-    this.physicsSimulator.update();
-    
-    // update positions of models (retain inspection group's rotation)
-    for (i = 0; i < models.length; i++)
+    // currently only detecting collisions on selected model, but still need to evaluate physics simulator
+    if (!selected)
     {
-        var model = models[i];
-
-        this.physicsSimulator.updatePhysicsBodyPosition(i, !this.isSelected(model));
+        this.physicsSimulator.evaluate();
+        return;
     }
-    
-    // update physics simulation
-    this.physicsSimulator.stepSimulation(1, 1);
 
-    // get collisions
-    for (i = 0; i < models.length; i++)
+    // update position of selected model with physics simulator
+    this.physicsSimulator.updatePhysicsBody(this.physicsSimulator.getPhysicsBodyIndex(selected));
+    
+    // evaluate physics simulator
+    this.physicsSimulator.evaluate();
+
+    // check collision status
+    var colliding = this.physicsSimulator.isColliding(selected);
+    if (colliding)
     {
-        var model = models[i];
-        if (!this.isSelected(model)) continue; // for now only test currently selected model
-            
-        var colliding = this.physicsSimulator.isColliding(model);
-        if (colliding)
+        // if model is set to stop on collision, update its position from the physics simulator
+        if (selected.getAttribute("stopOnCollision").getValueDirect())
         {
             var trans = new Ammo.btTransform();
-            this.physicsSimulator.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
+            this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
             var origin = trans.getOrigin();
-            var rot = trans.getRotation();
-            var quaternion = new Quaternion();
-            quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+            //var rot = trans.getRotation();
+            //var quaternion = new Quaternion();
+            //quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
             Ammo.destroy(trans);
 
-            model.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
-            model.getAttribute("quaternion").setValueDirect(quaternion);
+            selected.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
+            //selected.getAttribute("quaternion").setValueDirect(quaternion);
         }
     }
 }

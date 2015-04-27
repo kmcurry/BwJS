@@ -61,7 +61,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.selector.setRayPick(this.rayPick);
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
-    //this.physicsSimulator.orphan.setValueDirect(true);
+    this.physicsSimulator.orphan.setValueDirect(true);
 
     this.name = new StringAttr("Bridgeworks");
     this.onLoad = new StringAttr();
