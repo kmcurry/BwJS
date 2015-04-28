@@ -8,6 +8,7 @@ function AttributeContainer()
     this.attrType = eAttrType.AttributeContainer;
 
     this.attrNameMap = [];
+    this.attrModifiedCBsEnabled = false;
 }
 
 AttributeContainer.prototype.clone = function()
@@ -48,7 +49,7 @@ AttributeContainer.prototype.isContainer = function()
 
 AttributeContainer.prototype.registerAttribute = function(attribute, name)
 {
-	if (!attribute) return;
+    if (!attribute) return;
 	
     if (this.attrNameMap[name] == undefined)
     {
@@ -62,7 +63,10 @@ AttributeContainer.prototype.registerAttribute = function(attribute, name)
         attribute.setContainer(this);
     }
 
-    attribute.addModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+    if (this.attrModifiedCBsEnabled)
+    {
+        attribute.addModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+    }
 }
 
 AttributeContainer.prototype.unregisterAttribute = function(attribute)
@@ -75,7 +79,10 @@ AttributeContainer.prototype.unregisterAttribute = function(attribute)
         {
             if (this.attrNameMap[i][j] == attribute)
             {
-                attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+                if (this.attrModifiedCBsEnabled)
+                {
+                    attribute.removeModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+                }
                 delete this.attrNameMap[i][j];
                 this.attrNameMap[i].splice(j, 1);
                 break;
@@ -237,6 +244,25 @@ AttributeContainer.prototype.synchronize = function(src, syncValues)
     }
 }
 
+AttributeContainer.prototype.addModifiedCB = function(callback, data)
+{
+    if (!this.attrModifiedCBsEnabled)
+    {
+        this.attrModifiedCBsEnabled = true;
+        
+        for (var i in this.attrNameMap)
+        {
+            for (var j=0; j < this.attrNameMap[i].length; j++)
+            {
+                this.attrNameMap[i][j].addModifiedCB(AttributeContainer_AttributeModifiedCB, this);
+            }
+        }
+    }
+    
+    // call base-class implementation
+    Attribute.prototype.addModifiedCB.call(this, callback, data);
+}
+    
 function AttributeContainer_AttributeModifiedCB(attribute, container)
 {
     for (var i=0; i < container.modifiedCBs.length; i++)

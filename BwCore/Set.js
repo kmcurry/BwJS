@@ -1,4 +1,4 @@
-﻿SetCommand.prototype = new Command();
+SetCommand.prototype = new Command();
 SetCommand.prototype.constructor = SetCommand;
 
 function SetCommand()
@@ -8,6 +8,14 @@ function SetCommand()
     this.attrType = eAttrType.Set;
     
     this.target.addModifiedCB(SetCommand_TargetModifiedCB, this);
+}
+
+SetCommand.prototype.onUnregister = function()
+{
+    for (var i = 0; i < this.borrowedAttributes.length; i++)
+    {
+        this.unregisterAttribute(this.borrowedAttributes[i]);
+    }
 }
 
 SetCommand.prototype.execute = function()
