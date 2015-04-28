@@ -321,7 +321,14 @@ PhysicsSimulator.prototype.updatePhysicsBodies = function()
         var index = this.bodies.indexOf(body);
         if (index < 0)
         {
-            removed.push(this.bodyModels[i]);
+            for (j = 0; j < this.bodyModels.length; j++)
+            {
+                if (this.bodyModels[j].name == body)
+                {
+                    removed.push(this.bodyModels[j]);
+                    break;
+                }
+            }
         }
     }
     
@@ -414,12 +421,6 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
         this.physicsShapes.push(shape);
         this.physicsBodies.push(body);
         this.bodyAdded.push(true);
-        // ensure model is contained in "bodies" attribute; 
-        // because delete removes, and enabled modified calls delete
-        if (this.bodies.indexOf(model.name) < 0)
-        {
-            this.bodies.push_back(model.name);
-        }
     }
 }
 
@@ -452,7 +453,6 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.physicsShapes.splice(i, 1);
             this.bodyModels.splice(i, 1);
             this.bodyAdded.splice(i, 1);
-            this.bodies.removeElement(i);
             return;
         }
     }
