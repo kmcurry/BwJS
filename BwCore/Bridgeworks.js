@@ -38,6 +38,7 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.mapProjectionCalculator = new MapProjectionCalculator();
     this.rasterComponentEventListener = new RasterComponentEventListener();
     this.snapMgr = new SnapMgr();
+    this.physicsSimulator = new PhysicsSimulator();
 
     // set registry to allocated objects
     this.graphMgr.setRegistry(this.registry);
@@ -53,12 +54,14 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.mapProjectionCalculator.setRegistry(this.registry);
     this.rasterComponentEventListener.setRegistry(this.registry);
     this.snapMgr.setRegistry(this.registry);
+    this.physicsSimulator.setRegistry(this.registry);
 
     // configure dependencies
     this.factory.setGraphMgr(this.graphMgr);
     this.selector.setRayPick(this.rayPick);
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
+    this.physicsSimulator.orphan.setValueDirect(true);
 
     this.name = new StringAttr("Bridgeworks");
     this.onLoad = new StringAttr();
@@ -137,6 +140,7 @@ Bridgeworks.prototype.initRegistry = function()
     this.registry.register(this.mapProjectionCalculator);
     this.registry.register(this.rasterComponentEventListener);
     this.registry.register(this.snapMgr);
+    this.registry.register(this.physicsSimulator);
 
     // backward compatibility
     this.registry.registerByName(this.renderAgent, "AnimationAgent");
@@ -202,7 +206,10 @@ Bridgeworks.prototype.onLoadModified = function()
     //this.iscetAgent.start(); There is no isectAgent in javascript version
     this.selector.start();
     this.rasterComponentEventListener.start();
-
+    
+    this.physicsSimulator.bodies.clear();
+    this.physicsSimulator.deletePhysicsBodies();
+    
     // TODO
     console.debug("TODO: " + arguments.callee.name);
 }
@@ -242,7 +249,13 @@ Bridgeworks.prototype.updateScene = function(xml)
         xml = loadXMLResource(this.contentDir + "/" + xml);
     }
 
+    // disable physics while parsing
+    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+    
     this.parser.parse(xml);
+    
+    // restore physics evaluate state
+    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)

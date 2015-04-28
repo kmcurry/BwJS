@@ -1,0 +1,1168 @@
+<?xml version="1.0" encoding="UTF-8"?><?bw onload="initialize"?><Session broadcast="false">
+    <Set target="Selector" computePivotDistance="true"/>
+    <MouseHandler/>
+    <KeyboardHandler/>
+    <ObjectInspector>
+        <name>ObjectInspector</name>
+        <enabled>true</enabled>
+        <evaluate>true</evaluate>
+        <rotationDelta item0="0" item1="0" item2="0"/>
+    </ObjectInspector>
+    <SceneInspector>
+        <name>SceneInspector</name>
+        <enabled>false</enabled>
+        <evaluate>false</evaluate>
+        <panDelta item0="0" item1="0" item2="0"/>
+        <rotationDelta item0="0" item1="0" item2="0"/>
+        <viewRelativeXAxisRotation>true</viewRelativeXAxisRotation>
+        <viewRelativeZAxisRotation>true</viewRelativeZAxisRotation>
+        <pivotDistance>26.58005155820728</pivotDistance>
+        <panSensitivity item0="1" item1="1" item2="1"/>
+        <rotationSensitivity item0="0.5" item1="0.5" item2="0.5"/>
+        <viewRelativeTranslationDelta item0="0" item1="0" item2="0"/>
+    </SceneInspector>
+    <Isolator>
+        <name>Root</name>
+        <PerspectiveCamera>
+            <name>Camera</name>
+            <position item0="22.018870505127175" item1="9.781693420184803" item2="-16.978528706423706"/>
+            <rotation item0="19.500000000000057" item1="-61.50000000000006" item2="-3.5902397653041916e-14"/>
+            <nearDistance>1</nearDistance>
+            <farDistance>10000</farDistance>
+            <zoom>3.2</zoom>
+        </PerspectiveCamera>
+        <Group>
+            <name>Lights</name>
+            <GlobalIllumination>
+                <name>GlobalLight</name>
+                <ambient item0="0.25" item1="0.25" item2="0.25"/>
+            </GlobalIllumination>
+            <PointLight>
+                <name>PointLight1</name>
+                <position item0="0" item1="25" item2="0"/>
+                <parent>Camera</parent>
+                <ambient item0="0.25" item1="0.25" item2="0.25"/>
+                <diffuse item0="0.6" item1="0.6" item2="0.6"/>
+                <specular item0="0.5" item1="0.5" item2="0.5"/>
+            </PointLight>
+        </Group>
+        <Group>
+            <name>Models</name>
+            <ModelRoot>
+                <Model>
+                    <name>Grid</name>
+                    <scale item0="50" item1="1" item2="50"/>
+                    <url>objects/Grid.lwo</url>
+                    <moveable>false</moveable>
+                    <detectCollision>true</detectCollision>
+                    <physicalProperties>
+                        <mass>0</mass>
+                    </physicalProperties>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+                </Model>
+                <Set>
+                    <target>Grid</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+                </Set>
+            </ModelRoot>
+            <ModelRoot>
+                <Model>
+                    <name>SelectPoint</name>
+                    <scale item0="0.1" item1="0.1" item2="0.1"/>
+                    <url>objects/Sphere.lwo</url>
+                    <selectable>false</selectable>
+                    <moveable>false</moveable>
+                    <color item0="1" item1="0" item2="0" item3="1"/>
+                    <opacity>0</opacity>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+                </Model>
+                <Set>
+                    <target>SelectPoint</target>
+                    <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+                </Set>
+            </ModelRoot>
+            <Isolator>
+                <name>ScreenCaptureIsolator</name>
+                <isolateTextures>true</isolateTextures>
+                <MediaTexture>
+                    <name>ScreenCaptureTexture</name>
+                </MediaTexture>
+                <ScreenRect>
+                    <name>ScreenCaptureRect</name>
+                    <enabled>false</enabled>
+                </ScreenRect>
+            </Isolator>
+        </Group>
+        <PhysicsSimulator>
+            <name>PhysicsSimulator</name>
+            <evaluate>false</evaluate>
+            <bodies>
+                <item0>Grid</item0>
+                <item1>1. Cube</item1>
+                <item2>2. Cube</item2>
+                <item4>3. Cube</item4>
+                <item5>4. Cube</item5>
+                <item6>5. Cube</item6>
+                <item7>6. Cube</item7>
+                <item8>7. Cube</item8>
+                <item9>8. Cube</item9>
+            </bodies>
+        </PhysicsSimulator>
+        <ModelRoot>
+            <Model>
+                <name>1. Cube</name>
+                <position item0="3.020369376827148e-7" item1="0.9299957752227783" item2="0.006078297737985849"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>1. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>2. Cube</name>
+                <position item0="-0.02105788327753544" item1="1.2249435186386108" item2="-2.0315794944763184"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>2. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>3. Cube</name>
+                <position item0="0.05926068499684334" item1="1.0981661081314087" item2="-4.062834739685059"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>3. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>4. Cube</name>
+                <position item0="2.0299923419952393" item1="1.0882229804992676" item2="-4.298428535461426"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>4. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>5. Cube</name>
+                <position item0="2.0194687843322754" item1="1.0642879009246826" item2="0.31794145703315735"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>5. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>6. Cube</name>
+                <position item0="0.301101952791214" item1="2.7237536907196045" item2="-3.896406888961792"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>6. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>7. Cube</name>
+                <position item0="2.2990787029266357" item1="2.7111451625823975" item2="-0.26044413447380066"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>7. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+        <ModelRoot>
+            <Model>
+                <name>8. Cube</name>
+                <position item0="1.5791438817977905" item1="0.9741989374160767" item2="-6.10053825378418"/>
+                <rotation item0="0" item1="0" item2="0"/>
+                <scale item0="1" item1="1" item2="1"/>
+                <url>objects/Cube.lwo</url>
+                <detectCollision>true</detectCollision>
+                <genericConnectors>
+                    <item0>
+                        <name>PositiveX</name>
+                        <type>default</type>
+                        <normal item0="1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item0>
+                    <item1>
+                        <name>PositiveY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item1>
+                    <item2>
+                        <name>PositiveZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item2>
+                    <item3>
+                        <name>NegativeX</name>
+                        <type>default</type>
+                        <normal item0="-1" item1="0" item2="0"/>
+                        <point>
+                            <center item0="-1" item1="0" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item3>
+                    <item4>
+                        <name>NegativeY</name>
+                        <type>default</type>
+                        <normal item0="0" item1="-1" item2="0"/>
+                        <point>
+                            <center item0="0" item1="-1" item2="0"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item4>
+                    <item5>
+                        <name>NegativeZ</name>
+                        <type>default</type>
+                        <normal item0="0" item1="0" item2="-1"/>
+                        <point>
+                            <center item0="0" item1="0" item2="-1"/>
+                            <radius>0.25</radius>
+                        </point>
+                    </item5>
+                </genericConnectors>
+                <physicalProperties>
+                    <mass>5</mass>
+                </physicalProperties>
+            </Model>
+            <Set>
+                <target>8. Cube</target>
+                <inspectionGroup_rotationQuat item0="1" item1="0" item2="0" item3="0"/>
+            </Set>
+        </ModelRoot>
+    </Isolator>
+    <RenderDirective>
+        <name>RenderDirective</name>
+        <backgroundImageFilename>http://localhost:8080//BwContent/images/Sky2.jpg</backgroundImageFilename>
+        <shadowsEnabled>false</shadowsEnabled>
+        <highlightType>2</highlightType>
+    </RenderDirective>
+    <DisconnectAttributes>
+        <name>DisconnectAllMouse</name>
+        <numResponses>-1</numResponses>
+        <event>MButton3.Down</event>
+        <event>MButton3.Down</event>
+        <event>MButton1.Up</event>
+        <event>MButton2.Up</event>
+        <event>MButton3.Up</event>
+        <event>MButton1.Down</event>
+        <event>MButton1+MButton3.Down</event>
+        <event>MButton2.Down</event>
+        <event>MButton3.Down</event>
+        <connectionType>DisconnectAllTargets</connectionType>
+        <sourceContainer>MouseHandler</sourceContainer>
+    </DisconnectAttributes>
+    <ConnectAttributes>
+        <name>MButton3.Scene</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>SceneInspector</targetContainer>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>invertedRotationDelta:0</targetAttribute>
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>invertedRotationDelta:1</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>MButtonBoth.Scene</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1+MButton3.Down</event>
+        <event>MButton1+MButton3.Down</event>
+        <event>MButton1+MButton3.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>SceneInspector</targetContainer>
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>invertedPanDelta:0</targetAttribute>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>invertedPanDelta:1</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>Object.Zoom</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>ObjectInspector</targetContainer>
+        <sourceAttribute>deltaY</sourceAttribute>
+        <targetAttribute>translationDelta:2</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>Object.Rotate</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>ObjectInspector</targetContainer>
+        <sourceAttribute>deviceY</sourceAttribute>
+        <targetAttribute>rotationNow:0</targetAttribute>
+        <sourceAttribute>deviceX</sourceAttribute>
+        <targetAttribute>rotationNow:1</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>Object.Move</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>ObjectInspector</targetContainer>
+        <sourceAttribute>delta:0</sourceAttribute>
+        <targetAttribute>translationDelta:0</targetAttribute>
+        <sourceAttribute>delta:1</sourceAttribute>
+        <targetAttribute>translationDelta:1</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>MButton3.Object</name>
+        <numResponses>-1</numResponses>
+        <event>MButton3.Down</event>
+        <event>MButton3.Down</event>
+        <event>MButton3.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>ObjectInspector</targetContainer>
+        <sourceAttribute>delta:1</sourceAttribute>
+        <targetAttribute>translationDelta:2</targetAttribute>
+    </ConnectAttributes>
+    <ConnectAttributes>
+        <name>MButton1.Flight</name>
+        <numResponses>-1</numResponses>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <event>MButton1.Down</event>
+        <sourceContainer>MouseHandler</sourceContainer>
+        <targetContainer>FlightSimulator</targetContainer>
+        <sourceAttribute>deltaX</sourceAttribute>
+        <targetAttribute>rollDelta</targetAttribute>
+    </ConnectAttributes>
+    <Set>
+        <name>SetCapture_Down_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="-5" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Up_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_UP.Down</event>
+        <event>VK_UP.Down</event>
+        <event>VK_UP.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="5" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Left_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_LEFT.Down</event>
+        <event>VK_LEFT.Down</event>
+        <event>VK_LEFT.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="0" item1="-5" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Right_Rot_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_RIGHT.Down</event>
+        <event>VK_RIGHT.Down</event>
+        <event>VK_RIGHT.Down</event>
+        <target>SceneInspector</target>
+        <rotationDelta item0="0" item1="5" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Left_Pan_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <target>SceneInspector</target>
+        <panDelta item0="1" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Right_Pan_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <target>SceneInspector</target>
+        <panDelta item0="-1" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Up_Pan_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <target>SceneInspector</target>
+        <viewRelativeTranslationDelta item0="0" item1="0" item2="-1"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Down_Pan_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <target>SceneInspector</target>
+        <viewRelativeTranslationDelta item0="0" item1="0" item2="1"/>
+    </Set>
+    <Set>
+        <name>SetCapture_ZoomIn_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_PLUS.Down</event>
+        <event>VK_PLUS.Down</event>
+        <event>VK_PLUS.Down</event>
+        <target>SceneInspector</target>
+        <panDelta item0="0" item1="0" item2="5"/>
+    </Set>
+    <Set>
+        <name>SetCapture_ZoomOut_Scene</name>
+        <numResponses>-1</numResponses>
+        <event>VK_MINUS.Down</event>
+        <event>VK_MINUS.Down</event>
+        <event>VK_MINUS.Down</event>
+        <target>SceneInspector</target>
+        <panDelta item0="0" item1="0" item2="-5"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Down_Rot_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <event>VK_DOWN.Down</event>
+        <target>ObjectInspector</target>
+        <rotationDelta item0="-5" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Up_Rot_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_UP.Down</event>
+        <event>VK_UP.Down</event>
+        <event>VK_UP.Down</event>
+        <target>ObjectInspector</target>
+        <rotationDelta item0="5" item1="0" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Left_Rot_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_LEFT.Down</event>
+        <event>VK_LEFT.Down</event>
+        <event>VK_LEFT.Down</event>
+        <target>ObjectInspector</target>
+        <rotationDelta item0="0" item1="-5" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_Right_Rot_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_RIGHT.Down</event>
+        <event>VK_RIGHT.Down</event>
+        <event>VK_RIGHT.Down</event>
+        <target>ObjectInspector</target>
+        <rotationDelta item0="0" item1="5" item2="0"/>
+    </Set>
+    <Set>
+        <name>SetCapture_S_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <event>VK_CONTROL+VK_LEFT.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Set>
+        <name>SetCapture_F_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <event>VK_CONTROL+VK_RIGHT.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Set>
+        <name>SetCapture_C_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <event>VK_CONTROL+VK_UP.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Set>
+        <name>SetCapture_V_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <event>VK_CONTROL+VK_DOWN.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Set>
+        <name>SetCapture_E_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_MINUS.Down</event>
+        <event>VK_MINUS.Down</event>
+        <event>VK_MINUS.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Set>
+        <name>SetCapture_D_Pan_Objects</name>
+        <numResponses>-1</numResponses>
+        <event>VK_PLUS.Down</event>
+        <event>VK_PLUS.Down</event>
+        <event>VK_PLUS.Down</event>
+        <target>ObjectInspector</target>
+    </Set>
+    <Play>
+        <numResponses>-1</numResponses>
+        <event>VK_PERIOD</event>
+        <event>VK_PERIOD</event>
+        <event>play</event>
+        <event>VK_PERIOD</event>
+    </Play>
+    <CommandSequence>
+        <name>Pause</name>
+        <numResponses>-1</numResponses>
+        <event>VK_SLASH</event>
+        <event>VK_SLASH</event>
+        <event>pause</event>
+        <event>VK_SLASH</event>
+        <Pause/>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>true</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+    </CommandSequence>
+    <CommandSequence>
+        <name>Stop</name>
+        <numResponses>-1</numResponses>
+        <event>VK_COMMA</event>
+        <event>VK_COMMA</event>
+        <event>stop</event>
+        <event>VK_COMMA</event>
+        <Stop/>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>true</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+    </CommandSequence>
+    <CommandSequence>
+        <name>EnableObjectInspection</name>
+        <numResponses>-1</numResponses>
+        <event>EnableObjectInspection</event>
+        <event>EnableObjectInspection</event>
+        <event>VK_O</event>
+        <event>EnableObjectInspection</event>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>true</evaluate>
+        </Set>
+        <Set>
+            <target>FlightSimulator</target>
+        </Set>
+        <Set>
+            <target>WalkSimulator</target>
+        </Set>
+    </CommandSequence>
+    <CommandSequence>
+        <name>EnableSceneInspection</name>
+        <numResponses>-1</numResponses>
+        <event>EnableSceneInspection</event>
+        <event>EnableSceneInspection</event>
+        <event>VK_S</event>
+        <event>EnableSceneInspection</event>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>true</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>FlightSimulator</target>
+        </Set>
+        <Set>
+            <target>WalkSimulator</target>
+        </Set>
+    </CommandSequence>
+    <CommandSequence>
+        <name>EnableFlightSimulation</name>
+        <numResponses>-1</numResponses>
+        <event>EnableFlightSimulation</event>
+        <event>EnableFlightSimulation</event>
+        <event>VK_F</event>
+        <event>EnableFlightSimulation</event>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>FlightSimulator</target>
+        </Set>
+        <Set>
+            <target>WalkSimulator</target>
+        </Set>
+    </CommandSequence>
+    <CommandSequence>
+        <name>EnableWalkSimulation</name>
+        <numResponses>-1</numResponses>
+        <event>EnableWalkSimulation</event>
+        <event>EnableWalkSimulation</event>
+        <event>VK_W</event>
+        <event>EnableWalkSimulation</event>
+        <Set>
+            <target>SceneInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>ObjectInspector</target>
+            <evaluate>false</evaluate>
+        </Set>
+        <Set>
+            <target>FlightSimulator</target>
+        </Set>
+        <Set>
+            <target>WalkSimulator</target>
+        </Set>
+    </CommandSequence>
+    <Set>
+        <numResponses>-1</numResponses>
+        <event>VK_ADD</event>
+        <event>VK_ADD</event>
+        <event>VK_ADD</event>
+        <target>RenderAgent</target>
+        <desiredFrameRate>10</desiredFrameRate>
+    </Set>
+    <Set>
+        <numResponses>-1</numResponses>
+        <event>VK_SUBTRACT</event>
+        <event>VK_SUBTRACT</event>
+        <event>VK_SUBTRACT</event>
+        <target>RenderAgent</target>
+        <desiredFrameRate>10</desiredFrameRate>
+    </Set>
+    <SnapTo>
+        <enabled>true</enabled>
+        <listen>true</listen>
+        <numResponses>0</numResponses>
+        <models>
+            <item0>
+                <name>1. Cube</name>
+                <position item0="-0.04297612579830553" item1="0.6867447131612936" item2="-0.004728795977724021"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item0>
+            <item1>
+                <name>2. Cube</name>
+                <position item0="-0.04306283965706825" item1="0.686744749546051" item2="-2.0047287940979004"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item1>
+            <item2>
+                <name>3. Cube</name>
+                <position item0="-0.043149553515830975" item1="0.6867447859308085" item2="-4.004728792218077"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item2>
+            <item3>
+                <name>4. Cube</name>
+                <position item0="1.9568504446043429" item1="0.6867446796142174" item2="-4.004815506076842"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item3>
+            <item4>
+                <name>5. Cube</name>
+                <position item0="1.9570238723218685" item1="0.6867446068447025" item2="-0.004815509836488596"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item4>
+            <item5>
+                <name>6. Cube</name>
+                <position item0="-0.04314944719766247" item1="2.6867447859308053" item2="-4.004728755837929"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item5>
+            <item6>
+                <name>7. Cube</name>
+                <position item0="1.957023978640037" item1="2.6867446068446994" item2="-0.004815473456340813"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item6>
+            <item7>
+                <name>8. Cube</name>
+                <position item0="1.9567637307455803" item1="0.6867447159989748" item2="-6.004815504197018"/>
+                <quaternion item0="0.9999999997650216" item1="9.125060374972142e-9" item2="0.00002167846452717578" item3="-2.634178031930877e-8"/>
+            </item7>
+        </models>
+    </SnapTo>
+</Session>

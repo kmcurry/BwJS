@@ -293,6 +293,14 @@ Attribute.prototype.setLength = function(length)
 
 Attribute.prototype.addModifiedCB = function(callback, data)
 {
+    // don't add dups
+    var indexCB = this.modifiedCBs.indexOf(callback);
+    var indexData = this.modifiedCBsData.indexOf(data);
+    if (indexCB >= 0 && indexCB == indexData) 
+    {
+        return;
+    }
+        
     this.modifiedCBs.push(callback);
     this.modifiedCBsData.push(data);
 }

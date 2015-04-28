@@ -620,7 +620,11 @@ function PhysicalPropertiesAttr()
 
     this.mass = new NumberAttr(0);
     this.radius = new NumberAttr(0);
+    this.friction = new NumberAttr(0);
+    this.restitution = new NumberAttr(0);
 
     this.registerAttribute(this.mass, "mass");
     this.registerAttribute(this.radius, "radius");
+    this.registerAttribute(this.friction, "friction");
+    this.registerAttribute(this.restitution, "restitution");
 }

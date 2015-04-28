@@ -140,6 +140,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["PhysicsSimulator"] = newPhysicsSimulator;
     this.newResourceProcs["GoblinPhysicsSimulator"] = newGoblinPhysicsSimulator;
     this.newResourceProcs["CannonPhysicsSimulator"] = newCannonPhysicsSimulator;
+    this.newResourceProcs["Spinner"] = newAnimator;
 
     // commands
     this.newResourceProcs["AppendNode"] = newCommand;
@@ -633,6 +634,20 @@ function newCannonPhysicsSimulator(name, factory)
     return resource;
 }
 
+function newAnimator(name, factory)
+{
+    var resource = null;
+    
+    switch (name)
+    {
+        case "Spinner":
+            resource = new Spinner();
+            break;
+    }
+    
+    return resource;
+}
+
 function newCommand(name, factory)
 {
     var resource = null;
@@ -774,6 +789,13 @@ function finalizeModel(model, factory)
         contentBuilder.visitHandler(contentHandler);
 
         contentHandler.parseFileStream(pathInfo[0]);
+    }
+    
+    // if physicsEnabled, add this to Bridgeworks' physics simulator
+    if (model.physicsEnabled.getValueDirect())
+    {
+        var bworks = factory.registry.find("Bridgeworks");
+        bworks.physicsSimulator.bodies.push_back(model.name);
     }
 }
 

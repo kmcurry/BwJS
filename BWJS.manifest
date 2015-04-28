@@ -126,6 +126,8 @@ SceneGraph/BoneEffector.js
 SceneGraph/SnapConnector.js
 SceneGraph/PhysicsSimulator.js
 SceneGraph/SnapModel.js
+SceneGraph/Animator.js
+SceneGraph/Spinner.js
 Event/EventType.js 
 Event/Event.js 
 Event/InputEvent.js 

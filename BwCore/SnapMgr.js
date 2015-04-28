@@ -163,6 +163,7 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
     {
         var factory = this.registry.find("AttributeFactory");
         var snapModel = factory.create("SnapModel");
+        factory.finalize("Model", snapModel);
         snapModel.synchronize(snappee, true);
         // don't copy vertices/snapConnectors
         snapModel.vertices.setValueDirect(new Array());
@@ -181,10 +182,6 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         snapModel.snap(snappee, new Matrix4x4());
         snappee.getParent(0).addChild(snapModel);
         snappee = snapModel;
-        
-        // add to physics simulator
-        var physicsSimulator = this.registry.find("PhysicsSimulator");
-        physicsSimulator.bodies.push_back(snapModel.name);
     }
     
     if (snapper.attrType == eAttrType.SnapModel)

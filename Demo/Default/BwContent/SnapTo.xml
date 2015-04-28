@@ -40,12 +40,14 @@
                         <scale x="1" y="1" z="1"/>
                         <physicalProperties>
                             <mass>0</mass>
+                            <restitution>1.3</restitution>
+                            <friction>3.2</friction>
                         </physicalProperties>  
                     </Model>
-                    <Model name="CenterBox" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
+                    <Model name="CenterBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="0" y="0.26" z="0"/>
-                        <rotation x="40" y="40" z="40"/>
-                        <scale x="1" y="1" z="1"/>
+                        <rotation x="0" y="0" z="0"/>
+                        <scale x="0.25" y="0.25" z="0.25"/>
                         <genericConnectors>
                             <genericConnector name="PositiveX" type="default">
                                 <normal x="1" y="0" z="0"/>
@@ -92,8 +94,14 @@
                         </genericConnectors>
                         <physicalProperties>
                             <mass>5</mass>
+                            <restitution>0.3</restitution>
+                            <friction>1.2</friction>
                         </physicalProperties>  
                     </Model>
+                    <!--<Model name="SelectPoint" url="objects/Sphere.lwo" moveable="false" opacity="0" selectable="false" physicsEnabled="false">
+                        <scale x=".1" y=".1" z=".1"/>
+                        <color r="1" g="0" b="0" a="1"/>
+                      </Model>-->
                     <!--<Model name="CenterBox2" indexedGeometry="false" url="/objects/UV_SphereG.lwo" detectCollision="true">
                         <position x="0" y="10.26" z="0"/>
                         <rotation x="40" y="40" z="40"/>
@@ -102,7 +110,7 @@
                             <mass>5</mass>
                         </physicalProperties>  
                     </Model>-->
-                    <!--<Model name="RightBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
+                    <Model name="RightBox" indexedGeometry="false" url="/objects/Cube.lwo" detectCollision="true">
                         <position x="1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
@@ -205,7 +213,7 @@
                         <physicalProperties>
                             <mass>5</mass>
                         </physicalProperties>  
-                    </Model>-->
+                    </Model>
                     <!--<Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y="3.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
@@ -316,17 +324,20 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <PhysicsSimulator name="PhysicsSimulator" evaluate="true">
+    <!--<PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>grid</body>
             <body>CenterBox</body>
             <body>CenterBox2</body>
-            <!--<body>RightBox</body>
+            <body>RightBox</body>
             <body>LeftBox</body>
             <body>UV_BoxG4</body>
-            <body>cylinderRight</body>-->
+            <body>cylinderRight</body>
         </bodies>
-    </PhysicsSimulator>
+    </PhysicsSimulator>-->
+    <!--<Spinner name="Spinner" target="CenterBox" angularVelocity="10">
+        <axisEndpoint x="1" y="0" z="0"/>
+    </Spinner>-->
    <!--<AnimalMover name="CowMover1" target="CenterBox" linearSpeed="0.15" angularSpeed="25"/>-->
     <!--<SnapTo>
         <models>
