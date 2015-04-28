@@ -27517,6 +27517,12 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
         this.physicsShapes.push(shape);
         this.physicsBodies.push(body);
         this.bodyAdded.push(true);
+        // ensure model is contained in "bodies" attribute; 
+        // because delete removes, and enabled modified calls delete
+        if (this.bodies.indexOf(model.name) < 0)
+        {
+            this.bodies.push_back(model.name);
+        }
     }
 }
 
