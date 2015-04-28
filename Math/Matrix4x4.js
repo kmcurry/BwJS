@@ -520,7 +520,7 @@ Matrix4x4.prototype.transpose = function()
     this._44 = temp._44;
 }
 
-Matrix4x4.prototype.invert = function()
+Matrix4x4.prototype.invert = function(transpose)
 {
     var det = determinant4x4(this._11, this._12, this._13, this._14,
                              this._21, this._22, this._23, this._24,
@@ -558,8 +558,11 @@ Matrix4x4.prototype.invert = function()
         }
     }
 
-    // transpose
-    inverse.transpose();
+    // if transpose requested, don't transpose (because inverse is already transposed at this point)
+    if (!transpose)
+    {
+        inverse.transpose();
+    }
 
     this.loadMatrix(inverse);
 }

@@ -218,6 +218,16 @@ var eCubeMapFace =
     Negative_Z                      : 5
 }
 
+function EnabledCaps()
+{
+    this.alphaBlend = false;
+    this.cullBackFace = false;
+    this.depthBufferWrite = false;
+    this.depthTest = false;
+    this.lighting = false;
+    this.stencilTest = false;
+}
+    
 /*
  * render context
  */
