@@ -200,6 +200,17 @@ SelectionListener.prototype.processPick = function(pick)
 		    
             case eAttrType.Model:
             case eAttrType.SnapModel:
+            case eAttrType.Ball:
+            case eAttrType.Beam:
+            case eAttrType.Cube:
+            case eAttrType.Elbow:
+            case eAttrType.Gear:
+            case eAttrType.Plank:
+            case eAttrType.Pyramid:
+            case eAttrType.Ring:
+            case eAttrType.Tube:
+            case eAttrType.Wall:
+            case eAttrType.Wedge:
             {
                 this.selections.models.push(node);
                 this.registerSelection(node, element);

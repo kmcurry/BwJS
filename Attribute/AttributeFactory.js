@@ -113,9 +113,19 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["TriList"] = newSGNode;
     this.newResourceProcs["NullObject"] = newSGNode;
     this.newResourceProcs["Material"] = newSGNode;
-    this.newResourceProcs["Cube"] = newSGNode;
     this.newResourceProcs["ScreenRect"] = newSGNode;
     this.newResourceProcs["SnapModel"] = newSnapModel;
+    this.newResourceProcs["Beam"] = newShape;
+    this.newResourceProcs["Cube"] = newShape;
+    this.newResourceProcs["Elbow"] = newShape;
+    this.newResourceProcs["Gear"] = newShape;
+    this.newResourceProcs["Plank"] = newShape;
+    this.newResourceProcs["Pyramid"] = newShape;
+    this.newResourceProcs["Ring"] = newShape;
+    this.newResourceProcs["Ball"] = newShape;
+    this.newResourceProcs["Tube"] = newShape;
+    this.newResourceProcs["Wall"] = newShape;
+    this.newResourceProcs["Wedge"] = newShape;
 
     // directives
     this.newResourceProcs["BBoxDirective"] = newSGDirective;
@@ -187,6 +197,17 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
 {
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
+    this.finalizeProcs["Beam"] = finalizeModel;
+    this.finalizeProcs["Cube"] = finalizeModel;
+    this.finalizeProcs["Elbow"] = finalizeModel;
+    this.finalizeProcs["Gear"] = finalizeModel;
+    this.finalizeProcs["Plank"] = finalizeModel;
+    this.finalizeProcs["Pyramid"] = finalizeModel;
+    this.finalizeProcs["Ring"] = finalizeModel;
+    this.finalizeProcs["Ball"] = finalizeModel;
+    this.finalizeProcs["Tube"] = finalizeModel;
+    this.finalizeProcs["Wall"] = finalizeModel;
+    this.finalizeProcs["Wedge"] = finalizeModel;
 
     // directives
     this.finalizeProcs["BBoxDirective"] = finalizeDirective;
@@ -417,9 +438,6 @@ function newSGNode(name, factory)
             resource = new NullObject();
             registerParentableAttributes(resource, factory);
             break;
-        case "Cube":
-            resource = new Cube();
-            break;
         case "Material":
             resource = new Material();
             break;
@@ -488,6 +506,57 @@ function newSnapModel(name, factory)
     resource.setGraphMgr(factory.graphMgr);
     registerParentableAttributes(resource, factory);
     addInspectionGroup(resource, factory);
+    return resource;
+}
+
+function newShape(name, factory)
+{
+    var resource = null;
+    
+    switch (name)
+    {
+        case "Beam":
+            resource = new Beam();
+            break;
+        case "Cube":
+            resource = new Cube();
+            break;
+        case "Elbow":
+            resource = new Elbow();
+            break;
+        case "Gear":
+            resource = new Gear();
+            break;
+        case "Plank":
+            resource = new Plank();
+            break;
+        case "Pyramid":
+            resource = new Pyramid();
+            break;
+        case "Ring":
+            resource = new Ring();
+            break;
+        case "Ball":
+            resource = new Ball();
+            break;
+        case "Tube":
+            resource = new Tube();
+            break;
+        case "Wall":
+            resource = new Wall();
+            break;
+        case "Wedge":
+            resource = new Wedge();
+            break;
+    }
+    
+    if (resource)
+    {
+        resource.setGraphMgr(factory.graphMgr);
+        registerParentableAttributes(resource, factory);
+        addInspectionGroup(resource, factory);
+    }
+    
     return resource;
 }
 
