@@ -116,7 +116,7 @@ AttributeFactory.prototype.initializeNewResourceMap = function()
     this.newResourceProcs["ScreenRect"] = newSGNode;
     this.newResourceProcs["SnapModel"] = newSnapModel;
     this.newResourceProcs["Beam"] = newShape;
-    this.newResourceProcs["Cube"] = newShape;
+    this.newResourceProcs["Box"] = newShape;
     this.newResourceProcs["Elbow"] = newShape;
     this.newResourceProcs["Gear"] = newShape;
     this.newResourceProcs["Plank"] = newShape;
@@ -198,7 +198,7 @@ AttributeFactory.prototype.initializeFinalizeMap = function()
     // nodes
     this.finalizeProcs["Model"] = finalizeModel;
     this.finalizeProcs["Beam"] = finalizeModel;
-    this.finalizeProcs["Cube"] = finalizeModel;
+    this.finalizeProcs["Box"] = finalizeModel;
     this.finalizeProcs["Elbow"] = finalizeModel;
     this.finalizeProcs["Gear"] = finalizeModel;
     this.finalizeProcs["Plank"] = finalizeModel;
@@ -515,11 +515,14 @@ function newShape(name, factory)
     
     switch (name)
     {
+        case "Ball":
+            resource = new Ball();
+            break;
         case "Beam":
             resource = new Beam();
             break;
-        case "Cube":
-            resource = new Cube();
+        case "Box":
+            resource = new Box();
             break;
         case "Elbow":
             resource = new Elbow();
@@ -535,9 +538,6 @@ function newShape(name, factory)
             break;
         case "Ring":
             resource = new Ring();
-            break;
-        case "Ball":
-            resource = new Ball();
             break;
         case "Tube":
             resource = new Tube();

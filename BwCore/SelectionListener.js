@@ -202,7 +202,7 @@ SelectionListener.prototype.processPick = function(pick)
             case eAttrType.SnapModel:
             case eAttrType.Ball:
             case eAttrType.Beam:
-            case eAttrType.Cube:
+            case eAttrType.Box:
             case eAttrType.Elbow:
             case eAttrType.Gear:
             case eAttrType.Plank:

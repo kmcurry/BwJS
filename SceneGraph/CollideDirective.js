@@ -104,13 +104,18 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
             var trans = new Ammo.btTransform();
             this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
             var origin = trans.getOrigin();
-            //var rot = trans.getRotation();
-            //var quaternion = new Quaternion();
-            //quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+            var rot = trans.getRotation();
+            var quaternion = new Quaternion();
+            quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
             Ammo.destroy(trans);
 
-            selected.getAttribute("sectorPosition").setValueDirect(origin.x(), origin.y(), origin.z()); 
+            selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+            selected.getAttribute("position").setValueDirect(origin.x(), origin.y(), origin.z()); 
+            selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+            
+            //selected.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this.physicsSimulator);
             //selected.getAttribute("quaternion").setValueDirect(quaternion);
+            //selected.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this.physicsSimulator);
         }
     }
 }

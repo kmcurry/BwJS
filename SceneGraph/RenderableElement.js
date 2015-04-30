@@ -1,4 +1,4 @@
-﻿RenderableElement.prototype = new SGNode();
+RenderableElement.prototype = new SGNode();
 RenderableElement.prototype.constructor = RenderableElement;
 
 function RenderableElement()

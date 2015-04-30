@@ -91,7 +91,7 @@ var eAttrType = {
     SnapModel                   :1035,
     Ball                        :1036,
     Beam                        :1037,
-    Cube                        :1038,
+    Box                         :1038,
     Elbow                       :1039,
     Gear                        :1040,
     Plank                       :1041,

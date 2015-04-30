@@ -369,6 +369,11 @@ Matrix4x4.prototype.loadXYZAxisRotation = function(degreesX, degreesY, degreesZ)
     this.loadMatrix(result);
 }
 
+Matrix4x4.prototype.getTranslation = function()
+{
+    return { x: this._41, y: this._42, z: this._43 }
+}
+
 Matrix4x4.prototype.getRotationAngles = function()
 {
     var x, y, z;

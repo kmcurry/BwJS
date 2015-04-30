@@ -1,18 +1,18 @@
-Cube.prototype = new Model();
-Cube.prototype.constructor = Cube;
+Box.prototype = new Model();
+Box.prototype.constructor = Box;
 
-function Cube()
+function Box()
 {
     Model.call(this);
-    this.className = "Cube";
-    this.attrType = eAttrType.Cube;
+    this.className = "Box";
+    this.attrType = eAttrType.Box;
     
     this.url.setValueDirect("objects/Cube.lwo");
     
     // Physical Properties
     this.physicalProperties.mass.setValueDirect(5);
     this.physicalProperties.friction.setValueDirect(1.2);
-    this.physicalProperties.restitution.setValueDirect(0);
+    this.physicalProperties.restitution.setValueDirect(0.1);
     
     // Snap Connectors
     

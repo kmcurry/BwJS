@@ -24,8 +24,7 @@ Dissolve.prototype.update = function(params, visitChildren)
 
 Dissolve.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         // call base-class implementation
         Group.prototype.apply.call(this, directive, params, visitChildren);

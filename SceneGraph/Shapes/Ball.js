@@ -12,7 +12,7 @@ function Ball()
     // Physical Properties
     this.physicalProperties.mass.setValueDirect(8);
     this.physicalProperties.friction.setValueDirect(1.2);
-    this.physicalProperties.restitution.setValueDirect(0);
+    this.physicalProperties.restitution.setValueDirect(0.1);
     
     // Snap Connectors
     

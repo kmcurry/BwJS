@@ -114,8 +114,7 @@ Light.prototype.update = function(params, visitChildren)
 
 Light.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         switch (directive)
         {

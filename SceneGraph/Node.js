@@ -10,6 +10,7 @@ function Node()
     this.attrType = eAttrType.Node;
 
     this.__nodeId__ = g__nodeId__++;
+    this.enabled_ = true;
     this.children = [];
     this.parents = [];
 
@@ -18,6 +19,8 @@ function Node()
     this.orphan = new BooleanAttr(false);
     this.modified = new PulseAttr();
 
+    this.enabled.addModifiedCB(Node_EnabledModifiedCB, this);
+    
     this.registerAttribute(this.name, "name");
     this.registerAttribute(this.enabled, "enabled");
     this.registerAttribute(this.orphan, "orphan");
@@ -387,3 +390,7 @@ Node.prototype.setModified = function()
     if (this.graphMgr) this.graphMgr.updateRegistry.register(this);
 }
 
+function Node_EnabledModifiedCB(attribute, container)
+{
+    container.enabled_ = attribute.getValueDirect();
+}

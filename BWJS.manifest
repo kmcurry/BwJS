@@ -122,6 +122,7 @@ SceneGraph/ScreenRect.js
 SceneGraph/MorphEffector.js
 SceneGraph/Bone.js
 SceneGraph/BoneEffector.js
+SceneGraph/Cube.js
 SceneGraph/SnapConnector.js
 SceneGraph/PhysicsSimulator.js
 SceneGraph/SnapModel.js
@@ -129,7 +130,7 @@ SceneGraph/Animator.js
 SceneGraph/Spinner.js
 SceneGraph/Shapes/Ball.js
 SceneGraph/Shapes/Beam.js
-SceneGraph/Shapes/Cube.js
+SceneGraph/Shapes/Box.js
 SceneGraph/Shapes/Elbow.js
 SceneGraph/Shapes/Gear.js
 SceneGraph/Shapes/Plank.js

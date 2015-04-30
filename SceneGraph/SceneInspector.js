@@ -72,8 +72,7 @@ SceneInspector.prototype.getCamera = function()
 
 SceneInspector.prototype.evaluate = function()
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         return;
     }
