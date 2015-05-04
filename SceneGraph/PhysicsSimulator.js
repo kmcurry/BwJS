@@ -95,7 +95,7 @@ PhysicsSimulator.prototype.evaluate = function()
         //this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
         this.bodyModels[i].getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this);
     
-        this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+        this.bodyModels[i].getAttribute("position").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
 
         this.bodyModels[i].getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
@@ -383,7 +383,7 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
-    var position = model.getAttribute("sectorPosition").getValueDirect();
+    var position = model.getAttribute("position").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
     if (properties.mass == 0)
     {
@@ -461,7 +461,7 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
 PhysicsSimulator.prototype.getCompoundShape = function(model)
 {
     var compoundShape = new Ammo.btCompoundShape();
-
+    
     var position = new Vector3D();
     var rotation = new Vector3D();
     var scale = model.getAttribute("scale").getValueDirect();
@@ -472,27 +472,9 @@ PhysicsSimulator.prototype.getCompoundShape = function(model)
 
 PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    var center = model.getAttribute("center").getValueDirect();
+    // get collision shape(s)
+    this.getCollisionShape(model, position, rotation, scale, compoundShape);
     
-    for (var i = 0; i < model.surfaces.length; i++)
-    {
-        var shape = this.getCollisionShape(model.surfaces[i], center, scale);
-
-        var transform = new Ammo.btTransform();
-        transform.setIdentity();
-        var origin = new Ammo.btVector3(position.x, position.y, position.z);
-        transform.setOrigin(origin);
-        Ammo.destroy(origin);
-        var quat = new Quaternion();
-        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
-        transform.setRotation(quaternion);
-        Ammo.destroy(quaternion);
-
-        compoundShape.addChildShape(transform, shape);
-        Ammo.destroy(transform);
-    }
-
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
     {
@@ -517,28 +499,172 @@ PhysicsSimulator.prototype.addCollisionShape = function(model, position, rotatio
     }
 }
 
-PhysicsSimulator.prototype.getCollisionShape = function(surface, center, scale)
+PhysicsSimulator.prototype.getCollisionShape = function(model, position, rotation, scale, compoundShape)
 {
-    // scale vertices
-    var scaleMatrix = new Matrix4x4();
-    scaleMatrix.loadScale(scale.x, scale.y, scale.z);
-
-    var matrix = scaleMatrix;
-    
-    var shape = new Ammo.btConvexHullShape();
-    var verts = surface.getAttribute("vertices").getValueDirect();
-    for (var i = 0; i < verts.length; i += 3)
+    switch (model.attrType)
     {
-        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
-        var vert = matrix.transform(verts[i], verts[i + 1], verts[i + 2], 1);
-        var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
-        shape.addPoint(point);
-        Ammo.destroy(point);
+        case eAttrType.Box:
+        case eAttrType.Beam:
+        case eAttrType.Plank:
+        case eAttrType.Wall:
+            shapes = this.getBoxCollisionShape(model, position, rotation, scale, compoundShape);
+            break;
+            
+        case eAttrType.Ball:
+            shapes = this.getSphereCollisionShape(model, position, rotation, scale, compoundShape);
+            break;
+        
+        case eAttrType.SnapModel:
+            //shapes = this.getSnapCollisionShape(model, position, rotation, scale, compoundShape);
+            //break;
+        
+        case eAttrType.Model:
+        default:
+            shapes = this.getConvexCollisionShape(model, position, rotation, scale, compoundShape);
+            break;
     }
-
-    return shape;
 }
 
+PhysicsSimulator.prototype.getConvexCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    var shapes = [];
+    
+    for (var i = 0; i < model.surfaces.length; i++)
+    {
+        var verts = model.surfaces[i].getAttribute("vertices").getValueDirect();
+        if (verts.length == 0) continue;
+
+        // scale vertices
+        var scaleMatrix = new Matrix4x4();
+        scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+        var matrix = scaleMatrix;
+
+        var shape = new Ammo.btConvexHullShape();
+
+        for (var j = 0; j < verts.length; j += 3)
+        {
+            var vert = matrix.transform(verts[j], verts[j + 1], verts[j + 2], 1);
+            var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
+            shape.addPoint(point);
+            Ammo.destroy(point);
+        }
+        
+        shapes.push(shape);
+    }
+
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
+
+        compoundShape.addChildShape(transform, shapes[i]);
+        Ammo.destroy(transform);
+    }
+}
+
+PhysicsSimulator.prototype.getBoxCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    var shapes = [];
+    
+    var bbox_min = model.bbox.min.getValueDirect();
+    var bbox_max = model.bbox.max.getValueDirect();
+
+    var halfExtents = new Ammo.btVector3(((bbox_max.x - bbox_min.x) * scale.x) / 2,
+                                         ((bbox_max.y - bbox_min.y) * scale.y) / 2,
+                                         ((bbox_max.z - bbox_min.z) * scale.z) / 2);
+    var shape = new Ammo.btBoxShape(halfExtents);
+    Ammo.destroy(halfExtents);
+    
+    shapes.push(shape);
+    
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
+
+        compoundShape.addChildShape(transform, shapes[i]);
+        Ammo.destroy(transform);
+    }
+}
+
+PhysicsSimulator.prototype.getSphereCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    var shapes = [];
+    
+    var bbox_min = model.bbox.min.getValueDirect();
+    var bbox_max = model.bbox.max.getValueDirect();
+
+    var radius = ((bbox_max.x - bbox_min.x) * scale.x) / 2;
+    var shape = new Ammo.btSphereShape(radius);
+            
+    shapes.push(shape);
+    
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
+
+        compoundShape.addChildShape(transform, shapes[i]);
+        Ammo.destroy(transform);
+    }
+}
+/*
+PhysicsSimulator.prototype.getSnapCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    for (var i in model.snaps)
+    {
+        var snapped = model.snaps[i].model;
+        var matrix = model.snaps[i].matrix;
+        
+        var snappedPosition = matrix.getTranslation();
+        snappedPosition.x += position.x;
+        snappedPosition.y += position.y;
+        snappedPosition.z += position.z;
+        snappedPosition.x *= scale.x;
+        snappedPosition.y *= scale.y;
+        snappedPosition.z *= scale.z;
+        
+        var snappedRotation = matrix.getRotationAngles();
+        snappedRotation.x += rotation.x;
+        snappedRotation.y += rotation.y;
+        snappedRotation.z += rotation.z;
+        
+        var snappedScale = scale;//matrix.getScalingFactors();
+        //snappedScale.x *= scale.x;
+        //snappedScale.y *= scale.y;
+        //snappedScale.z *= scale.z;
+        
+        this.getCollisionShape(snapped, snappedPosition, snappedRotation, snappedScale, compoundShape);
+    }
+}
+*/
 PhysicsSimulator.prototype.getNetProperties = function(model)
 {
     var mass = 0;  
@@ -624,7 +750,7 @@ PhysicsSimulator.prototype.updatePhysicsBody = function(n)
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
-    var position = model.getAttribute("sectorPosition").getValueDirect();
+    var position = model.getAttribute("position").getValueDirect();
     var vector = new Ammo.btVector3(position.x, position.y, position.z);
     transform.setOrigin(vector);
     Ammo.destroy(vector);
@@ -692,7 +818,7 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
     var transform = new Ammo.btTransform();
     transform.setIdentity();
 
-    var position = model.getAttribute("sectorPosition").getValueDirect();
+    var position = model.getAttribute("position").getValueDirect();
     var vector = new Ammo.btVector3(position.x, position.y, position.z);
     transform.setOrigin(vector);
     Ammo.destroy(vector);

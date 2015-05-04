@@ -1,4 +1,4 @@
-﻿RasterComponentEventListener.prototype = new EventListener();
+RasterComponentEventListener.prototype = new EventListener();
 RasterComponentEventListener.prototype.constructor = Command;
 
 function RasterComponentEventListener()

@@ -18,9 +18,9 @@ BooleanAttr.prototype.clone = function()
 
 BooleanAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return values[0];
+    //var values = [];
+    //this.getValue(values);
+    return this.values[0];
 }
 
 BooleanAttr.prototype.getLastValueDirect = function()
@@ -57,9 +57,9 @@ ColorAttr.prototype.clone = function()
 
 ColorAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return { r: values[0], g: values[1], b: values[2], a: values[3] };
+    //var values = [];
+    //this.getValue(values);
+    return { r: this.values[0], g: this.values[1], b: this.values[2], a: this.values[3] };
 }
 
 ColorAttr.prototype.setValueDirect = function(r, g, b, a, params)
@@ -95,10 +95,10 @@ Matrix4x4Attr.prototype.clone = function()
 
 Matrix4x4Attr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
+    //var values = [];
+    //this.getValue(values);
     var result = new Matrix4x4();
-    result.loadArray(values);
+    result.loadArray(this.values);
     return result;
 }
 
@@ -130,9 +130,9 @@ NumberArrayAttr.prototype.clone = function()
 
 NumberArrayAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return values;
+    //var values = [];
+    //this.getValue(values);
+    return this.values;
 }
 
 NumberArrayAttr.prototype.setValueDirect = function(values, params)
@@ -160,9 +160,9 @@ NumberAttr.prototype.clone = function()
 
 NumberAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return values[0];
+    //var values = [];
+    //this.getValue(values);
+    return this.values[0];
 }
 
 NumberAttr.prototype.setValueDirect = function(value, params)
@@ -217,10 +217,10 @@ QuaternionAttr.prototype.clone = function()
 
 QuaternionAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
+    //var values = [];
+    //this.getValue(values);
     var result = new Quaternion();
-    result.loadArray(values);
+    result.loadArray(this.values);
     return result;
 }
 
@@ -250,9 +250,9 @@ ReferenceAttr.prototype.clone = function()
 
 ReferenceAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return values[0];
+    //var values = [];
+    //this.getValue(values);
+    return this.values[0];
 }
 
 ReferenceAttr.prototype.setValueDirect = function(value, params)
@@ -281,9 +281,9 @@ StringAttr.prototype.clone = function()
 
 StringAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return values;
+    //var values = [];
+    //this.getValue(values);
+    return this.values;
 }
 
 StringAttr.prototype.getLastValueDirect = function()
@@ -358,9 +358,9 @@ Vector2DAttr.prototype.clone = function()
 
 Vector2DAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return { x: values[0], y: values[1] };
+    //var values = [];
+    //this.getValue(values);
+    return { x: this.values[0], y: this.values[1] };
 }
 
 Vector2DAttr.prototype.setValueDirect = function(x, y, params)
@@ -390,9 +390,9 @@ Vector3DAttr.prototype.clone = function()
 
 Vector3DAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return { x: values[0], y: values[1], z: values[2] };
+    //var values = [];
+    //this.getValue(values);
+    return { x: this.values[0], y: this.values[1], z: this.values[2] };
 }
 
 Vector3DAttr.prototype.setValueDirect = function(x, y, z, params)
@@ -429,9 +429,9 @@ ViewportAttr.prototype.clone = function()
 
 ViewportAttr.prototype.getValueDirect = function()
 {
-    var values = [];
-    this.getValue(values);
-    return { x: values[0], y: values[1], width: values[2], height: values[3] };
+    //var values = [];
+    //this.getValue(values);
+    return { x: this.values[0], y: this.values[1], width: this.values[2], height: this.values[3] };
 }
 
 ViewportAttr.prototype.setValueDirect = function(x, y, width, height, params)

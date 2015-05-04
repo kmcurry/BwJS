@@ -90,8 +90,7 @@ MediaTexture.prototype.update = function(params, visitChildren)
 
 MediaTexture.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         // call base-class implementation
         Texture.prototype.apply.call(this, directive, params, visitChildren);

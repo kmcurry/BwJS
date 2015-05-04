@@ -25,7 +25,7 @@ Evaluator.prototype.evaluate = function()
 Evaluator.prototype.update = function(params, visitChildren)
 {
     // evaluate if evaluator is "enabled" and has not "expired"
-    var enabled = this.enabled.getValueDirect();
+    var enabled = this.enabled_;
     var expired = this.expired.getValueDirect();
     if (enabled && !expired)
     {

@@ -65,8 +65,7 @@ BalloonTipLabel.prototype.update = function(params, visitChildren)
 
 BalloonTipLabel.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         // call base-class implementation
         RasterComponent.prototype.apply.call(this, directive, params, visitChildren);

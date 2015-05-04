@@ -38,8 +38,7 @@ function WalkSimulator()
 
 WalkSimulator.prototype.evaluate = function()
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         return;
     }

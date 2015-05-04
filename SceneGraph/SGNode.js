@@ -39,8 +39,7 @@ SGNode.prototype.update = function(params, visitChildren)
 
 SGNode.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         return;
     }

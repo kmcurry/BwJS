@@ -276,8 +276,7 @@ Model.prototype.update = function(params, visitChildren)
 
 Model.prototype.apply = function(directive, params, visitChildren)
 {
-    var enabled = this.enabled.getValueDirect();
-    if (!enabled)
+    if (!this.enabled_)
     {
         // call base-class implementation
         ParentableMotionElement.prototype.apply.call(this, directive, params, visitChildren);

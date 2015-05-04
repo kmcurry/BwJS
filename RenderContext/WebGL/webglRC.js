@@ -69,6 +69,7 @@ function webglRC(canvas, background)
     var _vClipPlaneEnabledStates = [];
     var _viewport = new Viewport(0, 0, canvas.width, canvas.height);
     var _clearColor = new Color(0, 0, 0, background ? 0 : 1);
+    var _enabledCaps = new EnabledCaps();
     
     //
     // methods
@@ -96,8 +97,7 @@ function webglRC(canvas, background)
 
         var normalMatrix = new Matrix4x4();
         normalMatrix.loadMatrix(this.worldMatrixStack.top());
-        normalMatrix.invert();
-        normalMatrix.transpose();
+        normalMatrix.invert(true);
         _gl.uniformMatrix4fv(_program.normalMatrix, false, new Float32Array(normalMatrix.flatten()));
     }
     
@@ -184,26 +184,32 @@ function webglRC(canvas, background)
         {
             case eRenderMode.AlphaBlend:
                 _gl.disable(_gl.BLEND);
+                _enabledCaps.alphaBlend = false;
                 break;
 
             case eRenderMode.CullBackFace:
                 _gl.disable(_gl.CULL_FACE);
+                _enabledCaps.cullBackFace = false;
                 break;
 
             case eRenderMode.DepthBufferWrite:
                 _gl.depthMask(false);
+                _enabledCaps.depthBufferWrite = false;
                 break;
 
             case eRenderMode.DepthTest:
                 _gl.disable(_gl.DEPTH_TEST);
+                _enabledCaps.depthTest = false;
                 break;
 
             case eRenderMode.Lighting:
-                _gl.uniform1i(_program.lightingEnabled, false); 
+                _gl.uniform1i(_program.lightingEnabled, false);
+                _enabledCaps.lighting = false;
                 break;
                 
             case eRenderMode.StencilTest:
                 _gl.disable(_gl.STENCIL_TEST);
+                _enabledCaps.stencilTest = false;
                 break;
         }
     }
@@ -216,26 +222,32 @@ function webglRC(canvas, background)
         {
             case eRenderMode.AlphaBlend:
                 _gl.enable(_gl.BLEND);
+                _enabledCaps.alphaBlend = true;
                 break;
 
             case eRenderMode.CullBackFace:
                 _gl.enable(_gl.CULL_FACE);
+                _enabledCaps.cullBackFace = true;
                 break;
 
             case eRenderMode.DepthBufferWrite:
                 _gl.depthMask(true);
+                _enabledCaps.depthBufferWrite = true;
                 break;
 
             case eRenderMode.DepthTest:
                 _gl.enable(_gl.DEPTH_TEST);
+                _enabledCaps.depthTest = true;
                 break;
 
             case eRenderMode.Lighting:
                 _gl.uniform1i(_program.lightingEnabled, true);
+                _enabledCaps.lighting = true;
                 break;
                 
             case eRenderMode.StencilTest:
                 _gl.enable(_gl.STENCIL_TEST);
+                _enabledCaps.stencilTest = true;
                 break;
         }
     }
@@ -258,27 +270,27 @@ function webglRC(canvas, background)
         switch (cap)
         {
             case eRenderMode.AlphaBlend:
-                e = _gl.getParameter(_gl.BLEND);
+                e = _enabledCaps.alphaBlend;
                 break;
 
             case eRenderMode.CullBackFace:
-                e = _gl.getParameter(_gl.CULL_FACE);
+                e = _enabledCaps.cullBackFace;
                 break;
                 
             case eRenderMode.DepthBufferWrite:
-                e = _gl.getParameter(_gl.DEPTH_WRITEMASK);
+                e = _enabledCaps.depthBufferWrite;
                 break;
 
             case eRenderMode.DepthTest:
-                e = _gl.getParameter(_gl.DEPTH_TEST);
+                e = _enabledCaps.depthTest;
                 break;
 
             case eRenderMode.Lighting:
-                e = _gl.getUniform(_program.getGLProgram(), _program.lightingEnabled);
+                e = _enabledCaps.lighting;
                 break;
                 
             case eRenderMode.StencilTest:
-                e = _gl.getParameter(_gl.STENCIL_TEST);
+                e = _enabledCaps.stencilTest;
                 break;
         }
 
@@ -874,6 +886,14 @@ function webglRC(canvas, background)
                 
                 // restore states that don't translate between program switches
                 this.setGlobalIllumination(this.globalIllumination);
+                
+                // get enabled states
+                _enabledCaps.alphaBlend = _gl.getParameter(_gl.BLEND);
+                _enabledCaps.cullBackFace = _gl.getParameter(_gl.CULL_FACE);
+                _enabledCaps.depthTest = _gl.getParameter(_gl.DEPTH_TEST);
+                _enabledCaps.depthBufferWrite = _gl.getParameter(_gl.DEPTH_WRITEMASK);
+                _enabledCaps.lighting = _gl.getUniform(_program.getGLProgram(), _program.lightingEnabled);
+                _enabledCaps.stencilTest = _gl.getParameter(_gl.STENCIL_TEST);  
             }
         }
     }
