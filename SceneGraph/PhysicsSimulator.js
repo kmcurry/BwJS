@@ -55,7 +55,10 @@ PhysicsSimulator.prototype.evaluate = function()
                     if (!this.bodyAdded[i])
                     {
                         this.bodyAdded[i] = true;
-                        this.updatePhysicsBodyPosition(i);
+                        if (this.bodyModels[i].physicsEnabled.getValueDirect())
+                        {
+                            this.updatePhysicsBodyPosition(i);
+                        }
                     }
                 }
                 break;

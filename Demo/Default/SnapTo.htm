@@ -226,7 +226,7 @@
             {
                 //var xml = "\<Set target='UV_BoxG''>";
                 //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "<Serialize target='Root'/>";
+                var xml = "<Set target='CenterBox' physicsEnabled='true'/>";
                 console.debug(xml);
                 bridgeworks.updateScene(xml);
                 x += 0.5;

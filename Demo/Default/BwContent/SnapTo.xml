@@ -44,7 +44,7 @@
                             <friction>3.2</friction>
                         </physicalProperties>  
                     </Model>
-                    <Wall name="CenterBox" indexedGeometry="false" detectCollision="true">
+                    <Wall name="CenterBox" indexedGeometry="false" detectCollision="true" physicsEnabled="false">
                         <position x="0" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>

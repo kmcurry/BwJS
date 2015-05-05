@@ -104,6 +104,7 @@ function Model()
     this.detectCollision.addModifiedCB(Model_DetectCollisionModifiedCB, this);
     this.collisionDetected.addModifiedCB(Model_CollisionDetectedModifiedCB, this);
     this.vertices.addModifiedCB(Model_VerticesModifiedCB, this);
+    this.physicsEnabled.addModifiedCB(Model_PhysicsEnabledModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -632,6 +633,15 @@ Model.prototype.collisionDetectedModified = function()
 {
 }
 
+Model.prototype.physicsEnabledModified = function(enabled)
+{
+    if (enabled)
+    {
+        var bworks = this.registry.find("Bridgeworks");
+        bworks.physicsSimulator.updatePhysicsBody(bworks.physicsSimulator.getPhysicsBodyIndex(this));
+    }
+}
+
 function Model_SortPolygonsModifiedCB(attribute, container)
 {
     // TODO
@@ -690,4 +700,9 @@ function Model_CollisionDetectedModifiedCB(attribute, container)
 
 function Model_VerticesModifiedCB(attribute, container)
 {
+}
+
+function Model_PhysicsEnabledModifiedCB(attribute, container)
+{
+    container.physicsEnabledModified(attribute.getValueDirect());
 }
