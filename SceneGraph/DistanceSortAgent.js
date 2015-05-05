@@ -1,4 +1,4 @@
-﻿function DistanceSortRec(distance,
+function DistanceSortRec(distance,
                          geometry,
                          dissolve)
 {

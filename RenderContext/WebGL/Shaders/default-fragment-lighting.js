@@ -190,10 +190,7 @@ var default_fragment_lighting_fs = [
 "       lightingFactor  = uFrontMaterial.emissive;",
 "       lightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a = (uFrontMaterial.ambient.a + ",
-"                           uFrontMaterial.diffuse.a + ",
-"                           uFrontMaterial.specular.a + ",
-"                           uFrontMaterial.emissive.a) / 4.0;",
+"       lightingFactor.a = uFrontMaterial.diffuse.a;",
 "       lightingFactor = clamp(lightingFactor, 0.0, 1.0);",
 "   }",
 "   else", // uLightingEnabled == 0

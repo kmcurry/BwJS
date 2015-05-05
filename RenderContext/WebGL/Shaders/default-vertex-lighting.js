@@ -166,10 +166,7 @@ var default_vertex_lighting_vs = [
 "       vLightingFactor  = uFrontMaterial.emissive;",
 "       vLightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = (uFrontMaterial.ambient.a + ",
-"                            uFrontMaterial.diffuse.a + ",
-"                            uFrontMaterial.specular.a + ",
-"                            uFrontMaterial.emissive.a) / 4.0;",
+"       vLightingFactor.a = uFrontMaterial.diffuse.a;",
 "       vLightingFactor = clamp(vLightingFactor, 0.0, 1.0);",
 "",
 "   }",

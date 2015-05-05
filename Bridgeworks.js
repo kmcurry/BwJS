@@ -10850,6 +10850,8 @@ function webglRC(canvas, background)
     _gl.viewport(0, 0, canvas.width, canvas.height);
     _gl.enable(_gl.CULL_FACE);
     _gl.cullFace(_gl.BACK);
+    _gl.enable(_gl.BLEND);
+    _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
    
     // extensions
     var OES_standard_derivatives_extension = _gl.getExtension('OES_standard_derivatives');
@@ -12474,10 +12476,7 @@ var default_fragment_lighting_fs = [
 "       lightingFactor  = uFrontMaterial.emissive;",
 "       lightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a = (uFrontMaterial.ambient.a + ",
-"                           uFrontMaterial.diffuse.a + ",
-"                           uFrontMaterial.specular.a + ",
-"                           uFrontMaterial.emissive.a) / 4.0;",
+"       lightingFactor.a = uFrontMaterial.diffuse.a;",
 "       lightingFactor = clamp(lightingFactor, 0.0, 1.0);",
 "   }",
 "   else", // uLightingEnabled == 0
@@ -12710,10 +12709,7 @@ var default_vertex_lighting_vs = [
 "       vLightingFactor  = uFrontMaterial.emissive;",
 "       vLightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = (uFrontMaterial.ambient.a + ",
-"                            uFrontMaterial.diffuse.a + ",
-"                            uFrontMaterial.specular.a + ",
-"                            uFrontMaterial.emissive.a) / 4.0;",
+"       vLightingFactor.a = uFrontMaterial.diffuse.a;",
 "       vLightingFactor = clamp(vLightingFactor, 0.0, 1.0);",
 "",
 "   }",
@@ -18913,7 +18909,7 @@ VertexGeometry.prototype.apply = function(directive, params, visitChildren)
                     // completely transparent, skip drawing
                     drawNow = false;
                 }
-
+                
                 if (drawNow)
                 {
                     this.vertexBuffer.draw();
@@ -18932,13 +18928,13 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     var texture1 = null;
 
     // enable blending
-    this.graphMgr.renderContext.enable(eRenderMode.AlphaBlend);
+    //this.graphMgr.renderContext.enable(eRenderMode.AlphaBlend);
 
     // set blend factors
-    this.graphMgr.renderContext.setBlendFactor(RC_SRC_ALPHA, RC_ONE_MINUS_SRC_ALPHA);
+    //this.graphMgr.renderContext.setBlendFactor(RC_SRC_ALPHA, RC_ONE_MINUS_SRC_ALPHA);
 
     // get number of texture stages
-    var maxStages = this.graphMgr.renderContext.getMaxTextureStages();
+    var maxStages = 2;//this.graphMgr.renderContext.getMaxTextureStages();
 
     // get texture array
     var textureArray = this.graphMgr.textureArrayStack.top();
@@ -18961,7 +18957,7 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     var currMatDesc = this.graphMgr.renderContext.getFrontMaterial();
 
     // push current material
-    this.graphMgr.renderState.push(RENDERSTATE_MATERIAL_BIT);
+    //this.graphMgr.renderState.push(RENDERSTATE_MATERIAL_BIT);
 
     // if non-zero dissolve, set to material
     if (dissolve > 0)
@@ -18999,8 +18995,8 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     // if color texture, set material for blending
     if (textureArray.textures[eTextureType.Color].length)
     {
-        this.setBlendingMaterial(textureArray.textures[eTextureType.Color][0].getAttribute("opacity").getValueDirect(),
-        ambientLevel, diffuseLevel, specularLevel, emissiveLevel);
+        //this.setBlendingMaterial(textureArray.textures[eTextureType.Color][0].getAttribute("opacity").getValueDirect(),
+        //    ambientLevel, diffuseLevel, specularLevel, emissiveLevel);
     }
 
     // set texture blend factor
@@ -19041,8 +19037,8 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
             texture0 = texture;
 
             // set material for blending
-            this.setBlendingMaterial(texture.getAttribute("opacity").getValueDirect(),
-            ambientLevel, diffuseLevel, specularLevel, emissiveLevel);
+            //this.setBlendingMaterial(texture.getAttribute("opacity").getValueDirect(),
+            //    ambientLevel, diffuseLevel, specularLevel, emissiveLevel);
 
             // set texture blend factor
             this.graphMgr.renderContext.setTextureBlendFactor(currMatDesc.diffuse.a * (1 - dissolve) * texture.getAttribute("opacity").getValueDirect());
@@ -19137,10 +19133,10 @@ VertexGeometry.prototype.drawTextured = function(dissolve)
     this.graphMgr.renderContext.enableTextureStage(1, 0);
     
     // disable blending
-    this.graphMgr.renderContext.disable(eRenderMode.AlphaBlend);
+    //this.graphMgr.renderContext.disable(eRenderMode.AlphaBlend);
 
     // pop current material
-    this.graphMgr.renderState.pop(RENDERSTATE_MATERIAL_BIT);
+    //this.graphMgr.renderState.pop(RENDERSTATE_MATERIAL_BIT);
 }
 
 VertexGeometry.prototype.drawPrimitives = function()
@@ -19578,8 +19574,6 @@ Material.prototype.apply = function(directive, params, visitChildren)
         return;
     }
     
-    this.graphMgr.setCurrentMaterial(this);
-    
     switch (directive)
     {
         case "render":
@@ -19587,6 +19581,7 @@ Material.prototype.apply = function(directive, params, visitChildren)
             params.opacity = this.lastOpacity; // set in update()
             
             this.applyMaterialDesc();
+            this.graphMgr.setCurrentMaterial(this);
         }
         break;
         
