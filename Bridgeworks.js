@@ -7841,11 +7841,17 @@ function PhysicalPropertiesAttr()
     this.radius = new NumberAttr(0);
     this.friction = new NumberAttr(0);
     this.restitution = new NumberAttr(0);
+    this.linearDamping = new NumberAttr(0);
+    this.angularDamping = new NumberAttr(0);
+    this.rollingFriction = new NumberAttr(0);
 
     this.registerAttribute(this.mass, "mass");
     this.registerAttribute(this.radius, "radius");
     this.registerAttribute(this.friction, "friction");
     this.registerAttribute(this.restitution, "restitution");
+    this.registerAttribute(this.linearDamping, "linearDamping");
+    this.registerAttribute(this.angularDamping, "angularDamping");
+    this.registerAttribute(this.rollingFriction, "rollingFriction");
 }
 
 function setAttributeValue(attribute, value)
@@ -19353,8 +19359,33 @@ TriList.prototype.draw = function(dissolve)
 {
     // TODO
     
-    // draw with textures
-    this.drawTextured(dissolve);
+    // check for presence of textures
+    var textureArray = this.graphMgr.textureArrayStack.top();
+    if (textureArray.textures[eTextureType.Color].length == 0 &&
+        textureArray.textures[eTextureType.Transparency].length == 0)
+    {
+        // draw untextured
+        
+        // if non-zero dissolve, set to material
+        if (dissolve > 0)
+        {
+            // get current material
+            var currMatDesc = this.graphMgr.renderContext.getFrontMaterial();
+        
+            currMatDesc.ambient.a *= (1 - dissolve);
+            currMatDesc.diffuse.a *= (1 - dissolve);
+            currMatDesc.specular.a *= (1 - dissolve);
+            currMatDesc.emissive.a *= (1 - dissolve);
+            this.graphMgr.renderContext.setFrontMaterial(currMatDesc);
+        }
+        
+        this.vertexBuffer.draw();
+    }
+    else
+    {
+        // draw with textures
+        this.drawTextured(dissolve);
+    }
 }
 
 TriList.prototype.buildBoundingTree = function()
@@ -27596,6 +27627,9 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
     rbInfo.set_m_friction(properties.friction);
     rbInfo.set_m_restitution(properties.restitution);
+    rbInfo.set_m_linearDamping(properties.linearDamping);
+    rbInfo.set_m_angularDamping(properties.angularDamping);
+    rbInfo.set_m_rollingFriction(properties.rollingFriction);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
@@ -27853,10 +27887,6 @@ PhysicsSimulator.prototype.getSnapCollisionShape = function(model, position, rot
 */
 PhysicsSimulator.prototype.getNetProperties = function(model)
 {
-    var mass = 0;  
-    var friction = 0;
-    var restitution = 0;
-
     // calculate scaled mass for model
     var scale = model.getAttribute("scale").getValueDirect();
     var avgScale = (scale.x + scale.y + scale.z) / 3;
@@ -27864,6 +27894,9 @@ PhysicsSimulator.prototype.getNetProperties = function(model)
     var mass = physicalProperties.getAttribute("mass").getValueDirect() * avgScale;
     var friction = physicalProperties.getAttribute("friction").getValueDirect();
     var restitution = physicalProperties.getAttribute("restitution").getValueDirect();
+    var linearDamping = physicalProperties.getAttribute("linearDamping").getValueDirect();
+    var angularDamping = physicalProperties.getAttribute("angularDamping").getValueDirect();
+    var rollingFriction = physicalProperties.getAttribute("rollingFriction").getValueDirect();
     
     // add children's properties (if any)
     for (var i = 0; i < model.motionChildren.length; i++)
@@ -27872,9 +27905,17 @@ PhysicsSimulator.prototype.getNetProperties = function(model)
         mass += childProperties.mass;
         friction += childProperties.friction;
         restitution += childProperties.restitution;
+        linearDamping += childProperties.linearDamping;
+        angularDamping += childProperties.angularDamping;
+        rollingFriction += childProperties.rollingFriction;
     }
 
-    return { mass: mass, friction: friction, restitution: restitution };
+    return { mass: mass, 
+             friction: friction, 
+             restitution: restitution, 
+             linearDamping: linearDamping,
+             angularDamping: angularDamping,
+             rollingFriction: rollingFriction };
 }
 
 PhysicsSimulator.prototype.updatePhysicsShape = function(model)
@@ -27907,6 +27948,9 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model)
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
     rbInfo.set_m_friction(properties.friction);
     rbInfo.set_m_restitution(properties.restitution);
+    rbInfo.set_m_linearDamping(properties.linearDamping);
+    rbInfo.set_m_angularDamping(properties.angularDamping);
+    rbInfo.set_m_rollingFriction(properties.rollingFriction);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);

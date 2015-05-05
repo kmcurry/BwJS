@@ -47,8 +47,33 @@ TriList.prototype.draw = function(dissolve)
 {
     // TODO
     
-    // draw with textures
-    this.drawTextured(dissolve);
+    // check for presence of textures
+    var textureArray = this.graphMgr.textureArrayStack.top();
+    if (textureArray.textures[eTextureType.Color].length == 0 &&
+        textureArray.textures[eTextureType.Transparency].length == 0)
+    {
+        // draw untextured
+        
+        // if non-zero dissolve, set to material
+        if (dissolve > 0)
+        {
+            // get current material
+            var currMatDesc = this.graphMgr.renderContext.getFrontMaterial();
+        
+            currMatDesc.ambient.a *= (1 - dissolve);
+            currMatDesc.diffuse.a *= (1 - dissolve);
+            currMatDesc.specular.a *= (1 - dissolve);
+            currMatDesc.emissive.a *= (1 - dissolve);
+            this.graphMgr.renderContext.setFrontMaterial(currMatDesc);
+        }
+        
+        this.vertexBuffer.draw();
+    }
+    else
+    {
+        // draw with textures
+        this.drawTextured(dissolve);
+    }
 }
 
 TriList.prototype.buildBoundingTree = function()
