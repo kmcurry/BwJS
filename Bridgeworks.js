@@ -10724,7 +10724,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
     this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial.ambient");
     this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial.diffuse");
     this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial.specular");
-    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial.emission");
+    this.frontMaterial.emissive = gl.getUniformLocation(program, "uFrontMaterial.emissive");
     this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial.shininess");
 
     // textures
@@ -10818,7 +10818,7 @@ function gl_MaterialParameters()
     var ambient;
     var diffuse;
     var specular;
-    var emission;
+    var emissive;
     var shininess; 
 }
 
@@ -11408,7 +11408,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & MATERIALDESC_EMISSIVE_BIT)
         {
             // TODO
-            //_gl.uniform4fv(_program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
+            _gl.uniform4fv(_program.frontMaterial.emissive, new Float32Array(desc.emissive.v()));
             
             this.frontMaterial.emissive = desc.emissive;
         }
@@ -12348,7 +12348,7 @@ var default_fragment_lighting_fs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",
@@ -12471,11 +12471,14 @@ var default_fragment_lighting_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       lightingFactor  = uFrontMaterial.emissive;",
+"       lightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       lightingFactor.a = (uFrontMaterial.ambient.a + ",
+"                           uFrontMaterial.diffuse.a + ",
+"                           uFrontMaterial.specular.a + ",
+"                           uFrontMaterial.emissive.a) / 4.0;",
+"       lightingFactor = clamp(lightingFactor, 0.0, 1.0);",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",
@@ -12583,7 +12586,7 @@ var default_vertex_lighting_vs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",
@@ -12704,11 +12707,15 @@ var default_vertex_lighting_vs = [
 "           }",
 "       }",
 "",
-"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       vLightingFactor  = uFrontMaterial.emissive;",
+"       vLightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       vLightingFactor.a = (uFrontMaterial.ambient.a + ",
+"                            uFrontMaterial.diffuse.a + ",
+"                            uFrontMaterial.specular.a + ",
+"                            uFrontMaterial.emissive.a) / 4.0;",
+"       vLightingFactor = clamp(vLightingFactor, 0.0, 1.0);",
+"",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",  
@@ -12911,7 +12918,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",
@@ -29905,6 +29912,46 @@ Command.prototype.isBorrowedAndReferenceModified = function(attribute)
 }
 
 
+AppendNodeCommand.prototype = new Command();
+AppendNodeCommand.prototype.constructor = AppendNodeCommand;
+
+function AppendNodeCommand()
+{
+    Command.call(this);
+    this.className = "AppendNodeCommand";
+    this.attrType = eAttrType.AppendNode;
+
+    this.parent = new StringAttr("");
+    this.child = new StringAttr("");
+    this.parentNode = null;
+    this.childNode = null;
+    
+    this.parent.addModifiedCB(AppendNodeCommand_ParentModifiedCB, this);
+    this.child.addModifiedCB(AppendNodeCommand_ChildModifiedCB, this);
+    
+    this.registerAttribute(this.parent, "parent");
+    this.registerAttribute(this.child, "child");   
+}
+
+AppendNodeCommand.prototype.execute = function()
+{
+    if (this.parentNode && this.childNode)
+    {
+        this.parentNode.addChild(this.childNode);
+    }
+}
+
+function AppendNodeCommand_ParentModifiedCB(attribute, container)
+{
+    var parent = attribute.getValueDirect().join("");
+    container.parentNode = container.registry.find(parent);
+}
+
+function AppendNodeCommand_ChildModifiedCB(attribute, container)
+{
+    var child = attribute.getValueDirect().join("");
+    container.childNode = container.registry.find(child);
+}
 SetCommand.prototype = new Command();
 SetCommand.prototype.constructor = SetCommand;
 
@@ -38202,8 +38249,8 @@ LWSceneBuilder.prototype.allocateLight = function(lightDesc)
     
     // light color
     var red = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
-    var green = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
-    var blue = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
+    var green = lightDesc.colorG * lightDesc.intensity * this.globalLightDesc.intensity;
+    var blue = lightDesc.colorB * lightDesc.intensity * this.globalLightDesc.intensity;
     var alpha = 1;
     
     // ambient color

@@ -18,7 +18,7 @@ function gl_MaterialParameters()
     var ambient;
     var diffuse;
     var specular;
-    var emission;
+    var emissive;
     var shininess; 
 }
 
@@ -608,7 +608,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & MATERIALDESC_EMISSIVE_BIT)
         {
             // TODO
-            //_gl.uniform4fv(_program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
+            _gl.uniform4fv(_program.frontMaterial.emissive, new Float32Array(desc.emissive.v()));
             
             this.frontMaterial.emissive = desc.emissive;
         }

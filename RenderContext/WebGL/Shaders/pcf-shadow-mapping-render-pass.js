@@ -65,7 +65,7 @@ var pcf_shadow_mapping_render_pass_fs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",

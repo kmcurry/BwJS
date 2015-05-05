@@ -42,7 +42,7 @@ var default_vertex_lighting_vs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",
@@ -163,11 +163,15 @@ var default_vertex_lighting_vs = [
 "           }",
 "       }",
 "",
-"       vLightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       vLightingFactor  = uFrontMaterial.emissive;",
+"       vLightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       vLightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       vLightingFactor.a = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       vLightingFactor.a = (uFrontMaterial.ambient.a + ",
+"                            uFrontMaterial.diffuse.a + ",
+"                            uFrontMaterial.specular.a + ",
+"                            uFrontMaterial.emissive.a) / 4.0;",
+"       vLightingFactor = clamp(vLightingFactor, 0.0, 1.0);",
+"",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",  
