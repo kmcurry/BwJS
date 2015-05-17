@@ -89,14 +89,14 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     }
 
     // update position of selected model with physics simulator
-    this.physicsSimulator.updatePhysicsBody(this.physicsSimulator.getPhysicsBodyIndex(selected));
+    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), true);
     
     // evaluate physics simulator
     this.physicsSimulator.evaluate();
 
     // check collision status
     var colliding = this.physicsSimulator.isColliding(selected);
-    if (colliding)
+    if (colliding.colliding)
     {
         // if model is set to stop on collision, update its position from the physics simulator
         if (selected.getAttribute("stopOnCollision").getValueDirect())
@@ -109,9 +109,9 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
             quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
             Ammo.destroy(trans);
 
-            selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+            //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
             selected.getAttribute("position").setValueDirect(origin.x(), origin.y(), origin.z()); 
-            selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+            //selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
             
             //selected.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this.physicsSimulator);
             //selected.getAttribute("quaternion").setValueDirect(quaternion);

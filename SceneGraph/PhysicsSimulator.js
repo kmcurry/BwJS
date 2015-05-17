@@ -57,7 +57,11 @@ PhysicsSimulator.prototype.evaluate = function()
                         this.bodyAdded[i] = true;
                         if (this.bodyModels[i].physicsEnabled.getValueDirect())
                         {
-                            this.updatePhysicsBodyPosition(i);
+                            var gravity = this.gravity.getValueDirect();
+                            var world = new Ammo.btVector3(gravity.x, gravity.y, gravity.z);
+                            this.physicsBodies[i].setGravity(world);
+                            Ammo.destroy(world);
+                            this.updatePhysicsBodyPosition(i, false);
                         }
                     }
                 }
@@ -66,7 +70,11 @@ PhysicsSimulator.prototype.evaluate = function()
             case 1:
                 // selected
                 {
-                    // stop positional updates
+                    // set body gravity to 0 so that it won't be affected by it during interaction
+                    var zero = new Ammo.btVector3(0, 0, 0);
+                    this.physicsBodies[i].setGravity(zero);
+                    Ammo.destroy(zero);
+                    // stop positional updates 
                     this.bodyAdded[i] = false;
                 }
                 break;
@@ -177,33 +185,39 @@ PhysicsSimulator.prototype.isColliding = function(model)
             var body1 = contactManifold.getBody1();
             
             //var distance = FLT_MAX;
+            var a, b;
             var numContacts = contactManifold.getNumContacts();
-            /*for (var j = 0; j < numContacts; j++)
+            for (var j = 0; j < numContacts; j++)
             {
                 var pt = contactManifold.getContactPoint(j);
                 var ptA = pt.getPositionWorldOnA();
                 var ptB = pt.getPositionWorldOnB();
 
+                a = new Vector3D(ptA.x(), ptA.y(), ptA.z());
+                b = new Vector3D(ptB.x(), ptB.y(), ptB.z());
+                
                 var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
                 //console.log(distance);               
             }
-            */
+            
             //if (distance < 0.05)
             if (numContacts > 0)
             {
                 if (body0.ptr == physicsBody.ptr)
                 {
-                    return true;
+                    b.subtractVector(a);
+                    return { colliding: true, vector: b };
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
-                    return true;
+                    a.subtractVector(b);
+                    return { colliding: true, vector: a };
                 }
             }
         }
     }
 
-    return false;
+    return { colliding: false, vector: undefined };
 }
 
 PhysicsSimulator.prototype.getColliders = function(model)
@@ -419,6 +433,8 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
+    
+    //body.setRestitution(properties.restitution);
     
     this.world.addRigidBody(body);
     //if (isDynamic)
@@ -809,12 +825,12 @@ PhysicsSimulator.prototype.updatePhysicsBody = function(n)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
-
+    
     this.world.addRigidBody(body);
     this.physicsBodies[n] = body;
 }
 
-PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
+PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, retainInspectionGroupRotation)
 {
     var index = this.updateBodyPositions.indexOf(n);
     if (index >= 0)
@@ -822,7 +838,7 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
         this.updateBodyPositions.splice(index, 1);
     }
     
-    if (!this.bodyAdded[n]) return;
+    //if (!this.bodyAdded[n]) return;
     
     var model = this.bodyModels[n];
     if (!model)
@@ -858,7 +874,10 @@ PhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n)
         Ammo.destroy(quaternion);
 
         // clear inspection group's rotation
-        rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        if (!retainInspectionGroupRotation) 
+        {
+            rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        }
     }
     
     body.setWorldTransform(transform);
