@@ -185,7 +185,7 @@ PhysicsSimulator.prototype.isColliding = function(model)
             var body1 = contactManifold.getBody1();
             
             //var distance = FLT_MAX;
-            var a, b;
+            var a, b, distance;
             var numContacts = contactManifold.getNumContacts();
             for (var j = 0; j < numContacts; j++)
             {
@@ -196,7 +196,7 @@ PhysicsSimulator.prototype.isColliding = function(model)
                 a = new Vector3D(ptA.x(), ptA.y(), ptA.z());
                 b = new Vector3D(ptB.x(), ptB.y(), ptB.z());
                 
-                var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
+                distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
                 //console.log(distance);               
             }
             
@@ -205,13 +205,32 @@ PhysicsSimulator.prototype.isColliding = function(model)
             {
                 if (body0.ptr == physicsBody.ptr)
                 {
-                    b.subtractVector(a);
-                    return { colliding: true, vector: b };
+                    var collidee = null;
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body1.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];
+                            break;
+                        }
+                    }
+                    
+                    return { colliding: true, collidee: collidee, collideePoint: a, distance: distance };
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
+                    var collidee = null;
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body0.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];
+                            break;
+                        }
+                    }
+                    
                     a.subtractVector(b);
-                    return { colliding: true, vector: a };
+                    return { colliding: true, collidee: collidee, collideePoint: b, distance: distance };
                 }
             }
         }
@@ -905,7 +924,9 @@ PhysicsSimulator.prototype.initPhysics = function()
     this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
 
     var gravity = this.gravity.getValueDirect();
-    this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
+    gravity = new Ammo.btVector3(gravity.x, gravity.y, gravity.z)
+    this.world.setGravity(gravity);
+    Ammo.destroy(gravity);
 }
 
 PhysicsSimulator.prototype.bodiesModified = function()

@@ -459,7 +459,7 @@ function Stack(element)
 {
     this.stack = new Array();
     this.maxLength = 0;
-    
+
     if (element)
     {
         this.stack.push(element);
@@ -468,11 +468,11 @@ function Stack(element)
 
 Stack.prototype.push = function(element)
 {
-	if (this.maxLength > 0 && this.stack.length >= this.maxLength)
-	{
-		this.pop();
-	}
-	
+    if (this.maxLength > 0 && this.stack.length >= this.maxLength)
+    {
+        this.pop();
+    }
+
     this.stack.push(element);
 }
 
@@ -494,9 +494,9 @@ Stack.prototype.top = function()
 {
     if (this.stack.length > 0)
     {
-        return this.stack[this.stack.length-1];
+        return this.stack[this.stack.length - 1];
     }
-    
+
     return null;
 }
 
@@ -506,7 +506,7 @@ Stack.prototype.getAt = function(index)
     {
         return this.stack[index];
     }
-    
+
     return null;
 }
 
@@ -24762,6 +24762,7 @@ SerializeDirective.prototype.execute = function(root)
 }
 
 
+var MIN_COLLIDE_DISTANCE = 0.01;
 var MAX_SEE_AHEAD = 2;
 
 CollideParams.prototype = new DirectiveParams();
@@ -24793,7 +24794,11 @@ function CollideDirective()
     SGDirective.call(this);
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
-
+    
+    this.lastSelected = null;
+    this.lastColliding = false;
+    this.lastCollidingDistance = FLT_MAX;
+    
     this.name.setValueDirect("CollideDirective");
 }
 
@@ -24849,39 +24854,133 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     if (!selected)
     {
         this.physicsSimulator.evaluate();
+        this.lastSelected = null; // clear last selected
         return;
     }
 
+    // if selected is not the same as last selected, reset last selected position
+    if (selected != this.lastSelected)
+    {
+        selected.lastPosition = new Stack(selected.position.getValueDirect());
+        selected.lastPosition.maxLength = 50;
+        this.lastSelected = selected;
+        this.lastColliding = false;
+        this.lastCollidingDistance = FLT_MAX;
+    }
+    
+    //var position = selected.position.getValueDirect();
+    //var lastPosition = selected.lastSelectedPosition || position;
+    //var delta = new Vector3D(position.x - lastPosition.x, position.y - lastPosition.y, position.z - lastPosition.z);
+    //delta.multiplyScalar(1 / 5);
+    //var timeIncrement = this.physicsSimulator.timeIncrement.getValueDirect() / 5;
+    //this.physicsSimulator.timeIncrement.setValueDirect(timeIncrement);
+    //for (var i = 0; i < 5; i++)
+    {
+        //position.x += delta.x;
+        //position.y += delta.y;
+        //position.z += delta.z;
+        //selected.position.setValueDirect(position.x, position.y, position.z);
+        if (this.detectCollision(selected))
+        {
+            return;
+        }
+    }
+ }
+    
+CollideDirective.prototype.detectCollision = function(selected)
+{  
     // update position of selected model with physics simulator
     this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), true);
     
-    // evaluate physics simulator
+    // evaluate physics simulator   
     this.physicsSimulator.evaluate();
 
     // check collision status
     var colliding = this.physicsSimulator.isColliding(selected);
-    if (colliding.colliding)
-    {
+    // if colliding and the distance between collision points is < MIN_COLLIDE_DISTANCE, update position to physics engine's position
+    if (colliding.colliding && colliding.distance > MIN_COLLIDE_DISTANCE)
+    {   
         // if model is set to stop on collision, update its position from the physics simulator
         if (selected.getAttribute("stopOnCollision").getValueDirect())
-        {
-            var trans = new Ammo.btTransform();
-            this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
-            var origin = trans.getOrigin();
-            var rot = trans.getRotation();
-            var quaternion = new Quaternion();
-            quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
-            Ammo.destroy(trans);
-
-            //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
-            selected.getAttribute("position").setValueDirect(origin.x(), origin.y(), origin.z()); 
+        {   /*
+            // if last selected position hasn't been set yet, set to physics engine's position
+            //if (!selected.lastSelectedPosition || this.lastColliding)
+            if (this.lastCollidingDistance < colliding.distance)
+            {
+                var trans = new Ammo.btTransform();
+                this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
+                var origin = trans.getOrigin();
+                var rot = trans.getRotation();
+                var quaternion = new Quaternion();
+                quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+                Ammo.destroy(trans);
+                
+                //selected.lastSelectedPosition = new Vector3D(origin.x(), origin.y(), origin.z());
+                //var position = selected.position.getValueDirect();
+                //colliding.vector.normalize();
+                //selected.lastSelectedPosition.x += (colliding.vector.x * (colliding.distance + MIN_COLLIDE_DISTANCE));
+                //selected.lastSelectedPosition.y += (colliding.vector.y * (colliding.distance + MIN_COLLIDE_DISTANCE));
+                //selected.lastSelectedPosition.z += (colliding.vector.z * (colliding.distance + MIN_COLLIDE_DISTANCE));
+                //selected.lastSelectedPosition = new Vector3D(origin.x(), origin.y(), origin.z());//position.x, position.y, position.z);
+                var position = selected.position.getValueDirect();
+                var lastPosition = selected.lastSelectedPosition;// || position;
+                //var delta = new Vector3D(lastPosition.x - position.x, lastPosition.y - position.y, lastPosition.z - position.z);
+                var delta = new Vector3D(position.x - colliding.collideePoint.x, position.y - colliding.collideePoint.y, position.z - colliding.collideePoint.z);
+                delta.normalize();
+                delta.multiplyScalar(colliding.distance);
+                //selected.lastSelectedPosition.x += delta.x;
+                //selected.lastSelectedPosition.y += delta.y;
+                //selected.lastSelectedPosition.z += delta.z;
+                
+                //selected.lastSelectedPosition = new Vector3D(origin.x(), origin.y(), origin.z());
+                
+                //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
+                selected.getAttribute("position").setValueDirect(selected.lastSelectedPosition.x, selected.lastSelectedPosition.y, selected.lastSelectedPosition.z);//origin.x(), origin.y(), origin.z()); 
+                //selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+            }
+            
+            //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
+            //selected.getAttribute("position").setValueDirect(selected.lastSelectedPosition.x, selected.lastSelectedPosition.y, selected.lastSelectedPosition.z);//origin.x(), origin.y(), origin.z()); 
             //selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
             
             //selected.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this.physicsSimulator);
             //selected.getAttribute("quaternion").setValueDirect(quaternion);
             //selected.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this.physicsSimulator);
+            */
+            
+            if (selected.lastPosition.length() > 0)
+            {
+                lastPosition = selected.lastPosition.top();
+                selected.lastPosition.pop();
+                
+                selected.getAttribute("position").setValueDirect(lastPosition.x, lastPosition.y, lastPosition.z);
+            }
+            else
+            {
+                var trans = new Ammo.btTransform();
+                this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
+                var origin = trans.getOrigin();
+                var rot = trans.getRotation();
+                var quaternion = new Quaternion();
+                quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+                Ammo.destroy(trans);
+                
+                selected.getAttribute("position").setValueDirect(origin.x(), origin.y(), origin.z());
+            }
+            
+            this.lastColliding = true;
+            this.lastCollidingDistance = colliding.distance;
         }
     }
+    else
+    {
+        // no collision; update last selected position to current position
+        selected.lastPosition.push(selected.position.getValueDirect())
+        this.lastColliding = false;
+        this.lastCollidingDistance = FLT_MAX;
+    }
+    
+    return this.lastColliding;
 }
 
 CollideDirective.prototype.detectObstructions = function(collideRecs)
@@ -27399,7 +27498,7 @@ PhysicsSimulator.prototype.isColliding = function(model)
             var body1 = contactManifold.getBody1();
             
             //var distance = FLT_MAX;
-            var a, b;
+            var a, b, distance;
             var numContacts = contactManifold.getNumContacts();
             for (var j = 0; j < numContacts; j++)
             {
@@ -27410,7 +27509,7 @@ PhysicsSimulator.prototype.isColliding = function(model)
                 a = new Vector3D(ptA.x(), ptA.y(), ptA.z());
                 b = new Vector3D(ptB.x(), ptB.y(), ptB.z());
                 
-                var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
+                distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
                 //console.log(distance);               
             }
             
@@ -27419,13 +27518,32 @@ PhysicsSimulator.prototype.isColliding = function(model)
             {
                 if (body0.ptr == physicsBody.ptr)
                 {
-                    b.subtractVector(a);
-                    return { colliding: true, vector: b };
+                    var collidee = null;
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body1.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];
+                            break;
+                        }
+                    }
+                    
+                    return { colliding: true, collidee: collidee, collideePoint: a, distance: distance };
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
+                    var collidee = null;
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body0.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];
+                            break;
+                        }
+                    }
+                    
                     a.subtractVector(b);
-                    return { colliding: true, vector: a };
+                    return { colliding: true, collidee: collidee, collideePoint: b, distance: distance };
                 }
             }
         }
@@ -28119,7 +28237,9 @@ PhysicsSimulator.prototype.initPhysics = function()
     this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
 
     var gravity = this.gravity.getValueDirect();
-    this.world.setGravity(new Ammo.btVector3(gravity.x, gravity.y, gravity.z));
+    gravity = new Ammo.btVector3(gravity.x, gravity.y, gravity.z)
+    this.world.setGravity(gravity);
+    Ammo.destroy(gravity);
 }
 
 PhysicsSimulator.prototype.bodiesModified = function()
