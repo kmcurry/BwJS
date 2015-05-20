@@ -403,6 +403,8 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     // watch for changes in enabled
     model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
     model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
+    // watch for changes in physical properties
+    model.getAttribute("physicalProperties").addModifiedCB(PhysicsSimulator_ModelPhysicalPropertiesModifiedCB, this);
 
     // if model is disabled, don't create
     if (model.getAttribute("enabled").getValueDirect() == false)
@@ -739,22 +741,14 @@ PhysicsSimulator.prototype.getNetProperties = function(model)
              rollingFriction: rollingFriction };
 }
 
-PhysicsSimulator.prototype.updatePhysicsShape = function(model)
+PhysicsSimulator.prototype.updatePhysicsShape = function(model, physicsShape)
 {
     // locate array position of model
-    var n = -1;
-    for (var i = 0; i < this.bodyModels.length; i++)
-    {
-        if (this.bodyModels[i] == model)
-        {
-            n = i;
-            break;
-        }
-    }
+    var n = this.getPhysicsBodyIndex(model);
     if (n == -1)
         return;
 
-    var shape = this.getCompoundShape(model);
+    var shape = physicsShape || this.getCompoundShape(model);
 
     var properties = this.getNetProperties(model);
 
@@ -841,6 +835,9 @@ PhysicsSimulator.prototype.updatePhysicsBody = function(n)
     var rbInfo = new Ammo.btRigidBodyConstructionInfo(properties.mass, motionState, shape, localInertia);
     rbInfo.set_m_friction(properties.friction);
     rbInfo.set_m_restitution(properties.restitution);
+    rbInfo.set_m_linearDamping(properties.linearDamping);
+    rbInfo.set_m_angularDamping(properties.angularDamping);
+    rbInfo.set_m_rollingFriction(properties.rollingFriction);
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
@@ -947,6 +944,16 @@ PhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
     }
 }
 
+PhysicsSimulator.prototype.modelPhysicalPropertiesModified = function(model)
+{
+    // locate array position of model
+    var n = this.getPhysicsBodyIndex(model);
+    if (n == -1)
+        return;
+    
+    this.updatePhysicsShape(model, this.physicsShapes[n]);
+}
+
 function PhysicsSimulator_GravityModifiedCB(attribute, container)
 {
     container.updateWorld = true;
@@ -1017,4 +1024,9 @@ function PhysicsSimulator_ModelParentModifiedCB(attribute, container)
 function PhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
 {
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
+}
+
+function PhysicsSimulator_ModelPhysicalPropertiesModifiedCB(attribute, container)
+{
+    container.modelPhysicalPropertiesModified(attribute.getContainer());
 }

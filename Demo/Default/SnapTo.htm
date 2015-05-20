@@ -222,19 +222,41 @@
             var x = 1.5;
             var y = 1.5;
             var z = 1.5;
-            function serialize()
+            function doSomething()
             {
                 //var xml = "\<Set target='UV_BoxG''>";
                 //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "<Set target='CenterBox' physicsEnabled='true'/>";
+                var xml = "<Set target='RightBox'>";
+                xml += "<physicalProperties>";
+                xml += "<mass>0</mass>";
+                xml += "</physicalProperties>";
+                xml += "</Set>";
                 console.debug(xml);
                 bridgeworks.updateScene(xml);
-                x += 0.5;
-                y += 0.5;
-                z += 0.5;
+                //x += 0.5;
+                //y += 0.5;
+                //z += 0.5;
                 
-                var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
-                s[0].color.setValueDirect(1, 0, 0, 1);
+                //var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
+                //s[0].color.setValueDirect(1, 0, 0, 1);
+            }
+            function doSomethingElse()
+            {
+                //var xml = "\<Set target='UV_BoxG''>";
+                //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
+                var xml = "<Set target='RightBox'>";
+                xml += "<physicalProperties>";
+                xml += "<mass>10</mass>";
+                xml += "</physicalProperties>";
+                xml += "</Set>";
+                console.debug(xml);
+                bridgeworks.updateScene(xml);
+                //x += 0.5;
+                //y += 0.5;
+                //z += 0.5;
+                
+                //var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
+                //s[0].color.setValueDirect(1, 0, 0, 1);
             }
         </script>
 
@@ -252,7 +274,8 @@
             <button onclick="bridgeworks.renderController.stop();">Stop</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             Object: <input id="objectname"/>
-            <button onclick="serialize();">Serialize</button>
+            <button onclick="doSomething();">Do Something</button>
+            <button onclick="doSomethingElse();">Do Something Else</button>
         </div>
     </center>
 

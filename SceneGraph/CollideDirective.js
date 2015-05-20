@@ -169,9 +169,9 @@ CollideDirective.prototype.detectCollision = function(selected)
                 
                 //selected.lastSelectedPosition = new Vector3D(origin.x(), origin.y(), origin.z());
                 
-                //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
-                selected.getAttribute("position").setValueDirect(selected.lastSelectedPosition.x, selected.lastSelectedPosition.y, selected.lastSelectedPosition.z);//origin.x(), origin.y(), origin.z()); 
-                //selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+                selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
+                selected.getAttribute("position").setValueDirect(origin.x(), origin.y(), origin.z());//selected.lastSelectedPosition.x, selected.lastSelectedPosition.y, selected.lastSelectedPosition.z);//origin.x(), origin.y(), origin.z()); 
+                selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
             }
             
             //selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
