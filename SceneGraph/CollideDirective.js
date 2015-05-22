@@ -31,7 +31,7 @@ function CollideDirective()
     this.className = "CollideDirective";
     this.attrType = eAttrType.CollideDirective;
     
-    this.lastSelected = null;
+    this.lastDetected = null;
     this.lastColliding = false;
     this.lastCollidingDistance = FLT_MAX;
     
@@ -59,7 +59,7 @@ CollideDirective.prototype.execute = function(root)
     root.apply("collide", params, true);
 
     // detect collisions
-    this.detectCollisions(params.detectCollisions);
+    //this.detectCollisions(params.detectCollisions);
 
     // detect obstructions
     this.detectObstructions(params.detectCollisions);
@@ -85,115 +85,129 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         {
             selected = model;
         }
-    }
+    } 
     // currently only detecting collisions on selected model, but still need to evaluate physics simulator
     if (!selected)
     {
         this.physicsSimulator.evaluate();
-        this.lastSelected = null; // clear last selected
+        this.lastDetected = null; // clear last selected
         return;
     }
 
+    this.physicsSimulator.evaluate();
+    
     // if selected is not the same as last selected, reset last selected position
-    if (selected != this.lastSelected)
+    if (selected != this.lastDetected)
     {
-        selected.lastSelectedPosition = new Stack(selected.position.getValueDirect());
-        this.lastSelected = selected;
+        selected.lastPosition = selected.position.getValueDirect();
+        selected.lastQuaternion = getInspectionGroupQuaternion(selected).getValueDirect();
+        this.lastDetected = selected;
         this.lastColliding = false;
         this.lastCollidingDistance = FLT_MAX;
     }
-    
-    //var position = selected.position.getValueDirect();
-    //var lastPosition = selected.lastSelectedPosition || position;
-    //var delta = new Vector3D(position.x - lastPosition.x, position.y - lastPosition.y, position.z - lastPosition.z);
-    //delta.multiplyScalar(1 / 5);
-    //var timeIncrement = this.physicsSimulator.timeIncrement.getValueDirect() / 5;
-    //this.physicsSimulator.timeIncrement.setValueDirect(timeIncrement);
-    //for (var i = 0; i < 5; i++)
+    /*
+    var position = selected.position.getValueDirect();
+    var lastPosition = selected.lastPosition || position;
+    var delta = new Vector3D(position.x - lastPosition.x, position.y - lastPosition.y, position.z - lastPosition.z);
+    var delta_distance = distanceBetween(new Vector3D(position.x, position.y, position.z),
+                                         new Vector3D(lastPosition.x, lastPosition.y, lastPosition.z));
+    console.log(delta_distance);
+    var bbox_min = selected.bbox.min.getValueDirect();
+    var bbox_max = selected.bbox.max.getValueDirect();
+    var bbox_size = distanceBetween(new Vector3D(bbox_min.x, bbox_min.y, bbox_min.z),
+                                    new Vector3D(bbox_max.x, bbox_max.y, bbox_max.z));
+    var iterations = 1;
+    if (delta_distance > bbox_size)
     {
-        //position.x += delta.x;
-        //position.y += delta.y;
-        //position.z += delta.z;
-        //selected.position.setValueDirect(position.x, position.y, position.z);
-        //if (selected.physicalProperties.mass.getValueDirect() > 0)
+        iterations = Math.ceil(delta_distance / bbox_size);
+    }
+    delta.multiplyScalar(1 / iterations);
+    var timeIncrement = this.physicsSimulator.timeIncrement.getValueDirect() / iterations;
+    this.physicsSimulator.timeIncrement.setValueDirect(timeIncrement);
+    for (var i = 0; i < iterations; i++)
+    {
+        position.x += delta.x;
+        position.y += delta.y;
+        position.z += delta.z;
+        selected.position.setValueDirect(position.x, position.y, position.z);
+    */
         if (this.detectCollision(selected))
         {
             return;
         }
-    }
+    //}
  }
     
-CollideDirective.prototype.detectCollision = function(selected)
+CollideDirective.prototype.detectCollision = function(model)
 {  
-    // update position of selected model with physics simulator
-    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(selected), true);
+    // if selected is not the same as last selected, reset last selected position
+    if (model != this.lastDetected)
+    {    
+        model.lastPosition = model.position.getValueDirect();
+        model.lastQuaternion = getInspectionGroupQuaternion(model).getValueDirect();
+        this.lastDetected = model;
+        this.lastColliding = false;
+        this.lastCollidingDistance = FLT_MAX;
+    }
     
-    // evaluate physics simulator   
-    this.physicsSimulator.evaluate();
+    // update position of selected model with physics simulator
+    this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(model), true);
+    
+    // perform CD 
+    this.physicsSimulator.performDiscreteCollisionDetection();
 
-    if (selected.physicalProperties.mass.getValueDirect() == 0) return false;
+    if (model.physicalProperties.mass.getValueDirect() == 0) return false;
     
     // check collision status
-    var collidees = this.physicsSimulator.isColliding(selected);
+    var colliding = this.physicsSimulator.isColliding(model);
     // if colliding and the distance between collision points is < MIN_COLLIDE_DISTANCE, update position to physics engine's position
-    if (collidees.colliding)
+    if (colliding.colliding)
     {   
         // if model is set to stop on collision, update its position from the physics simulator
-        if (selected.getAttribute("stopOnCollision").getValueDirect())
+        if (model.getAttribute("stopOnCollision").getValueDirect())
         {    
-            // if last selected position hasn't been set yet, set to physics engine's position
-            //if (!selected.lastSelectedPosition || this.lastColliding)
-            if (collidees.distance > 0.01)
+            //if (colliding.distance > 0.01) // check already performed by PhysicsSimulator::isColliding
             {
-                var trans = new Ammo.btTransform();
-                this.physicsSimulator.getPhysicsBody(selected).getMotionState().getWorldTransform(trans);
-                var origin = trans.getOrigin();
-                var rot = trans.getRotation();
-                var quaternion = new Quaternion();
-                quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
-                Ammo.destroy(trans);
-                
-                //selected.lastSelectedPosition.x -= collidees.pos.x;
-                //selected.lastSelectedPosition.y -= collidees.pos.y;
-                //selected.lastSelectedPosition.z -= collidees.pos.z;
-                this.lastColliding = true;
-                
                 if (this.lastColliding)
                 {
-                    //if (selected.lastSelectedPosition.length() > 1)
-                    {
-                    //    selected.lastSelectedPosition.pop();
-                    }
-                    //else
-                    {
-                        var position = new Vector3D(origin.x(), origin.y(), origin.z());                        
-                        selected.lastSelectedPosition.push(position);
-                        //this.lastColliding = false;
-                        
-                        selected.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
-                        selected.getAttribute("quaternion").setValueDirect(quaternion.x, quaternion.y, quaternion.z);//origin.x(), origin.y(), origin.z()); 
-                        selected.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
-                        //zeroInspectionGroup(selected);
-                    }
-                }
-                var lastSelectedPosition = selected.lastSelectedPosition.top();
+                    this.physicsSimulator.evaluate();
+                    
+                    var trans = new Ammo.btTransform();
+                    this.physicsSimulator.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
+                    var origin = trans.getOrigin();
+                    //var rot = trans.getRotation();
+                    //var quaternion = new Quaternion();
+                    //quaternion.load(rot.w(), rot.x(), rot.y(), rot.z());
+                    Ammo.destroy(trans);
                 
-                selected.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
-                selected.getAttribute("position").setValueDirect(lastSelectedPosition.x, lastSelectedPosition.y, lastSelectedPosition.z);//origin.x(), origin.y(), origin.z()); 
-                selected.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+                    var position = new Vector3D(origin.x(), origin.y(), origin.z());                        
+                    model.lastPosition = position;
+                    //model.lastQuaternion = quaternion;
+                }
+                
+                model.getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
+                model.getAttribute("position").setValueDirect(model.lastPosition.x, model.lastPosition.y, model.lastPosition.z);
+                model.getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+                
+                //model.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
+                //model.getAttribute("quaternion").setValueDirect(model.lastQuaternion);
+                //model.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
+                getInspectionGroupQuaternion(model).setValueDirect(model.lastQuaternion);
             }
 
-            this.lastCollidingDistance = 0;
-            console.log("colliding");
+            this.lastColliding = true;
+            this.lastCollidingDistance = colliding.distance;
+            //console.log("colliding");
         }
     }
     else
     {
-        // no collision; update last selected position to current position
-        selected.lastSelectedPosition.push(selected.position.getValueDirect());
+        // no collision
+        model.lastPosition = model.position.getValueDirect();
+        model.lastQuaternion = getInspectionGroupQuaternion(model).getValueDirect();
         this.lastColliding = false;
         this.lastCollidingDistance = FLT_MAX;
-        console.log("not colliding");
+        //console.log("not colliding");
     }
     
     return this.lastColliding;

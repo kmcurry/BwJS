@@ -165,6 +165,11 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
     this.world.stepSimulation(timeIncrement, maxSubSteps);
 }
 
+PhysicsSimulator.prototype.performDiscreteCollisionDetection = function()
+{
+    this.world.performDiscreteCollisionDetection();
+}
+    
 PhysicsSimulator.prototype.isColliding = function(model)
 {
     // if model is parented, get parent
@@ -184,7 +189,6 @@ PhysicsSimulator.prototype.isColliding = function(model)
             var body0 = contactManifold.getBody0();
             var body1 = contactManifold.getBody1();
             
-            //var distance = FLT_MAX;
             var a, b, distance;
             var numContacts = contactManifold.getNumContacts();
             for (var j = 0; j < numContacts; j++)
@@ -195,12 +199,10 @@ PhysicsSimulator.prototype.isColliding = function(model)
 
                 a = new Vector3D(ptA.x(), ptA.y(), ptA.z());
                 b = new Vector3D(ptB.x(), ptB.y(), ptB.z());
-                
-                distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
-                if (distance < 0.01) continue;
-                if (b.y > 0) continue;
-                //console.log(distance);               
             
+                distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
+                if (distance < 0.01) continue; // don't consider very small distances
+                            
                 if (body0.ptr == physicsBody.ptr)
                 {
                     var collidee = null;
@@ -208,12 +210,12 @@ PhysicsSimulator.prototype.isColliding = function(model)
                     {
                         if (body1.ptr == this.physicsBodies[j].ptr)
                         {
-                            collidee = this.bodyModels[j];
-                            break;
+                            collidee = this.bodyModels[j];                           
+                            if (a.y > 0) continue; // don't consider "collisions" outside of the collidee
+                            //console.log(distance);               
+                            //break;
                         }
                     }
-                    
-                    return { colliding: true, collidee: collidee, collideePoint: b, distance: distance };
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
@@ -223,17 +225,19 @@ PhysicsSimulator.prototype.isColliding = function(model)
                         if (body0.ptr == this.physicsBodies[j].ptr)
                         {
                             collidee = this.bodyModels[j];
-                            break;
+                            if (b.y > 0) continue; // don't consider "collisions" outside of the collidee
+                            //console.log(distance);               
+                            //break;
                         }
                     }
                 }
                                    
-                return { colliding: true, collidee: collidee, collideePoint: a, distance: distance };
+                return { colliding: true, collidee: collidee, collideePoint: b, distance: distance };
             }
         }
     }
 
-    return { colliding: false, distance: FLT_MAX };
+    return { colliding: false, collidee: null, collideePoint: undefined, distance: FLT_MAX };
 }
 
 PhysicsSimulator.prototype.getColliders = function(model)
