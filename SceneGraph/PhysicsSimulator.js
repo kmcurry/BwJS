@@ -165,9 +165,12 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
     this.world.stepSimulation(timeIncrement, maxSubSteps);
 }
 
-PhysicsSimulator.prototype.performDiscreteCollisionDetection = function()
+PhysicsSimulator.prototype.detectCollisions = function()
 {
-    this.world.performDiscreteCollisionDetection();
+    //this.update();
+    this.evaluate();
+    //this.world.performDiscreteCollisionDetection();
+    //this.stepSimulation(1);
 }
     
 PhysicsSimulator.prototype.isColliding = function(model)
@@ -205,39 +208,41 @@ PhysicsSimulator.prototype.isColliding = function(model)
                             
                 if (body0.ptr == physicsBody.ptr)
                 {
+                    if (a.y > 0) continue; // don't consider "collisions" outside of the collidee
+                    /*
                     var collidee = null;
                     for (var j = 0; j < this.physicsBodies.length; j++)
                     {
                         if (body1.ptr == this.physicsBodies[j].ptr)
                         {
-                            collidee = this.bodyModels[j];                           
-                            if (a.y > 0) continue; // don't consider "collisions" outside of the collidee
+                            collidee = this.bodyModels[j];                                                      
                             //console.log(distance);               
                             //break;
                         }
-                    }
+                    }*/
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
-                    var collidee = null;
+                    if (b.y > 0) continue; // don't consider "collisions" outside of the collidee
+                    /*
                     for (var j = 0; j < this.physicsBodies.length; j++)
                     {
                         if (body0.ptr == this.physicsBodies[j].ptr)
                         {
                             collidee = this.bodyModels[j];
-                            if (b.y > 0) continue; // don't consider "collisions" outside of the collidee
+                            
                             //console.log(distance);               
                             //break;
                         }
-                    }
+                    }*/
                 }
                                    
-                return { colliding: true, collidee: collidee, collideePoint: b, distance: distance };
+                return { colliding: true, distance: distance };
             }
         }
     }
 
-    return { colliding: false, collidee: null, collideePoint: undefined, distance: FLT_MAX };
+    return { colliding: false, distance: FLT_MAX };
 }
 
 PhysicsSimulator.prototype.getColliders = function(model)

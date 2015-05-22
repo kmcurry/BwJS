@@ -57,7 +57,7 @@ CollideDirective.prototype.execute = function(root)
 
     // get list of models for collision detection
     root.apply("collide", params, true);
-
+    
     // detect collisions
     //this.detectCollisions(params.detectCollisions);
 
@@ -86,6 +86,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
             selected = model;
         }
     } 
+    
     // currently only detecting collisions on selected model, but still need to evaluate physics simulator
     if (!selected)
     {
@@ -93,7 +94,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
         this.lastDetected = null; // clear last selected
         return;
     }
-
+    
     this.physicsSimulator.evaluate();
     
     // if selected is not the same as last selected, reset last selected position
@@ -154,7 +155,7 @@ CollideDirective.prototype.detectCollision = function(model)
     this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(model), true);
     
     // perform CD 
-    this.physicsSimulator.performDiscreteCollisionDetection();
+    this.physicsSimulator.detectCollisions();
 
     if (model.physicalProperties.mass.getValueDirect() == 0) return false;
     
@@ -169,9 +170,7 @@ CollideDirective.prototype.detectCollision = function(model)
             //if (colliding.distance > 0.01) // check already performed by PhysicsSimulator::isColliding
             {
                 if (this.lastColliding)
-                {
-                    this.physicsSimulator.evaluate();
-                    
+                {                   
                     var trans = new Ammo.btTransform();
                     this.physicsSimulator.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
                     var origin = trans.getOrigin();
