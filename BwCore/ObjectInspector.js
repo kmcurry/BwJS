@@ -207,7 +207,7 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     var attrSetParams = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
     
-    var continuous = true;
+    var continuous = false;
     if (!this.cd) this.cd = this.registry.find("CollideDirective");  
     if (continuous)
     {

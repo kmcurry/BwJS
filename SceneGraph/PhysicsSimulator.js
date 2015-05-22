@@ -81,8 +81,7 @@ PhysicsSimulator.prototype.evaluate = function()
         }
     }
 
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement);
+    this.stepSimulation();
     
     var trans = new
     Ammo.btTransform();
@@ -159,6 +158,7 @@ PhysicsSimulator.prototype.update = function()
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
+    timeIncrement = timeIncrement || this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
     maxSubSteps = maxSubSteps || 10;
     
     this.update();
@@ -167,10 +167,9 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 
 PhysicsSimulator.prototype.detectCollisions = function()
 {
-    //this.update();
-    this.evaluate();
+    this.update();
+    this.stepSimulation(0.000001);
     //this.world.performDiscreteCollisionDetection();
-    //this.stepSimulation(1);
 }
     
 PhysicsSimulator.prototype.isColliding = function(model)
@@ -747,14 +746,14 @@ PhysicsSimulator.prototype.getNetProperties = function(model)
              rollingFriction: rollingFriction };
 }
 
-PhysicsSimulator.prototype.updatePhysicsShape = function(model, physicsShape)
+PhysicsSimulator.prototype.updatePhysicsShape = function(model, shape)
 {
     // locate array position of model
     var n = this.getPhysicsBodyIndex(model);
     if (n == -1)
         return;
 
-    var shape = physicsShape || this.getCompoundShape(model);
+    shape = shape || this.getCompoundShape(model);
 
     var properties = this.getNetProperties(model);
 
