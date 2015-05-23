@@ -25026,8 +25026,9 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     
     // perform ray pick from model current position to ground along y direction and retrieve distance rpG
     var scale = ground.scale.getVector3D();
+    var scale_max = max3(scale.x, scale.y, scale.z);
     var rpG = rayPick(ground.boundingTree, position, new Vector3D(0, y, 0),
-                      0, 10000, ground.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), false, null);
+                      0, 10000, ground.transformCompound, new Matrix4x4(), scale_max, false, null);
     if (!rpG)
     {
         return { colliding: false, distance: FLT_MAX }
@@ -25045,13 +25046,26 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     }
     
     var model_distance = 0;
-    center = model.transformCompound.transform(center.x, center.y, center.z, 1);
+    //center = model.transformCompound.transform(center.x, center.y, center.z, 1);
     scale = model.scale.getVector3D();
-    var rpM = null;//rayPick(model.boundingTree, center, rotationMatrix.transform(0, y, 0, 0),
-    //                  0, 10000, model.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), true, null, true);
+    scale_max = max3(scale.x, scale.y, scale.z);
+    var rpM = null;//rayPick(model.boundingTree, new Vector3D(), rotationMatrix.transform(transDelta.x, transDelta.y, transDelta.z, 0),
+                      //0, 10000, new Matrix4x4(), new Matrix4x4(), scale_max, true, null, true);
     if (rpM)
     {
-        model_distance = rpM.distance;
+        rpM.distance *= scale_max;
+        // project distance onto negative-y axis
+        var angle = toDegrees(Math.acos(dotProduct(transDelta, new Vector3D(0, -1, 0))));
+        var cross = crossProduct(transDelta, new Vector3D(0, -1, 0));
+        var matrix = new Matrix4x4();
+        matrix.loadRotation(cross.x, cross.y, cross.z, angle);
+        var transDelta2 = new Vector3D(transDelta.x, transDelta.y, transDelta.z);
+        transDelta2.normalize();
+        transDelta2.multiplyScalar(rpM.distance);
+        transDelta2 = matrix.transform(transDelta2.x, transDelta2.y, transDelta2.z, 0);
+        var delta = transDelta2.y < 0 ? -transDelta2.y : 0;
+        
+        model_distance = rpM.distance + delta;
     }
     else // !rpM
     {
