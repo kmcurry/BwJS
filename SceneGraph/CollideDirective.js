@@ -221,6 +221,9 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         return { colliding: false, distance: FLT_MAX }
     }
     
+    // get model center
+    var center = model.center.getVector3D();
+    
     // get model current position
     var position = model.position.getVector3D();
     
@@ -241,19 +244,43 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         return { colliding: false, distance: FLT_MAX }
     }
 
-    // get scaled half bbox of model
-    scale = model.scale.getVector3D();
-    var bbox_max = model.bbox.max.getVector3D();
-    var bbox_min = model.bbox.min.getVector3D();
-    var halfBBox = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    // perform ray pick from model current position to farthest model edge along y direction and retrieve distance model_distance
     
-    // find collision distance (rpG - halfBBox)
-    var collisionDistance = rpG.distance - halfBBox;
+    // account for model's object-inspected rotation
+    var rotationMatrix = new Matrix4x4();
+    var inspectionGroup = getInspectionGroup(model);
+    if (inspectionGroup)
+    {
+        var quaternionRotate = inspectionGroup.getChild(2);
+        rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+    }
+    
+    var model_distance = 0;
+    center = model.transformCompound.transform(center.x, center.y, center.z, 1);
+    scale = model.scale.getVector3D();
+    var rpM = null;//rayPick(model.boundingTree, center, rotationMatrix.transform(0, y, 0, 0),
+    //                  0, 10000, model.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), true, null, true);
+    if (rpM)
+    {
+        model_distance = rpM.distance;
+    }
+    else // !rpM
+    {
+        // shouldn't occur for a convex object;
+        // use scaled half bbox of model as approximation
+        var bbox_max = model.bbox.max.getVector3D();
+        var bbox_min = model.bbox.min.getVector3D();
+        model_distance = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    }
+    
+    // find collision distance (rpG - model_distance)
+    var collisionDistance = rpG.distance - model_distance;
     //console.log(collisionDistance);
     
     // if collision distance < distance, return colliding with collision distance
     if (collisionDistance < distance)
     {
+        if (collisionDistance < 0) collisionDistance = 0; // don't allow negative values
         return { colliding: true, distance: collisionDistance }
     }
     

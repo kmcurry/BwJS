@@ -7962,7 +7962,8 @@ function RayIntersectParams(rayOrigin,
                             viewMatrix,
                             scale,
                             doubleSided,
-                            clipPlanes)
+                            clipPlanes,
+                            farthest)
 {
     this.rayOrigin = rayOrigin || new Vector3D();
     this.rayDir = rayDir || new Vector3D();
@@ -7974,8 +7975,14 @@ function RayIntersectParams(rayOrigin,
     this.scale = scale || 0;
     this.doubleSided = doubleSided || false;
     this.clipPlanes = clipPlanes || new Array();
+    this.farthest = farthest || false;
     this.intersects = false;
     this.intersectRecord = new RayIntersectRecord();
+    
+    if (farthest)
+    {
+        this.intersectRecord.distance = 0;
+    }
 }
 
 function Triangle(x0, y0, z0, x1, y1, z1, x2, y2, z2)
@@ -8594,10 +8601,17 @@ SphereTree.prototype.rayIntersectsTriangleList = function(triIndices, params)
                 (params.doubleSided ? false : true));
         if (result.result)
         {
-            if (result.t >= params.nearDistance &&
-                    result.t <= params.farDistance &&
-                    result.t < params.intersectRecord.distance)
+            if (result.t >= params.nearDistance && result.t <= params.farDistance)
             {
+                if (!params.farthest)
+                {
+                    if (result.t >= params.intersectRecord.distance) continue;
+                }
+                else // params.farthest
+                {
+                    if (result.t <= params.intersectRecord.distance) continue;
+                }
+                
                 var pointModel = new Vector3D(tri.v0.x * (1 - result.u - result.v) + tri.v1.x * result.u + tri.v2.x * result.v,
                         tri.v0.y * (1 - result.u - result.v) + tri.v1.y * result.u + tri.v2.y * result.v,
                         tri.v0.z * (1 - result.u - result.v) + tri.v1.z * result.u + tri.v2.z * result.v);
@@ -8754,17 +8768,18 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
 }
 
 function rayPick(tree,
-        rayOrigin,
-        rayDir,
-        nearDistance,
-        farDistance,
-        worldMatrix,
-        viewMatrix,
-        scale,
-        doubleSided,
-        clipPlanes)
+                 rayOrigin,
+                 rayDir,
+                 nearDistance,
+                 farDistance,
+                 worldMatrix,
+                 viewMatrix,
+                 scale,
+                 doubleSided,
+                 clipPlanes,
+                 farthest)
 {
-    var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes);
+    var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes, farthest);
     tree.rayIntersectsTree(params);
     if (params.intersects == true)
     {
@@ -24995,6 +25010,9 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         return { colliding: false, distance: FLT_MAX }
     }
     
+    // get model center
+    var center = model.center.getVector3D();
+    
     // get model current position
     var position = model.position.getVector3D();
     
@@ -25015,19 +25033,43 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         return { colliding: false, distance: FLT_MAX }
     }
 
-    // get scaled half bbox of model
-    scale = model.scale.getVector3D();
-    var bbox_max = model.bbox.max.getVector3D();
-    var bbox_min = model.bbox.min.getVector3D();
-    var halfBBox = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    // perform ray pick from model current position to farthest model edge along y direction and retrieve distance model_distance
     
-    // find collision distance (rpG - halfBBox)
-    var collisionDistance = rpG.distance - halfBBox;
+    // account for model's object-inspected rotation
+    var rotationMatrix = new Matrix4x4();
+    var inspectionGroup = getInspectionGroup(model);
+    if (inspectionGroup)
+    {
+        var quaternionRotate = inspectionGroup.getChild(2);
+        rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
+    }
+    
+    var model_distance = 0;
+    center = model.transformCompound.transform(center.x, center.y, center.z, 1);
+    scale = model.scale.getVector3D();
+    var rpM = null;//rayPick(model.boundingTree, center, rotationMatrix.transform(0, y, 0, 0),
+    //                  0, 10000, model.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), true, null, true);
+    if (rpM)
+    {
+        model_distance = rpM.distance;
+    }
+    else // !rpM
+    {
+        // shouldn't occur for a convex object;
+        // use scaled half bbox of model as approximation
+        var bbox_max = model.bbox.max.getVector3D();
+        var bbox_min = model.bbox.min.getVector3D();
+        model_distance = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    }
+    
+    // find collision distance (rpG - model_distance)
+    var collisionDistance = rpG.distance - model_distance;
     //console.log(collisionDistance);
     
     // if collision distance < distance, return colliding with collision distance
     if (collisionDistance < distance)
     {
+        if (collisionDistance < 0) collisionDistance = 0; // don't allow negative values
         return { colliding: true, distance: collisionDistance }
     }
     
