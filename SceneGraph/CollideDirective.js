@@ -191,7 +191,7 @@ CollideDirective.prototype.detectCollision = function(model)
                 //model.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
                 //model.getAttribute("quaternion").setValueDirect(model.lastQuaternion);
                 //model.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
-                getInspectionGroupQuaternion(model).setValueDirect(model.lastQuaternion);
+                //getInspectionGroupQuaternion(model).setValueDirect(model.lastQuaternion);
             }
 
             this.lastColliding = true;
@@ -212,6 +212,55 @@ CollideDirective.prototype.detectCollision = function(model)
     return this.lastColliding;
 }
 
+CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
+{   
+    // get ground model
+    var ground = this.registry.find("Ground");
+    if (!ground) 
+    {
+        return { colliding: false, distance: FLT_MAX }
+    }
+    
+    // get model current position
+    var position = model.position.getVector3D();
+    
+    // get model next position
+    var nextPosition = new Vector3D(position.x + transDelta.x, position.y + transDelta.y, position.z + transDelta.z);
+    
+    // get distance between current and next position
+    var distance = distanceBetween(position, nextPosition);
+    
+    var y = transDelta.y < 0 ? -1 : 1;
+    
+    // perform ray pick from model current position to ground along y direction and retrieve distance rpG
+    var scale = ground.scale.getVector3D();
+    var rpG = rayPick(ground.boundingTree, position, new Vector3D(0, y, 0),
+                      0, 10000, ground.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), false, null);
+    if (!rpG)
+    {
+        return { colliding: false, distance: FLT_MAX }
+    }
+
+    // get scaled half bbox of model
+    scale = model.scale.getVector3D();
+    var bbox_max = model.bbox.max.getVector3D();
+    var bbox_min = model.bbox.min.getVector3D();
+    var halfBBox = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    
+    // find collision distance (rpG - halfBBox)
+    var collisionDistance = rpG.distance - halfBBox;
+    //console.log(collisionDistance);
+    
+    // if collision distance < distance, return colliding with collision distance
+    if (collisionDistance < distance)
+    {
+        return { colliding: true, distance: collisionDistance }
+    }
+    
+    // collision distance > distance, return false
+    return { colliding: false, distance: FLT_MAX }
+}
+    
 CollideDirective.prototype.detectObstructions = function(collideRecs)
 {
     var i, j;

@@ -203,42 +203,20 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     transDelta.subtractVector(clickPtCamSpace);
     transDelta.addVector(zTransWorldSpace);
 
-    // add scaled direction vectors to current node position
+    // check for potential collision with ground, and adjust transDelta if collision would occur otherwise
+    if (!this.cd) this.cd = this.registry.find("CollideDirective");
+    var colliding = this.cd.detectGroundCollision(selected, transDelta, camXform);
+    if (colliding.colliding)
+    {
+        transDelta.normalize();
+        transDelta.multiplyScalar(colliding.distance);
+    }
+    
+    // add transDelta to current node position
     var attrSetParams = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
     
-    var continuous = false;
-    if (!this.cd) this.cd = this.registry.find("CollideDirective");  
-    if (continuous)
-    {
-        // perform continuous CD
-        var position = selected.position.getValueDirect(); 
-        var position = new Vector3D(position.x, position.y, position.z);
-        var delta = new Vector3D(transDelta.x, transDelta.y, transDelta.z);
-        var newPosition = new Vector3D(position.x + transDelta.x, position.y + transDelta.y, position.z + transDelta.z);
-        var distance = distanceBetween(position, newPosition);
-        console.log(distance);
-        // TODO: move to selection occurred
-        var bbox_min = selected.bbox.min.getValueDirect();
-        var bbox_max = selected.bbox.max.getValueDirect();
-        var min_dim = min3(bbox_max.x - bbox_min.x, bbox_max.y - bbox_min.y, bbox_max.z - bbox_min.z);
-        var iterations = Math.ceil(distance / min_dim) + 5;
-        delta.multiplyScalar(1 / iterations);
-        for (var i = 0; i < iterations; i++)
-        {
-            position.x += delta.x;
-            position.y += delta.y;
-            position.z += delta.z;
-            selected.position.setValueDirect(position.x, position.y, position.z);
-
-            if (this.cd.detectCollision(selected)) return;
-        }
-    }
-    else
-    {
-        selected.position.setValue(attrSetVals, attrSetParams);
-        this.cd.detectCollision(selected);
-    } 
+    selected.position.setValue(attrSetVals, attrSetParams);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
@@ -259,8 +237,6 @@ ObjectInspector.prototype.translationDeltaModified = function()
         }
 
         this.applyCameraRelativeTranslation(pme);
-        
-        //this.cd.detectCollision(pme);
     }
 
     var zeroes = [0, 0, 0];

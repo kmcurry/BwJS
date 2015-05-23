@@ -388,6 +388,11 @@ Vector3DAttr.prototype.clone = function()
     return attr;
 }
 
+Vector3DAttr.prototype.getVector3D = function()
+{
+    return new Vector3D(this.values[0], this.values[1], this.values[2]);
+}
+    
 Vector3DAttr.prototype.getValueDirect = function()
 {
     //var values = [];

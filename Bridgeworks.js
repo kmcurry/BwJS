@@ -6654,6 +6654,11 @@ Vector3DAttr.prototype.clone = function()
     return attr;
 }
 
+Vector3DAttr.prototype.getVector3D = function()
+{
+    return new Vector3D(this.values[0], this.values[1], this.values[2]);
+}
+    
 Vector3DAttr.prototype.getValueDirect = function()
 {
     //var values = [];
@@ -24939,9 +24944,7 @@ CollideDirective.prototype.detectCollision = function(model)
             //if (colliding.distance > 0.01) // check already performed by PhysicsSimulator::isColliding
             {
                 if (this.lastColliding)
-                {
-                    //this.physicsSimulator.stepSimulation(1);
-                    
+                {                   
                     var trans = new Ammo.btTransform();
                     this.physicsSimulator.getPhysicsBody(model).getMotionState().getWorldTransform(trans);
                     var origin = trans.getOrigin();
@@ -24962,7 +24965,7 @@ CollideDirective.prototype.detectCollision = function(model)
                 //model.getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);    
                 //model.getAttribute("quaternion").setValueDirect(model.lastQuaternion);
                 //model.getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this.physicsSimulator);
-                getInspectionGroupQuaternion(model).setValueDirect(model.lastQuaternion);
+                //getInspectionGroupQuaternion(model).setValueDirect(model.lastQuaternion);
             }
 
             this.lastColliding = true;
@@ -24983,6 +24986,55 @@ CollideDirective.prototype.detectCollision = function(model)
     return this.lastColliding;
 }
 
+CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
+{   
+    // get ground model
+    var ground = this.registry.find("Ground");
+    if (!ground) 
+    {
+        return { colliding: false, distance: FLT_MAX }
+    }
+    
+    // get model current position
+    var position = model.position.getVector3D();
+    
+    // get model next position
+    var nextPosition = new Vector3D(position.x + transDelta.x, position.y + transDelta.y, position.z + transDelta.z);
+    
+    // get distance between current and next position
+    var distance = distanceBetween(position, nextPosition);
+    
+    var y = transDelta.y < 0 ? -1 : 1;
+    
+    // perform ray pick from model current position to ground along y direction and retrieve distance rpG
+    var scale = ground.scale.getVector3D();
+    var rpG = rayPick(ground.boundingTree, position, new Vector3D(0, y, 0),
+                      0, 10000, ground.transformCompound, new Matrix4x4(), max3(scale.x, scale.y, scale.z), false, null);
+    if (!rpG)
+    {
+        return { colliding: false, distance: FLT_MAX }
+    }
+
+    // get scaled half bbox of model
+    scale = model.scale.getVector3D();
+    var bbox_max = model.bbox.max.getVector3D();
+    var bbox_min = model.bbox.min.getVector3D();
+    var halfBBox = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    
+    // find collision distance (rpG - halfBBox)
+    var collisionDistance = rpG.distance - halfBBox;
+    //console.log(collisionDistance);
+    
+    // if collision distance < distance, return colliding with collision distance
+    if (collisionDistance < distance)
+    {
+        return { colliding: true, distance: collisionDistance }
+    }
+    
+    // collision distance > distance, return false
+    return { colliding: false, distance: FLT_MAX }
+}
+    
 CollideDirective.prototype.detectObstructions = function(collideRecs)
 {
     var i, j;
@@ -27394,8 +27446,7 @@ PhysicsSimulator.prototype.evaluate = function()
         }
     }
 
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement);
+    this.stepSimulation();
     
     var trans = new
     Ammo.btTransform();
@@ -27466,12 +27517,13 @@ PhysicsSimulator.prototype.update = function()
     
     while (this.updateBodyPositions.length > 0)
     {
-        this.updatePhysicsBodyPosition(this.updateBodyPositions[0]);
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[0], true);
     }
 }
 
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
+    timeIncrement = timeIncrement || this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
     maxSubSteps = maxSubSteps || 10;
     
     this.update();
@@ -27480,10 +27532,9 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 
 PhysicsSimulator.prototype.detectCollisions = function()
 {
-    //this.update();
-    this.evaluate();
+    this.update();
+    this.stepSimulation(0.000001, 1);
     //this.world.performDiscreteCollisionDetection();
-    //this.stepSimulation(1);
 }
     
 PhysicsSimulator.prototype.isColliding = function(model)
@@ -27741,11 +27792,6 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     transform.setIdentity();
 
     var position = model.getAttribute("position").getValueDirect();
-    // temporary fix to remove y-axis padding between static and dynamic objects
-    if (properties.mass == 0)
-    {
-        position.y -= 0.075;
-    }
     var vector = new Ammo.btVector3(position.x, position.y, position.z);
     transform.setOrigin(vector);
     Ammo.destroy(vector);
@@ -27773,8 +27819,6 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
-    
-    //body.setRestitution(properties.restitution);
     
     this.world.addRigidBody(body);
     //if (isDynamic)
@@ -28060,14 +28104,14 @@ PhysicsSimulator.prototype.getNetProperties = function(model)
              rollingFriction: rollingFriction };
 }
 
-PhysicsSimulator.prototype.updatePhysicsShape = function(model, physicsShape)
+PhysicsSimulator.prototype.updatePhysicsShape = function(model, shape)
 {
     // locate array position of model
     var n = this.getPhysicsBodyIndex(model);
     if (n == -1)
         return;
 
-    var shape = physicsShape || this.getCompoundShape(model);
+    shape = shape || this.getCompoundShape(model);
 
     var properties = this.getNetProperties(model);
 
@@ -28088,7 +28132,7 @@ PhysicsSimulator.prototype.updatePhysicsShape = function(model, physicsShape)
     Ammo.destroy(localInertia);
     var body = new Ammo.btRigidBody(rbInfo);
     Ammo.destroy(rbInfo);
-
+    
     // remove previous before adding
     this.world.removeRigidBody(this.physicsBodies[n]);
     Ammo.destroy(this.physicsBodies[n]);
@@ -28290,7 +28334,7 @@ function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 {
-    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
     if (index >= 0)
@@ -28304,7 +28348,7 @@ function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 {
-    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
     if (index >= 0)
@@ -28318,7 +28362,7 @@ function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelQuaternionModifiedCB(attribute, container)
 {
-    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()));
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
     if (index >= 0)
@@ -32714,42 +32758,20 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     transDelta.subtractVector(clickPtCamSpace);
     transDelta.addVector(zTransWorldSpace);
 
-    // add scaled direction vectors to current node position
+    // check for potential collision with ground, and adjust transDelta if collision would occur otherwise
+    if (!this.cd) this.cd = this.registry.find("CollideDirective");
+    var colliding = this.cd.detectGroundCollision(selected, transDelta, camXform);
+    if (colliding.colliding)
+    {
+        transDelta.normalize();
+        transDelta.multiplyScalar(colliding.distance);
+    }
+    
+    // add transDelta to current node position
     var attrSetParams = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
     
-    var continuous = true;
-    if (!this.cd) this.cd = this.registry.find("CollideDirective");  
-    if (continuous)
-    {
-        // perform continuous CD
-        var position = selected.position.getValueDirect(); 
-        var position = new Vector3D(position.x, position.y, position.z);
-        var delta = new Vector3D(transDelta.x, transDelta.y, transDelta.z);
-        var newPosition = new Vector3D(position.x + transDelta.x, position.y + transDelta.y, position.z + transDelta.z);
-        var distance = distanceBetween(position, newPosition);
-        console.log(distance);
-        // TODO: move to selection occurred
-        var bbox_min = selected.bbox.min.getValueDirect();
-        var bbox_max = selected.bbox.max.getValueDirect();
-        var min_dim = min3(bbox_max.x - bbox_min.x, bbox_max.y - bbox_min.y, bbox_max.z - bbox_min.z);
-        var iterations = Math.ceil(distance / min_dim) + 5;
-        delta.multiplyScalar(1 / iterations);
-        for (var i = 0; i < iterations; i++)
-        {
-            position.x += delta.x;
-            position.y += delta.y;
-            position.z += delta.z;
-            selected.position.setValueDirect(position.x, position.y, position.z);
-
-            if (this.cd.detectCollision(selected)) return;
-        }
-    }
-    else
-    {
-        selected.position.setValue(attrSetVals, attrSetParams);
-        this.cd.detectCollision(selected);
-    } 
+    selected.position.setValue(attrSetVals, attrSetParams);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
@@ -32770,8 +32792,6 @@ ObjectInspector.prototype.translationDeltaModified = function()
         }
 
         this.applyCameraRelativeTranslation(pme);
-        
-        //this.cd.detectCollision(pme);
     }
 
     var zeroes = [0, 0, 0];

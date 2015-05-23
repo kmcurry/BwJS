@@ -34,7 +34,7 @@
                         <rotation p="0" h="0" r="0"/>
                         <MediaTexture name="ProjectionImage1" textureType="0" opacity="1"/>
                     </PerspectiveProjector>
-                    <Model name="grid" url="/objects/GridG.lwo" detectCollision="true">
+                    <Model name="Ground" url="/objects/GridG.lwo" detectCollision="true">
                         <position x="0" y="0" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="1" y="1" z="1"/>
@@ -44,11 +44,11 @@
                             <friction>3.2</friction>
                         </physicalProperties>  
                     </Model>
-                    <Wall name="CenterBox" indexedGeometry="false" detectCollision="true" physicsEnabled="false">
+                    <Wedge name="CenterBox" indexedGeometry="false" detectCollision="true" physicsEnabled="true">
                         <position x="0" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
-                    </Wall>
+                    </Wedge>
                     <!--<Model name="SelectPoint" url="objects/Sphere.lwo" moveable="false" opacity="0" selectable="false" physicsEnabled="false">
                         <scale x=".1" y=".1" z=".1"/>
                         <color r="1" g="0" b="0" a="1"/>
@@ -66,11 +66,11 @@
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
                     </Box>
-                    <Box name="LeftBox" indexedGeometry="false" detectCollision="true">
+                    <!--<Box name="LeftBox" indexedGeometry="false" detectCollision="true">
                         <position x="-1" y="0.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
-                    </Box>
+                    </Box>-->
                     <!--<Model name="UV_BoxG4" indexedGeometry="false" url="/objects/UV_BoxG.lwo" detectCollision="true">
                         <position x="0" y="3.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
@@ -183,7 +183,7 @@
     <Set target="ObjectInspector" evaluate="true"/>
     <!--<PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
-            <body>grid</body>
+            <body>Ground</body>
             <body>CenterBox</body>
             <body>CenterBox2</body>
             <body>RightBox</body>
