@@ -238,7 +238,7 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     // perform ray pick from model current position to ground along direction and retrieve distance rpG
     var scale = ground.scale.getVector3D();
     var scale_max = max3(scale.x, scale.y, scale.z);
-    var rpG = rayPick(ground.boundingTree, position, new Vector3D(0, y, 0),
+    var rpG = rayPick(ground.boundingTree, new Vector3D(nextPosition.x, position.y, nextPosition.z), new Vector3D(0, y, 0),
                       0, 10000, ground.transformCompound, new Matrix4x4(), scale_max, false, null);
     if (!rpG)
     {
