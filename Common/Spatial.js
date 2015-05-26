@@ -18,7 +18,8 @@ function RayIntersectParams(rayOrigin,
                             viewMatrix,
                             scale,
                             doubleSided,
-                            clipPlanes)
+                            clipPlanes,
+                            farthest)
 {
     this.rayOrigin = rayOrigin || new Vector3D();
     this.rayDir = rayDir || new Vector3D();
@@ -30,8 +31,14 @@ function RayIntersectParams(rayOrigin,
     this.scale = scale || 0;
     this.doubleSided = doubleSided || false;
     this.clipPlanes = clipPlanes || new Array();
+    this.farthest = farthest || false;
     this.intersects = false;
     this.intersectRecord = new RayIntersectRecord();
+    
+    if (farthest)
+    {
+        this.intersectRecord.distance = 0;
+    }
 }
 
 function Triangle(x0, y0, z0, x1, y1, z1, x2, y2, z2)
@@ -650,10 +657,17 @@ SphereTree.prototype.rayIntersectsTriangleList = function(triIndices, params)
                 (params.doubleSided ? false : true));
         if (result.result)
         {
-            if (result.t >= params.nearDistance &&
-                    result.t <= params.farDistance &&
-                    result.t < params.intersectRecord.distance)
+            if (result.t >= params.nearDistance && result.t <= params.farDistance)
             {
+                if (!params.farthest)
+                {
+                    if (result.t >= params.intersectRecord.distance) continue;
+                }
+                else // params.farthest
+                {
+                    if (result.t <= params.intersectRecord.distance) continue;
+                }
+                
                 var pointModel = new Vector3D(tri.v0.x * (1 - result.u - result.v) + tri.v1.x * result.u + tri.v2.x * result.v,
                         tri.v0.y * (1 - result.u - result.v) + tri.v1.y * result.u + tri.v2.y * result.v,
                         tri.v0.z * (1 - result.u - result.v) + tri.v1.z * result.u + tri.v2.z * result.v);
@@ -810,17 +824,18 @@ Octree.prototype.buildTreeLevels = function(levels, min, max, root, triIndices)
 }
 
 function rayPick(tree,
-        rayOrigin,
-        rayDir,
-        nearDistance,
-        farDistance,
-        worldMatrix,
-        viewMatrix,
-        scale,
-        doubleSided,
-        clipPlanes)
+                 rayOrigin,
+                 rayDir,
+                 nearDistance,
+                 farDistance,
+                 worldMatrix,
+                 viewMatrix,
+                 scale,
+                 doubleSided,
+                 clipPlanes,
+                 farthest)
 {
-    var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes);
+    var params = new RayIntersectParams(rayOrigin, rayDir, nearDistance, farDistance, worldMatrix, viewMatrix, scale, doubleSided, clipPlanes, farthest);
     tree.rayIntersectsTree(params);
     if (params.intersects == true)
     {

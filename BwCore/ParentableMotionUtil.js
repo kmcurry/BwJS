@@ -188,6 +188,22 @@ function zeroInspectionGroup(node)
     return;
 }
 
+function getInspectionGroupQuaternion(node)
+{
+    var pRotGroup = getInspectionGroup(node);
+    if (pRotGroup)
+    {
+        var pQuat = pRotGroup.getChild(2);
+        if (pQuat)
+        {
+            var quatAttr = pQuat.rotationQuat;
+            return quatAttr;
+        }
+    }
+    
+    return null;
+}
+
 function clearObjectPositionMap()
 {
     g_objPosMap = {};

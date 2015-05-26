@@ -18,7 +18,7 @@ function gl_MaterialParameters()
     var ambient;
     var diffuse;
     var specular;
-    var emission;
+    var emissive;
     var shininess; 
 }
 
@@ -50,6 +50,8 @@ function webglRC(canvas, background)
     _gl.viewport(0, 0, canvas.width, canvas.height);
     _gl.enable(_gl.CULL_FACE);
     _gl.cullFace(_gl.BACK);
+    _gl.enable(_gl.BLEND);
+    _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
    
     // extensions
     var OES_standard_derivatives_extension = _gl.getExtension('OES_standard_derivatives');
@@ -608,7 +610,7 @@ function webglRC(canvas, background)
         if (desc.validMembersMask & MATERIALDESC_EMISSIVE_BIT)
         {
             // TODO
-            //_gl.uniform4fv(_program.frontMaterial.emission, new Float32Array(desc.emissive.v()));
+            _gl.uniform4fv(_program.frontMaterial.emissive, new Float32Array(desc.emissive.v()));
             
             this.frontMaterial.emissive = desc.emissive;
         }

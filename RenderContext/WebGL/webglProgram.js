@@ -99,7 +99,7 @@ function webglProgram(rc, gl, source_vs, source_fs)
     this.frontMaterial.ambient = gl.getUniformLocation(program, "uFrontMaterial.ambient");
     this.frontMaterial.diffuse = gl.getUniformLocation(program, "uFrontMaterial.diffuse");
     this.frontMaterial.specular = gl.getUniformLocation(program, "uFrontMaterial.specular");
-    this.frontMaterial.emission = gl.getUniformLocation(program, "uFrontMaterial.emission");
+    this.frontMaterial.emissive = gl.getUniformLocation(program, "uFrontMaterial.emissive");
     this.frontMaterial.shininess = gl.getUniformLocation(program, "uFrontMaterial.shininess");
 
     // textures

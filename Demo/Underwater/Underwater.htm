@@ -157,6 +157,7 @@
         <script type="text/javascript" src="../../Device/MouseHandler.js"></script>
         <script type="text/javascript" src="../../Device/KeyboardHandler.js"></script>
         <script type="text/javascript" src="../../BwCore/Command.js"></script>
+        <script type="text/javascript" src="../../BwCore/AppendNode.js"></script>
         <script type="text/javascript" src="../../BwCore/Set.js"></script>
         <script type="text/javascript" src="../../BwCore/ConnectAttributes.js"></script>
         <script type="text/javascript" src="../../BwCore/AutoInterpolate.js"></script>
@@ -222,41 +223,19 @@
             var x = 1.5;
             var y = 1.5;
             var z = 1.5;
-            function doSomething()
+            function serialize()
             {
                 //var xml = "\<Set target='UV_BoxG''>";
                 //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "<Set target='RightBox'>";
-                xml += "<physicalProperties>";
-                xml += "<mass>0</mass>";
-                xml += "</physicalProperties>";
-                xml += "</Set>";
+                var xml = "<Serialize target='Root'/>";
                 console.debug(xml);
                 bridgeworks.updateScene(xml);
-                //x += 0.5;
-                //y += 0.5;
-                //z += 0.5;
+                x += 0.5;
+                y += 0.5;
+                z += 0.5;
                 
-                //var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
-                //s[0].color.setValueDirect(1, 0, 0, 1);
-            }
-            function doSomethingElse()
-            {
-                //var xml = "\<Set target='UV_BoxG''>";
-                //xml += "<scale x='" + x + "' y='" + y + "' z='" + z + "'/></Set>";
-                var xml = "<Set target='RightBox'>";
-                xml += "<physicalProperties>";
-                xml += "<mass>10</mass>";
-                xml += "</physicalProperties>";
-                xml += "</Set>";
-                console.debug(xml);
-                bridgeworks.updateScene(xml);
-                //x += 0.5;
-                //y += 0.5;
-                //z += 0.5;
-                
-                //var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
-                //s[0].color.setValueDirect(1, 0, 0, 1);
+                var s = bridgeworks.registry.getByType(eAttrType.SnapModel);
+                s[0].color.setValueDirect(1, 0, 0, 1);
             }
         </script>
 
@@ -274,8 +253,7 @@
             <button onclick="bridgeworks.renderController.stop();">Stop</button>
             <!--<button onclick="bridgeworks.renderController.fastForward();">FF</button>-->
             Object: <input id="objectname"/>
-            <button onclick="doSomething();">Do Something</button>
-            <button onclick="doSomethingElse();">Do Something Else</button>
+            <button onclick="serialize();">Serialize</button>
         </div>
     </center>
 
@@ -286,7 +264,7 @@
     <script type="text/javascript">
         document.onreadystatechange = function () {
             if (document.readyState == "complete") {
-                bridgeworks = init("SnapTo.xml", document.getElementById("BwContainer"));
+                bridgeworks = init("Underwater.xml", document.getElementById("BwContainer"));
             }
         }
     </script>

@@ -860,12 +860,9 @@ function finalizeModel(model, factory)
         contentHandler.parseFileStream(pathInfo[0]);
     }
     
-    // if physicsEnabled, add this to Bridgeworks' physics simulator
-    if (model.physicsEnabled.getValueDirect())
-    {
-        var bworks = factory.registry.find("Bridgeworks");
-        bworks.physicsSimulator.bodies.push_back(model.name);
-    }
+    // add to Bridgeworks' physics simulator
+    var bworks = factory.registry.find("Bridgeworks");
+    bworks.physicsSimulator.bodies.push_back(model.name);
 }
 
 function finalizeDirective(directive, factory)

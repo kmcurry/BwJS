@@ -866,8 +866,8 @@ LWSceneBuilder.prototype.allocateLight = function(lightDesc)
     
     // light color
     var red = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
-    var green = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
-    var blue = lightDesc.colorR * lightDesc.intensity * this.globalLightDesc.intensity;
+    var green = lightDesc.colorG * lightDesc.intensity * this.globalLightDesc.intensity;
+    var blue = lightDesc.colorB * lightDesc.intensity * this.globalLightDesc.intensity;
     var alpha = 1;
     
     // ambient color

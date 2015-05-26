@@ -16,6 +16,7 @@ function ObjectInspector()
     this.rotationNow = new Vector3DAttr(0, 0, 0);
     this.selectionOccurred = new BooleanAttr(false);
     this.selectionCleared = new BooleanAttr(false);
+    this.cd = null;
     
     this.translationDelta.addModifiedCB(ObjectInspector_TranslationDeltaModifiedCB, this);
     this.rotationDelta.addModifiedCB(ObjectInspector_RotationDeltaModifiedCB, this);
@@ -98,14 +99,14 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     {
         return;
     }
-
-    // get sector view matrix
-    var camSectorXform = cam.getSectorTransform();
-    camSectorXform.invert(); // put in view-space
+    
+    // get view matrix
+    var camXform = cam.getTransform();
+    camXform.invert(); // put in view-space
 
     // get node, camera world positions
-    var nodePos = selected.sectorWorldCenter.getValueDirect();
-    var camPos  = cam.sectorWorldPosition.getValueDirect();
+    var nodePos = selected.worldCenter.getValueDirect();
+    var camPos  = cam.worldPosition.getValueDirect();
 
     // calculate forward vector as vector from camera world position to node world position
     var fwd = new Vector3D(nodePos.x - camPos.x, 
@@ -187,29 +188,38 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     destCamSpace.addVector(yTransCamSpace);
 
     // convert clickPtCamSpace and destCamSpace to world space
-    camSectorXform.invert();
+    camXform.invert();
     // if parented, multipy view with parent's inverse
     if (mParent)
     {
-        camSectorXform = camSectorXform.multiply(mParent);
+        camXform = camXform.multiply(mParent);
         zTransWorldSpace = mParent.transform(zTransWorldSpace.x, zTransWorldSpace.y, zTransWorldSpace.z, 0);
     }
-    clickPtCamSpace = camSectorXform.transform(clickPtCamSpace.x, clickPtCamSpace.y, clickPtCamSpace.z, 1);
-    destCamSpace = camSectorXform.transform(destCamSpace.x, destCamSpace.y, destCamSpace.z, 1);
+    clickPtCamSpace = camXform.transform(clickPtCamSpace.x, clickPtCamSpace.y, clickPtCamSpace.z, 1);
+    destCamSpace = camXform.transform(destCamSpace.x, destCamSpace.y, destCamSpace.z, 1);
     
     // calculate the translation delta as destCamSpace - clickPtCamSpace + zTransWorldSpace
     transDelta = new Vector3D(destCamSpace.x, destCamSpace.y, destCamSpace.z);
     transDelta.subtractVector(clickPtCamSpace);
     transDelta.addVector(zTransWorldSpace);
 
-    // add scaled direction vectors to current node position
+    // check for potential collision with ground, and adjust transDelta if collision would occur otherwise
+    if (!this.cd) this.cd = this.registry.find("CollideDirective");
+    var colliding = this.cd.detectGroundCollision(selected, transDelta, camXform);
+    if (colliding.colliding)
+    {
+        transDelta.normalize();
+        transDelta.multiplyScalar(colliding.distance);
+        //transDelta.y += colliding.yTrans;
+    }
+    
+    // add transDelta to current node position
     var attrSetParams = new AttributeSetParams(-1, -1, eAttrSetOp.Add, true, true);
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
-    selected.sectorPosition.setValue(attrSetVals, attrSetParams);
-
-    var sPos = selected.sectorPosition.getValueDirect();
-    //console.debug("selected.sectorPosition: " + sPos.x + ", " + 
-    //    sPos.y + ", " + sPos.z);
+    
+    selected.position.setValue(attrSetVals, attrSetParams);
+    
+    //if (colliding.colliding) this.cd.detectCollision(selected);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
@@ -233,9 +243,9 @@ ObjectInspector.prototype.translationDeltaModified = function()
     }
 
     var zeroes = [0, 0, 0];
-    var params = new AttributeSetParams(0,0,0, true, false);
+    var params = new AttributeSetParams(-1, -1, eAttrSetOp.Replace, true, false);
 
-    this.translationDelta.setValue(zeroes, params);  
+    this.translationDelta.setValue(zeroes, params);
 }
 
 ObjectInspector.prototype.rotationDeltaModified = function()
@@ -268,6 +278,9 @@ ObjectInspector.prototype.rotationDeltaModified = function()
         this.mouseNow.setValueDirect(mNow.y, mNow.x);
 
         this.evaluate();
+                   
+        if (!this.cd) this.cd = this.registry.find("CollideDirective");
+        this.cd.detectCollision(pme);
     }
 }
 
@@ -298,6 +311,9 @@ ObjectInspector.prototype.rotationNowModified = function()
             //    rNow.y);
     
             this.evaluate();
+                           
+            if (!this.cd) this.cd = this.registry.find("CollideDirective");
+            this.cd.detectCollision(pme);
         }
     }
 }
@@ -351,6 +367,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
         pMouseNow.setValueDirect(clickPoint.x, clickPoint.y);
 
         pSelected = this.getInspectionObject(this.selectedObjects[i]);
+        pSelected.lastPosition = pSelected.position.getValueDirect();
 
         pRotGroup = getInspectionGroup(pSelected);
         //setInspectionGroupActivationState(pSelected, this.enabled.getValueDirect())
@@ -366,6 +383,7 @@ ObjectInspector.prototype.runSelectionOccurred = function()
             pQuat.enabled.setValue(values, params);
 
             pRotQuatAttr = pQuat.rotationQuat;
+            pSelected.lastQuaternion = pRotQuatAttr.getValueDirect();
 
             pResultQuat.addTarget(pRotQuatAttr, eAttrSetOp.Replace, null, false);
 

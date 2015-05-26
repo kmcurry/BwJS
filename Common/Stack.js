@@ -1,8 +1,8 @@
-﻿function Stack(element)
+function Stack(element)
 {
     this.stack = new Array();
     this.maxLength = 0;
-    
+
     if (element)
     {
         this.stack.push(element);
@@ -11,11 +11,11 @@
 
 Stack.prototype.push = function(element)
 {
-	if (this.maxLength > 0 && this.stack.length >= this.maxLength)
-	{
-		this.pop();
-	}
-	
+    if (this.maxLength > 0 && this.stack.length >= this.maxLength)
+    {
+        this.pop();
+    }
+
     this.stack.push(element);
 }
 
@@ -37,9 +37,9 @@ Stack.prototype.top = function()
 {
     if (this.stack.length > 0)
     {
-        return this.stack[this.stack.length-1];
+        return this.stack[this.stack.length - 1];
     }
-    
+
     return null;
 }
 
@@ -49,7 +49,7 @@ Stack.prototype.getAt = function(index)
     {
         return this.stack[index];
     }
-    
+
     return null;
 }
 

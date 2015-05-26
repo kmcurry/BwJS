@@ -64,7 +64,7 @@ var default_fragment_lighting_fs = [
 "   vec4 ambient;",
 "   vec4 diffuse;",
 "   vec4 specular;",
-"   vec4 emission;",
+"   vec4 emissive;",
 "   float shininess;",
 "};",
 "uniform material uFrontMaterial;",
@@ -187,11 +187,11 @@ var default_fragment_lighting_fs = [
 "           }",
 "       }",
 "",
-"       lightingFactor  = uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
+"       lightingFactor  = uFrontMaterial.emissive;",
+"       lightingFactor += uGlobalAmbientLight * uFrontMaterial.ambient;", // global ambient contribution
 "       lightingFactor += gAmbient + gDiffuse + gSpecular;", // light contribution(s)
-"       lightingFactor.a  = uFrontMaterial.ambient.a / 3.0 + ",
-"                           uFrontMaterial.diffuse.a / 3.0 + ",
-"                           uFrontMaterial.specular.a / 3.0;",
+"       lightingFactor.a = uFrontMaterial.diffuse.a;",
+"       lightingFactor = clamp(lightingFactor, 0.0, 1.0);",
 "   }",
 "   else", // uLightingEnabled == 0
 "   {",

@@ -622,9 +622,15 @@ function PhysicalPropertiesAttr()
     this.radius = new NumberAttr(0);
     this.friction = new NumberAttr(0);
     this.restitution = new NumberAttr(0);
+    this.linearDamping = new NumberAttr(0);
+    this.angularDamping = new NumberAttr(0);
+    this.rollingFriction = new NumberAttr(0);
 
     this.registerAttribute(this.mass, "mass");
     this.registerAttribute(this.radius, "radius");
     this.registerAttribute(this.friction, "friction");
     this.registerAttribute(this.restitution, "restitution");
+    this.registerAttribute(this.linearDamping, "linearDamping");
+    this.registerAttribute(this.angularDamping, "angularDamping");
+    this.registerAttribute(this.rollingFriction, "rollingFriction");
 }

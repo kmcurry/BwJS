@@ -178,8 +178,6 @@ Material.prototype.apply = function(directive, params, visitChildren)
         return;
     }
     
-    this.graphMgr.setCurrentMaterial(this);
-    
     switch (directive)
     {
         case "render":
@@ -187,6 +185,7 @@ Material.prototype.apply = function(directive, params, visitChildren)
             params.opacity = this.lastOpacity; // set in update()
             
             this.applyMaterialDesc();
+            this.graphMgr.setCurrentMaterial(this);
         }
         break;
         

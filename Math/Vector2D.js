@@ -1,4 +1,4 @@
-﻿function Vector2D(x, y)
+function Vector2D(x, y)
 {
     this.x = x || 0;
     this.y = y || 0;

@@ -151,6 +151,7 @@ Device/DeviceHandler.js
 Device/MouseHandler.js 
 Device/KeyboardHandler.js
 BwCore/Command.js 
+BwCore/AppendNode.js
 BwCore/Set.js 
 BwCore/ConnectAttributes.js 
 BwCore/AutoInterpolate.js
