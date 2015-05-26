@@ -25024,7 +25024,7 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     
     var y = transDelta.y < 0 ? -1 : 1;
     
-    // perform ray pick from model current position to ground along y direction and retrieve distance rpG
+    // perform ray pick from model current position to ground along direction and retrieve distance rpG
     var scale = ground.scale.getVector3D();
     var scale_max = max3(scale.x, scale.y, scale.z);
     var rpG = rayPick(ground.boundingTree, position, new Vector3D(0, y, 0),
@@ -25032,7 +25032,7 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     if (!rpG)
     {
         return { colliding: false, distance: FLT_MAX }
-    }
+    }  
 
     // perform ray pick from model current position to farthest model edge along y direction and retrieve distance model_distance
     
@@ -25045,46 +25045,31 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
     }
     
-    var model_distance = 0;
-    //center = model.transformCompound.transform(center.x, center.y, center.z, 1);
+    var model_y_distance = 0;
     scale = model.scale.getVector3D();
-    scale_max = max3(scale.x, scale.y, scale.z);
-    var rpM = null;//rayPick(model.boundingTree, new Vector3D(), rotationMatrix.transform(transDelta.x, transDelta.y, transDelta.z, 0),
-                      //0, 10000, new Matrix4x4(), new Matrix4x4(), scale_max, true, null, true);
+    /*scale_max = max3(scale.x, scale.y, scale.z);
+    var rpM = rayPick(model.boundingTree, new Vector3D(), rotationMatrix.transform(0, -1, 0, 0),
+                  0, 10000, new Matrix4x4(), new Matrix4x4(), scale_max, true, null, true);
     if (rpM)
     {
-        rpM.distance *= scale_max;
-        // project distance onto negative-y axis
-        var angle = toDegrees(Math.acos(dotProduct(transDelta, new Vector3D(0, -1, 0))));
-        var cross = crossProduct(transDelta, new Vector3D(0, -1, 0));
-        var matrix = new Matrix4x4();
-        matrix.loadRotation(cross.x, cross.y, cross.z, angle);
-        var transDelta2 = new Vector3D(transDelta.x, transDelta.y, transDelta.z);
-        transDelta2.normalize();
-        transDelta2.multiplyScalar(rpM.distance);
-        transDelta2 = matrix.transform(transDelta2.x, transDelta2.y, transDelta2.z, 0);
-        var delta = transDelta2.y < 0 ? -transDelta2.y : 0;
-        
-        model_distance = rpM.distance + delta;
+        model_y_distance = rpM.distance * scale_max;
     }
-    else // !rpM
+    else // !rpM*/
     {
-        // shouldn't occur for a convex object;
-        // use scaled half bbox of model as approximation
         var bbox_max = model.bbox.max.getVector3D();
         var bbox_min = model.bbox.min.getVector3D();
-        model_distance = scale.y * (bbox_max.y - bbox_min.y) / 2;
-    }
+        model_y_distance = scale.y * (bbox_max.y - bbox_min.y) / 2;
+    }    
     
     // find collision distance (rpG - model_distance)
-    var collisionDistance = rpG.distance - model_distance;
+    var collisionDistance = rpG.distance - model_y_distance;
     //console.log(collisionDistance);
     
     // if collision distance < distance, return colliding with collision distance
     if (collisionDistance < distance)
     {
-        if (collisionDistance < 0) collisionDistance = 0; // don't allow negative values
-        return { colliding: true, distance: collisionDistance }
+        //if (collisionDistance < 0) collisionDistance = 0; // don't allow negative values
+        return { colliding: true, distance: collisionDistance, yTrans: model_y_distance }
     }
     
     // collision distance > distance, return false
@@ -32821,6 +32806,7 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     {
         transDelta.normalize();
         transDelta.multiplyScalar(colliding.distance);
+        //transDelta.y += colliding.yTrans;
     }
     
     // add transDelta to current node position
@@ -32828,6 +32814,8 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
     
     selected.position.setValue(attrSetVals, attrSetParams);
+    
+    //if (colliding.colliding) this.cd.detectCollision(selected);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()

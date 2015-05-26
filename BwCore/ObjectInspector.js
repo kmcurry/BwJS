@@ -210,6 +210,7 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     {
         transDelta.normalize();
         transDelta.multiplyScalar(colliding.distance);
+        //transDelta.y += colliding.yTrans;
     }
     
     // add transDelta to current node position
@@ -217,6 +218,8 @@ ObjectInspector.prototype.applyCameraRelativeTranslation = function(selected)
     var attrSetVals = [transDelta.x, transDelta.y, transDelta.z];
     
     selected.position.setValue(attrSetVals, attrSetParams);
+    
+    //if (colliding.colliding) this.cd.detectCollision(selected);
 }
 
 ObjectInspector.prototype.translationDeltaModified = function()
