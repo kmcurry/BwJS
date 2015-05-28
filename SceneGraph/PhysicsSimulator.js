@@ -168,7 +168,7 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 PhysicsSimulator.prototype.detectCollisions = function()
 {
     this.update();
-    this.stepSimulation(0.000001, 1);
+    this.stepSimulation(0.0001, 1);
     //this.world.performDiscreteCollisionDetection();
 }
     

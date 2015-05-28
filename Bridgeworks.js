@@ -25022,28 +25022,27 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
     // get distance between current and next position
     var distance = distanceBetween(position, nextPosition);
     
-    var y = transDelta.y < 0 ? -1 : 1;
-    
     // perform ray pick from model current position to ground along direction and retrieve distance rpG
     var scale = ground.scale.getVector3D();
     var scale_max = max3(scale.x, scale.y, scale.z);
-    var rpG = rayPick(ground.boundingTree, new Vector3D(nextPosition.x, position.y, nextPosition.z), new Vector3D(0, y, 0),
+    var rpG = rayPick(ground.boundingTree, new Vector3D(position.x, position.y, position.z), transDelta,
                       0, 10000, ground.transformCompound, new Matrix4x4(), scale_max, false, null);
     if (!rpG)
     {
         return { colliding: false, distance: FLT_MAX }
-    }  
+    } 
+    var ground_y_distance = position.y - rpG.pointWorld.y;
 
     // perform ray pick from model current position to farthest model edge along y direction and retrieve distance model_distance
     
     // account for model's object-inspected rotation
-    var rotationMatrix = new Matrix4x4();
+    /*var rotationMatrix = new Matrix4x4();
     var inspectionGroup = getInspectionGroup(model);
     if (inspectionGroup)
     {
         var quaternionRotate = inspectionGroup.getChild(2);
         rotationMatrix = quaternionRotate.getAttribute("matrix").getValueDirect();
-    }
+    }*/
     
     var model_y_distance = 0;
     scale = model.scale.getVector3D();
@@ -25061,15 +25060,15 @@ CollideDirective.prototype.detectGroundCollision = function(model, transDelta)
         model_y_distance = scale.y * (bbox_max.y - bbox_min.y) / 2;
     }    
     
-    // find collision distance (rpG - model_distance)
-    var collisionDistance = rpG.distance - model_y_distance;
+    // find collision distance (ground_y_distance - model_distance)
+    var collisionDistance = ground_y_distance - model_y_distance;
     //console.log(collisionDistance);
     
     // if collision distance < distance, return colliding with collision distance
     if (collisionDistance < distance)
     {
         //if (collisionDistance < 0) collisionDistance = 0; // don't allow negative values
-        return { colliding: true, distance: collisionDistance, yTrans: model_y_distance }
+        return { colliding: true, distance: collisionDistance }
     }
     
     // collision distance > distance, return false
@@ -27574,7 +27573,7 @@ PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 PhysicsSimulator.prototype.detectCollisions = function()
 {
     this.update();
-    this.stepSimulation(0.000001, 1);
+    this.stepSimulation(0.0001, 1);
     //this.world.performDiscreteCollisionDetection();
 }
     
