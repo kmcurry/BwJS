@@ -24949,7 +24949,7 @@ CollideDirective.prototype.detectCollision = function(model)
     if (model.physicalProperties.mass.getValueDirect() == 0) return false;
     
     // check collision status
-    var colliding = this.physicsSimulator.isColliding(model);
+    var colliding = this.isColliding(model);
     // if colliding and the distance between collision points is < MIN_COLLIDE_DISTANCE, update position to physics engine's position
     if (colliding.colliding)
     {   
@@ -25159,6 +25159,13 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     }
 }
     
+CollideDirective.prototype.isColliding = function(model)
+{   
+    var colliding = this.physicsSimulator.isColliding(model);
+    
+    return colliding;
+}
+
 CollideDirective.prototype.isSelected = function(model)
 {
     var selected = model.getAttribute("selected").getValueDirect();
@@ -27442,6 +27449,8 @@ function PhysicsSimulator()
     this.registerAttribute(this.gravity, "gravity");
     this.registerAttribute(this.worldHalfExtents, "worldHalfExtents");
     this.registerAttribute(this.bodies, "bodies");
+
+    this.name.setValueDirect("PhysicsSimulator");
 
     this.initPhysics();
 }

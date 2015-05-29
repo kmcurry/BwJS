@@ -38,6 +38,8 @@ function PhysicsSimulator()
     this.registerAttribute(this.worldHalfExtents, "worldHalfExtents");
     this.registerAttribute(this.bodies, "bodies");
 
+    this.name.setValueDirect("PhysicsSimulator");
+
     this.initPhysics();
 }
 
