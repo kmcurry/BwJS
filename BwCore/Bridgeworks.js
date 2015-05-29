@@ -78,8 +78,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     enumerateAttributeTypes();
     enumerateAttributeElementTypes();
 
-    // TODO: remove the following when onLoadModified is defined
-    console.debug("TODO: " + arguments.callee.name);
     this.initRegistry();
     this.initEventListeners();
     this.viewportMgr.initLayout();
@@ -240,22 +238,38 @@ Bridgeworks.prototype.setRenderContext = function(rc)
     this.graphMgr.setRenderContext(rc);
 }
 
-Bridgeworks.prototype.updateScene = function(xml)
+Bridgeworks.prototype.updateScene = function(xml, onload)
 {
     var xmlString = new String(xml);
     var extension = xmlString.substr(xmlString.length - 3, 3);
     if (extension == "xml")
     {
-        xml = loadXMLResource(this.contentDir + "/" + xml);
-    }
+        var that = this;
+        loadXMLResource(this.contentDir + "/" + xml,
+            function(xml)
+            {
+                // disable physics while parsing
+                var evaluate = that.physicsSimulator.evaluate_.getValueDirect();
 
-    // disable physics while parsing
-    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
-    
-    this.parser.parse(xml);
-    
-    // restore physics evaluate state
-    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
+                that.parser.parse(xml);
+
+                // restore physics evaluate state
+                that.physicsSimulator.evaluate_.setValueDirect(evaluate);
+                
+                if (onload) onload(xml);                   
+            }
+        );
+    }
+    else
+    {
+        // disable physics while parsing
+        var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+
+        this.parser.parse(xml);
+
+        // restore physics evaluate state
+        this.physicsSimulator.evaluate_.setValueDirect(evaluate);
+    }
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)

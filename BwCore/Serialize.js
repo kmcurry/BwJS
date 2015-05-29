@@ -185,7 +185,7 @@ SerializeCommand.prototype.serializeScene = function()
     // root element close tag
     this.serialized += "</Session>";
     serializedScene += this.serialized;
-    console.log(this.serialized);
+    //console.log(this.serialized);
 
     return;
 }

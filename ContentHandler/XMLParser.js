@@ -24,8 +24,23 @@ XMLParser.prototype.processingInstruction = function(target, data)
     {
         case "bw":
             {
-                // TODO
-                console.debug("TODO: " + target.toString());
+                var dataString = new String(data);
+
+                // onLoad
+                var onLoad = this.parseTokenValue(dataString, "onLoad=\"", "\"");
+                if (onLoad)
+                {
+                    console.debug("Processing Instruction for: " + onLoad);
+                    switch (onLoad)
+                    {
+                        case "initialize":
+                        {
+                            var bworks = this.registry.find("Bridgeworks");
+                            bworks.onLoadModified();
+                        }
+                        break;
+                    }
+                }
             }
             break;
 
@@ -39,28 +54,39 @@ XMLParser.prototype.processingInstruction = function(target, data)
                 {
                     console.debug("Processing Instruction for: " + url);
                     var ext = getFileExtension(url);
-                    switch (ext) {
+                    switch (ext) 
+                    {
                     case "xml":
                         {
-                            var xml = loadXMLResource(this.contentDir + "/" + url);
-                            this.parse(xml);
+                            var that = this;
+                            loadXMLResource(this.contentDir + "/" + url, 
+                                function(xml) 
+                                { 
+                                    that.parse(xml); 
+                                }
+                            );
                         }
                         break;
                         // TODO: abstract this dependency away from here
                     case "lws":
                         {
-                            var pathInfo = formatPath(url);
-                            console.debug("Include instruction for path: " + pathInfo[0]);
-                            console.debug("Include content dir: " + pathInfo[1]);
-            
-                            var contentHandler = new LWSceneHandler();
-                            contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-            
-                            var contentBuilder = new LWSceneBuilder(); 
-                            contentBuilder.setRegistry(this.factory.registry);
-                            contentBuilder.visitHandler(contentHandler);
-            
-                            contentHandler.parseFileStream(pathInfo[0]); 
+                            var that = this;
+                            formatPath(url, 
+                                function(path, dir)
+                                {
+                                    console.debug("Include instruction for path: " + path);
+                                    console.debug("Include content dir: " + dir);
+
+                                    var contentHandler = new LWSceneHandler();
+                                    contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
+
+                                    var contentBuilder = new LWSceneBuilder(); 
+                                    contentBuilder.setRegistry(that.factory.registry);
+                                    contentBuilder.visitHandler(contentHandler);
+
+                                    contentHandler.parseFileStream(path); 
+                                }
+                            );
                         }
                         break;
                     }

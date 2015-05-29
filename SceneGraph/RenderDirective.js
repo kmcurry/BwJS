@@ -223,15 +223,19 @@ function RenderDirective_BackgroundColorModifiedCB(attribute, container)
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
 {
     var vp = container.viewport.getValueDirect();
-    var pathInfo = formatPath(container.backgroundImageFilename.getValueDirect().join(""));
-    
-    container.backgroundImageFilename.removeModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
-    container.backgroundImageFilename.setValueDirect(pathInfo[0]);
-    container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
-    
-    //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
-    container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
-    container.backgroundImageSet = true;
+    var url = container.backgroundImageFilename.getValueDirect().join("");
+    formatPath(url, 
+        function(path, dir)
+        {
+            container.backgroundImageFilename.removeModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
+            container.backgroundImageFilename.setValueDirect(path);
+            container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
+
+            //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+            container.backgroundTexture.imageFilename.setValueDirect(path);
+            container.backgroundImageSet = true;
+        }
+    );
 }
 
 function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)

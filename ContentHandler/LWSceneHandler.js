@@ -1,4 +1,4 @@
-﻿LWSceneHandler.prototype = new ContentHandler();
+LWSceneHandler.prototype = new ContentHandler();
 LWSceneHandler.prototype.constructor = LWSceneHandler;
 
 function LWSceneHandler()
@@ -19,7 +19,17 @@ LWSceneHandler.prototype.addTokenHandler = function(handler, data)
 LWSceneHandler.prototype.parseFileStream = function(url)
 {
     var filename = formFullPath(url, this.contentDirectory.getValueDirect().join(""));
-    var filestream = loadTextResource(filename);
+    var that = this;
+    loadTextResource(filename, 
+        function(text)
+        {
+            that.parseSceneFileStream(text);
+        }
+    );
+}
+
+LWSceneHandler.prototype.parseSceneFileStream = function(filestream)
+{
     if (filestream == null)
     {
         return -2;

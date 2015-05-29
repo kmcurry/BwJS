@@ -817,8 +817,6 @@ function newDeviceHandler(name, factory)
 
 function configureModel(model, factory)
 {
-    // TODO
-    console.debug("TODO: " + arguments.callee.name);
 }
 
 function configureDirective(directive, factory)
@@ -837,32 +835,31 @@ function configureDirective(directive, factory)
 function finalizeModel(model, factory)
 {
     // TODO
-    console.debug("TODO: remove LWO assumption");
+    //console.debug("TODO: remove LWO assumption");
 
     var url = model.getAttribute("url").getValueDirect();
-    if (url) {
-
+    if (url) 
+    {
         url = url.join("");
+        formatPath(url, 
+            function(path, dir)
+            {
+                //console.debug("path: " + path);
+                //console.debug("content dir: " + dir);
 
-        var pathInfo = formatPath(url);
-        console.debug("path: " + pathInfo[0]);
-        console.debug("content dir: " + pathInfo[1]);
+                var contentHandler = new LWObjectHandler();
+                contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
 
-        var contentHandler = new LWObjectHandler();
-        contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
+                var contentBuilder = new LWObjectBuilder();
+                contentBuilder.setRegistry(factory.registry);
+                contentBuilder.models.push(model);
+                contentBuilder.layer = model.getAttribute("layer").getValueDirect();
+                contentBuilder.visitHandler(contentHandler);
 
-        var contentBuilder = new LWObjectBuilder();
-        contentBuilder.setRegistry(factory.registry);
-        contentBuilder.models.push(model);
-        contentBuilder.layer = model.getAttribute("layer").getValueDirect();
-        contentBuilder.visitHandler(contentHandler);
-
-        contentHandler.parseFileStream(pathInfo[0]);
-    }
-    
-    // add to Bridgeworks' physics simulator
-    var bworks = factory.registry.find("Bridgeworks");
-    bworks.physicsSimulator.bodies.push_back(model.name);
+                contentHandler.parseFileStream(path);
+            }
+        );       
+    }  
 }
 
 function finalizeDirective(directive, factory)
@@ -902,29 +899,31 @@ function finalizeDeviceHandler(handler, factory)
 function finalizeEvaluator(evaluator, factory)
 {
     // TODO
-    console.debug("TODO: " + arguments.callee.name);
+    //console.debug("TODO: " + arguments.callee.name);
 
     switch (evaluator.className)
     {
         case "KeyframeInterpolator":
-
             var url = evaluator.getAttribute("url").getValueDirect();
-            if (url) {
-
+            if (url) 
+            {
                 url = url.join("");
+                formatPath(url,
+                    function(path, dir)
+                    {
+                        var contentHandler = new LWSceneHandler();
+                        contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
 
-                var pathInfo = formatPath(url);
+                        var contentBuilder = new LWSceneBuilder();
+                        contentBuilder.setRegistry(factory.registry);
+                        contentBuilder.evaluators.push(evaluator);
+                        contentBuilder.visitHandler(contentHandler);
 
-                var contentHandler = new LWSceneHandler();
-                contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-
-                var contentBuilder = new LWSceneBuilder();
-                contentBuilder.setRegistry(factory.registry);
-                contentBuilder.evaluators.push(evaluator);
-                contentBuilder.visitHandler(contentHandler);
-
-                contentHandler.parseFileStream(pathInfo[0]);
+                        contentHandler.parseFileStream(path);
+                    }
+                );
             }
+            
             AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
             break;
     }
@@ -1022,7 +1021,6 @@ function AttributeFactory_DirectiveRootModifiedCB(root, factory)
 
 function AttributeFactory_ParentableLabelModifiedCB(attribute, container)
 {
-    console.debug("TODO: " + arguments.callee.name);
 }
 
 function AttributeFactory_ParentableGeoPositionModifiedCB(attribute, container)

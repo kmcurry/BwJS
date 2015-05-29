@@ -1,49 +1,82 @@
-function loadBinaryResource(url)
+function loadBinaryResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
-    
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');
-    req.send();
-    
-    if (req.status != 200)
+    var xhr = new XMLHttpRequest();
+ 
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
-function loadXMLResource(url)
+function loadXMLResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
  
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');    
-    req.send();
-    
-    if (req.status != 200)
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
-function loadTextResource(url)
+function loadTextResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
  
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');    
-    req.send();
-    
-    if (req.status != 200)
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
 function isLower(c)
@@ -101,62 +134,63 @@ function getObjectClassName(obj) {
     DOES NOT ENSURE CONTENT EXISTS
     Treat is like our best guess
 */
-function formatPath(url)
+function formatPath(url, onload, onerror)
 {
     var result = [];
     
-    var validPath = "";
-    var validDir  = "";
+    var href = document.location.href;
+    var validPath = url;
+    var validDir  = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/";
+
+    if (!isFullPath(url))
+    {        
+        validPath = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/" + url;
+        
+        var ndx = validPath.lastIndexOf("objects");
+        if (ndx == -1) ndx = validPath.lastIndexOf("images");
+        if (ndx == -1) ndx = validPath.lastIndexOf("motions");
+        if (ndx == -1) ndx = validPath.lastIndexOf("envelopes");
+        if (ndx == -1) ndx = validPath.lastIndexOf("scenes");
+        if (ndx >=  0) ndx--;
+
+        validDir = validPath.substring(0, ndx) + "/";
+    }
     
-    try {
+    try 
+    {
         $.ajax({
-            url: url,
+            url: validPath,
             type:'HEAD',
-            async: false,
+            async: true,
             error: function()
             {
-                console.debug(url + " does not exist.");
-                // could be a relative path
-                var href = document.location.href;
-                
-                validPath = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/" + url;
-                
-                console.debug("Trying: " + validPath);
-                
-                var ndx = validPath.lastIndexOf("objects/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("motions/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
-                
-                validDir = validPath.substring(0, ndx);
-                
-                console.debug("With contentDir: " + validDir);  
+                console.debug(validPath + " does not exist.");
+                if (onerror) onerror(validPath, validDir);
             },
             success: function()
             {
-                var href = document.location.href;
-                
-                validPath = url;
-                
-                var ndx = validPath.lastIndexOf("objects/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("motions/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
-                
-                //validDir = validPath.substring(0, ndx);
-                validDir = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir;
-                
                 console.debug("File found: " + validPath);
+                if (onload) onload(validPath, validDir);
             }
         });
-        
-        result[0] = validPath;
-        result[1] = validDir;
-    } catch (e) {
-        
+    } 
+    catch (e) 
+    {       
     }
     
     return result;
+}
+
+function isWebURL(url)
+{
+    url.toLowerCase();
+    
+    if (url.indexOf("http:") >= 0 ||
+        url.indexOf("https:") >= 0 ||
+        url.indexOf("ftp:") >= 0)
+        return true;
+
+    return false;
 }
 
 /**

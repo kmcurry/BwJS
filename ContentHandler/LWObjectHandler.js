@@ -311,7 +311,17 @@ LWObjectHandler.prototype.addObjectHandler = function(handler, data)
 LWObjectHandler.prototype.parseFileStream = function(url)
 {
     var filename = formFullPath(url, this.contentDirectory.getValueDirect().join(""));
-    var filestream = loadBinaryResource(filename);
+    var that = this;
+    loadBinaryResource(filename, 
+        function(binary)
+        {
+            that.parseObjectFileStream(binary, url);
+        }
+    );
+}
+    
+LWObjectHandler.prototype.parseObjectFileStream = function(filestream, url)
+{
     if (filestream == null)
     {
         return -2;
@@ -321,9 +331,9 @@ LWObjectHandler.prototype.parseFileStream = function(url)
 
     // read file tag (must be 'FORM')
     if (parser.readUInt8() != 70 || // 'F'
-    parser.readUInt8() != 79 || // 'O'
-    parser.readUInt8() != 82 || // 'R'
-    parser.readUInt8() != 77)   // 'M'
+        parser.readUInt8() != 79 || // 'O'
+        parser.readUInt8() != 82 || // 'R'
+        parser.readUInt8() != 77)   // 'M'
     {
         return -1;
     }
@@ -333,9 +343,9 @@ LWObjectHandler.prototype.parseFileStream = function(url)
 
     // read file type (must be 'LWO2')
     if (parser.readUInt8() != 76 || // 'L'
-    parser.readUInt8() != 87 || // 'W'
-    parser.readUInt8() != 79 || // 'O'
-    parser.readUInt8() != 50)   // '2'
+        parser.readUInt8() != 87 || // 'W'
+        parser.readUInt8() != 79 || // 'O'
+        parser.readUInt8() != 50)   // '2'
     {
         return -1;
     }

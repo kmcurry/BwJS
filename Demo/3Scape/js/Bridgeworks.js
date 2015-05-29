@@ -120,6 +120,7 @@ function formatPath(url)
     var validPath = "";
     var validDir  = "";
     
+    if (
     try {
         $.ajax({
             url: url,

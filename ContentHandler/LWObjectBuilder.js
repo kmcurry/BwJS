@@ -66,6 +66,10 @@ LWObjectBuilder.prototype.allocateModel = function(data)
         // define model attributes
         this.describeModel(data, data.layers[layer-1], model);
     }
+   
+    // add to Bridgeworks' physics simulator
+    var bworks = this.registry.find("Bridgeworks");
+    bworks.physicsSimulator.bodies.push_back(model.name);
 }
 
 LWObjectBuilder.prototype.describeModel = function(data, layer, model)
