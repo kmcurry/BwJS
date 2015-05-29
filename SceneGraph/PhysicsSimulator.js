@@ -407,14 +407,17 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
     model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-    // watch for changes in enabled
+    // watch for changes in enabled/physicsEnabled
     model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
     model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
+    model.getAttribute("physicsEnabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
+    model.getAttribute("physicsEnabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
     // watch for changes in physical properties
     model.getAttribute("physicalProperties").addModifiedCB(PhysicsSimulator_ModelPhysicalPropertiesModifiedCB, this);
 
     // if model is disabled, don't create
-    if (model.getAttribute("enabled").getValueDirect() == false)
+    if (model.getAttribute("enabled").getValueDirect() == false ||
+        model.getAttribute("physicsEnabled").getValueDirect() == false)
         return;
     
     // if model is parented, don't add here; it will be added as a shape to the parent model's body
@@ -487,7 +490,6 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.bodyModels[i].getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());

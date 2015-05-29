@@ -244,6 +244,9 @@ SnapModel.prototype.snap = function(model, matrix)
     //name += "_" + model.name.getValueDirect().join("");
     //this.name.setValueDirect(name);
     
+    // add model's physical properties to this
+    this.addPhysicalProperties(model);
+    
     // add snap entry
     this.snaps[model.__nodeId__] = snapRec;
 }
@@ -347,6 +350,9 @@ SnapModel.prototype.unsnap = function(model)
     // enable (show) model
     model.enabled.setValueDirect(true);
     
+    // remove model's physical properties from this
+    this.removePhysicalProperties(model);
+    
     // clear snap entry
     this.snaps[model.__nodeId__] = undefined;
 }
@@ -423,4 +429,14 @@ SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
 {
     // don't replace snapped surface's attribute value
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
+}
+
+SnapModel.prototype.addPhysicalProperties = function(model)
+{
+    // TODO
+}
+
+SnapModel.prototype.removePhysicalProperties = function(model)
+{
+    // TODO
 }

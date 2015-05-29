@@ -22,52 +22,85 @@ Allocator.prototype.allocate = function()
 {
     return null;
 }
-function loadBinaryResource(url)
+function loadBinaryResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
-    
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');
-    req.send();
-    
-    if (req.status != 200)
+    var xhr = new XMLHttpRequest();
+ 
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
-function loadXMLResource(url)
+function loadXMLResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
  
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');    
-    req.send();
-    
-    if (req.status != 200)
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
-function loadTextResource(url)
+function loadTextResource(url, onload, onerror)
 {
-    var req = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
  
-    req.open('GET', url, false);
-    req.overrideMimeType('text/plain; charset=x-user-defined');    
-    req.send();
-    
-    if (req.status != 200)
+    xhr.open('GET', url, true);
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');    
+    xhr.onload = function(e) 
     {
-        return null;
-    }
-    
-    return req.responseText;
+        if (xhr.readyState === 4) 
+        {
+            if (xhr.status === 200) 
+            {
+                if (onload) onload(xhr.responseText);
+            } 
+            else 
+            {
+                if (onerror) onerror(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = function(e) 
+    {
+        if (onerror) onerror(xhr.statusText);
+    };
+    xhr.send(null);
 }
 
 function isLower(c)
@@ -125,62 +158,63 @@ function getObjectClassName(obj) {
     DOES NOT ENSURE CONTENT EXISTS
     Treat is like our best guess
 */
-function formatPath(url)
+function formatPath(url, onload, onerror)
 {
     var result = [];
     
-    var validPath = "";
-    var validDir  = "";
+    var href = document.location.href;
+    var validPath = url;
+    var validDir  = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/";
+
+    if (!isFullPath(url))
+    {        
+        validPath = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/" + url;
+        
+        var ndx = validPath.lastIndexOf("objects");
+        if (ndx == -1) ndx = validPath.lastIndexOf("images");
+        if (ndx == -1) ndx = validPath.lastIndexOf("motions");
+        if (ndx == -1) ndx = validPath.lastIndexOf("envelopes");
+        if (ndx == -1) ndx = validPath.lastIndexOf("scenes");
+        if (ndx >=  0) ndx--;
+
+        validDir = validPath.substring(0, ndx) + "/";
+    }
     
-    try {
+    try 
+    {
         $.ajax({
-            url: url,
+            url: validPath,
             type:'HEAD',
-            async: false,
+            async: true,
             error: function()
             {
-                console.debug(url + " does not exist.");
-                // could be a relative path
-                var href = document.location.href;
-                
-                validPath = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir + "/" + url;
-                
-                console.debug("Trying: " + validPath);
-                
-                var ndx = validPath.lastIndexOf("objects/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("motions/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
-                
-                validDir = validPath.substring(0, ndx);
-                
-                console.debug("With contentDir: " + validDir);  
+                console.debug(validPath + " does not exist.");
+                if (onerror) onerror(validPath, validDir);
             },
             success: function()
             {
-                var href = document.location.href;
-                
-                validPath = url;
-                
-                var ndx = validPath.lastIndexOf("objects/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("motions/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("envelopes/");
-                if (ndx == -1) ndx = validPath.lastIndexOf("scenes/");
-                
-                //validDir = validPath.substring(0, ndx);
-                validDir = href.substring(0, href.lastIndexOf("/")) + "/" + bridgeworks.contentDir;
-                
                 console.debug("File found: " + validPath);
+                if (onload) onload(validPath, validDir);
             }
         });
-        
-        result[0] = validPath;
-        result[1] = validDir;
-    } catch (e) {
-        
+    } 
+    catch (e) 
+    {       
     }
     
     return result;
+}
+
+function isWebURL(url)
+{
+    url.toLowerCase();
+    
+    if (url.indexOf("http:") >= 0 ||
+        url.indexOf("https:") >= 0 ||
+        url.indexOf("ftp:") >= 0)
+        return true;
+
+    return false;
 }
 
 /**
@@ -13468,8 +13502,23 @@ XMLParser.prototype.processingInstruction = function(target, data)
     {
         case "bw":
             {
-                // TODO
-                console.debug("TODO: " + target.toString());
+                var dataString = new String(data);
+
+                // onLoad
+                var onLoad = this.parseTokenValue(dataString, "onLoad=\"", "\"");
+                if (onLoad)
+                {
+                    console.debug("Processing Instruction for: " + onLoad);
+                    switch (onLoad)
+                    {
+                        case "initialize":
+                        {
+                            var bworks = this.registry.find("Bridgeworks");
+                            bworks.onLoadModified();
+                        }
+                        break;
+                    }
+                }
             }
             break;
 
@@ -13483,28 +13532,39 @@ XMLParser.prototype.processingInstruction = function(target, data)
                 {
                     console.debug("Processing Instruction for: " + url);
                     var ext = getFileExtension(url);
-                    switch (ext) {
+                    switch (ext) 
+                    {
                     case "xml":
                         {
-                            var xml = loadXMLResource(this.contentDir + "/" + url);
-                            this.parse(xml);
+                            var that = this;
+                            loadXMLResource(this.contentDir + "/" + url, 
+                                function(xml) 
+                                { 
+                                    that.parse(xml); 
+                                }
+                            );
                         }
                         break;
                         // TODO: abstract this dependency away from here
                     case "lws":
                         {
-                            var pathInfo = formatPath(url);
-                            console.debug("Include instruction for path: " + pathInfo[0]);
-                            console.debug("Include content dir: " + pathInfo[1]);
-            
-                            var contentHandler = new LWSceneHandler();
-                            contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-            
-                            var contentBuilder = new LWSceneBuilder(); 
-                            contentBuilder.setRegistry(this.factory.registry);
-                            contentBuilder.visitHandler(contentHandler);
-            
-                            contentHandler.parseFileStream(pathInfo[0]); 
+                            var that = this;
+                            formatPath(url, 
+                                function(path, dir)
+                                {
+                                    console.debug("Include instruction for path: " + path);
+                                    console.debug("Include content dir: " + dir);
+
+                                    var contentHandler = new LWSceneHandler();
+                                    contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
+
+                                    var contentBuilder = new LWSceneBuilder(); 
+                                    contentBuilder.setRegistry(that.factory.registry);
+                                    contentBuilder.visitHandler(contentHandler);
+
+                                    contentHandler.parseFileStream(path); 
+                                }
+                            );
                         }
                         break;
                     }
@@ -18355,15 +18415,19 @@ function RenderDirective_BackgroundColorModifiedCB(attribute, container)
 function RenderDirective_BackgroundImageFilenameModifiedCB(attribute, container)
 {
     var vp = container.viewport.getValueDirect();
-    var pathInfo = formatPath(container.backgroundImageFilename.getValueDirect().join(""));
-    
-    container.backgroundImageFilename.removeModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
-    container.backgroundImageFilename.setValueDirect(pathInfo[0]);
-    container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
-    
-    //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
-    container.backgroundTexture.imageFilename.setValueDirect(pathInfo[0]);
-    container.backgroundImageSet = true;
+    var url = container.backgroundImageFilename.getValueDirect().join("");
+    formatPath(url, 
+        function(path, dir)
+        {
+            container.backgroundImageFilename.removeModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
+            container.backgroundImageFilename.setValueDirect(path);
+            container.backgroundImageFilename.addModifiedCB(RenderDirective_BackgroundImageFilenameModifiedCB, container);
+
+            //container.graphMgr.renderContext.setBackgroundImage(pathInfo[0], vp.width, vp.height);
+            container.backgroundTexture.imageFilename.setValueDirect(path);
+            container.backgroundImageSet = true;
+        }
+    );
 }
 
 function RenderDirective_ShadowsEnabledModifiedCB(attribute, container)
@@ -20041,6 +20105,7 @@ function Model()
     this.collisionDetected.addModifiedCB(Model_CollisionDetectedModifiedCB, this);
     this.vertices.addModifiedCB(Model_VerticesModifiedCB, this);
     this.physicsEnabled.addModifiedCB(Model_PhysicsEnabledModifiedCB, this);
+    this.physicalProperties.mass.addModifiedCB(Model_PhysicalProperties_MassModifiedCB, this);
 
     this.registerAttribute(this.url, "url");
     this.registerAttribute(this.layer, "layer");
@@ -20109,6 +20174,9 @@ function Model()
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
     this.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
+    
+    //this.enableDisplayList.setValueDirect(true);
+    //this.autoDisplayList.setValueDirect(true);
 }
 
 Model.prototype.synchronize = function(src, syncValues)
@@ -20571,11 +20639,6 @@ Model.prototype.collisionDetectedModified = function()
 
 Model.prototype.physicsEnabledModified = function(enabled)
 {
-    if (enabled)
-    {
-        var bworks = this.registry.find("Bridgeworks");
-        bworks.physicsSimulator.updatePhysicsBody(bworks.physicsSimulator.getPhysicsBodyIndex(this));
-    }
 }
 
 function Model_SortPolygonsModifiedCB(attribute, container)
@@ -20641,6 +20704,10 @@ function Model_VerticesModifiedCB(attribute, container)
 function Model_PhysicsEnabledModifiedCB(attribute, container)
 {
     container.physicsEnabledModified(attribute.getValueDirect());
+}
+
+function Model_PhysicalProperties_MassModifiedCB(attribute, container)
+{
 }
 Texture.prototype = new ParentableMotionElement();
 Texture.prototype.constructor = Texture;
@@ -27819,14 +27886,17 @@ PhysicsSimulator.prototype.createPhysicsBody = function(model)
     model.getAttribute("scale").addModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
     model.getAttribute("parent").addModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-    // watch for changes in enabled
+    // watch for changes in enabled/physicsEnabled
     model.getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
     model.getAttribute("enabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
+    model.getAttribute("physicsEnabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
+    model.getAttribute("physicsEnabled").addModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
     // watch for changes in physical properties
     model.getAttribute("physicalProperties").addModifiedCB(PhysicsSimulator_ModelPhysicalPropertiesModifiedCB, this);
 
     // if model is disabled, don't create
-    if (model.getAttribute("enabled").getValueDirect() == false)
+    if (model.getAttribute("enabled").getValueDirect() == false ||
+        model.getAttribute("physicsEnabled").getValueDirect() == false)
         return;
     
     // if model is parented, don't add here; it will be added as a shape to the parent model's body
@@ -27899,7 +27969,6 @@ PhysicsSimulator.prototype.deletePhysicsBody = function(model)
             this.bodyModels[i].getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(PhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(PhysicsSimulator_ModelParentModifiedCB, this);
-            //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(PhysicsSimulator_ModelEnabledModifiedCB, this);
             this.world.removeRigidBody(this.physicsBodies[i]);
             Ammo.destroy(this.physicsShapes[i]);
             Ammo.destroy(this.physicsBodies[i].getMotionState());
@@ -28688,6 +28757,9 @@ SnapModel.prototype.snap = function(model, matrix)
     //name += "_" + model.name.getValueDirect().join("");
     //this.name.setValueDirect(name);
     
+    // add model's physical properties to this
+    this.addPhysicalProperties(model);
+    
     // add snap entry
     this.snaps[model.__nodeId__] = snapRec;
 }
@@ -28791,6 +28863,9 @@ SnapModel.prototype.unsnap = function(model)
     // enable (show) model
     model.enabled.setValueDirect(true);
     
+    // remove model's physical properties from this
+    this.removePhysicalProperties(model);
+    
     // clear snap entry
     this.snaps[model.__nodeId__] = undefined;
 }
@@ -28868,6 +28943,17 @@ SnapModel.prototype.connectSurfaceAttribute = function(surface, attribute, name)
     // don't replace snapped surface's attribute value
     attribute.addTarget(surface.getAttribute(name), eAttrSetOp.Replace, null, false);
 }
+
+SnapModel.prototype.addPhysicalProperties = function(model)
+{
+    // TODO
+}
+
+SnapModel.prototype.removePhysicalProperties = function(model)
+{
+    // TODO
+}
+
 Animator.prototype = new Evaluator();
 Animator.prototype.constructor = Animator;
     
@@ -34995,7 +35081,7 @@ SerializeCommand.prototype.serializeScene = function()
     // root element close tag
     this.serialized += "</Session>";
     serializedScene += this.serialized;
-    console.log(this.serialized);
+    //console.log(this.serialized);
 
     return;
 }
@@ -35564,7 +35650,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var name = "CompoundModel_" + snapModel.__nodeId__;
         snapModel.name.setValueDirect(name);
         // enable physics
-        snapModel.physicsEnabled.setValueDirect(true);
+        //snapModel.physicsEnabled.setValueDirect(true);
+        // add to Bridgeworks' physics simulator
+        var ps = this.registry.find("PhysicsSimulator");
+        ps.bodies.push_back(snapModel.name);
         // update transforms
         snapModel.updateSimpleTransform();
         snapModel.updateCompoundTransform();
@@ -36061,7 +36150,17 @@ LWObjectHandler.prototype.addObjectHandler = function(handler, data)
 LWObjectHandler.prototype.parseFileStream = function(url)
 {
     var filename = formFullPath(url, this.contentDirectory.getValueDirect().join(""));
-    var filestream = loadBinaryResource(filename);
+    var that = this;
+    loadBinaryResource(filename, 
+        function(binary)
+        {
+            that.parseObjectFileStream(binary, url);
+        }
+    );
+}
+    
+LWObjectHandler.prototype.parseObjectFileStream = function(filestream, url)
+{
     if (filestream == null)
     {
         return -2;
@@ -36071,9 +36170,9 @@ LWObjectHandler.prototype.parseFileStream = function(url)
 
     // read file tag (must be 'FORM')
     if (parser.readUInt8() != 70 || // 'F'
-    parser.readUInt8() != 79 || // 'O'
-    parser.readUInt8() != 82 || // 'R'
-    parser.readUInt8() != 77)   // 'M'
+        parser.readUInt8() != 79 || // 'O'
+        parser.readUInt8() != 82 || // 'R'
+        parser.readUInt8() != 77)   // 'M'
     {
         return -1;
     }
@@ -36083,9 +36182,9 @@ LWObjectHandler.prototype.parseFileStream = function(url)
 
     // read file type (must be 'LWO2')
     if (parser.readUInt8() != 76 || // 'L'
-    parser.readUInt8() != 87 || // 'W'
-    parser.readUInt8() != 79 || // 'O'
-    parser.readUInt8() != 50)   // '2'
+        parser.readUInt8() != 87 || // 'W'
+        parser.readUInt8() != 79 || // 'O'
+        parser.readUInt8() != 50)   // '2'
     {
         return -1;
     }
@@ -36825,6 +36924,10 @@ LWObjectBuilder.prototype.allocateModel = function(data)
         // define model attributes
         this.describeModel(data, data.layers[layer-1], model);
     }
+   
+    // add to Bridgeworks' physics simulator
+    var bworks = this.registry.find("Bridgeworks");
+    bworks.physicsSimulator.bodies.push_back(model.name);
 }
 
 LWObjectBuilder.prototype.describeModel = function(data, layer, model)
@@ -37687,7 +37790,17 @@ LWSceneHandler.prototype.addTokenHandler = function(handler, data)
 LWSceneHandler.prototype.parseFileStream = function(url)
 {
     var filename = formFullPath(url, this.contentDirectory.getValueDirect().join(""));
-    var filestream = loadTextResource(filename);
+    var that = this;
+    loadTextResource(filename, 
+        function(text)
+        {
+            that.parseSceneFileStream(text);
+        }
+    );
+}
+
+LWSceneHandler.prototype.parseSceneFileStream = function(filestream)
+{
     if (filestream == null)
     {
         return -2;
@@ -39624,8 +39737,6 @@ function newDeviceHandler(name, factory)
 
 function configureModel(model, factory)
 {
-    // TODO
-    console.debug("TODO: " + arguments.callee.name);
 }
 
 function configureDirective(directive, factory)
@@ -39644,32 +39755,31 @@ function configureDirective(directive, factory)
 function finalizeModel(model, factory)
 {
     // TODO
-    console.debug("TODO: remove LWO assumption");
+    //console.debug("TODO: remove LWO assumption");
 
     var url = model.getAttribute("url").getValueDirect();
-    if (url) {
-
+    if (url) 
+    {
         url = url.join("");
+        formatPath(url, 
+            function(path, dir)
+            {
+                //console.debug("path: " + path);
+                //console.debug("content dir: " + dir);
 
-        var pathInfo = formatPath(url);
-        console.debug("path: " + pathInfo[0]);
-        console.debug("content dir: " + pathInfo[1]);
+                var contentHandler = new LWObjectHandler();
+                contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
 
-        var contentHandler = new LWObjectHandler();
-        contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
+                var contentBuilder = new LWObjectBuilder();
+                contentBuilder.setRegistry(factory.registry);
+                contentBuilder.models.push(model);
+                contentBuilder.layer = model.getAttribute("layer").getValueDirect();
+                contentBuilder.visitHandler(contentHandler);
 
-        var contentBuilder = new LWObjectBuilder();
-        contentBuilder.setRegistry(factory.registry);
-        contentBuilder.models.push(model);
-        contentBuilder.layer = model.getAttribute("layer").getValueDirect();
-        contentBuilder.visitHandler(contentHandler);
-
-        contentHandler.parseFileStream(pathInfo[0]);
-    }
-    
-    // add to Bridgeworks' physics simulator
-    var bworks = factory.registry.find("Bridgeworks");
-    bworks.physicsSimulator.bodies.push_back(model.name);
+                contentHandler.parseFileStream(path);
+            }
+        );       
+    }  
 }
 
 function finalizeDirective(directive, factory)
@@ -39709,29 +39819,31 @@ function finalizeDeviceHandler(handler, factory)
 function finalizeEvaluator(evaluator, factory)
 {
     // TODO
-    console.debug("TODO: " + arguments.callee.name);
+    //console.debug("TODO: " + arguments.callee.name);
 
     switch (evaluator.className)
     {
         case "KeyframeInterpolator":
-
             var url = evaluator.getAttribute("url").getValueDirect();
-            if (url) {
-
+            if (url) 
+            {
                 url = url.join("");
+                formatPath(url,
+                    function(path, dir)
+                    {
+                        var contentHandler = new LWSceneHandler();
+                        contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
 
-                var pathInfo = formatPath(url);
+                        var contentBuilder = new LWSceneBuilder();
+                        contentBuilder.setRegistry(factory.registry);
+                        contentBuilder.evaluators.push(evaluator);
+                        contentBuilder.visitHandler(contentHandler);
 
-                var contentHandler = new LWSceneHandler();
-                contentHandler.getAttribute("contentDirectory").setValueDirect(pathInfo[1]);
-
-                var contentBuilder = new LWSceneBuilder();
-                contentBuilder.setRegistry(factory.registry);
-                contentBuilder.evaluators.push(evaluator);
-                contentBuilder.visitHandler(contentHandler);
-
-                contentHandler.parseFileStream(pathInfo[0]);
+                        contentHandler.parseFileStream(path);
+                    }
+                );
             }
+            
             AttributeFactory_EvaluatorTargetConnectionTypeModifiedCB(evaluator.getAttribute("targetConnectionType"), factory);
             break;
     }
@@ -39829,7 +39941,6 @@ function AttributeFactory_DirectiveRootModifiedCB(root, factory)
 
 function AttributeFactory_ParentableLabelModifiedCB(attribute, container)
 {
-    console.debug("TODO: " + arguments.callee.name);
 }
 
 function AttributeFactory_ParentableGeoPositionModifiedCB(attribute, container)
@@ -39955,8 +40066,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     enumerateAttributeTypes();
     enumerateAttributeElementTypes();
 
-    // TODO: remove the following when onLoadModified is defined
-    console.debug("TODO: " + arguments.callee.name);
     this.initRegistry();
     this.initEventListeners();
     this.viewportMgr.initLayout();
@@ -40117,22 +40226,38 @@ Bridgeworks.prototype.setRenderContext = function(rc)
     this.graphMgr.setRenderContext(rc);
 }
 
-Bridgeworks.prototype.updateScene = function(xml)
+Bridgeworks.prototype.updateScene = function(xml, onload)
 {
     var xmlString = new String(xml);
     var extension = xmlString.substr(xmlString.length - 3, 3);
     if (extension == "xml")
     {
-        xml = loadXMLResource(this.contentDir + "/" + xml);
-    }
+        var that = this;
+        loadXMLResource(this.contentDir + "/" + xml,
+            function(xml)
+            {
+                // disable physics while parsing
+                var evaluate = that.physicsSimulator.evaluate_.getValueDirect();
 
-    // disable physics while parsing
-    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
-    
-    this.parser.parse(xml);
-    
-    // restore physics evaluate state
-    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
+                that.parser.parse(xml);
+
+                // restore physics evaluate state
+                that.physicsSimulator.evaluate_.setValueDirect(evaluate);
+                
+                if (onload) onload(xml);                   
+            }
+        );
+    }
+    else
+    {
+        // disable physics while parsing
+        var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+
+        this.parser.parse(xml);
+
+        // restore physics evaluate state
+        this.physicsSimulator.evaluate_.setValueDirect(evaluate);
+    }
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)

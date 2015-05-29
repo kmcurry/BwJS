@@ -174,7 +174,10 @@ SnapMgr.prototype.snap = function(snapper, snappee, matrix)
         var name = "CompoundModel_" + snapModel.__nodeId__;
         snapModel.name.setValueDirect(name);
         // enable physics
-        snapModel.physicsEnabled.setValueDirect(true);
+        //snapModel.physicsEnabled.setValueDirect(true);
+        // add to Bridgeworks' physics simulator
+        var ps = this.registry.find("PhysicsSimulator");
+        ps.bodies.push_back(snapModel.name);
         // update transforms
         snapModel.updateSimpleTransform();
         snapModel.updateCompoundTransform();
