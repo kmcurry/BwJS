@@ -174,6 +174,25 @@ AttributeRegistry.prototype.getByType = function(type)
             }
             break;
 
+        
+        case eAttrType.Model:
+            {
+                var result = [];
+                for (var i = eAttrType.Model + 1; i != eAttrType.Model_End; i++)
+                {
+                    var models = this.getByType(i);
+                    if (models)
+                    {
+                        for (var j = 0; j < models.length; j++)
+                        {
+                            result.push(models[j]);
+                        }
+                    }
+                }
+                return result;
+            }
+            break;
+            
         default:
             {
                 return this.typeRegistry[type];

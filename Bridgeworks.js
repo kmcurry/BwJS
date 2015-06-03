@@ -5119,18 +5119,19 @@ var eAttrType = {
     QuaternionRotate            :1020,
     Scale                       :1021,
     Rotate                      :1022,
-    Translate                   :1023,   
-    Model                       :1024,
-    Surface                     :1025,
-    MediaTexture                :1026,
-    NullObject                  :1027,   
-    Label                       :1028,
-    HTMLLabel                   :1029,
-    BalloonTipLabel             :1030, 
-    PathTrace                   :1031,
-    Bone                        :1032,
-    Selector                    :1033,
-    ScreenRect                  :1034,
+    Translate                   :1023,     
+    Surface                     :1024,
+    MediaTexture                :1025,
+    NullObject                  :1026,   
+    Label                       :1027,
+    HTMLLabel                   :1028,
+    BalloonTipLabel             :1029, 
+    PathTrace                   :1030,
+    Bone                        :1031,
+    Selector                    :1032,
+    ScreenRect                  :1033,
+      
+    Model                       :1034,
     SnapModel                   :1035,
     Ball                        :1036,
     Beam                        :1037,
@@ -5143,6 +5144,7 @@ var eAttrType = {
     Tube                        :1044,
     Wall                        :1045,
     Wedge                       :1046,
+    Model_End                   :1059, // all model types must be given a type between Model and Model_End
     
     Evaluator                   :1100,
     SceneInspector              :1101,
@@ -6231,6 +6233,25 @@ AttributeRegistry.prototype.getByType = function(type)
             }
             break;
 
+        
+        case eAttrType.Model:
+            {
+                var result = [];
+                for (var i = eAttrType.Model + 1; i != eAttrType.Model_End; i++)
+                {
+                    var models = this.getByType(i);
+                    if (models)
+                    {
+                        for (var j = 0; j < models.length; j++)
+                        {
+                            result.push(models[j]);
+                        }
+                    }
+                }
+                return result;
+            }
+            break;
+            
         default:
             {
                 return this.typeRegistry[type];
@@ -20166,13 +20187,13 @@ function Model()
 
     this.dissolveNode = new Dissolve();
     this.dissolveNode.getAttribute("name").setValueDirect("Dissolve");
-    this.addChild(this.dissolveNode);
+    this.isolatorNode.addChild(this.dissolveNode);
     this.dissolve.addTarget(this.dissolveNode.getAttribute("dissolve"));
     //this.dissolve.setCreatedByParent(true);
 
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
-    this.addChild(this.surfacesNode);
+    this.isolatorNode.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
     
     //this.enableDisplayList.setValueDirect(true);
@@ -34894,6 +34915,86 @@ function Util_InspectionGroup_RotationQuatModifiedCB(attribute, container)
 {
     container.setModified();
 }
+function MatchingModelExists(model, registry)
+{
+    var match = null;
+    var url = model.url.getValueDirect().join("");
+    var layer = model.layer.getValueDirect();
+    
+    var models = registry.getByType(eAttrType.Model);
+    if (models)
+    {
+        for (var i=0; i < models.length; i++)
+        {
+           if (models[i] == model || !models[i].loaded) continue;
+
+           if (models[i].url.getValueDirect().join("") == url &&
+               models[i].layer.getValueDirect() == layer)
+            {
+                match = models[i];
+                break;
+            }
+        }
+    }
+    
+    return match;
+}
+
+function ReplaceModelSurfaces(replacee, replacement)
+{
+    if (!replacee || !replacement)
+    {
+        return false;
+    }
+
+    // get "Isolator" node from replacee
+    var replacee_isolator = replacee.getNamedChild("Isolator");
+    if (!replacee_isolator)
+    {
+        return false;
+    }
+
+    // get "Surfaces" node from replacee's isolator
+    var replacee_surfaces = replacee_isolator.getNamedChild("Surfaces");
+    if (!replacee_surfaces)
+    {
+        return false;
+    }
+
+    // get "Isolator" node from replacement
+    var replacement_isolator = replacement.getNamedChild("Isolator");
+    if (!replacement_isolator)
+    {
+        return false;
+    }
+
+    // get "Surfaces" node from replacement's isolator
+    var replacement_surfaces = replacement_isolator.getNamedChild("Surfaces");
+    if (!replacement_surfaces)
+    {
+        return false;
+    }
+
+    // remove "Surfaces" node from replacee's isolator
+    replacee_isolator.removeChild(replacee_surfaces);
+
+    // add "Surfaces" node from replacement's isolator to replacee's isolator
+    replacee_isolator.addChild(replacement_surfaces);
+
+    // update bbox
+    replacee.getAttribute("bbox").copyValue(replacement.getAttribute("bbox"));
+
+    // notify models of sharing model
+    //dynamic_cast<CAttributePointerAttr*>(replacee->GetAttribute("sharingModel"))->SetValueDirect(replacement);
+    //dynamic_cast<CAttributePointerAttr*>(replacement->GetAttribute("sharingModel"))->SetValueDirect(replacee);
+
+    return true;
+}
+
+function CopyModelSurface(replacee, replacement)
+{
+}
+
 SerializeCommand.prototype = new Command();
 SerializeCommand.prototype.constructor = SerializeCommand;
 
@@ -36928,6 +37029,9 @@ LWObjectBuilder.prototype.allocateModel = function(data)
     // add to Bridgeworks' physics simulator
     var bworks = this.registry.find("Bridgeworks");
     bworks.physicsSimulator.bodies.push_back(model.name);
+    
+    // mark as loaded
+    model.loaded = true;
 }
 
 LWObjectBuilder.prototype.describeModel = function(data, layer, model)
@@ -39757,28 +39861,47 @@ function finalizeModel(model, factory)
     // TODO
     //console.debug("TODO: remove LWO assumption");
 
-    var url = model.getAttribute("url").getValueDirect();
+    var url = model.getAttribute("url").getValueDirect().join("");
     if (url) 
-    {
-        url = url.join("");
-        formatPath(url, 
-            function(path, dir)
+    {   /*
+        // check for matching model; if not found, import
+        var match = MatchingModelExists(model, factory.registry);
+        if (match)
+        {          
+            if (model.enableSharing.getValueDirect())
             {
-                //console.debug("path: " + path);
-                //console.debug("content dir: " + dir);
-
-                var contentHandler = new LWObjectHandler();
-                contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
-
-                var contentBuilder = new LWObjectBuilder();
-                contentBuilder.setRegistry(factory.registry);
-                contentBuilder.models.push(model);
-                contentBuilder.layer = model.getAttribute("layer").getValueDirect();
-                contentBuilder.visitHandler(contentHandler);
-
-                contentHandler.parseFileStream(path);
+                ReplaceModelSurfaces(model, match);
             }
-        );       
+            else // !enableSharing
+            {
+                CopyModelSurfaces(model, match);
+            }
+            
+            // add to Bridgeworks' physics simulator
+            var bworks = factory.registry.find("Bridgeworks");
+            bworks.physicsSimulator.bodies.push_back(model.name);
+        }
+        else // no matching model exists*/
+        {
+            formatPath(url, 
+                function(path, dir)
+                {
+                    //console.debug("path: " + path);
+                    //console.debug("content dir: " + dir);
+
+                    var contentHandler = new LWObjectHandler();
+                    contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
+
+                    var contentBuilder = new LWObjectBuilder();
+                    contentBuilder.setRegistry(factory.registry);
+                    contentBuilder.models.push(model);
+                    contentBuilder.layer = model.getAttribute("layer").getValueDirect();
+                    contentBuilder.visitHandler(contentHandler);
+
+                    contentHandler.parseFileStream(path);
+                }
+            );       
+        }
     }  
 }
 

@@ -67,7 +67,7 @@
                         <scale x="0.25" y="0.25" z="0.25"/>
                     </Box>
                     <!--<Box name="LeftBox" indexedGeometry="false" detectCollision="true">
-                        <position x="-1" y="0.26" z="0"/>
+                        <position x="-1" y="0.26" ="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
                     </Box>-->

@@ -837,28 +837,47 @@ function finalizeModel(model, factory)
     // TODO
     //console.debug("TODO: remove LWO assumption");
 
-    var url = model.getAttribute("url").getValueDirect();
+    var url = model.getAttribute("url").getValueDirect().join("");
     if (url) 
-    {
-        url = url.join("");
-        formatPath(url, 
-            function(path, dir)
+    {   /*
+        // check for matching model; if not found, import
+        var match = MatchingModelExists(model, factory.registry);
+        if (match)
+        {          
+            if (model.enableSharing.getValueDirect())
             {
-                //console.debug("path: " + path);
-                //console.debug("content dir: " + dir);
-
-                var contentHandler = new LWObjectHandler();
-                contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
-
-                var contentBuilder = new LWObjectBuilder();
-                contentBuilder.setRegistry(factory.registry);
-                contentBuilder.models.push(model);
-                contentBuilder.layer = model.getAttribute("layer").getValueDirect();
-                contentBuilder.visitHandler(contentHandler);
-
-                contentHandler.parseFileStream(path);
+                ReplaceModelSurfaces(model, match);
             }
-        );       
+            else // !enableSharing
+            {
+                CopyModelSurfaces(model, match);
+            }
+            
+            // add to Bridgeworks' physics simulator
+            var bworks = factory.registry.find("Bridgeworks");
+            bworks.physicsSimulator.bodies.push_back(model.name);
+        }
+        else // no matching model exists*/
+        {
+            formatPath(url, 
+                function(path, dir)
+                {
+                    //console.debug("path: " + path);
+                    //console.debug("content dir: " + dir);
+
+                    var contentHandler = new LWObjectHandler();
+                    contentHandler.getAttribute("contentDirectory").setValueDirect(dir);
+
+                    var contentBuilder = new LWObjectBuilder();
+                    contentBuilder.setRegistry(factory.registry);
+                    contentBuilder.models.push(model);
+                    contentBuilder.layer = model.getAttribute("layer").getValueDirect();
+                    contentBuilder.visitHandler(contentHandler);
+
+                    contentHandler.parseFileStream(path);
+                }
+            );       
+        }
     }  
 }
 

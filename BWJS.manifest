@@ -175,6 +175,7 @@ BwCore/GridLayout.js
 BwCore/ViewportMgr.js
 BwCore/RasterComponentEventListener.js
 BwCore/ParentableMotionUtil.js
+BwCore/ModelUtil.js
 BwCore/Serialize.js
 BwCore/ScreenCapture.js
 BwCore/Export.js

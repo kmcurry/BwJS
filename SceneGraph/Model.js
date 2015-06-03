@@ -166,13 +166,13 @@ function Model()
 
     this.dissolveNode = new Dissolve();
     this.dissolveNode.getAttribute("name").setValueDirect("Dissolve");
-    this.addChild(this.dissolveNode);
+    this.isolatorNode.addChild(this.dissolveNode);
     this.dissolve.addTarget(this.dissolveNode.getAttribute("dissolve"));
     //this.dissolve.setCreatedByParent(true);
 
     this.surfacesNode = new Group();
     this.surfacesNode.getAttribute("name").setValueDirect("Surfaces");
-    this.addChild(this.surfacesNode);
+    this.isolatorNode.addChild(this.surfacesNode);
     //this.surfacesNode.setCreatedByParent(true);
     
     //this.enableDisplayList.setValueDirect(true);
