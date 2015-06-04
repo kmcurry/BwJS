@@ -64,9 +64,18 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
                 var drawNow = true;
                 var dissolve = params.dissolve;
                 var opacity = params.opacity;
+                var worldViewMatrix = params.worldMatrix.multiply(params.viewMatrix);
+                var scale = worldViewMatrix.getScalingFactors();               
                 if (dissolve == 1)// || opacity == 0) // completely transparent objects can still reflect specularity
                 {
                     // completely transparent, skip drawing
+                    drawNow = false;
+                }
+                else if (this.cullable.getValueDirect() == true && !this.isRecordingDisplayList() && 
+                         this.outsideViewVolume(params.viewVolume, max3(scale.x, scale.y, scale.z), 
+                                                worldViewMatrix) == eCullResult.Outside)
+                {
+                    // outside viewing-volume, skip drawing
                     drawNow = false;
                 }
                 else if (dissolve > 0 ||
@@ -188,6 +197,11 @@ Geometry.prototype.getBBox = function()
 Geometry.prototype.getTriangles = function()
 {
     return new Array();
+}
+
+Geometry.prototype.outsideViewVolume = function(viewVolume, scale, worldView)
+{
+    return viewVolumeCull(viewVolume, this.boundingTree.root.sphere, scale, worldView);
 }
 
 function Geometry_SelectableModifiedCB(attribute, container)

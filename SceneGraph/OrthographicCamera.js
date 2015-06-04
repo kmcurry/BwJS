@@ -55,6 +55,8 @@ OrthographicCamera.prototype.apply = function(directive, params, visitChildren)
                 this.setClipPlanes();
             }
             
+            params.viewVolume.setOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
+            
             this.applyOrthographicTransform();
         }
         break;

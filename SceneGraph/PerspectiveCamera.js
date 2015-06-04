@@ -62,6 +62,8 @@ PerspectiveCamera.prototype.apply = function(directive, params, visitChildren)
                 this.setClipPlanes();
             }
             
+            params.viewVolume.setPerspective(this.fovyRadians, this.viewport.width / this.viewport.height, this.near, this.far);
+            
             this.applyPerspectiveTransform();
         }
         break;
