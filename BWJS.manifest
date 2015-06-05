@@ -17,7 +17,6 @@ Math/MatrixStack.js
 Math/Quaternion.js
 Math/Line.js
 Math/Plane.js
-Math/ViewVolume.js 
 Math/CompGeom.js
 Attribute/AttributeType.js 
 Attribute/Attribute.js 
@@ -31,6 +30,7 @@ Attribute/AttributeUtil.js
 Common/Agent.js 
 Common/Spatial.js
 Common/Context.js
+Common/ViewVolume.js 
 RenderContext/DisplayList.js
 RenderContext/RenderContext.js 
 RenderContext/RenderState.js 

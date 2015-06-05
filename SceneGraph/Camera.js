@@ -1,4 +1,4 @@
-﻿Camera.prototype = new ParentableMotionElement();
+Camera.prototype = new ParentableMotionElement();
 Camera.prototype.constructor = Camera;
 
 function Camera()

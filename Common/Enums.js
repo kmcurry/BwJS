@@ -1,4 +1,4 @@
-﻿/**
+/**
 *	The end behavior enumeration
 */
 var eEndBehavior =
@@ -90,4 +90,11 @@ var eBoneFalloffType =
     InverseDistance_8: 3,
     // inverse distance / 16
     InverseDistance_16: 4  
+};
+
+var eCullResult =
+{
+    Outside     :0,
+    Inside      :1,
+    Intersects  :2
 };

@@ -4303,6 +4303,7 @@ function distanceBetweenPlanes(plane1, plane2)
     // planes intersect
     return 0;
 }
+
 function ViewVolume()
 {
     this.left = null;
