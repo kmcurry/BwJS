@@ -8816,8 +8816,8 @@ ViewVolume.prototype.setOrthographic = function(left, right, top, bottom, near, 
     this.right  = new Plane2(frontBotRight, frontTopRight, backTopRight);
     this.top    = new Plane2(frontTopLeft,  backTopLeft,   backTopRight);
     this.bottom = new Plane2(backBotRight,  backBotLeft,   frontBotLeft);
-    this.near  = new Plane2(frontBotLeft,  frontTopLeft,  frontTopRight);
-    this.far   = new Plane2(backBotRight,  backTopRight,  backTopLeft);
+    this.near   = new Plane2(frontBotLeft,  frontTopLeft,  frontTopRight);
+    this.far    = new Plane2(backBotRight,  backTopRight,  backTopLeft);
 }
 
 ViewVolume.prototype.getPlane = function(planeEnum)
@@ -8853,8 +8853,8 @@ function viewVolumeCull(viewVolume, sphere, scale, worldView)
     var right  = viewVolume.right;
     var top    = viewVolume.top;
     var bottom = viewVolume.bottom;
-    var near  = viewVolume.near;
-    var far   = viewVolume.far;
+    var near   = viewVolume.near;
+    var far    = viewVolume.far;
 
     // transform sphere center by world-view transformation (put into view-space)
     var center = worldView.transform(sphere.center.x, sphere.center.y, sphere.center.z, 1);   
@@ -27700,7 +27700,7 @@ PhysicsSimulator.prototype.update = function()
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
     timeIncrement = timeIncrement || this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    maxSubSteps = maxSubSteps || 10;
+    maxSubSteps = 1;//maxSubSteps || 10;
     
     this.update();
     this.world.stepSimulation(timeIncrement, maxSubSteps);

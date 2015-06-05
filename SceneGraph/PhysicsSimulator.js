@@ -161,7 +161,7 @@ PhysicsSimulator.prototype.update = function()
 PhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
     timeIncrement = timeIncrement || this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    maxSubSteps = maxSubSteps || 10;
+    maxSubSteps = 1;//maxSubSteps || 10;
     
     this.update();
     this.world.stepSimulation(timeIncrement, maxSubSteps);
