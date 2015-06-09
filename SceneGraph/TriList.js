@@ -81,6 +81,7 @@ TriList.prototype.buildBoundingTree = function()
     var min = this.bbox.getAttribute("min").getValueDirect();
     var max = this.bbox.getAttribute("max").getValueDirect();
     
+    this.boundingTree = new Octree();
     this.boundingTree.setTriangles(this.getTriangles(), min, max);
     this.boundingTree.buildTree(this.approximationLevels.getValueDirect());
 }

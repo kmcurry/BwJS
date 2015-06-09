@@ -7,7 +7,7 @@ function Geometry()
     this.className = "Geometry";
     this.attrType = eAttrType.Geometry;
 
-    this.boundingTree = new Octree();
+    this.boundingTree = null;
     this.updateBoundingTree = false;
 
     this.selectable = new BooleanAttr(true);
@@ -100,7 +100,8 @@ Geometry.prototype.apply = function(directive, params, visitChildren)
 
         case "rayPick":
             {
-                if (this.selectable.getValueDirect() == true &&
+                if (this.boundingTree &&
+                    this.selectable.getValueDirect() == true &&
                     params.opacity > 0 &&
                     params.dissolve < 1)
                 {
@@ -201,6 +202,11 @@ Geometry.prototype.getTriangles = function()
 
 Geometry.prototype.outsideViewVolume = function(viewVolume, scale, worldView)
 {
+    if (!this.boundingTree)
+    {
+        return false;
+    }
+    
     return viewVolumeCull(viewVolume, this.boundingTree.root.sphere, scale, worldView);
 }
 

@@ -13,7 +13,7 @@ function Model()
     this.geometryBBoxesMap = [];
     this.geometryAttrConnections = [];
     this.surfaceAttrConnections = [];
-    this.boundingTree = new Octree();
+    this.boundingTree = null;
     this.updateBoundingTree = false;
     this.bones = [];
     
