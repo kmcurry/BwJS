@@ -26899,6 +26899,11 @@ function BoneEffector()
 
 BoneEffector.prototype.evaluate = function()
 {
+    if (!(this.enabled.getValueDirect()))
+    {
+        return;
+    }
+    
     this.update();
 
     // update bones
@@ -27577,6 +27582,7 @@ function PhysicsSimulator()
 
     this.gravity.addModifiedCB(PhysicsSimulator_GravityModifiedCB, this);
     this.bodies.addModifiedCB(PhysicsSimulator_BodiesModifiedCB, this);
+    this.enabled.addModifiedCB(PhysicsSimulator_EnabledModifiedCB, this);
 
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.timeScale, "timeScale");
@@ -27591,6 +27597,11 @@ function PhysicsSimulator()
 
 PhysicsSimulator.prototype.evaluate = function()
 {
+    if (!(this.enabled.getValueDirect()))
+    {
+        return;
+    }
+    
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -28508,6 +28519,11 @@ function PhysicsSimulator_GravityModifiedCB(attribute, container)
 function PhysicsSimulator_BodiesModifiedCB(attribute, container)
 {
     container.bodiesModified();
+}
+
+function PhysicsSimulator_EnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
 }
 
 function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
@@ -40261,12 +40277,12 @@ Bridgeworks.prototype.updateScene = function(xml)
     }
 
     // disable physics while parsing
-    var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
+    //var evaluate = this.physicsSimulator.evaluate_.getValueDirect();
     
     this.parser.parse(xml);
     
     // restore physics evaluate state
-    this.physicsSimulator.evaluate_.setValueDirect(evaluate);
+    //this.physicsSimulator.evaluate_.setValueDirect(evaluate);
 }
 
 function Bridgeworks_OnLoadModifiedCB(attribute, container)

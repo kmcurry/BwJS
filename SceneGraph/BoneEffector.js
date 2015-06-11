@@ -33,6 +33,11 @@ function BoneEffector()
 
 BoneEffector.prototype.evaluate = function()
 {
+    if (!(this.enabled.getValueDirect()))
+    {
+        return;
+    }
+    
     this.update();
 
     // update bones
