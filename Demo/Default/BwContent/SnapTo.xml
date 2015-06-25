@@ -181,7 +181,7 @@
     <?bwinclude url="SendMessage.xml"?>
     <Set target="SceneInspector" evaluate="false"/>
     <Set target="ObjectInspector" evaluate="true"/>
-    <Set target="PhysicsSimulator" evaluate="false"/>
+    <Set target="PhysicsSimulator" evaluate="true"/>
     <!--<PhysicsSimulator name="PhysicsSimulator" evaluate="true">
         <bodies>
             <body>Ground</body>
