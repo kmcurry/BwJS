@@ -12,7 +12,7 @@ PreviewFrameStep 1
 CurrentFrame 0
 FramesPerSecond 30
 
-LoadObjectLayer 2 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Torso.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
@@ -25,7 +25,7 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key 2.750797 0 0 0 0 0 0 0 0
+  Key 2.6740866 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
@@ -71,10 +71,11 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0 2.750797 0
+LockedChannels 5
+PivotPosition 0 0.008306038 0
 ShadowOptions 7
 
-LoadObjectLayer 1 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Head.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
@@ -87,13 +88,13 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key 3.5395808 0 0 0 0 0 0 0 0
+  Key 3.536207 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0 0
+  Key 0.0071153855 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -133,30 +134,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0 3.539581 0
-ParentItem 10000000
+PivotPosition 0 -0.7227704 0
 ShadowOptions 7
 
-LoadObjectLayer 3 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Arm_Upper_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.82508665 0 0 0 0 0 0 0 0
+  Key 0.83183181 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 3.2805991 0 0 0 0 0 0 0 0
+  Key 3.2827456 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.030015504 0 0 0 0 0 0 0 0
+  Key 0.029828262 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -197,30 +197,29 @@ Channel 8
 }
 
 LockedChannels 40
-PivotPosition 0.8250867 3.280599 0.0300155
-ParentItem 10000000
+PivotPosition -0.1553739 0.3029978 0.0006685486
 ShadowOptions 7
 
-LoadObjectLayer 4 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Arm_Lower_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.85870957 0 0 0 0 0 0 0 0
+  Key 0.8668623 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 2.481154 0 0 0 0 0 0 0 0
+  Key 2.4815078 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.027992681 0 0 0 0 0 0 0 0
+  Key 0.029644608 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -260,30 +259,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0.8587096 2.481154 0.02799268
-ParentItem 10000002
+PivotPosition -0.1378767 0.2611424 0.0005020658
 ShadowOptions 7
 
-LoadObjectLayer 5 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Hand_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.86311835 0 0 0 0 0 0 0 0
+  Key 1.0084209 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.7639505 0 0 0 0 0 0 0 0
+  Key 1.7639885 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.030286463 0 0 0 0 0 0 0 0
+  Key 0.029760938 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -323,30 +321,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0.8631184 1.76395 0.03028646
-ParentItem 10000003
+PivotPosition 0.006674723 0.1017272 4.30923e-006
 ShadowOptions 7
 
-LoadObjectLayer 6 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Arm_Upper_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.83571619 0 0 0 0 0 0 0 0
+  Key -0.83776706 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 3.28089 0 0 0 0 0 0 0 0
+  Key 3.2827177 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.027533444 0 0 0 0 0 0 0 0
+  Key 0.030346818 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -386,30 +383,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.8357162 3.28089 0.02753344
-ParentItem 10000000
+PivotPosition 0.1533372 0.3028313 0.001171307
 ShadowOptions 7
 
-LoadObjectLayer 7 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Arm_Lower_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.86936116 0 0 0 0 0 0 0 0
+  Key -0.87178582 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 2.4807563 0 0 0 0 0 0 0 0
+  Key 2.4811265 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.028042905 0 0 0 0 0 0 0 0
+  Key 0.029131969 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -449,30 +445,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.8693612 2.480756 0.02804291
-ParentItem 10000005
+PivotPosition 0.1378309 0.2604722 -0.0003726661
 ShadowOptions 7
 
-LoadObjectLayer 8 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Hand_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.87242252 0 0 0 0 0 0 0 0
+  Key -1.014088 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.7635169 0 0 0 0 0 0 0 0
+  Key 1.7645575 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.03096568 0 0 0 0 0 0 0 0
+  Key 0.030345965 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -512,30 +507,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.8724225 1.763517 0.03096568
-ParentItem 10000006
+PivotPosition -0.002498394 0.1023583 0.0001830087
 ShadowOptions 7
 
-LoadObjectLayer 9 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Leg_Upper_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.40312904 0 0 0 0 0 0 0 0
+  Key 0.41405973 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.8006349 0 0 0 0 0 0 0 0
+  Key 1.8018368 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.029641852 0 0 0 0 0 0 0 0
+  Key -0.00050402113 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -576,30 +570,29 @@ Channel 8
 }
 
 LockedChannels 40
-PivotPosition 0.403129 1.800635 0.02964185
-ParentItem 10000000
+PivotPosition 0.009365454 0.5205335 -0.0005040225
 ShadowOptions 7
 
-LoadObjectLayer 10 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Leg_Lower_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.40312901 0 0 0 0 0 0 0 0
+  Key 0.41167876 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 0.99936223 0 0 0 0 0 0 0 0
+  Key 1.0003433 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0 0
+  Key 0.0028499677 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -639,30 +632,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0.403129 0.9993623 0
-ParentItem 10000008
+PivotPosition 0.004134553 0.4461717 0
 ShadowOptions 7
 
-LoadObjectLayer 11 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Foot_Right.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key 0.41893801 0 0 0 0 0 0 0 0
+  Key 0.41366389 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 0.27930647 0 0 0 0 0 0 0 0
+  Key 0.28113693 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.015808985 0 0 0 0 0 0 0 0
+  Key 0.020982306 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -702,30 +694,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition 0.418938 0.2793064 0.01580898
-ParentItem 10000009
+PivotPosition 0.01135711 0.1398475 -0.1699315
 ShadowOptions 7
 
-LoadObjectLayer 12 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Leg_Upper_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.39615378 0 0 0 0 0 0 0 0
+  Key -0.42805153 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.7991679 0 0 0 0 0 0 0 0
+  Key 1.8023887 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0 0
+  Key 0.00032432622 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -765,30 +756,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.3961537 1.799168 0
-ParentItem 10000000
+PivotPosition 0.0008088555 0.5209315 0
 ShadowOptions 7
 
-LoadObjectLayer 13 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Leg_Lower_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.38732001 0 0 0 0 0 0 0 0
+  Key -0.42122838 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.0000031 0 0 0 0 0 0 0 0
+  Key 1.0009849 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0 0
+  Key 0.00033601327 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -828,30 +818,29 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.38732 1.000003 0
-ParentItem 1000000b
+PivotPosition 0.003616126 0.4463577 -0.002286483
 ShadowOptions 7
 
-LoadObjectLayer 14 objects/Robot.lwo
+LoadObjectLayer 1 objects/Robot_Foot_Left.lwo
 ShowObject 7 3
 ObjectMotion
 NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -0.3952246 0 0 0 0 0 0 0 0
+  Key -0.42328331 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 0.27981615 0 0 0 0 0 0 0 0
+  Key 0.28079823 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key 0.015808985 0 0 0 0 0 0 0 0
+  Key 0.020519517 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -891,8 +880,7 @@ Channel 8
   Behaviors 1 1
 }
 
-PivotPosition -0.3952246 0.2798162 0.01580898
-ParentItem 1000000c
+PivotPosition 0.009074866 0.1399937 -0.1710439
 ShadowOptions 7
 
 AmbientColor 1 1 1
@@ -1049,8 +1037,8 @@ SaveAlpha 0
 ViewConfiguration 0
 DefineView 0
 ViewType 9
-ViewAimpoint -6.698027 0 -4.048901
-ViewZoomFactor 3.434262
+ViewAimpoint -0.5554693 0.5187359 0.02754755
+ViewZoomFactor 46.20575
 
 GridNumber 100
 GridSize 2
@@ -1062,7 +1050,7 @@ ShowSafeAreas 1
 ShowFieldChart 1
 OverlayColor_fv 0 0 0
 
-CurrentObject 0
+CurrentObject 13
 CurrentLight 0
 CurrentCamera 0
 GraphEditorData
