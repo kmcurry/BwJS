@@ -24957,6 +24957,7 @@ function CollideDirective()
     this.lastDetected = null;
     this.lastColliding = false;
     this.lastCollidingDistance = FLT_MAX;
+    this.selector = null;
     
     this.name.setValueDirect("CollideDirective");
 }
@@ -24966,7 +24967,8 @@ CollideDirective.prototype.setRegistry = function(registry)
     // use Bridgeworks' physics simulator for collision detection
     var bworks = registry.find("Bridgeworks");
     this.physicsSimulator = bworks.physicsSimulator;
-
+    this.selector = bworks.selector;
+    
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);
 }
@@ -25063,7 +25065,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
  }
     
 CollideDirective.prototype.detectCollision = function(model)
-{  
+{  return;
     // if selected is not the same as last selected, reset last selected position
     if (model != this.lastDetected)
     {    
@@ -25261,31 +25263,17 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
-    var i;
-    var snapper = null;
-    var snappees = [];
-    
-    for (i in collideRecs)
-    {
-        // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model) &&
-            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
-        {
-            snapper = collideRecs[i].model;
-        }
-        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
-        {
-            snappees.push(collideRecs[i].model);
-        }       
-    }
-    if (!snapper || snappees.length == 0) return;
+    var snapper = this.selector.selected;
+    if (!snapper || snapper.getAttribute("snapEnabled").getValueDirect() == false) return;
 
     // test plugs for collision with sockets
     var snapMgr = this.registry.find("SnapMgr");
-    for (i = 0; i < snappees.length; i++)
+    for (var i in collideRecs)
     {
-        if (snapper.boundingTree.collides(snappees[i].boundingTree) &&
-            snapMgr.trySnap(snapper, snappees[i]))
+        var snappee = collideRecs[i].model;
+        if (snappee == snapper) continue;
+        if (snapper.boundingTree.collides(snappee.boundingTree) &&
+            snapMgr.trySnap(snapper, snappee))
         {     
             return;
             //break;
@@ -27571,9 +27559,11 @@ function PhysicsSimulator()
     this.updateBodies = false;
     this.updateBodyPositions = [];
     this.lastBodies = [];
+    this.evaluating = false;
+    this.selector = null;
 
     this.timeIncrement = new NumberAttr(0);
-    this.timeScale = new NumberAttr(1);
+    this.timeScale = new NumberAttr(100);
     this.gravity = new Vector3DAttr(0, -9.8, 0);
     this.worldHalfExtents = new Vector3DAttr(10000, 10000, 10000); // TODO: does this need to be configurable? 
     this.bodies = new AttributeVector(new StringAttrAllocator());
@@ -27595,6 +27585,16 @@ function PhysicsSimulator()
     this.initPhysics();
 }
 
+PhysicsSimulator.prototype.setRegistry = function(registry)
+{
+    // use Bridgeworks' physics simulator for collision detection
+    var bworks = registry.find("Bridgeworks");
+    this.selector = bworks.selector;
+    
+    // call base-class implementation
+    SGDirective.prototype.setRegistry.call(this, registry);
+}
+
 PhysicsSimulator.prototype.evaluate = function()
 {
     if (!(this.enabled.getValueDirect()))
@@ -27602,50 +27602,49 @@ PhysicsSimulator.prototype.evaluate = function()
         return;
     }
     
-    // add/remove bodies based on selection state (allows for object inspection)
-    for (var i = 0; i < this.bodyModels.length; i++)
+    this.evaluating = true;
+    
+    var selected = this.selector.selected;
+    if (selected)
     {
-        switch (this.isSelected(this.bodyModels[i]))
+        var index = this.getPhysicsBodyIndex(selected);
+        if (index >= 0 && this.bodyAdded[index])
         {
-            case 0:
-                // unselected
-                {
-                    // if not added, update its position and add
-                    if (!this.bodyAdded[i])
-                    {
-                        this.bodyAdded[i] = true;
-                        if (this.bodyModels[i].physicsEnabled.getValueDirect())
-                        {
-                            var gravity = this.gravity.getValueDirect();
-                            var world = new Ammo.btVector3(gravity.x, gravity.y, gravity.z);
-                            this.physicsBodies[i].setGravity(world);
-                            Ammo.destroy(world);
-                            this.updatePhysicsBodyPosition(i, false);
-                        }
-                    }
-                }
-                break;
-
-            case 1:
-                // selected
-                {
-                    // set body gravity to 0 so that it won't be affected by it during interaction
-                    var zero = new Ammo.btVector3(0, 0, 0);
-                    this.physicsBodies[i].setGravity(zero);
-                    Ammo.destroy(zero);
-                    // stop positional updates 
-                    this.bodyAdded[i] = false;
-                }
-                break;
+            // set body gravity to 0 so that it won't be affected by it during interaction
+            var zero = new Ammo.btVector3(0, 0, 0);
+            this.physicsBodies[index].setGravity(zero);
+            Ammo.destroy(zero);
+            // stop positional updates 
+            this.bodyAdded[index] = false;
         }
     }
-
+    
+    // add/remove bodies based on selection state (allows for object inspection)
+    for (var i = 0; i < this.bodyAdded.length; i++)
+    {
+        // if not added, update its position and add
+        if (!this.bodyAdded[i])
+        {
+            if (this.bodyModels[i] != selected)
+            {
+                this.bodyAdded[i] = true;
+                if (this.bodyModels[i].physicsEnabled.getValueDirect())
+                {
+                    var gravity = this.gravity.getValueDirect();
+                    var world = new Ammo.btVector3(gravity.x, gravity.y, gravity.z);
+                    this.physicsBodies[i].setGravity(world);
+                    Ammo.destroy(world);
+                    this.updatePhysicsBodyPosition(i, false);
+                }
+            }
+        }
+    }
+   
     this.stepSimulation();
     
-    var trans = new
-    Ammo.btTransform();
-    var worldHalfExtents = this.worldHalfExtents.getValueDirect();
-    var modelsOutOfBounds = [];
+    var trans = new Ammo.btTransform();
+    //var worldHalfExtents = this.worldHalfExtents.getValueDirect();
+    //var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
     {
         var physicsEnabled = this.bodyModels[i].physicsEnabled.getValueDirect();
@@ -27659,33 +27658,27 @@ PhysicsSimulator.prototype.evaluate = function()
         var rot = trans.getRotation();
         var quat = new Quaternion();
         quat.load(rot.w(), rot.x(), rot.y(), rot.z());
-
-        this.bodyModels[i].getAttribute("position").removeModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
-        //this.bodyModels[i].getAttribute("rotation").removeModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
-        this.bodyModels[i].getAttribute("quaternion").removeModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this);
     
         this.bodyModels[i].getAttribute("position").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
-
-        this.bodyModels[i].getAttribute("position").addModifiedCB(PhysicsSimulator_ModelPositionModifiedCB, this);
-        //this.bodyModels[i].getAttribute("rotation").addModifiedCB(PhysicsSimulator_ModelRotationModifiedCB, this);
-        this.bodyModels[i].getAttribute("quaternion").addModifiedCB(PhysicsSimulator_ModelQuaternionModifiedCB, this);
-        
-        // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
+        /*
+        // if object has moved outside of the world boundary, remove it from the simulation
         if (position.x < -worldHalfExtents.x || position.x > worldHalfExtents.x ||
             position.y < -worldHalfExtents.y || position.y > worldHalfExtents.y ||
             position.z < -worldHalfExtents.z || position.z > worldHalfExtents.z)
         {
             modelsOutOfBounds.push(this.bodyModels[i]);
-        }
+        }*/
     }
     Ammo.destroy(trans);
-
+    /*
     // remove any models that have moved outside of the world boundary
     for (var i = 0; i < modelsOutOfBounds.length; i++)
     {
         this.deletePhysicsBody(modelsOutOfBounds[i]);
     }
+    */
+    this.evaluating = false;
 }
 
 PhysicsSimulator.prototype.update = function()
@@ -27883,20 +27876,6 @@ PhysicsSimulator.prototype.getBodyModel = function(physicsBody)
     }
 
     return null;
-}
-
-PhysicsSimulator.prototype.isSelected = function(model)
-{
-    var selected = model.getAttribute("selected").getValueDirect();
-    if (!selected)
-    {
-        for (var i = 0; i < model.motionChildren.length && !selected; i++)
-        {
-            selected = this.isSelected(model.motionChildren[i]);
-        }
-    }
-
-    return selected;
 }
     
 PhysicsSimulator.prototype.updatePhysicsBodies = function()
@@ -28103,6 +28082,7 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, position, rotatio
 {
     switch (model.attrType)
     {
+        case eAttrType.Model:
         case eAttrType.Box:
         case eAttrType.Beam:
         case eAttrType.Plank:
@@ -28117,8 +28097,6 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, position, rotatio
         case eAttrType.SnapModel:
             //shapes = this.getSnapCollisionShape(model, position, rotation, scale, compoundShape);
             //break;
-        
-        case eAttrType.Model:
         default:
             shapes = this.getConvexCollisionShape(model, position, rotation, scale, compoundShape);
             break;
@@ -28533,6 +28511,8 @@ function PhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 {
+    if (container.evaluating) return;
+    
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
@@ -28547,6 +28527,8 @@ function PhysicsSimulator_ModelPositionModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 {
+    if (container.evaluating) return;
+    
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
@@ -28561,6 +28543,8 @@ function PhysicsSimulator_ModelRotationModifiedCB(attribute, container)
 
 function PhysicsSimulator_ModelQuaternionModifiedCB(attribute, container)
 {
+    if (container.evaluating) return;
+    
     //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
     //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
     var index = container.getPhysicsBodyIndex(attribute.getContainer());
@@ -40043,13 +40027,23 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.canvas = canvas;
     this.contentDir = contentDir;
 
+    this.name = new StringAttr("Bridgeworks");
+    this.onLoad = new StringAttr();
+
+    this.onLoad.addModifiedCB(Bridgeworks_OnLoadModifiedCB, this);
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.onLoad, "onLoad");
+    
     // allocate objects
+    this.registry = new BwRegistry();
+    this.registry.register(this); // need to set here for objects that might need Bridgeworks on call to setRegistry
+        
     //this.renderContext = null;
     this.graphMgr = new GraphMgr();
     this.graphMgr.setRenderContext(this.renderContext)
 
-    this.styleMgr = new StyleMgr();
-    this.registry = new BwRegistry();
+    this.styleMgr = new StyleMgr();  
     this.factory = new AttributeFactory();
     this.parser = new XMLParser(this.factory, this.registry, this.contentDir);
     this.eventAdapter = new EventAdapter();
@@ -40089,14 +40083,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
     this.physicsSimulator.orphan.setValueDirect(false); // evaluated by renders (true to disable)
-
-    this.name = new StringAttr("Bridgeworks");
-    this.onLoad = new StringAttr();
-
-    this.onLoad.addModifiedCB(Bridgeworks_OnLoadModifiedCB, this);
-
-    this.registerAttribute(this.name, "name");
-    this.registerAttribute(this.onLoad, "onLoad");
 
     this.viewportMgr.getAttribute("width").setValueDirect(this.canvas.width);
     this.viewportMgr.getAttribute("height").setValueDirect(this.canvas.height);
@@ -40152,8 +40138,13 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
 
 Bridgeworks.prototype.initRegistry = function()
 {
+    // register this (if not already)
+    if (!this.registry.find("Bridgeworks"))
+    {
+        this.registry.register(this);
+    }
+    
     // register allocated objects
-    this.registry.register(this);
     this.registry.register(this.graphMgr);
     this.registry.register(this.factory);
     this.registry.register(this.eventAdapter);

@@ -16,13 +16,23 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.canvas = canvas;
     this.contentDir = contentDir;
 
+    this.name = new StringAttr("Bridgeworks");
+    this.onLoad = new StringAttr();
+
+    this.onLoad.addModifiedCB(Bridgeworks_OnLoadModifiedCB, this);
+
+    this.registerAttribute(this.name, "name");
+    this.registerAttribute(this.onLoad, "onLoad");
+    
     // allocate objects
+    this.registry = new BwRegistry();
+    this.registry.register(this); // need to set here for objects that might need Bridgeworks on call to setRegistry
+        
     //this.renderContext = null;
     this.graphMgr = new GraphMgr();
     this.graphMgr.setRenderContext(this.renderContext)
 
-    this.styleMgr = new StyleMgr();
-    this.registry = new BwRegistry();
+    this.styleMgr = new StyleMgr();  
     this.factory = new AttributeFactory();
     this.parser = new XMLParser(this.factory, this.registry, this.contentDir);
     this.eventAdapter = new EventAdapter();
@@ -62,14 +72,6 @@ function Bridgeworks(canvas, bgImage, contentDir)
     this.rasterComponentEventListener.setStyleMgr(this.styleMgr);
     this.rasterComponents = null;
     this.physicsSimulator.orphan.setValueDirect(false); // evaluated by renders (true to disable)
-
-    this.name = new StringAttr("Bridgeworks");
-    this.onLoad = new StringAttr();
-
-    this.onLoad.addModifiedCB(Bridgeworks_OnLoadModifiedCB, this);
-
-    this.registerAttribute(this.name, "name");
-    this.registerAttribute(this.onLoad, "onLoad");
 
     this.viewportMgr.getAttribute("width").setValueDirect(this.canvas.width);
     this.viewportMgr.getAttribute("height").setValueDirect(this.canvas.height);
@@ -125,8 +127,13 @@ Bridgeworks.prototype.handleEvent = function(event, eventType /* optional type o
 
 Bridgeworks.prototype.initRegistry = function()
 {
+    // register this (if not already)
+    if (!this.registry.find("Bridgeworks"))
+    {
+        this.registry.register(this);
+    }
+    
     // register allocated objects
-    this.registry.register(this);
     this.registry.register(this.graphMgr);
     this.registry.register(this.factory);
     this.registry.register(this.eventAdapter);

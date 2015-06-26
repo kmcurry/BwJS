@@ -34,6 +34,7 @@ function CollideDirective()
     this.lastDetected = null;
     this.lastColliding = false;
     this.lastCollidingDistance = FLT_MAX;
+    this.selector = null;
     
     this.name.setValueDirect("CollideDirective");
 }
@@ -43,7 +44,8 @@ CollideDirective.prototype.setRegistry = function(registry)
     // use Bridgeworks' physics simulator for collision detection
     var bworks = registry.find("Bridgeworks");
     this.physicsSimulator = bworks.physicsSimulator;
-
+    this.selector = bworks.selector;
+    
     // call base-class implementation
     SGDirective.prototype.setRegistry.call(this, registry);
 }
@@ -140,7 +142,7 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
  }
     
 CollideDirective.prototype.detectCollision = function(model)
-{  
+{  return;
     // if selected is not the same as last selected, reset last selected position
     if (model != this.lastDetected)
     {    
@@ -338,31 +340,17 @@ CollideDirective.prototype.detectObstructions = function(collideRecs)
 
 CollideDirective.prototype.detectSnapConnections = function(collideRecs)
 {
-    var i;
-    var snapper = null;
-    var snappees = [];
-    
-    for (i in collideRecs)
-    {
-        // only test plugs from the currently selected model
-        if (this.isSelected(collideRecs[i].model) &&
-            collideRecs[i].model.getAttribute("snapEnabled").getValueDirect())
-        {
-            snapper = collideRecs[i].model;
-        }
-        else if (collideRecs[i].model.getAttribute("snapEnabled").getValueDirect()) // !selected
-        {
-            snappees.push(collideRecs[i].model);
-        }       
-    }
-    if (!snapper || snappees.length == 0) return;
+    var snapper = this.selector.selected;
+    if (!snapper || snapper.getAttribute("snapEnabled").getValueDirect() == false) return;
 
     // test plugs for collision with sockets
     var snapMgr = this.registry.find("SnapMgr");
-    for (i = 0; i < snappees.length; i++)
+    for (var i in collideRecs)
     {
-        if (snapper.boundingTree.collides(snappees[i].boundingTree) &&
-            snapMgr.trySnap(snapper, snappees[i]))
+        var snappee = collideRecs[i].model;
+        if (snappee == snapper) continue;
+        if (snapper.boundingTree.collides(snappee.boundingTree) &&
+            snapMgr.trySnap(snapper, snappee))
         {     
             return;
             //break;

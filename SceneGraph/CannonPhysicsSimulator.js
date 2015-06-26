@@ -13,10 +13,13 @@ function CannonPhysicsSimulator()
     this.solver = null;
     this.world = null;
     this.physicsBodies = [];
+    this.physicsShapes = [];
     this.bodyAdded = [];
     this.bodyModels = [];
     this.updateWorld = false;
     this.updateBodies = false;
+    this.updateBodyPositions = [];
+    this.lastBodies = [];
 
     this.timeIncrement = new NumberAttr(0);
     this.timeScale = new NumberAttr(1);
@@ -28,6 +31,7 @@ function CannonPhysicsSimulator()
 
     this.gravity.addModifiedCB(CannonPhysicsSimulator_GravityModifiedCB, this);
     this.bodies.addModifiedCB(CannonPhysicsSimulator_BodiesModifiedCB, this);
+    this.enabled.addModifiedCB(CannonPhysicsSimulator_EnabledModifiedCB, this);
 
     this.registerAttribute(this.timeIncrement, "timeIncrement");
     this.registerAttribute(this.timeScale, "timeScale");
@@ -35,14 +39,18 @@ function CannonPhysicsSimulator()
     this.registerAttribute(this.worldHalfExtents, "worldHalfExtents");
     this.registerAttribute(this.bodies, "bodies");
 
+    this.name.setValueDirect("CannonPhysicsSimulator");
+
     this.initPhysics();
 }
 
 CannonPhysicsSimulator.prototype.evaluate = function()
 {
-    var timeIncrement = this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
-    this.stepSimulation(timeIncrement);
-
+    if (!(this.enabled.getValueDirect()))
+    {
+        return;
+    }
+    
     // add/remove bodies based on selection state (allows for object inspection)
     for (var i = 0; i < this.bodyModels.length; i++)
     {
@@ -51,10 +59,14 @@ CannonPhysicsSimulator.prototype.evaluate = function()
             case 0:
                 // unselected
                 {
-                    // if not added, restore
+                    // if not added, update its position and add
                     if (!this.bodyAdded[i])
                     {
-                        this.updatePhysicsBody(i);
+                        this.bodyAdded[i] = true;
+                        if (this.bodyModels[i].physicsEnabled.getValueDirect())
+                        {
+                            this.updatePhysicsBodyPosition(i, false);
+                        }
                     }
                 }
                 break;
@@ -62,13 +74,15 @@ CannonPhysicsSimulator.prototype.evaluate = function()
             case 1:
                 // selected
                 {
-                    // stop positional updates
+                    // stop positional updates 
                     this.bodyAdded[i] = false;
                 }
                 break;
         }
     }
 
+    this.stepSimulation();
+    
     var worldHalfExtents = this.worldHalfExtents.getValueDirect();
     var modelsOutOfBounds = [];
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -85,7 +99,7 @@ CannonPhysicsSimulator.prototype.evaluate = function()
         var quat = new Quaternion();
         quat.load(rotation.w, rotation.x, rotation.y, rotation.z);
 
-        this.bodyModels[i].getAttribute("sectorPosition").setValueDirect(position.x, position.y, position.z);
+        this.bodyModels[i].getAttribute("position").setValueDirect(position.x, position.y, position.z);
         this.bodyModels[i].getAttribute("quaternion").setValueDirect(quat);
 
         // if object has moved outside of the world boundary, remove it from the simulation (memory errors occur when positions become too large)
@@ -117,17 +131,36 @@ CannonPhysicsSimulator.prototype.update = function()
     {
         this.updateBodies = false;
         this.updatePhysicsBodies();
+        
+        this.lastBodies = [];
+        for (var i = 0; i < this.bodies.Size(); i++)
+        {
+            this.lastBodies.push(this.bodies.getAt(i));
+        }
+    }
+    
+    while (this.updateBodyPositions.length > 0)
+    {
+        this.updatePhysicsBodyPosition(this.updateBodyPositions[0], true);
     }
 }
 
 CannonPhysicsSimulator.prototype.stepSimulation = function(timeIncrement, maxSubSteps)
 {
-    maxSubSteps = maxSubSteps || 10;
+    timeIncrement = timeIncrement || this.timeIncrement.getValueDirect() * this.timeScale.getValueDirect();
+    maxSubSteps = 10;//maxSubSteps || 10;
     
     this.update();
-    this.world.step(timeIncrement);//, maxSubSteps);
+    this.world.step(timeIncrement, maxSubSteps);
 }
 
+CannonPhysicsSimulator.prototype.detectCollisions = function()
+{
+    this.update();
+    this.stepSimulation(0.0001, 1);
+    //this.world.performDiscreteCollisionDetection();
+}
+    
 CannonPhysicsSimulator.prototype.isColliding = function(model)
 {
     // if model is parented, get parent
@@ -147,34 +180,57 @@ CannonPhysicsSimulator.prototype.isColliding = function(model)
             var body0 = contactManifold.getBody0();
             var body1 = contactManifold.getBody1();
             
-            //var distance = FLT_MAX;
+            var a, b, distance;
             var numContacts = contactManifold.getNumContacts();
-            /*for (var j = 0; j < numContacts; j++)
+            for (var j = 0; j < numContacts; j++)
             {
                 var pt = contactManifold.getContactPoint(j);
                 var ptA = pt.getPositionWorldOnA();
                 var ptB = pt.getPositionWorldOnB();
 
-                var distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
-                //console.log(distance);               
-            }
-            */
-            //if (distance < 0.05)
-            if (numContacts > 0)
-            {
+                a = new Vector3D(ptA.x(), ptA.y(), ptA.z());
+                b = new Vector3D(ptB.x(), ptB.y(), ptB.z());
+            
+                distance = Math.min(distanceBetween(new Vector3D(ptA.x(), ptA.y(), ptA.z()), new Vector3D(ptB.x(), ptB.y(), ptB.z()), distance));
+                if (distance < 0.01) continue; // don't consider very small distances
+                            
                 if (body0.ptr == physicsBody.ptr)
                 {
-                    return true;
+                    if (a.y > 0) continue; // don't consider "collisions" outside of the collidee
+                    /*
+                    var collidee = null;
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body1.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];                                                      
+                            //console.log(distance);               
+                            //break;
+                        }
+                    }*/
                 }
                 else if (body1.ptr == physicsBody.ptr)
                 {
-                    return true;
+                    if (b.y > 0) continue; // don't consider "collisions" outside of the collidee
+                    /*
+                    for (var j = 0; j < this.physicsBodies.length; j++)
+                    {
+                        if (body0.ptr == this.physicsBodies[j].ptr)
+                        {
+                            collidee = this.bodyModels[j];
+                            
+                            //console.log(distance);               
+                            //break;
+                        }
+                    }*/
                 }
+                                   
+                return { colliding: true, distance: distance };
             }
         }
     }
 
-    return false;
+    return { colliding: false, distance: FLT_MAX };
 }
 
 CannonPhysicsSimulator.prototype.getColliders = function(model)
@@ -241,6 +297,11 @@ CannonPhysicsSimulator.prototype.getPhysicsBody = function(bodyModel)
     return null;
 }
 
+CannonPhysicsSimulator.prototype.getPhysicsBodyIndex = function(bodyModel)
+{
+    return this.bodyModels.indexOf(bodyModel);
+}
+
 CannonPhysicsSimulator.prototype.getBodyModel = function(physicsBody)
 {
     for (var i = 0; i < this.physicsBodies.length; i++)
@@ -267,19 +328,50 @@ CannonPhysicsSimulator.prototype.isSelected = function(model)
 
     return selected;
 }
-
+    
 CannonPhysicsSimulator.prototype.updatePhysicsBodies = function()
 {
-    // remove existing bodies
-    while (this.bodyModels.length > 0)
+    var i;
+    
+    // determine changes between lastBodies and bodies
+    var added = [];
+    for (i = 0; i < this.bodies.Size(); i++)
     {
-        this.deletePhysicsBody(this.bodyModels[0]);
+        var body = this.bodies.getAt(i);
+        var index = this.lastBodies.indexOf(body);
+        if (index < 0)
+        {
+            added.push(body);
+        }
+    }
+    var removed = [];
+    for (i = 0; i < this.lastBodies.length; i++)
+    {
+        var body = this.lastBodies[i];
+        var index = this.bodies.indexOf(body);
+        if (index < 0)
+        {
+            for (j = 0; j < this.bodyModels.length; j++)
+            {
+                if (this.bodyModels[j].name == body)
+                {
+                    removed.push(this.bodyModels[j]);
+                    break;
+                }
+            }
+        }
+    }
+    
+    // remove any removed bodies
+    for (i = 0; i < removed.length; i++)
+    {
+        this.deletePhysicsBody(removed[i]);
     }
 
-    // add bodies to world (if not already present)
-    for (var i = 0; i < this.bodies.Size(); i++)
+    // add any added bodies to world
+    for (var i = 0; i < added.length; i++)
     {
-        var name = this.bodies.getAt(i).getValueDirect().join("");
+        var name = added[i].getValueDirect().join("");
         var model = this.registry.find(name);
         if (model)
         {
@@ -295,6 +387,9 @@ CannonPhysicsSimulator.prototype.createPhysicsBody = function(model)
 
     // watch for changes in vertices
     model.getAttribute("vertices").addModifiedCB(CannonPhysicsSimulator_ModelVerticesModifiedCB, this);
+    model.getAttribute("position").addModifiedCB(CannonPhysicsSimulator_ModelPositionModifiedCB, this);
+    model.getAttribute("rotation").addModifiedCB(CannonPhysicsSimulator_ModelRotationModifiedCB, this);
+    model.getAttribute("quaternion").addModifiedCB(CannonPhysicsSimulator_ModelQuaternionModifiedCB, this);
     // watch for changes in scale
     model.getAttribute("scale").addModifiedCB(CannonPhysicsSimulator_ModelScaleModifiedCB, this);
     // watch for changes in parent
@@ -302,6 +397,8 @@ CannonPhysicsSimulator.prototype.createPhysicsBody = function(model)
     // watch for changes in enabled
     model.getAttribute("enabled").removeModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this); // ensure no dups (not removed by delete)
     model.getAttribute("enabled").addModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this);
+    // watch for changes in physical properties
+    model.getAttribute("physicalProperties").addModifiedCB(CannonPhysicsSimulator_ModelPhysicalPropertiesModifiedCB, this);
 
     // if model is disabled, don't create
     if (model.getAttribute("enabled").getValueDirect() == false)
@@ -311,17 +408,17 @@ CannonPhysicsSimulator.prototype.createPhysicsBody = function(model)
     if (model.motionParent)
         return;
 
-    var mass = this.getNetMass(model);
+    var properties = this.getNetProperties(model);
 
     var body = new CANNON.Body({
-        mass: mass
+        mass: properties.mass
     });
-
-    this.getCompoundShape(model, body);
     
-    var position = model.getAttribute("sectorPosition").getValueDirect();
+    this.getCompoundShape(model, body);
+
+    var position = model.getAttribute("position").getValueDirect();
     // temporary fix to remove y-axis padding between static and dynamic objects
-    if (mass == 0)
+    if (properties.mass == 0)
     {
         //position.y -= 0.075;
     }
@@ -344,6 +441,14 @@ CannonPhysicsSimulator.prototype.createPhysicsBody = function(model)
     }
 }
 
+CannonPhysicsSimulator.prototype.deletePhysicsBodies = function()
+{
+    while (this.bodyModels.length > 0)
+    {
+        this.deletePhysicsBody(this.bodyModels[0]);
+    }
+}
+
 CannonPhysicsSimulator.prototype.deletePhysicsBody = function(model)
 {
     for (var i = 0; i < this.bodyModels.length; i++)
@@ -351,6 +456,9 @@ CannonPhysicsSimulator.prototype.deletePhysicsBody = function(model)
         if (this.bodyModels[i] == model)
         {
             this.bodyModels[i].getAttribute("vertices").removeModifiedCB(CannonPhysicsSimulator_ModelVerticesModifiedCB, this);
+            this.bodyModels[i].getAttribute("position").removeModifiedCB(CannonPhysicsSimulator_ModelPositionModifiedCB, this);
+            this.bodyModels[i].getAttribute("rotation").removeModifiedCB(CannonPhysicsSimulator_ModelRotationModifiedCB, this);
+            this.bodyModels[i].getAttribute("quaternion").removeModifiedCB(CannonPhysicsSimulator_ModelQuaternionModifiedCB, this);
             this.bodyModels[i].getAttribute("scale").removeModifiedCB(CannonPhysicsSimulator_ModelScaleModifiedCB, this);
             this.bodyModels[i].getAttribute("parent").removeModifiedCB(CannonPhysicsSimulator_ModelParentModifiedCB, this);
             //this.bodyModels[i].getAttribute("enabled").removeModifiedCB(CannonPhysicsSimulator_ModelEnabledModifiedCB, this);
@@ -373,23 +481,9 @@ CannonPhysicsSimulator.prototype.getCompoundShape = function(model, body)
 
 CannonPhysicsSimulator.prototype.addCollisionShape = function(model, position, rotation, scale, body)
 {
-    var center = model.getAttribute("center").getValueDirect();
-            
-    for (var i = 0; i < model.geometries.length; i++)
-    {
-        var shape = this.getCollisionShape(model.geometries[i], center, scale);
-        if (shape)
-        {
-            var offset = new CANNON.Vec3(position.x, position.y, position.z);
-
-            var quat = new Quaternion();
-            quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
-            var quaternion = new CANNON.Quaternion(quat.x, quat.y, quat.z, quat.w);
-
-            body.addShape(shape, offset, quaternion);
-        }
-    }
-
+    // get collision shape(s)
+    this.getCollisionShape(model, position, rotation, scale, body);
+    
     // recurse on motion children
     for (var i = 0; i < model.motionChildren.length; i++)
     {
@@ -414,7 +508,78 @@ CannonPhysicsSimulator.prototype.addCollisionShape = function(model, position, r
     }
 }
 
-CannonPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, scale)
+CannonPhysicsSimulator.prototype.getCollisionShape = function(model, position, rotation, scale, body)
+{
+    switch (model.attrType)
+    {
+        case eAttrType.Box:
+        case eAttrType.Beam:
+        case eAttrType.Plank:
+        case eAttrType.Wall:
+            //this.getBoxCollisionShape(model, position, rotation, scale, body);
+            //break;
+            
+        case eAttrType.Ball:
+            //this.getSphereCollisionShape(model, position, rotation, scale, body);
+            //break;
+        
+        case eAttrType.SnapModel:
+        case eAttrType.Model:
+        default:
+            //this.getConvexCollisionShape(model, position, rotation, scale, body);
+            this.getBoxCollisionShape(model, position, rotation, scale, body);
+            break;
+    }
+}
+/*
+CannonPhysicsSimulator.prototype.getConvexCollisionShape = function(model, position, rotation, scale, body)
+{
+    var shapes = [];
+    
+    for (var i = 0; i < model.surfaces.length; i++)
+    {
+        var verts = model.surfaces[i].getAttribute("vertices").getValueDirect();
+        if (verts.length == 0) continue;
+
+        // scale vertices
+        var scaleMatrix = new Matrix4x4();
+        scaleMatrix.loadScale(scale.x, scale.y, scale.z);
+        var matrix = scaleMatrix;
+
+        var shape = new Ammo.btConvexHullShape();
+
+        for (var j = 0; j < verts.length; j += 3)
+        {
+            var vert = matrix.transform(verts[j], verts[j + 1], verts[j + 2], 1);
+            var point = new Ammo.btVector3(vert.x, vert.y, vert.z);
+            shape.addPoint(point);
+            Ammo.destroy(point);
+        }
+        
+        shapes.push(shape);
+    }
+
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
+
+        compoundShape.addChildShape(transform, shapes[i]);
+        Ammo.destroy(transform);
+    }
+}
+*/
+/*
+CannonPhysicsSimulator.prototype.getConvexCollisionShape = function(model, position, rotation, scale, body)
 {
     var shape = null;
     
@@ -434,7 +599,7 @@ CannonPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, 
         var v1 = tri.v1;
         var v2 = tri.v2;
         
-        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1] /*- center.y*/, verts[i + 2] - center.z, 1);
+        //var vert = matrix.transform(verts[i] - center.x, verts[i + 1], verts[i + 2] - center.z, 1);
         var vert = matrix.transform(v0.x, v0.y, v0.z, 1);
         var point = new CANNON.Vec3(vert.x, vert.y, vert.z);
         points.push(point);
@@ -457,48 +622,140 @@ CannonPhysicsSimulator.prototype.getCollisionShape = function(geometry, center, 
     
     return shape;
 }
-
-CannonPhysicsSimulator.prototype.getNetMass = function(model)
+*/
+CannonPhysicsSimulator.prototype.getBoxCollisionShape = function(model, position, rotation, scale, body)
 {
-    var mass = 0;
+    var shapes = [];
+    
+    var bbox_min = model.bbox.min.getValueDirect();
+    var bbox_max = model.bbox.max.getValueDirect();
 
+    var halfExtents = new CANNON.Vec3((Math.max(((bbox_max.x - bbox_min.x) * scale.x) / 2, 0.1)),
+                                      (Math.max(((bbox_max.y - bbox_min.y) * scale.y) / 2, 0.1)),
+                                      (Math.max(((bbox_max.z - bbox_min.z) * scale.z) / 2, 0.1)));
+    var shape = new CANNON.Box(halfExtents);
+    
+    shapes.push(shape);
+    
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var position = new CANNON.Vec3(position.x, position.y, position.z);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new CANNON.Quaternion(quat.x, quat.y, quat.z, quat.w);
+        
+        body.addShape(shape, position, quaternion);                       
+    }
+}
+/*
+CannonPhysicsSimulator.prototype.getSphereCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    var shapes = [];
+    
+    var bbox_min = model.bbox.min.getValueDirect();
+    var bbox_max = model.bbox.max.getValueDirect();
+
+    var radius = ((bbox_max.x - bbox_min.x) * scale.x) / 2;
+    var shape = new Ammo.btSphereShape(radius);
+            
+    shapes.push(shape);
+    
+    // add shape(s) to compound shape
+    for (var i = 0; i < shapes.length; i++)
+    {
+        var transform = new Ammo.btTransform();
+        transform.setIdentity();
+        var origin = new Ammo.btVector3(position.x, position.y, position.z);
+        transform.setOrigin(origin);
+        Ammo.destroy(origin);
+        var quat = new Quaternion();
+        quat.loadXYZAxisRotation(rotation.x, rotation.y, rotation.z);
+        var quaternion = new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w);
+        transform.setRotation(quaternion);
+        Ammo.destroy(quaternion);
+
+        compoundShape.addChildShape(transform, shapes[i]);
+        Ammo.destroy(transform);
+    }
+}
+
+CannonPhysicsSimulator.prototype.getSnapCollisionShape = function(model, position, rotation, scale, compoundShape)
+{
+    for (var i in model.snaps)
+    {
+        var snapped = model.snaps[i].model;
+        var matrix = model.snaps[i].matrix;
+        
+        var snappedPosition = matrix.getTranslation();
+        snappedPosition.x += position.x;
+        snappedPosition.y += position.y;
+        snappedPosition.z += position.z;
+        snappedPosition.x *= scale.x;
+        snappedPosition.y *= scale.y;
+        snappedPosition.z *= scale.z;
+        
+        var snappedRotation = matrix.getRotationAngles();
+        snappedRotation.x += rotation.x;
+        snappedRotation.y += rotation.y;
+        snappedRotation.z += rotation.z;
+        
+        var snappedScale = scale;//matrix.getScalingFactors();
+        //snappedScale.x *= scale.x;
+        //snappedScale.y *= scale.y;
+        //snappedScale.z *= scale.z;
+        
+        this.getCollisionShape(snapped, snappedPosition, snappedRotation, snappedScale, compoundShape);
+    }
+}
+*/
+CannonPhysicsSimulator.prototype.getNetProperties = function(model)
+{
     // calculate scaled mass for model
     var scale = model.getAttribute("scale").getValueDirect();
     var avgScale = (scale.x + scale.y + scale.z) / 3;
     var physicalProperties = model.getAttribute("physicalProperties");
     var mass = physicalProperties.getAttribute("mass").getValueDirect() * avgScale;
-
-    // add children's mass (if any)
+    var friction = physicalProperties.getAttribute("friction").getValueDirect();
+    var restitution = physicalProperties.getAttribute("restitution").getValueDirect();
+    var linearDamping = physicalProperties.getAttribute("linearDamping").getValueDirect();
+    var angularDamping = physicalProperties.getAttribute("angularDamping").getValueDirect();
+    var rollingFriction = physicalProperties.getAttribute("rollingFriction").getValueDirect();
+    
+    // add children's properties (if any)
     for (var i = 0; i < model.motionChildren.length; i++)
     {
-        mass += this.getNetMass(model.motionChildren[i]);
+        var childProperties = this.getNetProperties(model.motionChildren[i]);
+        mass += childProperties.mass;
+        friction += childProperties.friction;
+        restitution += childProperties.restitution;
+        linearDamping += childProperties.linearDamping;
+        angularDamping += childProperties.angularDamping;
+        rollingFriction += childProperties.rollingFriction;
     }
 
-    return mass;
+    return { mass: mass, 
+             friction: friction, 
+             restitution: restitution, 
+             linearDamping: linearDamping,
+             angularDamping: angularDamping,
+             rollingFriction: rollingFriction };
 }
 
-CannonPhysicsSimulator.prototype.updatePhysicsShape = function(model)
+CannonPhysicsSimulator.prototype.updatePhysicsShape = function(model, shape)
 {
     // locate array position of model
-    var n = -1;
-    for (var i = 0; i < this.bodyModels.length; i++)
-    {
-        if (this.bodyModels[i] == model)
-        {
-            n = i;
-            break;
-        }
-    }
+    var n = this.getPhysicsBodyIndex(model);
     if (n == -1)
         return;
 
-    var mass = this.getNetMass(model);
+    shape = shape || this.getCompoundShape(model);
+
+    var properties = this.getNetProperties(model);
 
     var body = new CANNON.Body({
-        mass: mass
+        mass: properties.mass
     });
-
-    this.getCompoundShape(model, body);
     
     // remove previous before adding
     this.world.removeBody(this.physicsBodies[n]);
@@ -509,28 +766,6 @@ CannonPhysicsSimulator.prototype.updatePhysicsShape = function(model)
 
 CannonPhysicsSimulator.prototype.updatePhysicsBody = function(n)
 {
-    this.removePhysicsBody(n);
-    this.restorePhysicsBody(n);
-}
-
-CannonPhysicsSimulator.prototype.removePhysicsBody = function(n)
-{
-    //if (!this.bodyAdded[n]) 
-    //    return; // don't re-remove
-    
-    var body = this.physicsBodies[n];
-    if (!body)
-        return;
-
-    this.world.removeBody(body);
-    this.bodyAdded[n] = false;
-}
-
-CannonPhysicsSimulator.prototype.restorePhysicsBody = function(n)
-{
-    //if (this.bodyAdded[n]) 
-    //    return; // don't re-restore
-    
     var model = this.bodyModels[n];
     if (!model)
         return;
@@ -538,7 +773,7 @@ CannonPhysicsSimulator.prototype.restorePhysicsBody = function(n)
     if (!body)
         return;
     
-    var position = model.getAttribute("sectorPosition").getValueDirect();
+    var position = model.getAttribute("position").getValueDirect();
     body.position = new CANNON.Vec3(position.x, position.y, position.z);
 
     // update rotation to include rotation caused by object inspection
@@ -561,9 +796,51 @@ CannonPhysicsSimulator.prototype.restorePhysicsBody = function(n)
         rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
     }   
     body.quaternion = new CANNON.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+}
+
+CannonPhysicsSimulator.prototype.updatePhysicsBodyPosition = function(n, retainInspectionGroupRotation)
+{
+    var index = this.updateBodyPositions.indexOf(n);
+    if (index >= 0)
+    {
+        this.updateBodyPositions.splice(index, 1);
+    }
     
-    this.world.addBody(body);
-    this.bodyAdded[n] = true;
+    //if (!this.bodyAdded[n]) return;
+    
+    var model = this.bodyModels[n];
+    if (!model)
+        return;
+    var body = this.physicsBodies[n];
+    if (!body)
+        return;
+    
+    var position = model.getAttribute("position").getValueDirect();
+    body.position = new CANNON.Vec3(position.x, position.y, position.z);
+
+    // update rotation to include rotation caused by object inspection
+    var rotation = new Quaternion();
+    var rotationGroup = getInspectionGroup(model);
+    if (rotationGroup)
+    {
+        var rotationQuat = rotationGroup.getChild(2).getAttribute("rotationQuat").getValueDirect();
+        var quat1 = new Quaternion();
+        quat1.load(rotationQuat.w, rotationQuat.x, rotationQuat.y, rotationQuat.z);
+
+        var modelQuat = model.getAttribute("quaternion").getValueDirect();
+        var quat2 = new Quaternion();
+        quat2.load(modelQuat.w, modelQuat.x, modelQuat.y, modelQuat.z);
+
+        var quat = quat2.multiply(quat1);
+        rotation.loadQuaternion(quat);
+        
+        // clear inspection group's rotation
+        if (!retainInspectionGroupRotation) 
+        {
+            rotationGroup.getChild(2).getAttribute("rotationQuat").setValueDirect(new Quaternion());
+        }
+    }   
+    body.quaternion = new CANNON.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 }
 
 CannonPhysicsSimulator.prototype.initPhysics = function()
@@ -595,13 +872,19 @@ CannonPhysicsSimulator.prototype.modelEnabledModified = function(model, enabled)
     }
 }
 
+CannonPhysicsSimulator.prototype.modelPhysicalPropertiesModified = function(model)
+{
+    // locate array position of model
+    var n = this.getPhysicsBodyIndex(model);
+    if (n == -1)
+        return;
+    
+    this.updatePhysicsShape(model, this.physicsShapes[n]);
+}
+
 function CannonPhysicsSimulator_GravityModifiedCB(attribute, container)
 {
-    if (container.world)
-    {
-        var gravity = attribute.getValueDirect();
-        container.world.gravity = new CANNON.Vec3(gravity.x, gravity.y, gravity.z);
-    }
+    container.updateWorld = true;
 }
 
 function CannonPhysicsSimulator_BodiesModifiedCB(attribute, container)
@@ -609,9 +892,56 @@ function CannonPhysicsSimulator_BodiesModifiedCB(attribute, container)
     container.bodiesModified();
 }
 
+function CannonPhysicsSimulator_EnabledModifiedCB(attribute, container)
+{
+    var enabled = attribute.getValueDirect();
+}
+
 function CannonPhysicsSimulator_ModelVerticesModifiedCB(attribute, container)
 {
     container.updatePhysicsShape(attribute.getContainer());
+}
+
+function CannonPhysicsSimulator_ModelPositionModifiedCB(attribute, container)
+{
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    if (index >= 0)
+    {
+        if (container.updateBodyPositions.indexOf(index) == -1)
+        {
+            container.updateBodyPositions.push(index);
+        }
+    }
+}
+
+function CannonPhysicsSimulator_ModelRotationModifiedCB(attribute, container)
+{
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    if (index >= 0)
+    {
+        if (container.updateBodyPositions.indexOf(index) == -1)
+        {
+            container.updateBodyPositions.push(index);
+        }
+    }
+}
+
+function CannonPhysicsSimulator_ModelQuaternionModifiedCB(attribute, container)
+{
+    //container.updatePhysicsBodyPosition(container.getPhysicsBodyIndex(attribute.getContainer()), true);
+    //container.updateBodyPositions.push(container.getPhysicsBodyIndex(attribute.getContainer()));
+    var index = container.getPhysicsBodyIndex(attribute.getContainer());
+    if (index >= 0)
+    {
+        if (container.updateBodyPositions.indexOf(index) == -1)
+        {
+            container.updateBodyPositions.push(index);
+        }
+    }
 }
 
 function CannonPhysicsSimulator_ModelScaleModifiedCB(attribute, container)
@@ -627,4 +957,9 @@ function CannonPhysicsSimulator_ModelParentModifiedCB(attribute, container)
 function CannonPhysicsSimulator_ModelEnabledModifiedCB(attribute, container)
 {
     container.modelEnabledModified(attribute.getContainer(), attribute.getValueDirect());
+}
+
+function CannonPhysicsSimulator_ModelPhysicalPropertiesModifiedCB(attribute, container)
+{
+    container.modelPhysicalPropertiesModified(attribute.getContainer());
 }

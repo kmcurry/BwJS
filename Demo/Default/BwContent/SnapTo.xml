@@ -45,7 +45,7 @@
                         </physicalProperties>  
                     </Model>
                     <Wedge name="CenterBox" indexedGeometry="false" detectCollision="true" physicsEnabled="true">
-                        <position x="0" y="0.26" z="0"/>
+                        <position x="0" y="2.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
                     </Wedge>
@@ -62,7 +62,7 @@
                         </physicalProperties>  
                     </Model>-->
                     <Box name="RightBox" indexedGeometry="false" detectCollision="true">
-                        <position x="1" y="0.26" z="0"/>
+                        <position x="1" y="2.26" z="0"/>
                         <rotation x="0" y="0" z="0"/>
                         <scale x="0.25" y="0.25" z="0.25"/>
                     </Box>
