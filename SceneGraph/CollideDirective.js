@@ -92,12 +92,12 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
     // currently only detecting collisions on selected model, but still need to evaluate physics simulator
     if (!selected)
     {
-        this.physicsSimulator.evaluate();
+        //this.physicsSimulator.evaluate();
         this.lastDetected = null; // clear last selected
         return;
     }
     
-    this.physicsSimulator.evaluate();
+    //this.physicsSimulator.evaluate();
     
     // if selected is not the same as last selected, reset last selected position
     if (selected != this.lastDetected)
@@ -142,7 +142,9 @@ CollideDirective.prototype.detectCollisions = function(collideRecs)
  }
     
 CollideDirective.prototype.detectCollision = function(model)
-{  return;
+{
+    if (model.physicalProperties.mass.getValueDirect() == 0) return false;
+    
     // if selected is not the same as last selected, reset last selected position
     if (model != this.lastDetected)
     {    
@@ -152,14 +154,12 @@ CollideDirective.prototype.detectCollision = function(model)
         this.lastColliding = false;
         this.lastCollidingDistance = FLT_MAX;
     }
-    
+
     // update position of selected model with physics simulator
     this.physicsSimulator.updatePhysicsBodyPosition(this.physicsSimulator.getPhysicsBodyIndex(model), true);
     
     // perform CD 
-    this.physicsSimulator.detectCollisions();
-
-    if (model.physicalProperties.mass.getValueDirect() == 0) return false;
+    //this.physicsSimulator.detectCollisions(); 
     
     // check collision status
     var colliding = this.isColliding(model);
@@ -348,7 +348,7 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
     for (var i in collideRecs)
     {
         var snappee = collideRecs[i].model;
-        if (snappee == snapper) continue;
+        if (snappee == snapper || snappee.getAttribute("snapEnabled").getValueDirect() == false) continue;
         if (snapper.boundingTree.collides(snappee.boundingTree) &&
             snapMgr.trySnap(snapper, snappee))
         {     

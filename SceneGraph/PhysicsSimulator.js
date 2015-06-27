@@ -24,7 +24,7 @@ function PhysicsSimulator()
     this.selector = null;
 
     this.timeIncrement = new NumberAttr(0);
-    this.timeScale = new NumberAttr(1);
+    this.timeScale = new NumberAttr(100);
     this.gravity = new Vector3DAttr(0, -9.8, 0);
     this.worldHalfExtents = new Vector3DAttr(10000, 10000, 10000); // TODO: does this need to be configurable? 
     this.bodies = new AttributeVector(new StringAttrAllocator());
