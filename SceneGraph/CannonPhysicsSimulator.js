@@ -535,7 +535,7 @@ CannonPhysicsSimulator.prototype.getCollisionShape = function(model, position, r
     }
 }
 
-CannonPhysicsSimulator.prototype.getConvexCollisionShape = function(model, center, position, rotation, scale, body)
+CannonPhysicsSimulator.prototype.getConvexCollisionShape = function(model, position, rotation, scale, body)
 {
     // scale vertices
     var matrix = new Matrix4x4();
