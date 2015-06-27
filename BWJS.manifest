@@ -191,7 +191,7 @@ Libs/qTip2/jquery-1.10.2.min.js
 Libs/qTip2/jquery.qtip.min.js
 Libs/jquery/jquery.hoverIntent.minified.js 
 Libs/jquery/jquery.bgiframe.min.js 
-Libs/three.js/three.js
+Libs/three.js/three.min.js
 Libs/JSModeler/build/jsmodeler.js
 Libs/ammo.js/ammo.js
 

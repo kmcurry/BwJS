@@ -24,7 +24,7 @@ function PhysicsSimulator()
     this.selector = null;
 
     this.timeIncrement = new NumberAttr(0);
-    this.timeScale = new NumberAttr(100);
+    this.timeScale = new NumberAttr(1);
     this.gravity = new Vector3DAttr(0, -9.8, 0);
     this.worldHalfExtents = new Vector3DAttr(10000, 10000, 10000); // TODO: does this need to be configurable? 
     this.bodies = new AttributeVector(new StringAttrAllocator());
@@ -545,8 +545,8 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, position, rotatio
     {
         case eAttrType.Model:
         case eAttrType.Box:
-        case eAttrType.Beam:
-        case eAttrType.Plank:
+        case eAttrType.Beam:       
+        case eAttrType.Plank:    
         case eAttrType.Wall:
             shapes = this.getBoxCollisionShape(model, position, rotation, scale, compoundShape);
             break;
@@ -555,9 +555,13 @@ PhysicsSimulator.prototype.getCollisionShape = function(model, position, rotatio
             shapes = this.getSphereCollisionShape(model, position, rotation, scale, compoundShape);
             break;
         
+        case eAttrType.Elbow:
+        case eAttrType.Gear:
+        case eAttrType.Pyramid:
+        case eAttrType.Ring:
+        case eAttrType.Tube:
+        case eAttrType.Wedge:
         case eAttrType.SnapModel:
-            //shapes = this.getSnapCollisionShape(model, position, rotation, scale, compoundShape);
-            //break;
         default:
             shapes = this.getConvexCollisionShape(model, position, rotation, scale, compoundShape);
             break;
