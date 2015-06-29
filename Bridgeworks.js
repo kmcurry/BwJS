@@ -25275,8 +25275,8 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
         if (snapper.boundingTree.collides(snappee.boundingTree) &&
             snapMgr.trySnap(snapper, snappee))
         {     
+            this.selector.clearSelections();
             return;
-            //break;
         }
     }
 }
@@ -33933,7 +33933,7 @@ SelectionListener.prototype.eventPerformed = function(event)
     }
     
     // TODO: allow for multi-select (clear if Ctrl is not pressed)
-    this.clearSelections();
+    //this.clearSelections();
     
     this.getAttribute("clickPoint").setValueDirect(event.x, event.y);
 }
@@ -33941,7 +33941,10 @@ SelectionListener.prototype.eventPerformed = function(event)
 SelectionListener.prototype.registerSelection = function(node, element)
 { 
     // only register first item
-    if (this.selected) return;
+    if (this.selected != node)
+    {
+        this.clearSelections();
+    }
     
     this.selected = node;
     var selected = node.getAttribute("selected");
@@ -34108,6 +34111,7 @@ SelectionListener.prototype.processPick = function(pick)
                 this.unsnapped.snapEnabled.setValueDirect(false);
                 this.selected = null // clear previous
                 this.registerSelection(this.unsnapped, -1);
+                this.unsnapped.highlight.setValueDirect(true);
                 
                 // mark all unsnapped models as physics-disabled and clear stopOnCollision flag (so they won't repel)
                 for (var i = 0; i < this.unsnappedModels.length; i++)
@@ -34117,8 +34121,6 @@ SelectionListener.prototype.processPick = function(pick)
                 }              
             }
         }
-        
-        this.selected.highlight.setValueDirect(true);
         
         this.pointObject.setValueDirect(pick.intersectRecord.pointModel.x, pick.intersectRecord.pointModel.y, pick.intersectRecord.pointModel.z);
         this.pointWorld.setValueDirect(pick.intersectRecord.pointWorld.x, pick.intersectRecord.pointWorld.y, pick.intersectRecord.pointWorld.z);
@@ -34174,6 +34176,7 @@ SelectionListener.prototype.clickPointModified = function()
     var point = this.getAttribute("clickPoint").getValueDirect();
     var vpMgr = this.registry.find("ViewportMgr");
     var vp = vpMgr.getViewportAtScreenXY(point.x, point.y);
+    this.selections.clear();
     this.selections.viewports.push(vp.viewport);
     this.rayPick.getAttribute("viewport").setValueDirect(vp.viewport.x, vp.viewport.y, vp.viewport.width, vp.viewport.height);
     this.rayPick.getAttribute("camera").setValueDirect(vp.camera);
@@ -34183,6 +34186,10 @@ SelectionListener.prototype.clickPointModified = function()
     {
         this.processPicks(this.rayPick.picked);
         this.selectionOccurred.pulse();
+    }
+    else 
+    {
+        this.clearSelections();
     }
     // update distance from screen center
     this.updateDistanceFromScreenCenter(root);

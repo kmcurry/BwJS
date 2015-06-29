@@ -352,8 +352,8 @@ CollideDirective.prototype.detectSnapConnections = function(collideRecs)
         if (snapper.boundingTree.collides(snappee.boundingTree) &&
             snapMgr.trySnap(snapper, snappee))
         {     
+            this.selector.clearSelections();
             return;
-            //break;
         }
     }
 }
